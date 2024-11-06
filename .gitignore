@@ -1,0 +1,6 @@
+build
+build-artifacts
+!third-party-src/build
+.pc
+*~
+build-private

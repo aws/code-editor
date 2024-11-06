@@ -1,0 +1,606 @@
+
+Index: AWSCodeOSS/build-private/src/src/vs/code/browser/workbench/workbench.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/code/browser/workbench/workbench.ts
++++ AWSCodeOSS/build-private/src/src/vs/code/browser/workbench/workbench.ts
+@@ -21,6 +21,7 @@ import type { IWorkbenchConstructionOpti
+ import { AuthenticationSessionInfo } from '../../../workbench/services/authentication/browser/authenticationService.js';
+ import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
+ import { create } from '../../../workbench/workbench.web.main.internal.js';
++import {extractLocalHostUriMetaDataForPortMapping} from "../../../platform/tunnel/common/tunnel.js";
+ 
+ interface ISecretStorageCrypto {
+ 	seal(data: string): Promise<string>;
+@@ -588,6 +589,20 @@ function readCookie(name: string): strin
+ 		settingsSyncOptions: config.settingsSyncOptions ? { enabled: config.settingsSyncOptions.enabled, } : undefined,
+ 		workspaceProvider: WorkspaceProvider.create(config),
+ 		urlCallbackProvider: new LocalStorageURLCallbackProvider(config.callbackRoute),
++		resolveExternalUri: (uri: URI): Promise<URI> => {
++			let resolvedUri = uri
++			const localhostMatch = extractLocalHostUriMetaDataForPortMapping(resolvedUri)
++			if (localhostMatch && resolvedUri.authority !== location.host) {
++				if (config?.productConfiguration?.rootEndpoint) {
++					const proxyUri = `${config?.productConfiguration.rootEndpoint}/ports/${localhostMatch.port}/`;
++					resolvedUri = URI.parse(new URL(proxyUri, window.location.href).toString())
++				} else {
++					throw new Error(`Failed to resolve external URI: ${uri.toString()}. Could not determine base url because productConfiguration missing.`)
++				}
++			}
++			// If not localhost, return unmodified.
++			return Promise.resolve(resolvedUri)
++		},
+ 		secretStorageProvider: config.remoteAuthority && !secretStorageKeyPath
+ 			? undefined /* with a remote without embedder-preferred storage, store on the remote */
+ 			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
+Index: AWSCodeOSS/build-private/src/src/vs/server/node/proxyServer.ts
+===================================================================
+--- /dev/null
++++ AWSCodeOSS/build-private/src/src/vs/server/node/proxyServer.ts
+@@ -0,0 +1,186 @@
++import proxyServer from "http-proxy";
++import * as http from "http";
++import * as net from "net";
++import * as url from "url";
++import {SocketServer} from "./serverServices";
++import {RemoteAgentConnectionContext} from "../../platform/remote/common/remoteAgentEnvironment";
++import {IServerChannel} from "../../base/parts/ipc/common/ipc";
++import {Emitter, Event} from "../../base/common/event.js";
++
++type ProxyRequest = {
++	base?: string;
++	port: string;
++	target: string;
++};
++
++const ACCEPTED_PROXY_PREFIXES = ["ports", "absports"];
++
++export class ProxyServer {
++	private readonly proxy: proxyServer;
++	private _allowedPorts: Set<number> = new Set();
++	private _socketServer: SocketServer<RemoteAgentConnectionContext>;
++
++	private readonly _onPortAdded = new Emitter<number>();
++	private readonly _onPortRemoved = new Emitter<number>();
++	private readonly _onPortSynced = new Emitter<number[]>();
++
++	public readonly onPortAdded: Event<number> = this._onPortAdded.event;
++	public readonly onPortRemoved: Event<number> = this._onPortRemoved.event;
++	public readonly onPortSynced: Event<number[]> = this._onPortSynced.event;
++
++	constructor(_socketServer: SocketServer<RemoteAgentConnectionContext>) {
++		this.proxy = proxyServer.createProxyServer({});
++		this.setupProxy();
++		this._socketServer = _socketServer;
++		this.registerChannel();
++	}
++
++	private registerChannel() {
++		this._socketServer.registerChannel('proxy', new ProxyChannel(this));
++	}
++
++	private setupProxy() {
++		this.proxy.on("error", (error, req, res) => {
++			if (res instanceof net.Socket) {
++				res.end(`HTTP/1.1 ${500} ${error.message}\r\n\r\n`);
++			} else {
++				res.writeHead(500);
++				res.end(error.message);
++			}
++		});
++
++		this.proxy.on("proxyRes", (res, req) => {
++			if (res.headers.location && res.headers.location.startsWith("/") && (req as any).base) {
++				res.headers.location = (req as any).base + res.headers.location;
++			}
++		});
++	}
++
++	private createProxyRequest(req: http.IncomingMessage): ProxyRequest | undefined {
++		const sourceUrl = url.parse(req.url ?? "", true);
++		let targetPathname = sourceUrl.pathname;
++		if (!targetPathname) {
++			return;
++		}
++		const [_, proxyPrefix, port] = targetPathname.split("/", 3);
++		if (!ACCEPTED_PROXY_PREFIXES.includes(proxyPrefix)) {
++			return;
++		}
++
++		let base: string | undefined;
++		if (proxyPrefix === "ports") {
++			base = `/ports/${port}`;
++			targetPathname = targetPathname.slice(base.length);
++		}
++		return {
++			base,
++			port,
++			target: url.resolve(`http://0.0.0.0:${port}/`, targetPathname),
++		};
++	}
++
++	private validatePort(proxyRequest: ProxyRequest): boolean {
++		const port = parseInt(proxyRequest.port);
++		if (port && !isNaN(port) && port > 0 && port < 65536 && this._allowedPorts.has(port)) {
++			return true;
++		}
++		return false;
++	}
++
++	private writeResponse(res: http.ServerResponse | net.Socket, code: number, message: string) {
++		if (res instanceof net.Socket) {
++			res.end(`HTTP/1.1 ${code} ${message}`);
++		} else {
++			res.writeHead(code, message);
++			res.end();
++		}
++	}
++
++	private internalHandle(
++		req: http.IncomingMessage,
++		res: http.ServerResponse | net.Socket,
++		handler: (proxyRequest: ProxyRequest) => void
++	): boolean {
++		const proxyRequest = this.createProxyRequest(req);
++		if (!proxyRequest) {
++			return false;
++		}
++
++		if (!this.validatePort(proxyRequest)) {
++			this.writeResponse(res, 400, "Bad Request");
++			return true;
++		}
++
++		if (proxyRequest.base) {
++			(req as any).base = proxyRequest.base;
++		}
++
++		handler(proxyRequest);
++		return true;
++	}
++
++	tryHandle(req: http.IncomingMessage, res: http.ServerResponse): boolean {
++		const handler = (proxyRequest: ProxyRequest) =>
++			this.proxy.web(req, res, {
++				ignorePath: true,
++				target: proxyRequest.target,
++			});
++		return this.internalHandle(req, res, handler);
++	}
++
++	tryHandleWs(req: http.IncomingMessage, socket: net.Socket, head: Buffer): boolean {
++		const handler = (proxyRequest: ProxyRequest) =>
++			this.proxy.ws(req, socket, head, {
++				ignorePath: true,
++				target: proxyRequest.target,
++			});
++		return this.internalHandle(req, socket, handler);
++	}
++
++	addAllowedPort(allowedPort: number) {
++		this._allowedPorts.add(allowedPort);
++		console.log(`Port ${allowedPort} added. Current allowed ports:`, this._allowedPorts);
++		this._onPortAdded.fire(allowedPort);
++	}
++
++	removeAllowedPort(allowedPort: number) {
++		this._allowedPorts.delete(allowedPort);
++		console.log(`Port ${allowedPort} removed. Current allowed ports:`, this._allowedPorts);
++		this._onPortRemoved.fire(allowedPort);
++	}
++
++	syncPorts() {
++		this._onPortSynced.fire([...this._allowedPorts]);
++	}
++}
++
++class ProxyChannel implements IServerChannel {
++	constructor(private proxyServer: ProxyServer) {}
++
++	listen(context: any, event: string): Event<any> {
++		switch (event) {
++			case 'onPortAdded':
++				return this.proxyServer.onPortAdded;
++			case 'onPortRemoved':
++				return this.proxyServer.onPortRemoved;
++			case 'onPortSynced':
++				return this.proxyServer.onPortSynced;
++			default:
++				throw new Error(`No such event: ${event}`);
++		}
++	}
++
++
++	async call(context: any, command: string, args?: any): Promise<any> {
++		switch (command) {
++			case 'addAllowedPort':
++				this.proxyServer.addAllowedPort(args);
++				return;
++			case 'removeAllowedPort':
++				this.proxyServer.removeAllowedPort(args);
++				return;
++			default:
++				throw new Error(`Unknown command: ${command}`);
++		}
++	}
++}
+Index: AWSCodeOSS/build-private/src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ AWSCodeOSS/build-private/src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -40,6 +40,7 @@ import { determineServerConnectionToken,
+ import { IServerEnvironmentService, ServerParsedArgs } from './serverEnvironmentService.js';
+ import { setupServerServices, SocketServer } from './serverServices.js';
+ import { CacheControl, serveError, serveFile, WebClientServer } from './webClientServer.js';
++import { ProxyServer } from './proxyServer.js';
+ // ESM-uncomment-begin
+ import { createRequire } from 'node:module';
+ const require = createRequire(import.meta.url);
+@@ -67,6 +68,7 @@ class RemoteExtensionHostAgentServer ext
+ 	private readonly _managementConnections: { [reconnectionToken: string]: ManagementConnection };
+ 	private readonly _allReconnectionTokens: Set<string>;
+ 	private readonly _webClientServer: WebClientServer | null;
++	private readonly _proxyServer: ProxyServer | null;
+ 	private readonly _webEndpointOriginChecker = WebEndpointOriginChecker.create(this._productService);
+ 
+ 	private readonly _serverRootPath: string;
+@@ -95,12 +97,24 @@ class RemoteExtensionHostAgentServer ext
+ 				? this._instantiationService.createInstance(WebClientServer, this._connectionToken, serverBasePath ?? '/', this._serverRootPath)
+ 				: null
+ 		);
++		this._proxyServer = (
++			hasWebClient
++				? this._instantiationService.createInstance(ProxyServer, this._socketServer)
++				: null
++		);
+ 		this._logService.info(`Extension host agent started.`);
+ 
+ 		this._waitThenShutdown(true);
+ 	}
+ 
+ 	public async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
++		const hasActiveConnections = !!Object.keys(this._extHostConnections).length;
++
++		// Allow all HTTP methods for proxy server requests
++		if (hasActiveConnections && this._proxyServer?.tryHandle(req, res)) {
++			return;
++		}
++
+ 		// Only serve GET requests
+ 		if (req.method !== 'GET') {
+ 			return serveError(req, res, 405, `Unsupported method ${req.method}`);
+@@ -125,7 +139,6 @@ class RemoteExtensionHostAgentServer ext
+ 		// Custom health check endpoint
+ 		if (pathname === '/healthz') {
+ 			res.writeHead(200, { 'Content-Type': 'application/json' });
+-			const hasActiveConnections = !!Object.keys(this._extHostConnections).length;
+ 			return void res.end(JSON.stringify({ hasActiveConnections }));
+ 		}
+ 
+@@ -190,12 +203,17 @@ class RemoteExtensionHostAgentServer ext
+ 		return void res.end('Not found');
+ 	}
+ 
+-	public handleUpgrade(req: http.IncomingMessage, socket: net.Socket) {
++	public handleUpgrade(req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
+ 		let reconnectionToken = generateUuid();
+ 		let isReconnection = false;
+ 		let skipWebSocketFrames = false;
+ 
+ 		if (req.url) {
++			const hasActiveConnections = !!Object.keys(this._extHostConnections).length;
++			if (hasActiveConnections && this._proxyServer?.tryHandleWs(req, socket, head)) {
++				return;
++			}
++
+ 			const query = url.parse(req.url, true).query;
+ 			if (typeof query.reconnectionToken === 'string') {
+ 				reconnectionToken = query.reconnectionToken;
+@@ -533,6 +551,8 @@ class RemoteExtensionHostAgentServer ext
+ 			return this._rejectWebSocketConnection(logPrefix, protocol, `Unknown initial data received`);
+ 
+ 		}
++
++		this._proxyServer?.syncPorts();
+ 	}
+ 
+ 	private async _createTunnel(protocol: PersistentProtocol, tunnelStartParams: ITunnelConnectionStartParams): Promise<void> {
+@@ -665,7 +685,7 @@ export interface IServerAPI {
+ 	/**
+ 	 * Do not remove!!. Called from server-main.js
+ 	 */
+-	handleUpgrade(req: http.IncomingMessage, socket: net.Socket): void;
++	handleUpgrade(req: http.IncomingMessage, socket: net.Socket, head: Buffer): void;
+ 	/**
+ 	 * Do not remove!!. Called from server-main.js
+ 	 */
+Index: AWSCodeOSS/build-private/src/src/server-main.js
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/server-main.js
++++ AWSCodeOSS/build-private/src/src/server-main.js
+@@ -128,14 +128,14 @@ async function start() {
+ 		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
+ 		return remoteExtensionHostAgentServer.handleRequest(req, res);
+ 	});
+-	server.on('upgrade', async (req, socket) => {
++	server.on('upgrade', async (req, socket, head) => {
+ 		if (firstWebSocket) {
+ 			firstWebSocket = false;
+ 			perf.mark('code/server/firstWebSocket');
+ 		}
+ 		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
+ 		// @ts-ignore
+-		return remoteExtensionHostAgentServer.handleUpgrade(req, socket);
++		return remoteExtensionHostAgentServer.handleUpgrade(req, socket, head);
+ 	});
+ 	server.on('error', async (err) => {
+ 		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
+Index: AWSCodeOSS/build-private/src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
++++ AWSCodeOSS/build-private/src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+@@ -4,7 +4,15 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as nls from '../../../../nls.js';
+-import { ITunnelService, TunnelOptions, RemoteTunnel, TunnelCreationOptions, ITunnel, TunnelProtocol, TunnelPrivacyId } from '../../../../platform/tunnel/common/tunnel.js';
++import {
++	ITunnelService,
++	TunnelOptions,
++	RemoteTunnel,
++	TunnelCreationOptions,
++	ITunnel,
++	TunnelProtocol,
++	TunnelPrivacyId,
++} from '../../../../platform/tunnel/common/tunnel.js';
+ import { Disposable } from '../../../../base/common/lifecycle.js';
+ import { IWorkbenchContribution } from '../../../common/contributions.js';
+ import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
+@@ -14,88 +22,93 @@ import { IRemoteExplorerService } from '
+ import { ILogService } from '../../../../platform/log/common/log.js';
+ import { IContextKeyService } from '../../../../platform/contextkey/common/contextkey.js';
+ import { forwardedPortsFeaturesEnabled } from '../../../services/remote/common/tunnelModel.js';
++import {Emitter} from '../../../../base/common/event.js';
++import {IRemoteAgentService} from '../../../services/remote/common/remoteAgentService.js';
+ 
+ export class TunnelFactoryContribution extends Disposable implements IWorkbenchContribution {
+ 
+ 	static readonly ID = 'workbench.contrib.tunnelFactory';
++	private _tunnelService: ITunnelService;
+ 
+ 	constructor(
+ 		@ITunnelService tunnelService: ITunnelService,
+ 		@IBrowserWorkbenchEnvironmentService environmentService: IBrowserWorkbenchEnvironmentService,
+ 		@IOpenerService private openerService: IOpenerService,
++		@IRemoteAgentService private remoteAgentService: IRemoteAgentService,
+ 		@IRemoteExplorerService remoteExplorerService: IRemoteExplorerService,
+ 		@ILogService logService: ILogService,
+ 		@IContextKeyService contextKeyService: IContextKeyService
+ 	) {
+ 		super();
+-		const tunnelFactory = environmentService.options?.tunnelProvider?.tunnelFactory;
+-		if (tunnelFactory) {
+-			// At this point we clearly want the ports view/features since we have a tunnel factory
+-			contextKeyService.createKey(forwardedPortsFeaturesEnabled.key, true);
+-			let privacyOptions = environmentService.options?.tunnelProvider?.features?.privacyOptions ?? [];
+-			if (environmentService.options?.tunnelProvider?.features?.public
+-				&& (privacyOptions.length === 0)) {
+-				privacyOptions = [
+-					{
+-						id: 'private',
+-						label: nls.localize('tunnelPrivacy.private', "Private"),
+-						themeIcon: 'lock'
+-					},
+-					{
+-						id: 'public',
+-						label: nls.localize('tunnelPrivacy.public', "Public"),
+-						themeIcon: 'eye'
+-					}
+-				];
+-			}
++		this._tunnelService = tunnelService;
++		// At this point we clearly want the ports view/features since we have a tunnel factory
++		contextKeyService.createKey(forwardedPortsFeaturesEnabled.key, true);
++		let privacyOptions = environmentService.options?.tunnelProvider?.features?.privacyOptions ?? [];
++		if (environmentService.options?.tunnelProvider?.features?.public
++			&& (privacyOptions.length === 0)) {
++			privacyOptions = [
++				{
++					id: 'private',
++					label: nls.localize('tunnelPrivacy.private', "Private"),
++					themeIcon: 'lock'
++				},
++				{
++					id: 'public',
++					label: nls.localize('tunnelPrivacy.public', "Public"),
++					themeIcon: 'eye'
++				}
++			];
++		}
+ 
+-			this._register(tunnelService.setTunnelProvider({
+-				forwardPort: async (tunnelOptions: TunnelOptions, tunnelCreationOptions: TunnelCreationOptions): Promise<RemoteTunnel | string | undefined> => {
+-					let tunnelPromise: Promise<ITunnel> | undefined;
+-					try {
+-						tunnelPromise = tunnelFactory(tunnelOptions, tunnelCreationOptions);
+-					} catch (e) {
+-						logService.trace('tunnelFactory: tunnel provider error');
+-					}
++		this._register(tunnelService.setTunnelProvider({
++			forwardPort: async (tunnelOptions: TunnelOptions, tunnelCreationOptions: TunnelCreationOptions): Promise<RemoteTunnel | string | undefined> => {
++				let tunnelPromise: Promise<ITunnel> | undefined;
++				try {
++					tunnelPromise = this.proxyTunnelFactory(tunnelOptions, tunnelCreationOptions);
++				} catch (e) {
++					logService.trace('tunnelFactory: tunnel provider error');
++				}
+ 
+-					if (!tunnelPromise) {
+-						return undefined;
+-					}
+-					let tunnel: ITunnel;
+-					try {
+-						tunnel = await tunnelPromise;
+-					} catch (e) {
+-						logService.trace('tunnelFactory: tunnel provider promise error');
+-						if (e instanceof Error) {
+-							return e.message;
+-						}
+-						return undefined;
++				if (!tunnelPromise) {
++					return undefined;
++				}
++				let tunnel: ITunnel;
++				try {
++					tunnel = await tunnelPromise;
++				} catch (e) {
++					logService.trace('tunnelFactory: tunnel provider promise error');
++					if (e instanceof Error) {
++						return e.message;
+ 					}
+-					const localAddress = tunnel.localAddress.startsWith('http') ? tunnel.localAddress : `http://${tunnel.localAddress}`;
+-					const remoteTunnel: RemoteTunnel = {
+-						tunnelRemotePort: tunnel.remoteAddress.port,
+-						tunnelRemoteHost: tunnel.remoteAddress.host,
+-						// The tunnel factory may give us an inaccessible local address.
+-						// To make sure this doesn't happen, resolve the uri immediately.
+-						localAddress: await this.resolveExternalUri(localAddress),
+-						privacy: tunnel.privacy ?? (tunnel.public ? TunnelPrivacyId.Public : TunnelPrivacyId.Private),
+-						protocol: tunnel.protocol ?? TunnelProtocol.Http,
+-						dispose: async () => { await tunnel.dispose(); }
+-					};
+-					return remoteTunnel;
++					return undefined;
+ 				}
+-			}));
+-			const tunnelInformation = environmentService.options?.tunnelProvider?.features ?
+-				{
+-					features: {
+-						elevation: !!environmentService.options?.tunnelProvider?.features?.elevation,
+-						public: !!environmentService.options?.tunnelProvider?.features?.public,
+-						privacyOptions,
+-						protocol: environmentService.options?.tunnelProvider?.features?.protocol === undefined ? true : !!environmentService.options?.tunnelProvider?.features?.protocol
++				const localAddress = tunnel.localAddress.startsWith('http') ? tunnel.localAddress : `http://${tunnel.localAddress}`;
++				const remoteTunnel: RemoteTunnel = {
++					tunnelRemotePort: tunnel.remoteAddress.port,
++					tunnelRemoteHost: tunnel.remoteAddress.host,
++					// The tunnel factory may give us an inaccessible local address.
++					// To make sure this doesn't happen, resolve the uri immediately.
++					localAddress: await this.resolveExternalUri(localAddress),
++					privacy: tunnel.privacy ?? (tunnel.public ? TunnelPrivacyId.Public : TunnelPrivacyId.Private),
++					protocol: tunnel.protocol ?? TunnelProtocol.Http,
++					dispose: async () => {
++						await tunnel.dispose();
+ 					}
+-				} : undefined;
+-			remoteExplorerService.setTunnelInformation(tunnelInformation);
+-		}
++				};
++				return remoteTunnel;
++			}
++		}));
++		const tunnelInformation = environmentService.options?.tunnelProvider?.features ?
++			{
++				features: {
++					elevation: !!environmentService.options?.tunnelProvider?.features?.elevation,
++					public: !!environmentService.options?.tunnelProvider?.features?.public,
++					privacyOptions,
++					protocol: environmentService.options?.tunnelProvider?.features?.protocol === undefined ? true : !!environmentService.options?.tunnelProvider?.features?.protocol
++				}
++			} : undefined;
++		remoteExplorerService.setTunnelInformation(tunnelInformation);
++		this.registerPortsListeners();
+ 	}
+ 
+ 	private async resolveExternalUri(uri: string): Promise<string> {
+@@ -105,4 +118,72 @@ export class TunnelFactoryContribution e
+ 			return uri;
+ 		}
+ 	}
++
++	proxyTunnelFactory = async (tunnelOptions: TunnelOptions, tunnelCreationOptions: TunnelCreationOptions) => {
++		const onDidDispose: Emitter<void> = new Emitter();
++		let isDisposed = false;
++
++		await this._setAllowedPorts(tunnelOptions.remoteAddress.port);
++
++		return Promise.resolve({
++			remoteAddress: tunnelOptions.remoteAddress,
++			localAddress: `localhost:${tunnelOptions.remoteAddress.port}`,
++			onDidDispose: onDidDispose.event,
++			dispose: () => {
++				if (!isDisposed) {
++					this._setAllowedPorts(tunnelOptions.remoteAddress.port, true);
++					isDisposed = true;
++					onDidDispose.fire();
++				}
++			}
++		})
++	}
++
++	private async _setAllowedPorts(port: number, remove?: boolean) {
++		const connection = this.remoteAgentService.getConnection();
++		if (connection) {
++			const channel = connection.getChannel('proxy');
++			if (!remove) {
++				await channel.call('addAllowedPort', port);
++			} else {
++				await channel.call('removeAllowedPort', port);
++			}
++		}
++	}
++
++	registerPortsListeners() {
++		const connection = this.remoteAgentService.getConnection();
++		if (connection) {
++			const channel = connection.getChannel('proxy');
++
++			const portAddedEvent = channel.listen('onPortAdded');
++			portAddedEvent(async (port: any) => {
++				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++				if (!tunnel) {
++					await this._tunnelService.openTunnel(undefined, 'localhost', port);
++				}
++			});
++
++			const portRemovedEvent = channel.listen('onPortRemoved');
++			portRemovedEvent(async (port: any) => {
++				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++				if (tunnel) {
++					await this._tunnelService.closeTunnel('localhost', port);
++				}
++			});
++
++			const portSyncedEvent = channel.listen('onPortSynced');
++			portSyncedEvent(async (ports: any) => {
++				if (Array.isArray(ports)) {
++					for (const port of ports) {
++						const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++						if (!tunnel) {
++							await this._tunnelService.openTunnel(undefined, 'localhost', port);
++						}
++					}
++				}
++			});
++
++		}
++	}
+ }
+Index: AWSCodeOSS/build-private/src/src/vs/workbench/services/remote/common/tunnelModel.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/workbench/services/remote/common/tunnelModel.ts
++++ AWSCodeOSS/build-private/src/src/vs/workbench/services/remote/common/tunnelModel.ts
+@@ -558,13 +558,7 @@ export class TunnelModel extends Disposa
+ 	}
+ 
+ 	private async addStorageKeyPostfix(prefix: string): Promise<string | undefined> {
+-		const workspace = this.workspaceContextService.getWorkspace();
+-		const workspaceHash = workspace.configuration ? hash(workspace.configuration.path) : (workspace.folders.length > 0 ? hash(workspace.folders[0].uri.path) : undefined);
+-		if (workspaceHash === undefined) {
+-			this.logService.debug('Could not get workspace hash for forwarded ports storage key.');
+-			return undefined;
+-		}
+-		return `${prefix}.${this.environmentService.remoteAuthority}.${workspaceHash}`;
++		return `${prefix}.fixed`;
+ 	}
+ 
+ 	private async getTunnelRestoreStorageKey(): Promise<string | undefined> {

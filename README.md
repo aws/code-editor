@@ -1,11 +1,17 @@
-## My Project
+## Code Editor
 
-TODO: Fill this README out!
+This is the repo for `code-editor`.
 
-Be sure to:
+### Repository structure
 
-* Change the title in this README
-* Edit your repository description on GitHub
+The repository structure is the following:
+- `overrides`: Non-code asset overrides. The file paths here follow the structure of the `third-party-src` submodule, and the files here override the files in `third-party-src` during the build process.
+- `patches`: Patch files created by [Quilt](https://linux.die.net/man/1/quilt), grouped around features.
+- `third-party-src`: Git submodule linking to the upstream [Code-OSS]() commit. The patches are applied on top of this specific commit.
+
+## Troubleshooting and Feedback
+
+See [CONTRIBUTING](CONTRIBUTING.md#reporting-bugsfeature-requests) for more information.
 
 ## Security
 
@@ -13,5 +19,5 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 
 ## License
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
+This library is licensed under the MIT License. See the LICENSE file.
 

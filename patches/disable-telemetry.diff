@@ -1,0 +1,54 @@
+When pulling a new change from upstream, make sure to replace all .data.microsoft.com with 0.0.0.0
+Otherwise the OSS will still ping microsoft, even if the telemetry is set to OFF. 
+See: https://github.com/VSCodium/vscodium/issues/26
+
+Index: AWSCodeOSS/build-private/src/src/vs/platform/telemetry/common/telemetryService.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/platform/telemetry/common/telemetryService.ts
++++ AWSCodeOSS/build-private/src/src/vs/platform/telemetry/common/telemetryService.ts
+@@ -208,7 +208,7 @@ Registry.as<IConfigurationRegistry>(Exte
+ 	'properties': {
+ 		[TELEMETRY_SETTING_ID]: {
+ 			'type': 'string',
+-			'enum': [TelemetryConfiguration.ON, TelemetryConfiguration.ERROR, TelemetryConfiguration.CRASH, TelemetryConfiguration.OFF],
++			'enum': [TelemetryConfiguration.OFF],
+ 			'enumDescriptions': [
+ 				localize('telemetry.telemetryLevel.default', "Sends usage data, errors, and crash reports."),
+ 				localize('telemetry.telemetryLevel.error', "Sends general error telemetry and crash reports."),
+@@ -216,7 +216,7 @@ Registry.as<IConfigurationRegistry>(Exte
+ 				localize('telemetry.telemetryLevel.off', "Disables all product telemetry.")
+ 			],
+ 			'markdownDescription': getTelemetryLevelSettingDescription(),
+-			'default': TelemetryConfiguration.ON,
++			'default': TelemetryConfiguration.OFF,
+ 			'restricted': true,
+ 			'scope': ConfigurationScope.APPLICATION,
+ 			'tags': ['usesOnlineServices', 'telemetry']
+Index: AWSCodeOSS/build-private/src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
++++ AWSCodeOSS/build-private/src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+@@ -294,7 +294,7 @@ import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL
+ 			'telemetry.enableCrashReporter': {
+ 				'type': 'boolean',
+ 				'description': localize('telemetry.enableCrashReporting', "Enable crash reports to be collected. This helps us improve stability. \nThis option requires restart to take effect."),
+-				'default': true,
++				'default': false,
+ 				'tags': ['usesOnlineServices', 'telemetry'],
+ 				'markdownDeprecationMessage': localize('enableCrashReporterDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated due to being combined into the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
+ 			}
+Index: AWSCodeOSS/build-private/src/src/vs/platform/telemetry/common/1dsAppender.ts
+===================================================================
+--- AWSCodeOSS.orig/build-private/src/src/vs/platform/telemetry/common/1dsAppender.ts
++++ AWSCodeOSS/build-private/src/src/vs/platform/telemetry/common/1dsAppender.ts
+@@ -19,8 +19,8 @@ export interface IAppInsightsCore {
+ 	unload(isAsync: boolean, unloadComplete: (unloadState: ITelemetryUnloadState) => void): void;
+ }
+ 
+-const endpointUrl = 'https://mobile.events.data.microsoft.com/OneCollector/1.0';
+-const endpointHealthUrl = 'https://mobile.events.data.microsoft.com/ping';
++const endpointUrl = 'https://0.0.0.0/OneCollector/1.0';
++const endpointHealthUrl = 'https://0.0.0.0/ping';
+ 
+ async function getClient(instrumentationKey: string, addInternalFlag?: boolean, xhrOverride?: IXHROverride): Promise<IAppInsightsCore> {
+ 	// ESM-comment-begin
