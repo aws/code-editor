@@ -17,3 +17,4 @@ remove-unsafe-eval.diff
 web-client-server.diff
 proxy-uri.diff
 use-stable-language-client.diff
+welcome-config.diff
