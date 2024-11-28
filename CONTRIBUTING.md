@@ -20,6 +20,11 @@ reported the issue. Please try to include as much information as you can. Detail
 * Anything unusual about your environment or deployment
 
 
+## Ensure security before each commit
+Configure git-secrets and run it before every commit. Make sure that secrets are not committed to Git version control.
+Follow [this guide](https://github.com/awslabs/git-secrets) before making a commit and push to your branch.
+
+
 ## Contributing via Pull Requests
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
 
