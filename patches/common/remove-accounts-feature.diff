@@ -1,0 +1,22 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+@@ -132,7 +132,7 @@ export class GlobalCompositeBar extends
+ 	}
+ 
+ 	getContextMenuActions(): IAction[] {
+-		return [toAction({ id: 'toggleAccountsVisibility', label: localize('accounts', "Accounts"), checked: this.accountsVisibilityPreference, run: () => this.accountsVisibilityPreference = !this.accountsVisibilityPreference })];
++		return [];
+ 	}
+ 
+ 	private toggleAccountsActivity() {
+@@ -147,7 +147,7 @@ export class GlobalCompositeBar extends
+ 	}
+ 
+ 	private get accountsVisibilityPreference(): boolean {
+-		return isAccountsActionVisible(this.storageService);
++		return false;
+ 	}
+ 
+ 	private set accountsVisibilityPreference(value: boolean) {

@@ -1,0 +1,72 @@
+Remove unsafe-eval and unsafe-inline from CSP directives
+
+---
+ src/vs/server/node/webClientServer.ts                       | 6 +++---
+ .../notebook/browser/view/renderers/backLayerWebView.ts     | 4 ++--
+ src/vs/workbench/contrib/webview/browser/pre/index.html     | 2 +-
+ .../extensions/worker/webWorkerExtensionHostIframe.html     | 2 +-
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+@@ -392,7 +392,7 @@ export class WebClientServer {
+ 			'default-src \'self\';',
+ 			'img-src \'self\' https: data: blob:;',
+ 			'media-src \'self\';',
+-			`script-src 'self' 'wasm-unsafe-eval' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++			`script-src 'self' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+ 			'child-src \'self\';',
+ 			`frame-src 'self' https://*.vscode-cdn.net data:;`,
+ 			'worker-src \'self\' data: blob:;',
+@@ -454,7 +454,7 @@ export class WebClientServer {
+ 			'img-src \'self\' https: data: blob:;',
+ 			'media-src \'none\';',
+ 			`script-src 'self' ${this._getScriptCspHashes(data).join(' ')};`,
+-			'style-src \'self\' \'unsafe-inline\';',
++			'style-src \'self\';',
+ 			'font-src \'self\' blob:;'
+ 		].join(' ');
+ 
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+@@ -317,8 +317,8 @@ export class BackLayerWebView<T extends
+ 				${enableCsp ?
+ 				`<meta http-equiv="Content-Security-Policy" content="
+ 					default-src 'none';
+-					script-src ${webviewGenericCspSource} 'unsafe-inline' 'wasm-unsafe-eval';
+-					style-src ${webviewGenericCspSource} 'unsafe-inline';
++					script-src ${webviewGenericCspSource};
++					style-src ${webviewGenericCspSource};
+ 					img-src ${webviewGenericCspSource} https: http: data:;
+ 					font-src ${webviewGenericCspSource} https:;
+ 					connect-src https:;
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+@@ -5,7 +5,7 @@
+ 	<meta charset="UTF-8">
+ 
+ 	<meta http-equiv="Content-Security-Policy"
+-		content="default-src 'none'; script-src 'sha256-DXeP32g8BdMsVuVabYTmznoTH59F7M7UtV0vXemEFqc=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-DXeP32g8BdMsVuVabYTmznoTH59F7M7UtV0vXemEFqc=' 'self'; frame-src 'self';">
+ 
+ 
+ 	<!-- Disable pinch zooming -->
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+@@ -4,7 +4,7 @@
+ 		<meta http-equiv="Content-Security-Policy" content="
+ 			default-src 'none';
+ 			child-src 'self' data: blob:;
+-			script-src 'self' 'wasm-unsafe-eval' 'sha256-xM2KVDKIoeb8vVxk4ezEUsxdTZh5wFnKO3YmFhy9tkk=' https: http://localhost:* blob:;
++			script-src 'self' 'sha256-xM2KVDKIoeb8vVxk4ezEUsxdTZh5wFnKO3YmFhy9tkk=' https: http://localhost:* blob:;
+ 			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
+ 	</head>
+ 	<body>

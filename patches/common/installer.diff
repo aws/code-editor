@@ -1,0 +1,514 @@
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+@@ -5,6 +5,7 @@
+ 
+ import * as v8 from 'node:v8';
+ import * as fs from 'fs';
++import * as os from 'os';
+ import * as path from 'path';
+ import { argv } from 'process';
+ import { Mapping, SourceMapGenerator } from 'source-map';
+@@ -406,8 +407,14 @@ export class Mangler {
+ 		private readonly config: { readonly manglePrivateFields: boolean; readonly mangleExports: boolean },
+ 	) {
+ 
++		// The following patch is optional, it is an optimisation to speed up the build process
++		// This mangle/rename process is the most CPU-intensive of the compile-build target
++		// If there is enough memory and CPU resources are available, this task can be parallelised
++		const memoryPerWorker = parseInt(process.env.MANGLER_MEMORY_PER_WORKER) || 12884901888; // (default 12GiB)
++		const maxWorkers = Math.max(1, Math.min(3, os.availableParallelism() - 1, Math.floor((v8.getHeapStatistics().total_available_size) / memoryPerWorker) - 1));
++		this.log(`Setting up rename worker pool with ${maxWorkers} workers`);
+ 		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+-			maxWorkers: 1,
++			maxWorkers: maxWorkers,
+ 			minWorkers: 'max'
+ 		});
+ 	}
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModu
+ exports.Mangler = void 0;
+ const v8 = require("node:v8");
+ const fs = require("fs");
++const os = require("os");
+ const path = require("path");
+ const process_1 = require("process");
+ const source_map_1 = require("source-map");
+@@ -350,8 +351,14 @@ class Mangler {
+         this.projectPath = projectPath;
+         this.log = log;
+         this.config = config;
++        // The following patch is optional, it is an optimisation to speed up the build process
++        // This mangle/rename process is the most CPU-intensive of the compile-build target
++        // If there is enough memory and CPU resources are available, this task can be parallelised
++        const memoryPerWorker = parseInt(process.env.MANGLER_MEMORY_PER_WORKER) || 12884901888; // (default 12GiB)
++        const maxWorkers = Math.max(1, Math.min(3, os.availableParallelism() - 1, Math.floor((v8.getHeapStatistics().total_available_size) / memoryPerWorker) - 1));
++        this.log(`Setting up rename worker pool with ${maxWorkers} workers`);
+         this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+-            maxWorkers: 1,
++            maxWorkers: maxWorkers,
+             minWorkers: 'max'
+         });
+     }
+Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
++++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+@@ -32,6 +32,7 @@ const { vscodeWebResourceIncludes, creat
+ const cp = require('child_process');
+ const log = require('fancy-log');
+ const buildfile = require('./buildfile');
++const through = require("through2");
+ 
+ const REPO_ROOT = path.dirname(__dirname);
+ const commit = getVersion(REPO_ROOT);
+@@ -191,6 +192,15 @@ function nodejs(platform, arch) {
+ 		arch = 'x64';
+ 	}
+ 
++	if (process.env['CUSTOM_NODE_PATH']) {
++		log(`Bundling custom Node from '${process.env['CUSTOM_NODE_PATH']}'...`);
++		return gulp.src(process.env['CUSTOM_NODE_PATH'])
++			.pipe(flatmap(stream => stream.pipe(gunzip()).pipe(untar())))
++			.pipe(filter('**/node'))
++			.pipe(util.setExecutableBit('**'))
++			.pipe(rename('node'));
++	}
++
+ 	log(`Downloading node.js ${nodeVersion} ${platform} ${arch} from ${product.nodejsRepository}...`);
+ 
+ 	const glibcPrefix = process.env['VSCODE_NODE_GLIBC'] ?? '';
+@@ -245,7 +255,7 @@ function nodejs(platform, arch) {
+ 	}
+ }
+ 
+-function packageTask(type, platform, arch, sourceFolderName, destinationFolderName) {
++function packageTask(type, platform, arch, sourceFolderName, destinationFolderName, isSlim=false) {
+ 	const destination = path.join(BUILD_ROOT, destinationFolderName);
+ 
+ 	return () => {
+@@ -323,6 +333,7 @@ function packageTask(type, platform, arc
+ 			}));
+ 
+ 		const license = gulp.src(['remote/LICENSE'], { base: 'remote', allowEmpty: true });
++		const thirdPartylicense = gulp.src(['LICENSE-THIRD-PARTY'], { base: '.', allowEmpty: true });
+ 
+ 		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
+ 
+@@ -338,7 +349,10 @@ function packageTask(type, platform, arc
+ 			.pipe(jsFilter.restore);
+ 
+ 		const nodePath = `.build/node/v${nodeVersion}/${platform}-${arch}`;
+-		const node = gulp.src(`${nodePath}/**`, { base: nodePath, dot: true });
++		// Do not include Node in slim package
++		const emptyTask = through.obj();
++		emptyTask.end();
++		const node = isSlim ? emptyTask : gulp.src(`${nodePath}/**`, { base: nodePath, dot: true });
+ 
+ 		let web = [];
+ 		if (type === 'reh-web') {
+@@ -354,6 +368,7 @@ function packageTask(type, platform, arc
+ 			packageJsonStream,
+ 			productJsonStream,
+ 			license,
++			thirdPartylicense,
+ 			sources,
+ 			deps,
+ 			node,
+@@ -380,20 +395,24 @@ function packageTask(type, platform, arc
+ 					.pipe(rename(`bin/${product.serverApplicationName}.cmd`)),
+ 			);
+ 		} else if (platform === 'linux' || platform === 'alpine' || platform === 'darwin') {
++			const nodePath = isSlim ? 'node' : "$ROOT/node";
+ 			result = es.merge(result,
+ 				gulp.src(`resources/server/bin/remote-cli/${platform === 'darwin' ? 'code-darwin.sh' : 'code-linux.sh'}`, { base: '.' })
+ 					.pipe(replace('@@VERSION@@', version))
+ 					.pipe(replace('@@COMMIT@@', commit))
+ 					.pipe(replace('@@APPNAME@@', product.applicationName))
++					.pipe(replace('"$ROOT/node"', nodePath))
+ 					.pipe(rename(`bin/remote-cli/${product.applicationName}`))
+ 					.pipe(util.setExecutableBit()),
+ 				gulp.src(`resources/server/bin/helpers/${platform === 'darwin' ? 'browser-darwin.sh' : 'browser-linux.sh'}`, { base: '.' })
+ 					.pipe(replace('@@VERSION@@', version))
+ 					.pipe(replace('@@COMMIT@@', commit))
+ 					.pipe(replace('@@APPNAME@@', product.applicationName))
++					.pipe(replace('"$ROOT/node"', nodePath))
+ 					.pipe(rename(`bin/helpers/browser.sh`))
+ 					.pipe(util.setExecutableBit()),
+ 				gulp.src(`resources/server/bin/${platform === 'darwin' ? 'code-server-darwin.sh' : 'code-server-linux.sh'}`, { base: '.' })
++					.pipe(replace('"$ROOT/node"', nodePath))
+ 					.pipe(rename(`bin/${product.serverApplicationName}`))
+ 					.pipe(util.setExecutableBit())
+ 			);
+@@ -466,6 +485,13 @@ function tweakProductForServerWeb(produc
+ 		['', 'min'].forEach(minified => {
+ 			const sourceFolderName = `out-vscode-${type}${dashed(minified)}`;
+ 			const destinationFolderName = `vscode-${type}${dashed(platform)}${dashed(arch)}`;
++			const slimDestinationFolderName = `${destinationFolderName}-slim`;
++
++			const slimServerTaskCI = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci-slim`, task.series(
++				util.rimraf(path.join(BUILD_ROOT, slimDestinationFolderName)),
++				packageTask(type, platform, arch, sourceFolderName, slimDestinationFolderName, true)
++			));
++			gulp.task(slimServerTaskCI);
+ 
+ 			const serverTaskCI = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci`, task.series(
+ 				gulp.task(`node-${platform}-${arch}`),
+@@ -482,6 +508,21 @@ function tweakProductForServerWeb(produc
+ 				serverTaskCI
+ 			));
+ 			gulp.task(serverTask);
++
++			if (type === 'reh-web') {
++				const combinedServerAndWebTask = task.define(`vscode-combined-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}`, task.series(
++					compileBuildTask,
++					gulp.task(`vscode-web${dashed(minified)}-ci`),
++					compileExtensionsBuildTask,
++					compileExtensionMediaBuildTask,
++					minified && !process.env.DISABLE_MANGLE ? minifyTask : bundleTask,
++					task.parallel(
++						serverTaskCI,
++						slimServerTaskCI
++					)
++				));
++				gulp.task(combinedServerAndWebTask);
++			}
+ 		});
+ 	});
+ });
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+@@ -82,6 +82,21 @@ function fromLocal(extensionPath, forWeb
+     }
+     return input;
+ }
++async function asyncRetry(func, maxRetries) {
++	let retryNum = 0;
++	for(;;) {
++		try {
++			return await func();
++		} catch(err) {
++			retryNum++;
++			if (retryNum == maxRetries) {
++				throw err;
++			} else {
++				console.warn(`retrying operation, attempt ${retryNum} out of ${maxRetries}`);
++			}
++		}
++	}
++}
+ function fromLocalWebpack(extensionPath, webpackConfigFileName, disableMangle) {
+     const vsce = require('@vscode/vsce');
+     const webpack = require('webpack');
+@@ -97,12 +112,15 @@ function fromLocalWebpack(extensionPath,
+             }
+         }
+     }
++    // During building, some of the parallel `yarn list --prod --json` calls were failing intermittently
++    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
++    // Added this retry to make the build process more stable
+     // TODO: add prune support based on packagedDependencies to vsce.PackageManager.Npm similar
+     // to vsce.PackageManager.Yarn.
+     // A static analysis showed there are no webpack externals that are dependencies of the current
+     // local extensions so we can use the vsce.PackageManager.None config to ignore dependencies list
+     // as a temporary workaround.
+-    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }).then(fileNames => {
++    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }), 3).then(fileNames => {
+         const files = fileNames
+             .map(fileName => path.join(extensionPath, fileName))
+             .map(filePath => new File({
+@@ -183,7 +201,10 @@ function fromLocalWebpack(extensionPath,
+ function fromLocalNormal(extensionPath) {
+     const vsce = require('@vscode/vsce');
+     const result = es.through();
+-    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm })
++    // During building, some of the parallel `yarn list --prod --json` calls were failing intermittently
++    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
++    // Added this retry to make the build process more stable
++    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm }), 3)
+         .then(fileNames => {
+         const files = fileNames
+             .map(fileName => path.join(extensionPath, fileName))
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+@@ -83,6 +83,21 @@ function fromLocal(extensionPath: string
+ 	return input;
+ }
+ 
++async function asyncRetry<T>(func: () => Promise<T>, maxRetries: number): Promise<T> {
++	let retryNum = 0;
++	for(;;) {
++		try {
++			return await func();
++		} catch(err: unknown) {
++			retryNum++;
++			if (retryNum == maxRetries) {
++				throw err;
++			} else {
++				console.warn(`retrying operation, attempt ${retryNum} out of ${maxRetries}`);
++			}
++		}
++	}
++}
+ 
+ function fromLocalWebpack(extensionPath: string, webpackConfigFileName: string, disableMangle: boolean): Stream {
+ 	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
+@@ -100,13 +115,15 @@ function fromLocalWebpack(extensionPath:
+ 			}
+ 		}
+ 	}
+-
++	// During building, some of the parallel `yarn list --prod --json` calls were failing intermittently
++	// A failure causes the whole build process to fail, but the operation seems to succeed on retry
++	// Added this retry to make the build process more stable
+ 	// TODO: add prune support based on packagedDependencies to vsce.PackageManager.Npm similar
+ 	// to vsce.PackageManager.Yarn.
+ 	// A static analysis showed there are no webpack externals that are dependencies of the current
+ 	// local extensions so we can use the vsce.PackageManager.None config to ignore dependencies list
+ 	// as a temporary workaround.
+-	vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }).then(fileNames => {
++	asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }), 3).then(fileNames => {
+ 		const files = fileNames
+ 			.map(fileName => path.join(extensionPath, fileName))
+ 			.map(filePath => new File({
+@@ -200,8 +217,10 @@ function fromLocalWebpack(extensionPath:
+ function fromLocalNormal(extensionPath: string): Stream {
+ 	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
+ 	const result = es.through();
+-
+-	vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm })
++	// During building, some of the parallel `yarn list --prod --json` calls were failing intermittently
++	// A failure causes the whole build process to fail, but the operation seems to succeed on retry
++	// Added this retry to make the build process more stable
++	asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm }), 3)
+ 		.then(fileNames => {
+ 			const files = fileNames
+ 				.map(fileName => path.join(extensionPath, fileName))
+Index: AWSCodeOSS/build/private/code-editor-src/build/npm/postinstall.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/npm/postinstall.js
++++ AWSCodeOSS/build/private/code-editor-src/build/npm/postinstall.js
+@@ -171,5 +171,3 @@ for (let dir of dirs) {
+ 	npmInstall(dir, opts);
+ }
+ 
+-cp.execSync('git config pull.rebase merges');
+-cp.execSync('git config blame.ignoreRevsFile .git-blame-ignore-revs');
+Index: AWSCodeOSS/build/private/code-editor-src/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/package.json
++++ AWSCodeOSS/build/private/code-editor-src/package.json
+@@ -32,7 +32,7 @@
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+     "precommit": "node build/hygiene.js",
+-    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
++    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron",
+     "7z": "7z",
+     "update-grammars": "node build/npm/update-all-grammars.mjs",
+@@ -76,7 +76,6 @@
+     "@vscode/iconv-lite-umd": "0.7.0",
+     "@vscode/policy-watcher": "^1.1.8",
+     "@vscode/proxy-agent": "^0.22.0",
+-    "@vscode/ripgrep": "^1.15.9",
+     "@vscode/spdlog": "^0.15.0",
+     "@vscode/sqlite3": "5.1.8-vscode",
+     "@vscode/sudo-prompt": "9.3.1",
+@@ -93,13 +92,12 @@
+     "@xterm/addon-webgl": "^0.19.0-beta.65",
+     "@xterm/headless": "^5.6.0-beta.65",
+     "@xterm/xterm": "^5.6.0-beta.65",
++    "http-proxy": "^1.18.1",
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-is-elevated": "0.7.0",
+-    "native-keymap": "^3.3.5",
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta22",
+     "open": "^8.4.2",
+@@ -118,6 +116,7 @@
+     "@types/debug": "^4.1.5",
+     "@types/eslint": "^9.6.1",
+     "@types/gulp-svgmin": "^1.2.1",
++    "@types/http-proxy": "^1.17.15",
+     "@types/http-proxy-agent": "^2.0.1",
+     "@types/kerberos": "^1.1.2",
+     "@types/minimist": "^1.2.1",
+@@ -136,7 +135,6 @@
+     "@typescript-eslint/utils": "^8.8.0",
+     "@vscode/gulp-electron": "^1.36.0",
+     "@vscode/l10n-dev": "0.0.35",
+-    "@vscode/telemetry-extractor": "^1.10.2",
+     "@vscode/test-cli": "^0.0.6",
+     "@vscode/test-electron": "^2.4.0",
+     "@vscode/test-web": "^0.0.62",
+Index: AWSCodeOSS/build/private/code-editor-src/remote/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/remote/package.json
++++ AWSCodeOSS/build/private/code-editor-src/remote/package.json
+@@ -9,7 +9,6 @@
+     "@vscode/deviceid": "^0.1.1",
+     "@vscode/iconv-lite-umd": "0.7.0",
+     "@vscode/proxy-agent": "^0.22.0",
+-    "@vscode/ripgrep": "^1.15.9",
+     "@vscode/spdlog": "^0.15.0",
+     "@vscode/tree-sitter-wasm": "^0.0.4",
+     "@vscode/vscode-languagedetection": "1.0.21",
+@@ -24,10 +23,10 @@
+     "@xterm/headless": "^5.6.0-beta.65",
+     "@xterm/xterm": "^5.6.0-beta.65",
+     "cookie": "^0.7.0",
++    "http-proxy": "^1.18.1",
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta22",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/emmet/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+@@ -482,7 +482,7 @@
+     "@types/node": "20.x"
+   },
+   "dependencies": {
+-    "@emmetio/css-parser": "ramya-rao-a/css-parser#vscode",
++    "@emmetio/css-parser": "0.4.0",
+     "@emmetio/html-matcher": "^0.3.3",
+     "@emmetio/math-expression": "^1.0.5",
+     "@vscode/emmet-helper": "^2.8.8",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/github/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+@@ -180,7 +180,7 @@
+   },
+   "dependencies": {
+     "@octokit/graphql": "5.0.5",
+-    "@octokit/graphql-schema": "14.4.0",
++    "@octokit/graphql-schema": "14.58.0",
+     "@octokit/rest": "19.0.4",
+     "tunnel": "^0.0.6",
+     "@vscode/extension-telemetry": "^0.9.0"
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/simple-browser/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/simple-browser/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/simple-browser/package.json
+@@ -70,7 +70,7 @@
+   },
+   "devDependencies": {
+     "@types/vscode-webview": "^1.57.0",
+-    "vscode-codicons": "^0.0.14"
++    "vscode-codicons": "0.0.12"
+   },
+   "repository": {
+     "type": "git",
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/compilation.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/compilation.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/compilation.js
+@@ -112,7 +112,7 @@ function compileTask(src, out, build, op
+         }
+         // mangle: TypeScript to TypeScript
+         let mangleStream = es.through();
+-        if (build && !options.disableMangle) {
++        if (build && !options.disableMangle && !process.env.DISABLE_MANGLE) {
+             let ts2tsMangler = new index_1.Mangler(compile.projectPath, (...data) => fancyLog(ansiColors.blue('[mangler]'), ...data), { mangleExports: true, manglePrivateFields: true });
+             const newContentsByFileName = ts2tsMangler.computeNewFileContents(new Set(['saveState']));
+             mangleStream = es.through(async function write(data) {
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/dependencies.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/dependencies.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/dependencies.js
+@@ -21,13 +21,14 @@ function getNpmProductionDependencies(fo
+             if (/ELSPROBLEMS/.test(match[0])) {
+                 continue;
+             }
+-            else if (/invalid: xterm/.test(match[0])) {
++            else if (/(invalid|extraneous|missing):/.test(match[0])) {
+                 continue;
+             }
+             else if (/A complete log of this run/.test(match[0])) {
+-                continue;
++                break;
+             }
+             else {
++                console.log(match[0]);
+                 throw err;
+             }
+         }
+Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.extensions.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.extensions.js
++++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.extensions.js
+@@ -100,7 +100,7 @@ const tasks = compilations.map(function
+ 		headerOut = relativeDirname.substr(index + 1) + '/out';
+ 	}
+ 
+-	function createPipeline(build, emitError, transpileOnly) {
++	function createPipeline(build, emitError, transpileOnly = true) { // transpile to avoid spurious type errors
+ 		const tsb = require('./lib/tsb');
+ 		const sourcemaps = require('gulp-sourcemaps');
+ 
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/optimize.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.js
+@@ -115,6 +115,7 @@ function bundleESMTask(opts) {
+                 outdir: path.join(REPO_ROOT_PATH, opts.src),
+                 write: false, // enables res.outputFiles
+                 metafile: true, // enables res.metafile
++                treeShaking: true,
+                 // minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
+             }).then(res => {
+                 for (const file of res.outputFiles) {
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/optimize.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.ts
+@@ -153,6 +153,7 @@ function bundleESMTask(opts: IBundleESMT
+ 				outdir: path.join(REPO_ROOT_PATH, opts.src),
+ 				write: false, // enables res.outputFiles
+ 				metafile: true, // enables res.metafile
++				treeShaking: true,
+ 				// minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
+ 			}).then(res => {
+ 				for (const file of res.outputFiles) {
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/getVersion.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.js
+@@ -11,6 +11,6 @@ function getVersion(root) {
+     if (!version || !/^[0-9a-f]{40}$/i.test(version.trim())) {
+         version = git.getVersion(root);
+     }
+-    return version;
++    return version || "unknown";
+ }
+ //# sourceMappingURL=getVersion.js.map
+\ No newline at end of file
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/getVersion.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.ts
+@@ -12,5 +12,5 @@ export function getVersion(root: string)
+ 		version = git.getVersion(root);
+ 	}
+ 
+-	return version;
++	return version || "unknown";
+ }

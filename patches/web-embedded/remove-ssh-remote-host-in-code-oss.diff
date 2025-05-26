@@ -1,0 +1,27 @@
+Remove ssh remote host in code-oss
+
+SSH remote host connections are not supported in the light-weight web version. This patch removes the remote status indicator functionality from Code OSS so that the status of a remote connection (e.g., SSH connection) would not show in the status bar.
+---
+ src/vs/workbench/contrib/remote/browser/remote.contribution.ts | 2 --
+ 1 file changed, 2 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
+@@ -9,7 +9,6 @@ import { ShowCandidateContribution } fro
+ import { LifecyclePhase } from '../../../services/lifecycle/common/lifecycle.js';
+ import { TunnelFactoryContribution } from './tunnelFactory.js';
+ import { RemoteAgentConnectionStatusListener, RemoteMarkers } from './remote.js';
+-import { RemoteStatusIndicator } from './remoteIndicator.js';
+ import { AutomaticPortForwarding, ForwardedPortsView, PortRestore } from './remoteExplorer.js';
+ import { InitialRemoteConnectionHealthContribution } from './remoteConnectionHealth.js';
+ 
+@@ -17,7 +16,6 @@ const workbenchContributionsRegistry = R
+ registerWorkbenchContribution2(ShowCandidateContribution.ID, ShowCandidateContribution, WorkbenchPhase.BlockRestore);
+ registerWorkbenchContribution2(TunnelFactoryContribution.ID, TunnelFactoryContribution, WorkbenchPhase.BlockRestore);
+ workbenchContributionsRegistry.registerWorkbenchContribution(RemoteAgentConnectionStatusListener, LifecyclePhase.Eventually);
+-registerWorkbenchContribution2(RemoteStatusIndicator.ID, RemoteStatusIndicator, WorkbenchPhase.BlockStartup);
+ workbenchContributionsRegistry.registerWorkbenchContribution(ForwardedPortsView, LifecyclePhase.Restored);
+ workbenchContributionsRegistry.registerWorkbenchContribution(PortRestore, LifecyclePhase.Eventually);
+ workbenchContributionsRegistry.registerWorkbenchContribution(AutomaticPortForwarding, LifecyclePhase.Eventually);

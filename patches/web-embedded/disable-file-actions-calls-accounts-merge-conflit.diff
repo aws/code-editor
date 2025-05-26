@@ -1,0 +1,791 @@
+Disable file actions,calls,accounts,merge conflit
+
+This patch disables or modifies various features and functionalities related to file actions, calls, accounts, and merge conflicts in the Code OSS codebase. 
+---
+ extensions/merge-conflict/package.json        |  74 ---
+ .../merge-conflict/src/commandHandler.ts      | 492 +++++++++---------
+ extensions/references-view/package.json       |  32 --
+ extensions/references-view/src/calls/index.ts |  98 ++--
+ extensions/references-view/src/extension.ts   |   4 +-
+ .../browser/actions/windowActions.ts          |  76 +--
+ .../browser/authentication.contribution.ts    |   3 +-
+ .../files/browser/fileActions.contribution.ts |  76 +--
+ .../mergeEditor/browser/commands/commands.ts  |  30 +-
+ .../browser/commands/devCommands.ts           |   2 +-
+ .../browser/mergeEditor.contribution.ts       |   4 +-
+ 11 files changed, 391 insertions(+), 500 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/merge-conflict/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+@@ -29,80 +29,6 @@
+     "watch": "gulp watch-extension:merge-conflict"
+   },
+   "contributes": {
+-    "commands": [
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.all-current%",
+-        "original": "Accept All Current",
+-        "command": "merge-conflict.accept.all-current",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.all-incoming%",
+-        "original": "Accept All Incoming",
+-        "command": "merge-conflict.accept.all-incoming",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.all-both%",
+-        "original": "Accept All Both",
+-        "command": "merge-conflict.accept.all-both",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.current%",
+-        "original": "Accept Current",
+-        "command": "merge-conflict.accept.current",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.incoming%",
+-        "original": "Accept Incoming",
+-        "command": "merge-conflict.accept.incoming",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.selection%",
+-        "original": "Accept Selection",
+-        "command": "merge-conflict.accept.selection",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.accept.both%",
+-        "original": "Accept Both",
+-        "command": "merge-conflict.accept.both",
+-        "enablement": "!isMergeEditor"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.next%",
+-        "original": "Next Conflict",
+-        "command": "merge-conflict.next",
+-        "enablement": "!isMergeEditor",
+-        "icon": "$(arrow-down)"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.previous%",
+-        "original": "Previous Conflict",
+-        "command": "merge-conflict.previous",
+-        "enablement": "!isMergeEditor",
+-        "icon": "$(arrow-up)"
+-      },
+-      {
+-        "category": "%command.category%",
+-        "title": "%command.compare%",
+-        "original": "Compare Current Conflict",
+-        "command": "merge-conflict.compare",
+-        "enablement": "!isMergeEditor"
+-      }
+-    ],
+     "menus": {
+       "scm/resourceState/context": [
+         {
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/src/commandHandler.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/merge-conflict/src/commandHandler.ts
++++ AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/src/commandHandler.ts
+@@ -6,15 +6,6 @@ import * as vscode from 'vscode';
+ import * as interfaces from './interfaces';
+ import ContentProvider from './contentProvider';
+ 
+-interface IDocumentMergeConflictNavigationResults {
+-	canNavigate: boolean;
+-	conflict?: interfaces.IDocumentMergeConflict;
+-}
+-
+-enum NavigationDirection {
+-	Forwards,
+-	Backwards
+-}
+ 
+ export default class CommandHandler implements vscode.Disposable {
+ 
+@@ -26,60 +17,6 @@ export default class CommandHandler impl
+ 	}
+ 
+ 	begin() {
+-		this.disposables.push(
+-			this.registerTextEditorCommand('merge-conflict.accept.current', this.acceptCurrent),
+-			this.registerTextEditorCommand('merge-conflict.accept.incoming', this.acceptIncoming),
+-			this.registerTextEditorCommand('merge-conflict.accept.selection', this.acceptSelection),
+-			this.registerTextEditorCommand('merge-conflict.accept.both', this.acceptBoth),
+-			this.registerTextEditorCommand('merge-conflict.accept.all-current', this.acceptAllCurrent, this.acceptAllCurrentResources),
+-			this.registerTextEditorCommand('merge-conflict.accept.all-incoming', this.acceptAllIncoming, this.acceptAllIncomingResources),
+-			this.registerTextEditorCommand('merge-conflict.accept.all-both', this.acceptAllBoth),
+-			this.registerTextEditorCommand('merge-conflict.next', this.navigateNext),
+-			this.registerTextEditorCommand('merge-conflict.previous', this.navigatePrevious),
+-			this.registerTextEditorCommand('merge-conflict.compare', this.compare)
+-		);
+-	}
+-
+-	private registerTextEditorCommand(command: string, cb: (editor: vscode.TextEditor, ...args: any[]) => Promise<void>, resourceCB?: (uris: vscode.Uri[]) => Promise<void>) {
+-		return vscode.commands.registerCommand(command, (...args) => {
+-			if (resourceCB && args.length && args.every(arg => arg && arg.resourceUri)) {
+-				return resourceCB.call(this, args.map(arg => arg.resourceUri));
+-			}
+-			const editor = vscode.window.activeTextEditor;
+-			return editor && cb.call(this, editor, ...args);
+-		});
+-	}
+-
+-	acceptCurrent(editor: vscode.TextEditor, ...args: any[]): Promise<void> {
+-		return this.accept(interfaces.CommitType.Current, editor, ...args);
+-	}
+-
+-	acceptIncoming(editor: vscode.TextEditor, ...args: any[]): Promise<void> {
+-		return this.accept(interfaces.CommitType.Incoming, editor, ...args);
+-	}
+-
+-	acceptBoth(editor: vscode.TextEditor, ...args: any[]): Promise<void> {
+-		return this.accept(interfaces.CommitType.Both, editor, ...args);
+-	}
+-
+-	acceptAllCurrent(editor: vscode.TextEditor): Promise<void> {
+-		return this.acceptAll(interfaces.CommitType.Current, editor);
+-	}
+-
+-	acceptAllIncoming(editor: vscode.TextEditor): Promise<void> {
+-		return this.acceptAll(interfaces.CommitType.Incoming, editor);
+-	}
+-
+-	acceptAllCurrentResources(resources: vscode.Uri[]): Promise<void> {
+-		return this.acceptAllResources(interfaces.CommitType.Current, resources);
+-	}
+-
+-	acceptAllIncomingResources(resources: vscode.Uri[]): Promise<void> {
+-		return this.acceptAllResources(interfaces.CommitType.Incoming, resources);
+-	}
+-
+-	acceptAllBoth(editor: vscode.TextEditor): Promise<void> {
+-		return this.acceptAll(interfaces.CommitType.Both, editor);
+ 	}
+ 
+ 	async compare(editor: vscode.TextEditor, conflict: interfaces.IDocumentMergeConflict | null) {
+@@ -147,151 +84,12 @@ export default class CommandHandler impl
+ 		await vscode.commands.executeCommand('vscode.diff', leftUri, rightUri, title, opts);
+ 	}
+ 
+-	navigateNext(editor: vscode.TextEditor): Promise<void> {
+-		return this.navigate(editor, NavigationDirection.Forwards);
+-	}
+-
+-	navigatePrevious(editor: vscode.TextEditor): Promise<void> {
+-		return this.navigate(editor, NavigationDirection.Backwards);
+-	}
+-
+-	async acceptSelection(editor: vscode.TextEditor): Promise<void> {
+-		const conflict = await this.findConflictContainingSelection(editor);
+-
+-		if (!conflict) {
+-			vscode.window.showWarningMessage(vscode.l10n.t("Editor cursor is not within a merge conflict"));
+-			return;
+-		}
+-
+-		let typeToAccept: interfaces.CommitType;
+-		let tokenAfterCurrentBlock: vscode.Range = conflict.splitter;
+-
+-		if (conflict.commonAncestors.length > 0) {
+-			tokenAfterCurrentBlock = conflict.commonAncestors[0].header;
+-		}
+-
+-		// Figure out if the cursor is in current or incoming, we do this by seeing if
+-		// the active position is before or after the range of the splitter or common
+-		// ancestors marker. We can use this trick as the previous check in
+-		// findConflictByActiveSelection will ensure it's within the conflict range, so
+-		// we don't falsely identify "current" or "incoming" if outside of a conflict range.
+-		if (editor.selection.active.isBefore(tokenAfterCurrentBlock.start)) {
+-			typeToAccept = interfaces.CommitType.Current;
+-		}
+-		else if (editor.selection.active.isAfter(conflict.splitter.end)) {
+-			typeToAccept = interfaces.CommitType.Incoming;
+-		}
+-		else if (editor.selection.active.isBefore(conflict.splitter.start)) {
+-			vscode.window.showWarningMessage(vscode.l10n.t('Editor cursor is within the common ancestors block, please move it to either the "current" or "incoming" block'));
+-			return;
+-		}
+-		else {
+-			vscode.window.showWarningMessage(vscode.l10n.t('Editor cursor is within the merge conflict splitter, please move it to either the "current" or "incoming" block'));
+-			return;
+-		}
+-
+-		this.tracker.forget(editor.document);
+-		conflict.commitEdit(typeToAccept, editor);
+-	}
+ 
+ 	dispose() {
+ 		this.disposables.forEach(disposable => disposable.dispose());
+ 		this.disposables = [];
+ 	}
+ 
+-	private async navigate(editor: vscode.TextEditor, direction: NavigationDirection): Promise<void> {
+-		const navigationResult = await this.findConflictForNavigation(editor, direction);
+-
+-		if (!navigationResult) {
+-			// Check for autoNavigateNextConflict, if it's enabled(which indicating no conflict remain), then do not show warning
+-			const mergeConflictConfig = vscode.workspace.getConfiguration('merge-conflict');
+-			if (mergeConflictConfig.get<boolean>('autoNavigateNextConflict.enabled')) {
+-				return;
+-			}
+-			vscode.window.showWarningMessage(vscode.l10n.t("No merge conflicts found in this file"));
+-			return;
+-		}
+-		else if (!navigationResult.canNavigate) {
+-			vscode.window.showWarningMessage(vscode.l10n.t("No other merge conflicts within this file"));
+-			return;
+-		}
+-		else if (!navigationResult.conflict) {
+-			// TODO: Show error message?
+-			return;
+-		}
+-
+-		// Move the selection to the first line of the conflict
+-		editor.selection = new vscode.Selection(navigationResult.conflict.range.start, navigationResult.conflict.range.start);
+-		editor.revealRange(navigationResult.conflict.range, vscode.TextEditorRevealType.Default);
+-	}
+-
+-	private async accept(type: interfaces.CommitType, editor: vscode.TextEditor, ...args: any[]): Promise<void> {
+-
+-		let conflict: interfaces.IDocumentMergeConflict | null;
+-
+-		// If launched with known context, take the conflict from that
+-		if (args[0] === 'known-conflict') {
+-			conflict = args[1];
+-		}
+-		else {
+-			// Attempt to find a conflict that matches the current cursor position
+-			conflict = await this.findConflictContainingSelection(editor);
+-		}
+-
+-		if (!conflict) {
+-			vscode.window.showWarningMessage(vscode.l10n.t("Editor cursor is not within a merge conflict"));
+-			return;
+-		}
+-
+-		// Tracker can forget as we know we are going to do an edit
+-		this.tracker.forget(editor.document);
+-		conflict.commitEdit(type, editor);
+-
+-		// navigate to the next merge conflict
+-		const mergeConflictConfig = vscode.workspace.getConfiguration('merge-conflict');
+-		if (mergeConflictConfig.get<boolean>('autoNavigateNextConflict.enabled')) {
+-			this.navigateNext(editor);
+-		}
+-
+-	}
+-
+-	private async acceptAll(type: interfaces.CommitType, editor: vscode.TextEditor): Promise<void> {
+-		const conflicts = await this.tracker.getConflicts(editor.document);
+-
+-		if (!conflicts || conflicts.length === 0) {
+-			vscode.window.showWarningMessage(vscode.l10n.t("No merge conflicts found in this file"));
+-			return;
+-		}
+-
+-		// For get the current state of the document, as we know we are doing to do a large edit
+-		this.tracker.forget(editor.document);
+-
+-		// Apply all changes as one edit
+-		await editor.edit((edit) => conflicts.forEach(conflict => {
+-			conflict.applyEdit(type, editor.document, edit);
+-		}));
+-	}
+-
+-	private async acceptAllResources(type: interfaces.CommitType, resources: vscode.Uri[]): Promise<void> {
+-		const documents = await Promise.all(resources.map(resource => vscode.workspace.openTextDocument(resource)));
+-		const edit = new vscode.WorkspaceEdit();
+-		for (const document of documents) {
+-			const conflicts = await this.tracker.getConflicts(document);
+-
+-			if (!conflicts || conflicts.length === 0) {
+-				continue;
+-			}
+-
+-			// For get the current state of the document, as we know we are doing to do a large edit
+-			this.tracker.forget(document);
+-
+-			// Apply all changes as one edit
+-			conflicts.forEach(conflict => {
+-				conflict.applyEdit(type, document, { replace: (range, newText) => edit.replace(document.uri, range, newText) });
+-			});
+-		}
+-		vscode.workspace.applyEdit(edit);
+-	}
+ 
+ 	private async findConflictContainingSelection(editor: vscode.TextEditor, conflicts?: interfaces.IDocumentMergeConflict[]): Promise<interfaces.IDocumentMergeConflict | null> {
+ 
+@@ -312,58 +110,4 @@ export default class CommandHandler impl
+ 		return null;
+ 	}
+ 
+-	private async findConflictForNavigation(editor: vscode.TextEditor, direction: NavigationDirection, conflicts?: interfaces.IDocumentMergeConflict[]): Promise<IDocumentMergeConflictNavigationResults | null> {
+-		if (!conflicts) {
+-			conflicts = await this.tracker.getConflicts(editor.document);
+-		}
+-
+-		if (!conflicts || conflicts.length === 0) {
+-			return null;
+-		}
+-
+-		const selection = editor.selection.active;
+-		if (conflicts.length === 1) {
+-			if (conflicts[0].range.contains(selection)) {
+-				return {
+-					canNavigate: false
+-				};
+-			}
+-
+-			return {
+-				canNavigate: true,
+-				conflict: conflicts[0]
+-			};
+-		}
+-
+-		let predicate: (_conflict: any) => boolean;
+-		let fallback: () => interfaces.IDocumentMergeConflict;
+-		let scanOrder: interfaces.IDocumentMergeConflict[];
+-
+-		if (direction === NavigationDirection.Forwards) {
+-			predicate = (conflict) => selection.isBefore(conflict.range.start);
+-			fallback = () => conflicts![0];
+-			scanOrder = conflicts;
+-		} else if (direction === NavigationDirection.Backwards) {
+-			predicate = (conflict) => selection.isAfter(conflict.range.start);
+-			fallback = () => conflicts![conflicts!.length - 1];
+-			scanOrder = conflicts.slice().reverse();
+-		} else {
+-			throw new Error(`Unsupported direction ${direction}`);
+-		}
+-
+-		for (const conflict of scanOrder) {
+-			if (predicate(conflict) && !conflict.range.contains(selection)) {
+-				return {
+-					canNavigate: true,
+-					conflict: conflict
+-				};
+-			}
+-		}
+-
+-		// Went all the way to the end, return the head
+-		return {
+-			canNavigate: true,
+-			conflict: fallback()
+-		};
+-	}
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/references-view/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+@@ -121,23 +121,6 @@
+         "icon": "$(refresh)"
+       },
+       {
+-        "command": "references-view.showCallHierarchy",
+-        "title": "%cmd.references-view.showCallHierarchy%",
+-        "category": "Calls"
+-      },
+-      {
+-        "command": "references-view.showOutgoingCalls",
+-        "title": "%cmd.references-view.showOutgoingCalls%",
+-        "category": "Calls",
+-        "icon": "$(call-outgoing)"
+-      },
+-      {
+-        "command": "references-view.showIncomingCalls",
+-        "title": "%cmd.references-view.showIncomingCalls%",
+-        "category": "Calls",
+-        "icon": "$(call-incoming)"
+-      },
+-      {
+         "command": "references-view.removeCallItem",
+         "title": "%cmd.references-view.removeCallItem%",
+         "icon": "$(close)"
+@@ -188,11 +171,6 @@
+           "group": "0_navigation@2"
+         },
+         {
+-          "command": "references-view.showCallHierarchy",
+-          "when": "editorHasCallHierarchyProvider",
+-          "group": "0_navigation@3"
+-        },
+-        {
+           "command": "references-view.showTypeHierarchy",
+           "when": "editorHasTypeHierarchyProvider",
+           "group": "0_navigation@4"
+@@ -215,16 +193,6 @@
+           "when": "view == references-view.tree && reference-list.hasResult"
+         },
+         {
+-          "command": "references-view.showOutgoingCalls",
+-          "group": "navigation@1",
+-          "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showIncoming"
+-        },
+-        {
+-          "command": "references-view.showIncomingCalls",
+-          "group": "navigation@1",
+-          "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showOutgoing"
+-        },
+-        {
+           "command": "references-view.showSupertypes",
+           "group": "navigation@1",
+           "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != supertypes"
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/src/calls/index.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/references-view/src/calls/index.ts
++++ AWSCodeOSS/build/private/code-editor-src/extensions/references-view/src/calls/index.ts
+@@ -4,40 +4,11 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as vscode from 'vscode';
+-import { SymbolsTree } from '../tree';
+-import { ContextKey } from '../utils';
+-import { CallItem, CallsDirection, CallsTreeInput } from './model';
++import { CallItem } from './model';
+ 
+-export function register(tree: SymbolsTree, context: vscode.ExtensionContext): void {
+-
+-	const direction = new RichCallsDirection(context.workspaceState, CallsDirection.Incoming);
+-
+-	function showCallHierarchy() {
+-		if (vscode.window.activeTextEditor) {
+-			const input = new CallsTreeInput(new vscode.Location(vscode.window.activeTextEditor.document.uri, vscode.window.activeTextEditor.selection.active), direction.value);
+-			tree.setInput(input);
+-		}
+-	}
+-
+-	function setCallsDirection(value: CallsDirection, anchor: CallItem | unknown) {
+-		direction.value = value;
+-
+-		let newInput: CallsTreeInput | undefined;
+-		const oldInput = tree.getInput();
+-		if (anchor instanceof CallItem) {
+-			newInput = new CallsTreeInput(new vscode.Location(anchor.item.uri, anchor.item.selectionRange.start), direction.value);
+-		} else if (oldInput instanceof CallsTreeInput) {
+-			newInput = new CallsTreeInput(oldInput.location, direction.value);
+-		}
+-		if (newInput) {
+-			tree.setInput(newInput);
+-		}
+-	}
++export function register(context: vscode.ExtensionContext): void {
+ 
+ 	context.subscriptions.push(
+-		vscode.commands.registerCommand('references-view.showCallHierarchy', showCallHierarchy),
+-		vscode.commands.registerCommand('references-view.showOutgoingCalls', (item: CallItem | unknown) => setCallsDirection(CallsDirection.Outgoing, item)),
+-		vscode.commands.registerCommand('references-view.showIncomingCalls', (item: CallItem | unknown) => setCallsDirection(CallsDirection.Incoming, item)),
+ 		vscode.commands.registerCommand('references-view.removeCallItem', removeCallItem)
+ 	);
+ }
+@@ -47,32 +18,3 @@ function removeCallItem(item: CallItem |
+ 		item.remove();
+ 	}
+ }
+-
+-class RichCallsDirection {
+-
+-	private static _key = 'references-view.callHierarchyMode';
+-
+-	private _ctxMode = new ContextKey<'showIncoming' | 'showOutgoing'>('references-view.callHierarchyMode');
+-
+-	constructor(
+-		private _mem: vscode.Memento,
+-		private _value: CallsDirection = CallsDirection.Outgoing,
+-	) {
+-		const raw = _mem.get<number>(RichCallsDirection._key);
+-		if (typeof raw === 'number' && raw >= 0 && raw <= 1) {
+-			this.value = raw;
+-		} else {
+-			this.value = _value;
+-		}
+-	}
+-
+-	get value() {
+-		return this._value;
+-	}
+-
+-	set value(value: CallsDirection) {
+-		this._value = value;
+-		this._ctxMode.set(this._value === CallsDirection.Incoming ? 'showIncoming' : 'showOutgoing');
+-		this._mem.update(RichCallsDirection._key, value);
+-	}
+-}
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/src/extension.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/references-view/src/extension.ts
++++ AWSCodeOSS/build/private/code-editor-src/extensions/references-view/src/extension.ts
+@@ -4,7 +4,6 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as vscode from 'vscode';
+-import * as calls from './calls';
+ import * as references from './references';
+ import { SymbolTree, SymbolTreeInput } from './references-view';
+ import { SymbolsTree } from './tree';
+@@ -15,7 +14,6 @@ export function activate(context: vscode
+ 	const tree = new SymbolsTree();
+ 
+ 	references.register(tree, context);
+-	calls.register(tree, context);
+ 	types.register(tree, context);
+ 
+ 	function setInput(input: SymbolTreeInput<unknown>) {
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+@@ -7,7 +7,7 @@ import { localize, localize2 } from '../
+ import { IWindowOpenable } from '../../../platform/window/common/window.js';
+ import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
+ import { MenuRegistry, MenuId, Action2, registerAction2, IAction2Options } from '../../../platform/actions/common/actions.js';
+-import { KeyChord, KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
++import { KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
+ import { IsMainWindowFullscreenContext } from '../../common/contextkeys.js';
+ import { IsMacNativeContext, IsDevelopmentContext, IsWebContext, IsIOSContext } from '../../../platform/contextkey/common/contextkeys.js';
+ import { Categories } from '../../../platform/action/common/actionCommonCategories.js';
+@@ -23,7 +23,7 @@ import { URI } from '../../../base/commo
+ import { getIconClasses } from '../../../editor/common/services/getIconClasses.js';
+ import { FileKind } from '../../../platform/files/common/files.js';
+ import { splitRecentLabel } from '../../../base/common/labels.js';
+-import { isMacintosh, isWeb, isWindows } from '../../../base/common/platform.js';
++import { isMacintosh } from '../../../base/common/platform.js';
+ import { ContextKeyExpr } from '../../../platform/contextkey/common/contextkey.js';
+ import { inQuickPickContext, getQuickNavigateHandler } from '../quickaccess.js';
+ import { IHostService } from '../../services/host/browser/host.js';
+@@ -363,36 +363,6 @@ class ShowAboutDialogAction extends Acti
+ 	}
+ }
+ 
+-class NewWindowAction extends Action2 {
+-
+-	constructor() {
+-		super({
+-			id: 'workbench.action.newWindow',
+-			title: {
+-				...localize2('newWindow', "New Window"),
+-				mnemonicTitle: localize({ key: 'miNewWindow', comment: ['&& denotes a mnemonic'] }, "New &&Window"),
+-			},
+-			f1: true,
+-			keybinding: {
+-				weight: KeybindingWeight.WorkbenchContrib,
+-				primary: isWeb ? (isWindows ? KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Alt | KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyN,
+-				secondary: isWeb ? [KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyN] : undefined
+-			},
+-			menu: {
+-				id: MenuId.MenubarFileMenu,
+-				group: '1_new',
+-				order: 3
+-			}
+-		});
+-	}
+-
+-	override run(accessor: ServicesAccessor): Promise<void> {
+-		const hostService = accessor.get(IHostService);
+-
+-		return hostService.openWindow({ remoteAuthority: null });
+-	}
+-}
+-
+ class BlurAction extends Action2 {
+ 
+ 	constructor() {
+@@ -412,7 +382,6 @@ class BlurAction extends Action2 {
+ 
+ // --- Actions Registration
+ 
+-registerAction2(NewWindowAction);
+ registerAction2(ToggleFullScreenAction);
+ registerAction2(QuickPickRecentAction);
+ registerAction2(OpenRecentAction);
+@@ -463,10 +432,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+ 	order: 1,
+ 	when: IsWebContext
+ });
+-
+-MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-	title: localize({ key: 'miOpenRecent', comment: ['&& denotes a mnemonic'] }, "Open &&Recent"),
+-	submenu: MenuId.MenubarRecentMenu,
+-	group: '2_open',
+-	order: 4
+-});
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+@@ -19,7 +19,6 @@ import { AuthenticationProviderInformati
+ import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
+ import { Extensions, IExtensionFeatureTableRenderer, IExtensionFeaturesRegistry, IRenderedData, IRowData, ITableData } from '../../../services/extensionManagement/common/extensionFeatures.js';
+ import { ExtensionsRegistry } from '../../../services/extensions/common/extensionsRegistry.js';
+-import { ManageTrustedExtensionsForAccountAction } from './actions/manageTrustedExtensionsForAccountAction.js';
+ import { ManageAccountPreferencesForExtensionAction } from './actions/manageAccountPreferencesForExtensionAction.js';
+ import { IAuthenticationUsageService } from '../../../services/authentication/browser/authenticationUsageService.js';
+ 
+@@ -182,7 +181,6 @@ class AuthenticationContribution extends
+ 
+ 	private _registerActions(): void {
+ 		this._register(registerAction2(SignOutOfAccountAction));
+-		this._register(registerAction2(ManageTrustedExtensionsForAccountAction));
+ 		this._register(registerAction2(ManageAccountPreferencesForExtensionAction));
+ 	}
+ 
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+@@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
+ import { ICommandAction } from '../../../../platform/action/common/action.js';
+ import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
+ import { openWindowCommand, newWindowCommand } from './fileCommands.js';
+-import { COPY_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_TO_SIDE_COMMAND_ID, REVERT_FILE_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_LABEL, SAVE_FILE_AS_COMMAND_ID, SAVE_FILE_AS_LABEL, SAVE_ALL_IN_GROUP_COMMAND_ID, OpenEditorsGroupContext, COMPARE_WITH_SAVED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, OpenEditorsDirtyEditorContext, COMPARE_SELECTED_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, REMOVE_ROOT_FOLDER_LABEL, SAVE_FILES_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_LABEL, OpenEditorsReadonlyEditorContext, OPEN_WITH_EXPLORER_COMMAND_ID, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, SAVE_ALL_COMMAND_ID, OpenEditorsSelectedFileOrUntitledContext } from './fileConstants.js';
++import { COPY_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_TO_SIDE_COMMAND_ID, REVERT_FILE_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_LABEL, SAVE_FILE_AS_COMMAND_ID, SAVE_FILE_AS_LABEL, SAVE_ALL_IN_GROUP_COMMAND_ID, OpenEditorsGroupContext, COMPARE_WITH_SAVED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, OpenEditorsDirtyEditorContext, COMPARE_SELECTED_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, REMOVE_ROOT_FOLDER_LABEL, SAVE_FILES_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_LABEL, OpenEditorsReadonlyEditorContext, OPEN_WITH_EXPLORER_COMMAND_ID, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL d, OpenEditorsSelectedFileOrUntitledContext } from './fileConstants.js';
+ import { CommandsRegistry, ICommandHandler } from '../../../../platform/commands/common/commands.js';
+ import { ContextKeyExpr, ContextKeyExpression } from '../../../../platform/contextkey/common/contextkey.js';
+ import { KeybindingsRegistry, KeybindingWeight } from '../../../../platform/keybinding/common/keybindingsRegistry.js';
+@@ -486,17 +486,6 @@ MenuRegistry.appendMenuItem(MenuId.Explo
+ 
+ MenuRegistry.appendMenuItem(MenuId.ExplorerContext, {
+ 	group: 'navigation',
+-	order: 6,
+-	command: {
+-		id: NEW_FOLDER_COMMAND_ID,
+-		title: NEW_FOLDER_LABEL,
+-		precondition: ContextKeyExpr.and(ExplorerResourceNotReadonlyContext, WorkbenchTreeFindOpen.toNegated())
+-	},
+-	when: ExplorerFolderContext
+-});
+-
+-MenuRegistry.appendMenuItem(MenuId.ExplorerContext, {
+-	group: 'navigation',
+ 	order: 10,
+ 	command: openToSideCommand,
+ 	when: ContextKeyExpr.and(ExplorerFolderContext.toNegated(), ResourceContextKey.HasResource)
+@@ -691,36 +680,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+ });
+ 
+ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-	group: '4_save',
+-	command: {
+-		id: SAVE_FILE_COMMAND_ID,
+-		title: nls.localize({ key: 'miSave', comment: ['&& denotes a mnemonic'] }, "&&Save"),
+-		precondition: ContextKeyExpr.or(ActiveEditorContext, ContextKeyExpr.and(FoldersViewVisibleContext, SidebarFocusContext))
+-	},
+-	order: 1
+-});
+-
+-MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-	group: '4_save',
+-	command: {
+-		id: SAVE_FILE_AS_COMMAND_ID,
+-		title: nls.localize({ key: 'miSaveAs', comment: ['&& denotes a mnemonic'] }, "Save &&As..."),
+-		precondition: ContextKeyExpr.or(ActiveEditorContext, ContextKeyExpr.and(FoldersViewVisibleContext, SidebarFocusContext))
+-	},
+-	order: 2
+-});
+-
+-MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-	group: '4_save',
+-	command: {
+-		id: SAVE_ALL_COMMAND_ID,
+-		title: nls.localize({ key: 'miSaveAll', comment: ['&& denotes a mnemonic'] }, "Save A&&ll"),
+-		precondition: DirtyWorkingCopiesContext
+-	},
+-	order: 3
+-});
+-
+-MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+ 	group: '5_autosave',
+ 	command: {
+ 		id: ToggleAutoSaveAction.ID,
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
+@@ -14,13 +14,12 @@ import { IDialogService } from '../../..
+ import { ITextEditorOptions } from '../../../../../platform/editor/common/editor.js';
+ import { ServicesAccessor } from '../../../../../platform/instantiation/common/instantiation.js';
+ import { IOpenerService } from '../../../../../platform/opener/common/opener.js';
+-import { IStorageService, StorageScope } from '../../../../../platform/storage/common/storage.js';
+ import { IEditorIdentifier, IResourceMergeEditorInput } from '../../../../common/editor.js';
+ import { MergeEditorInput, MergeEditorInputData } from '../mergeEditorInput.js';
+ import { IMergeEditorInputModel } from '../mergeEditorInputModel.js';
+ import { MergeEditor } from '../view/mergeEditor.js';
+ import { MergeEditorViewModel } from '../view/viewModel.js';
+-import { ctxIsMergeEditor, ctxMergeEditorLayout, ctxMergeEditorShowBase, ctxMergeEditorShowBaseAtTop, ctxMergeEditorShowNonConflictingChanges, StorageCloseWithConflicts } from '../../common/mergeEditor.js';
++import { ctxIsMergeEditor, ctxMergeEditorLayout, ctxMergeEditorShowBase, ctxMergeEditorShowBaseAtTop, ctxMergeEditorShowNonConflictingChanges } from '../../common/mergeEditor.js';
+ import { IEditorService } from '../../../../services/editor/common/editorService.js';
+ 
+ abstract class MergeEditorAction extends Action2 {
+@@ -563,20 +562,6 @@ export class ResetToBaseAndAutoMergeComm
+ 	}
+ }
+ 
+-export class ResetCloseWithConflictsChoice extends Action2 {
+-	constructor() {
+-		super({
+-			id: 'mergeEditor.resetCloseWithConflictsChoice',
+-			category: mergeEditorCategory,
+-			title: localize2('mergeEditor.resetChoice', "Reset Choice for \'Close with Conflicts\'"),
+-			f1: true,
+-		});
+-	}
+-	run(accessor: ServicesAccessor): void {
+-		accessor.get(IStorageService).remove(StorageCloseWithConflicts, StorageScope.PROFILE);
+-	}
+-}
+-
+ // this is an API command
+ export class AcceptMerge extends MergeEditorAction2 {
+ 	constructor() {
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
+@@ -139,7 +139,7 @@ export class MergeEditorLoadContentsFrom
+ 			category: MERGE_EDITOR_CATEGORY,
+ 			title: localize2('merge.dev.loadContentsFromFolder', "Load Merge Editor State from Folder"),
+ 			icon: Codicon.layoutCentered,
+-			f1: true
++			f1: false
+ 		});
+ 	}
+ 
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
+@@ -15,7 +15,7 @@ import {
+ 	AcceptAllInput1, AcceptAllInput2, AcceptMerge, CompareInput1WithBaseCommand,
+ 	CompareInput2WithBaseCommand, GoToNextUnhandledConflict, GoToPreviousUnhandledConflict, OpenBaseFile, OpenMergeEditor,
+ 	OpenResultResource, ResetToBaseAndAutoMergeCommand, SetColumnLayout, SetMixedLayout, ShowHideTopBase, ShowHideCenterBase, ShowHideBase,
+-	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2, ResetCloseWithConflictsChoice
++	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2
+ } from './commands/commands.js';
+ import { MergeEditorCopyContentsToJSON, MergeEditorLoadContentsFromFolder, MergeEditorSaveContentsToFolder } from './commands/devCommands.js';
+ import { MergeEditorInput } from './mergeEditorInput.js';
+@@ -83,7 +83,6 @@ registerAction2(AcceptAllInput2);
+ registerAction2(ResetToBaseAndAutoMergeCommand);
+ 
+ registerAction2(AcceptMerge);
+-registerAction2(ResetCloseWithConflictsChoice);
+ 
+ // Dev Commands
+ registerAction2(MergeEditorCopyContentsToJSON);

@@ -1,0 +1,30 @@
+Add custom cache to scanUserExtensions in reducing of
+ excessive extension fetch requests
+
+---
+ .../browser/webExtensionsScannerService.ts                   | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+@@ -100,6 +100,7 @@ export class WebExtensionsScannerService
+ 	private readonly customBuiltinExtensionsCacheResource: URI | undefined = undefined;
+ 	private readonly resourcesAccessQueueMap = new ResourceMap<Queue<IWebExtension[]>>();
+ 	private readonly extensionsEnabledWithApiProposalVersion: string[];
++	private customBuiltinExtensionsCache: IScannedExtension[] | null = null;
+ 
+ 	constructor(
+ 		@IBrowserWorkbenchEnvironmentService private readonly environmentService: IBrowserWorkbenchEnvironmentService,
+@@ -471,7 +472,9 @@ export class WebExtensionsScannerService
+ 		const extensions = new Map<string, IScannedExtension>();
+ 
+ 		// Custom builtin extensions defined through `additionalBuiltinExtensions` API
+-		const customBuiltinExtensions = await this.readCustomBuiltinExtensions(scanOptions);
++		const customBuiltinExtensions = this.customBuiltinExtensionsCache || await this.readCustomBuiltinExtensions(scanOptions);
++		// Set custom cache https://issues.amazon.com/issues/LambdaConsole-16657
++		if (!this.customBuiltinExtensionsCache) this.customBuiltinExtensionsCache = customBuiltinExtensions;
+ 		for (const extension of customBuiltinExtensions) {
+ 			extensions.set(extension.identifier.id.toLowerCase(), extension);
+ 		}

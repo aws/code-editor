@@ -1,0 +1,126 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
+@@ -1049,6 +1049,25 @@ export class RemoteAgentConnectionStatus
+ 						break;
+ 				}
+ 			});
++
++			connection.onDidStateChange((e) => {
++				let action = 'connected';
++				switch (e.type) {
++					case PersistentConnectionEventType.ConnectionLost:
++					case PersistentConnectionEventType.ReconnectionRunning:
++					case PersistentConnectionEventType.ReconnectionWait:
++						action = 'reconnecting';
++						break;
++					case PersistentConnectionEventType.ReconnectionPermanentFailure:
++						action = 'disconnected';
++						break;
++					case PersistentConnectionEventType.ConnectionGain:
++						action = 'connected';
++						break;
++				}
++
++				commandService.executeCommand('workbench.action.send-parent-event', { action });
++			});
+ 		}
+ 	}
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+@@ -410,6 +410,20 @@ class BlurAction extends Action2 {
+ 	}
+ }
+ 
++class SendEventToParentAction extends Action2 {
++
++	constructor() {
++		super({
++			id: 'workbench.action.send-parent-event',
++			title: 'Internal command to send an event to a parent window'
++		});
++	}
++
++	run(_accessor: ServicesAccessor, args: { action: string }): void {
++		window.top?.postMessage({source: 'code-editor', action: args.action}, '*');
++	}
++}
++
+ // --- Actions Registration
+ 
+ registerAction2(NewWindowAction);
+@@ -419,6 +433,7 @@ registerAction2(OpenRecentAction);
+ registerAction2(ReloadWindowAction);
+ registerAction2(ShowAboutDialogAction);
+ registerAction2(BlurAction);
++registerAction2(SendEventToParentAction);
+ 
+ // --- Commands/Keybindings Registration
+ 
+@@ -470,3 +485,8 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+ 	group: '2_open',
+ 	order: 4
+ });
++
++// notify top window when reloading the iframe, so that the whole ide can be reloaded
++window.addEventListener('pagehide', function () {
++	window.top?.postMessage({source: 'code-editor', action: 'reload'}, '*');
++});
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+@@ -472,19 +472,25 @@ class WorkspaceProvider implements IWork
+ 
+ 		const targetHref = this.createTargetUrl(workspace, options);
+ 		if (targetHref) {
+-			if (options?.reuse) {
+-				mainWindow.location.href = targetHref;
+-				return true;
+-			} else {
+-				let result;
+-				if (isStandalone()) {
+-					result = mainWindow.open(targetHref, '_blank', 'toolbar=no'); // ensures to open another 'standalone' window!
+-				} else {
+-					result = mainWindow.open(targetHref);
+-				}
++			var url = new URL(targetHref);
+ 
+-				return !!result;
++
++			let target, features;
++			if (!options?.reuse && isStandalone()) {
++				target = '_blank';
++				features = 'toolbar=no';
+ 			}
++			mainWindow.top?.postMessage({
++				source: 'code-editor',
++				action: "openEditor",
++				workspace: url.searchParams.get('workspace'),
++				folder: url.searchParams.get('folder'),
++				reuse: options?.reuse,
++				target,
++				features
++			}, '*');
++
++			return true;
+ 		}
+ 		return false;
+ 	}
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
+@@ -170,6 +170,8 @@ export class Workbench extends Layout {
+ 		} catch (error) {
+ 			onUnexpectedError(error);
+ 
++			window.top?.postMessage({source: 'code-editor', action: 'clientStartupError', error}, '*');
++
+ 			throw error; // rethrow because this is a critical issue we cannot handle properly here
+ 		}
+ 	}

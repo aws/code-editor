@@ -1,0 +1,140 @@
+remove import/export profiles and revert file menu items in
+ file menu
+
+---
+ .../files/browser/fileActions.contribution.ts |  45 +----
+ .../browser/userDataProfile.ts                | 162 +-----------------
+ 2 files changed, 4 insertions(+), 203 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+@@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
+ import { ICommandAction } from '../../../../platform/action/common/action.js';
+ import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
+ import { openWindowCommand, newWindowCommand } from './fileCommands.js';
+-import { COPY_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_TO_SIDE_COMMAND_ID, REVERT_FILE_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_LABEL, SAVE_FILE_AS_COMMAND_ID, SAVE_FILE_AS_LABEL, SAVE_ALL_IN_GROUP_COMMAND_ID, OpenEditorsGroupContext, COMPARE_WITH_SAVED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, OpenEditorsDirtyEditorContext, COMPARE_SELECTED_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, REMOVE_ROOT_FOLDER_LABEL, SAVE_FILES_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_LABEL, OpenEditorsReadonlyEditorContext, OPEN_WITH_EXPLORER_COMMAND_ID, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL d, OpenEditorsSelectedFileOrUntitledContext } from './fileConstants.js';
++import { COPY_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_TO_SIDE_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_LABEL, SAVE_FILE_AS_COMMAND_ID, SAVE_FILE_AS_LABEL, SAVE_ALL_IN_GROUP_COMMAND_ID, OpenEditorsGroupContext, COMPARE_WITH_SAVED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, OpenEditorsDirtyEditorContext, COMPARE_SELECTED_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, REMOVE_ROOT_FOLDER_LABEL, SAVE_FILES_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_LABEL, OpenEditorsReadonlyEditorContext, OPEN_WITH_EXPLORER_COMMAND_ID, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, OpenEditorsSelectedFileOrUntitledContext } from './fileConstants.js';
+ import { CommandsRegistry, ICommandHandler } from '../../../../platform/commands/common/commands.js';
+ import { ContextKeyExpr, ContextKeyExpression } from '../../../../platform/contextkey/common/contextkey.js';
+ import { KeybindingsRegistry, KeybindingWeight } from '../../../../platform/keybinding/common/keybindingsRegistry.js';
+@@ -20,7 +20,7 @@ import { CLOSE_SAVED_EDITORS_COMMAND_ID,
+ import { AutoSaveAfterShortDelayContext } from '../../../services/filesConfiguration/common/filesConfigurationService.js';
+ import { WorkbenchListDoubleSelection, WorkbenchTreeFindOpen } from '../../../../platform/list/browser/listService.js';
+ import { Schemas } from '../../../../base/common/network.js';
+-import { DirtyWorkingCopiesContext, EnterMultiRootWorkspaceSupportContext, HasWebFileSystemAccess, WorkbenchStateContext, WorkspaceFolderCountContext, SidebarFocusContext, ActiveEditorCanRevertContext, ActiveEditorContext, ResourceContextKey, ActiveEditorAvailableEditorIdsContext, MultipleEditorsSelectedInGroupContext, TwoEditorsSelectedInGroupContext, SelectedEditorsInGroupFileOrUntitledResourceContextKey } from '../../../common/contextkeys.js';
++import { DirtyWorkingCopiesContext, EnterMultiRootWorkspaceSupportContext, HasWebFileSystemAccess, WorkbenchStateContext, WorkspaceFolderCountContext, SidebarFocusContext, ActiveEditorContext, ResourceContextKey, ActiveEditorAvailableEditorIdsContext, MultipleEditorsSelectedInGroupContext, TwoEditorsSelectedInGroupContext, SelectedEditorsInGroupFileOrUntitledResourceContextKey } from '../../../common/contextkeys.js';
+ import { IsWebContext } from '../../../../platform/contextkey/common/contextkeys.js';
+ import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
+ import { ThemeIcon } from '../../../../base/common/themables.js';
+@@ -244,12 +244,6 @@ appendToCommandPalette({
+ });
+ 
+ appendToCommandPalette({
+-	id: REVERT_FILE_COMMAND_ID,
+-	title: nls.localize2('revert', "Revert File"),
+-	category: Categories.File
+-});
+-
+-appendToCommandPalette({
+ 	id: COMPARE_WITH_SAVED_COMMAND_ID,
+ 	title: nls.localize2('compareActiveWithSaved', "Compare Active File with Saved"),
+ 	category: Categories.File,
+@@ -352,26 +346,6 @@ MenuRegistry.appendMenuItem(MenuId.OpenE
+ 
+ MenuRegistry.appendMenuItem(MenuId.OpenEditorsContext, {
+ 	group: '2_save',
+-	order: 20,
+-	command: {
+-		id: REVERT_FILE_COMMAND_ID,
+-		title: nls.localize('revert', "Revert File"),
+-		precondition: OpenEditorsDirtyEditorContext
+-	},
+-	when: ContextKeyExpr.and(
+-		// Not: editor groups
+-		OpenEditorsGroupContext.toNegated(),
+-		// Not: readonly editors
+-		OpenEditorsReadonlyEditorContext.toNegated(),
+-		// Not: untitled editors (revert closes them)
+-		ResourceContextKey.Scheme.notEqualsTo(Schemas.untitled),
+-		// Not: auto save after short delay
+-		AutoSaveAfterShortDelayContext.toNegated()
+-	)
+-});
+-
+-MenuRegistry.appendMenuItem(MenuId.OpenEditorsContext, {
+-	group: '2_save',
+ 	order: 30,
+ 	command: {
+ 		id: SAVE_ALL_IN_GROUP_COMMAND_ID,
+@@ -688,21 +662,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+ 	},
+ 	order: 1
+ });
+-
+-MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-	group: '6_close',
+-	command: {
+-		id: REVERT_FILE_COMMAND_ID,
+-		title: nls.localize({ key: 'miRevert', comment: ['&& denotes a mnemonic'] }, "Re&&vert File"),
+-		precondition: ContextKeyExpr.or(
+-			// Active editor can revert
+-			ContextKeyExpr.and(ActiveEditorCanRevertContext),
+-			// Explorer focused but not on untitled
+-			ContextKeyExpr.and(ResourceContextKey.Scheme.notEqualsTo(Schemas.untitled), FoldersViewVisibleContext, SidebarFocusContext)
+-		),
+-	},
+-	order: 1
+-});
+ 
+ MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+ 	group: '6_close',
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+@@ -130,8 +130,6 @@ export class UserDataProfilesWorkbenchCo
+ 		this.registerProfilesActions();
+ 		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
+ 
+-		this._register(this.registerExportCurrentProfileAction());
+-
+ 		this.registerCreateFromCurrentProfileAction();
+ 		this.registerNewProfileAction();
+ 		this.registerDeleteProfileAction();
+@@ -364,34 +362,6 @@ export class UserDataProfilesWorkbenchCo
+ 		return disposables;
+ 	}
+ 
+-	private registerExportCurrentProfileAction(): IDisposable {
+-		const that = this;
+-		const disposables = new DisposableStore();
+-		const id = 'workbench.profiles.actions.exportProfile';
+-		disposables.add(registerAction2(class ExportProfileAction extends Action2 {
+-			constructor() {
+-				super({
+-					id,
+-					title: localize2('export profile', "Export Profile..."),
+-					category: PROFILES_CATEGORY,
+-					f1: true,
+-				});
+-			}
+-
+-			async run() {
+-				const editor = await that.openProfilesEditor();
+-				editor?.selectProfile(that.userDataProfileService.currentProfile);
+-			}
+-		}));
+-		disposables.add(MenuRegistry.appendMenuItem(MenuId.MenubarShare, {
+-			command: {
+-				id,
+-				title: localize2('export profile in share', "Export Profile ({0})...", that.userDataProfileService.currentProfile.name),
+-			},
+-		}));
+-		return disposables;
+-	}
+-
+ 
+ 	private registerCreateFromCurrentProfileAction(): void {
+ 		const that = this;

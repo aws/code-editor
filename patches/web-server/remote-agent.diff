@@ -1,0 +1,13 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -42,7 +42,7 @@ import { CacheControl, serveError, serve
+ import { createRequire } from 'node:module';
+ const require = createRequire(import.meta.url);
+ 
+-const SHUTDOWN_TIMEOUT = 5 * 60 * 1000;
++const SHUTDOWN_TIMEOUT = 60 * 1000;
+ 
+ declare module vsda {
+ 	// the signer is a native module that for historical reasons uses a lower case class name

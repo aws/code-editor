@@ -1,0 +1,54 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+@@ -14,7 +14,7 @@
+ import { IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions, IWorkbenchContribution } from '../../../common/contributions.js';
+ import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
+ import { VIEWLET_ID, IExtensionsWorkbenchService, IExtensionsViewPaneContainer, TOGGLE_IGNORE_EXTENSION_ACTION_ID, INSTALL_EXTENSION_FROM_VSIX_COMMAND_ID, WORKSPACE_RECOMMENDATIONS_VIEW_ID, IWorkspaceRecommendedExtensionsView, AutoUpdateConfigurationKey, HasOutdatedExtensionsContext, SELECT_INSTALL_VSIX_EXTENSION_COMMAND_ID, LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID, ExtensionEditorTab, THEME_ACTIONS_GROUP, INSTALL_ACTIONS_GROUP, OUTDATED_EXTENSIONS_VIEW_ID, CONTEXT_HAS_GALLERY, extensionsSearchActionsMenu, UPDATE_ACTIONS_GROUP, IExtensionArg, ExtensionRuntimeActionType } from '../common/extensions.js';
+-import { ReinstallAction, InstallSpecificVersionOfExtensionAction, ConfigureWorkspaceRecommendedExtensionsAction, ConfigureWorkspaceFolderRecommendedExtensionsAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ClearLanguageAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction, InstallAnotherVersionAction, InstallAction } from './extensionsActions.js';
++import { ReinstallAction, InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ClearLanguageAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction, InstallAnotherVersionAction, InstallAction } from './extensionsActions.js';
+ import { ExtensionsInput } from '../common/extensionsInput.js';
+ import { ExtensionEditor } from './extensionEditor.js';
+ import { StatusUpdater, MaliciousExtensionChecker, ExtensionsViewletViewsContribution, ExtensionsViewPaneContainer, BuiltInExtensionsContext, SearchMarketplaceExtensionsContext, RecommendedExtensionsContext, DefaultViewsContext, ExtensionsSortByContext, SearchHasTextContext } from './extensionsViewlet.js';
+@@ -1192,22 +1192,6 @@
+ 		});
+ 
+ 		this.registerExtensionAction({
+-			id: ConfigureWorkspaceFolderRecommendedExtensionsAction.ID,
+-			title: ConfigureWorkspaceFolderRecommendedExtensionsAction.LABEL,
+-			icon: configureRecommendedIcon,
+-			menu: [{
+-				id: MenuId.CommandPalette,
+-				when: WorkbenchStateContext.notEqualsTo('empty'),
+-			}, {
+-				id: MenuId.ViewTitle,
+-				when: ContextKeyExpr.equals('view', WORKSPACE_RECOMMENDATIONS_VIEW_ID),
+-				group: 'navigation',
+-				order: 2
+-			}],
+-			run: () => runAction(this.instantiationService.createInstance(ConfigureWorkspaceFolderRecommendedExtensionsAction, ConfigureWorkspaceFolderRecommendedExtensionsAction.ID, ConfigureWorkspaceFolderRecommendedExtensionsAction.LABEL))
+-		});
+-
+-		this.registerExtensionAction({
+ 			id: InstallSpecificVersionOfExtensionAction.ID,
+ 			title: { value: InstallSpecificVersionOfExtensionAction.LABEL, original: 'Install Specific Version of Extension...' },
+ 			category: ExtensionsLocalizedLabel,
+@@ -1751,17 +1735,6 @@
+ 			run: () => this.commandService.executeCommand('workbench.extensions.action.addToWorkspaceIgnoredRecommendations')
+ 		});
+ 
+-		this.registerExtensionAction({
+-			id: ConfigureWorkspaceRecommendedExtensionsAction.ID,
+-			title: { value: ConfigureWorkspaceRecommendedExtensionsAction.LABEL, original: 'Configure Recommended Extensions (Workspace)' },
+-			category: localize('extensions', "Extensions"),
+-			menu: {
+-				id: MenuId.CommandPalette,
+-				when: WorkbenchStateContext.isEqualTo('workspace'),
+-			},
+-			run: () => runAction(this.instantiationService.createInstance(ConfigureWorkspaceRecommendedExtensionsAction, ConfigureWorkspaceRecommendedExtensionsAction.ID, ConfigureWorkspaceRecommendedExtensionsAction.LABEL))
+-		});
+-
+ 	}
+ 
+ 	private registerExtensionAction(extensionActionOptions: IExtensionActionOptions): IDisposable {

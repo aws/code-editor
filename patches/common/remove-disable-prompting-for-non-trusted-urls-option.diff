@@ -1,0 +1,79 @@
+Remove option to disable prompting for non-trusted external
+ URLs
+
+---
+ .../url/browser/trustedDomainsValidator.ts       |  6 ------
+ .../contrib/url/browser/url.contribution.ts      | 16 ----------------
+ 2 files changed, 22 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+@@ -8,7 +8,6 @@ import Severity from '../../../../base/c
+ import { URI } from '../../../../base/common/uri.js';
+ import { localize } from '../../../../nls.js';
+ import { IClipboardService } from '../../../../platform/clipboard/common/clipboardService.js';
+-import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+ import { IDialogService } from '../../../../platform/dialogs/common/dialogs.js';
+ import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
+ import { IOpenerService, OpenOptions } from '../../../../platform/opener/common/opener.js';
+@@ -16,7 +15,6 @@ import { IProductService } from '../../.
+ import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
+ import { IStorageService } from '../../../../platform/storage/common/storage.js';
+ import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
+-import { IWorkspaceTrustManagementService } from '../../../../platform/workspace/common/workspaceTrust.js';
+ import { IWorkbenchContribution } from '../../../common/contributions.js';
+ import { ITrustedDomainService, isURLDomainTrusted } from './trustedDomainService.js';
+ import { configureOpenerTrustedDomainsHandler, readStaticTrustedDomains } from './trustedDomains.js';
+@@ -34,8 +32,6 @@ export class OpenerValidatorContribution
+ 		@IClipboardService private readonly _clipboardService: IClipboardService,
+ 		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+ 		@IInstantiationService private readonly _instantiationService: IInstantiationService,
+-		@IConfigurationService private readonly _configurationService: IConfigurationService,
+-		@IWorkspaceTrustManagementService private readonly _workspaceTrustService: IWorkspaceTrustManagementService,
+ 		@ITrustedDomainService private readonly _trustedDomainService: ITrustedDomainService,
+ 	) {
+ 		this._openerService.registerValidator({ shouldOpen: (uri, options) => this.validateLink(uri, options) });
+@@ -46,10 +42,6 @@ export class OpenerValidatorContribution
+ 			return true;
+ 		}
+ 
+-		if (openOptions?.fromWorkspace && this._workspaceTrustService.isWorkspaceTrusted() && !this._configurationService.getValue('workbench.trustedDomains.promptInTrustedWorkspace')) {
+-			return true;
+-		}
+-
+ 		const originalResource = resource;
+ 		let resourceUri: URI;
+ 		if (typeof resource === 'string') {
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+@@ -18,8 +18,6 @@ import { TrustedDomainsFileSystemProvide
+ import { OpenerValidatorContributions } from './trustedDomainsValidator.js';
+ import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
+ import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';
+-import { ConfigurationScope, Extensions as ConfigurationExtensions, IConfigurationRegistry } from '../../../../platform/configuration/common/configurationRegistry.js';
+-import { workbenchConfigurationNodeBase } from '../../../common/configuration.js';
+ import { ITrustedDomainService, TrustedDomainService } from './trustedDomainService.js';
+ import { registerSingleton, InstantiationType } from '../../../../platform/instantiation/common/extensions.js';
+ 
+@@ -77,17 +75,4 @@ registerWorkbenchContribution2(
+ );
+ 
+ 
+-const configurationRegistry = Registry.as<IConfigurationRegistry>(ConfigurationExtensions.Configuration);
+-configurationRegistry.registerConfiguration({
+-	...workbenchConfigurationNodeBase,
+-	properties: {
+-		'workbench.trustedDomains.promptInTrustedWorkspace': {
+-			scope: ConfigurationScope.APPLICATION,
+-			type: 'boolean',
+-			default: false,
+-			description: localize('workbench.trustedDomains.promptInTrustedWorkspace', "When enabled, trusted domain prompts will appear when opening links in trusted workspaces.")
+-		}
+-	}
+-});
+-
+ registerSingleton(ITrustedDomainService, TrustedDomainService, InstantiationType.Delayed);

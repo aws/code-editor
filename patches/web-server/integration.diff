@@ -1,0 +1,168 @@
+Index: AWSCodeOSS/build/private/code-editor-src/product.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/product.json
++++ AWSCodeOSS/build/private/code-editor-src/product.json
+@@ -1,18 +1,32 @@
+ {
+-	"nameShort": "Code - OSS",
+-	"nameLong": "Code - OSS",
+-	"applicationName": "code-oss",
+-	"dataFolderName": ".vscode-oss",
++	"extensionsGallery": {
++		"serviceUrl": "https://open-vsx.org/vscode/gallery",
++		"itemUrl": "https://open-vsx.org/vscode/item",
++		"resourceUrlTemplate": "https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}",
++		"controlUrl": "",
++		"recommendationsUrl": "",
++		"nlsBaseUrl": "",
++		"publisherUrl": ""
++	},
++	"linkProtectionTrustedDomains": [
++		"https://open-vsx.org",
++		"https://oidc.*.amazonaws.com",
++		"https://device.sso.*.amazonaws.com"
++	],
++	"nameShort": "Code Editor",
++	"nameLong": "Code Editor",
++	"applicationName": "code",
++	"dataFolderName": ".vscode-editor",
+ 	"win32MutexName": "vscodeoss",
+ 	"licenseName": "MIT",
+-	"licenseUrl": "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
+-	"serverLicenseUrl": "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
++	"licenseUrl": "https://github.com/aws/code-editor/blob/main/LICENSE",
++	"serverLicenseUrl": "https://github.com/aws/code-editor/blob/main/LICENSE",
+ 	"serverGreeting": [],
+ 	"serverLicense": [],
+ 	"serverLicensePrompt": "",
+-	"serverApplicationName": "code-server-oss",
+-	"serverDataFolderName": ".vscode-server-oss",
+-	"tunnelApplicationName": "code-tunnel-oss",
++	"serverApplicationName": "code-editor-server",
++	"serverDataFolderName": ".code-editor-server",
++	"tunnelApplicationName": "code-editor-tunnel",
+ 	"win32DirName": "Microsoft Code OSS",
+ 	"win32NameVersion": "Microsoft Code OSS",
+ 	"win32RegValueName": "CodeOSS",
+@@ -25,9 +39,9 @@
+ 	"win32TunnelServiceMutex": "vscodeoss-tunnelservice",
+ 	"win32TunnelMutex": "vscodeoss-tunnel",
+ 	"darwinBundleIdentifier": "com.visualstudio.code.oss",
+-	"linuxIconName": "code-oss",
++	"linuxIconName": "code-editor",
+ 	"licenseFileName": "LICENSE.txt",
+-	"reportIssueUrl": "https://github.com/microsoft/vscode/issues/new",
++	"reportIssueUrl": "https://github.com/aws/code-editor/issues/new",
+ 	"nodejsRepository": "https://nodejs.org",
+ 	"urlProtocol": "code-oss",
+ 	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/product.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/product/common/product.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/product.ts
+@@ -59,8 +59,8 @@ else {
+ 	if (Object.keys(product).length === 0) {
+ 		Object.assign(product, {
+ 			version: '1.95.0-dev',
+-			nameShort: 'Code - OSS Dev',
+-			nameLong: 'Code - OSS Dev',
++			nameShort: 'Code Editor',
++			nameLong: 'Code Editor',
+ 			applicationName: 'code-oss',
+ 			dataFolderName: '.vscode-oss',
+ 			urlProtocol: 'code-oss',
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+@@ -822,8 +822,8 @@ export class GettingStartedPage extends
+ 		}));
+ 
+ 		const header = $('.header', {},
+-			$('h1.product-name.caption', {}, this.productService.nameLong),
+-			$('p.subtitle.description', {}, localize({ key: 'gettingStarted.editingEvolved', comment: ['Shown as subtitle on the Welcome page.'] }, "Editing evolved"))
++			$('h1.product-name.caption', {}, "Code Editor"),
++			$('p.subtitle.description', {}, localize({ key: 'gettingStarted.editingEvolved', comment: ['Shown as subtitle on the Welcome page.'] }, "Based on Code-OSS, Visual  Studio Code Open Source"))
+ 		);
+ 
+ 		const leftColumn = $('.categories-column.categories-column-left', {},);
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/nls.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/nls.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/nls.ts
+@@ -43,6 +43,7 @@ function _format(message: string, args:
+ 		// FF3B and FF3D is the Unicode zenkaku representation for [ and ]
+ 		result = '\uFF3B' + result.replace(/[aouei]/g, '$&$&') + '\uFF3D';
+ 	}
++	result = result.replace(/\b(VS Code|Visual Studio Code)\b/gi, "Code Editor");
+ 
+ 	return result;
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+@@ -46,7 +46,9 @@ export class ExtHostLocalizationService
+ 		if (!str) {
+ 			this.logService.warn(`Using default string since no string found in i18n bundle that has the key: ${key}`);
+ 		}
+-		return format2(str ?? message, (args ?? {}));
++		let result = format2(str ?? message, (args ?? {}));
++		result = result.replace(/\b(VS Code|Visual Studio Code)\b/gi, "Code Editor");
++		return result;
+ 	}
+ 
+ 	getBundle(extensionId: string): { [key: string]: string } | undefined {
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+@@ -78,7 +78,7 @@ export class BrowserDialogHandler extend
+ 	async about(): Promise<void> {
+ 		const detailString = (useAgo: boolean): string => {
+ 			return localize('aboutDetail',
+-				"Version: {0}\nCommit: {1}\nDate: {2}\nBrowser: {3}",
++				"Version: {0}\nDate: {2}\nBrowser: {3}",
+ 				this.productService.version || 'Unknown',
+ 				this.productService.commit || 'Unknown',
+ 				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+@@ -327,7 +327,7 @@ import './contrib/surveys/browser/langua
+ 
+ // Welcome
+ import './contrib/welcomeGettingStarted/browser/gettingStarted.contribution.js';
+-import './contrib/welcomeWalkthrough/browser/walkThrough.contribution.js';
++
+ import './contrib/welcomeViews/common/viewsWelcome.contribution.js';
+ import './contrib/welcomeViews/common/newFile.contribution.js';
+ 
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
+@@ -34,7 +34,7 @@ export const COLOR_THEME_CONFIGURATION_S
+ const colorThemeSettingSchema: IConfigurationPropertySchema = {
+ 	type: 'string',
+ 	markdownDescription: nls.localize({ key: 'colorTheme', comment: ['{0} will become a link to another setting.'] }, "Specifies the color theme used in the workbench when {0} is not enabled.", formatSettingAsLink(ThemeSettings.DETECT_COLOR_SCHEME)),
+-	default: isWeb ? ThemeSettingDefaults.COLOR_THEME_LIGHT : ThemeSettingDefaults.COLOR_THEME_DARK,
++	default: new URL(location.href).searchParams.get("darkTheme") ? ThemeSettingDefaults.COLOR_THEME_DARK : ThemeSettingDefaults.COLOR_THEME_LIGHT,
+ 	tags: [COLOR_THEME_CONFIGURATION_SETTINGS_TAG],
+ 	enum: colorThemeSettingEnum,
+ 	enumDescriptions: colorThemeSettingEnumDescriptions,
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
+@@ -45,7 +45,8 @@ export class LabelContribution implement
+ 				separator: os === OperatingSystem.Windows ? '\\' : '/',
+ 				tildify: os !== OperatingSystem.Windows,
+ 				normalizeDriveLetter: os === OperatingSystem.Windows,
+-				workspaceSuffix: isWeb ? undefined : Schemas.vscodeRemote
++				// display environment name instead of vfs url
++				workspaceSuffix: new URLSearchParams(location.search).get("env-name") || undefined
+ 			};
+ 			this.labelService.registerFormatter({
+ 				scheme: Schemas.vscodeRemote,

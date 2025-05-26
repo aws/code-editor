@@ -1,0 +1,184 @@
+Add a bridge from the extension host to the grandparent
+ window
+
+This allows an extension to do the following:
+
+  vscode.window.receiveMessage((message) => {
+    console.log('Got from embedding page:', message);
+  });
+  vscode.window.sendMessage('Hello from extension');
+
+Messages are sent over the extension host proxy to the main window,
+then over postMessage to its parent window (if any).
+
+To prevent any extension from using this functionality, the APIs are
+gated behind an "embedded" API proposal which can only be set in a
+global product.json like so:
+
+  {
+    "productConfiguration": {
+      "extensionEnabledApiProposals": {
+        "my-extension": ["embedded"]
+      }
+    }
+  }
+
+If the IDE is not being run in an embedded context, the APIs will do
+nothing, i.e. any messages sent are swallowed and no messages will be
+received.
+---
+ .../workbench/api/browser/mainThreadWindow.ts | 20 +++++++++++++++++++
+ .../workbench/api/common/extHost.api.impl.ts  |  8 ++++++++
+ .../workbench/api/common/extHost.protocol.ts  |  2 ++
+ src/vs/workbench/api/common/extHostWindow.ts  | 14 +++++++++++++
+ .../common/extensionsProposedApi.ts           |  2 +-
+ src/vscode-dts/vscode.d.ts                    |  2 ++
+ 6 files changed, 47 insertions(+), 1 deletion(-)
+
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+@@ -3,6 +3,7 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
++import { mainWindow } from '../../../base/browser/window.js';
+ import { Event } from '../../../base/common/event.js';
+ import { DisposableStore } from '../../../base/common/lifecycle.js';
+ import { URI, UriComponents } from '../../../base/common/uri.js';
+@@ -29,6 +30,17 @@ export class MainThreadWindow implements
+ 		Event.latch(hostService.onDidChangeFocus)
+ 			(this.proxy.$onDidChangeWindowFocus, this.proxy, this.disposables);
+ 		userActivityService.onDidChangeIsActive(this.proxy.$onDidChangeWindowActive, this.proxy, this.disposables);
++
++		mainWindow.addEventListener('message', (e) => {
++			if (e.origin !== this.getOrigin() || e.source !== mainWindow.parent) {
++				return;
++			}
++			this.proxy.$receiveMessage(e.data);
++		});
++	}
++
++	private getOrigin() {
++		return /origin=([^&?#=]+)|$/.exec(mainWindow.location.search)?.[1];
+ 	}
+ 
+ 	dispose(): void {
+@@ -63,4 +75,12 @@ export class MainThreadWindow implements
+ 		const result = await this.openerService.resolveExternalUri(URI.revive(uriComponents), options);
+ 		return result.resolved;
+ 	}
++
++	$sendMessage(message: any): void {
++		const origin = this.getOrigin();
++		if (!origin) {
++			return;
++		}
++		mainWindow.parent.postMessage(message, origin);
++	}
+ }
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+@@ -676,6 +676,14 @@ export function createApiFactoryAndRegis
+ 
+ 		// namespace: window
+ 		const window: typeof vscode.window = {
++			receiveMessage(listener, thisArg?, disposables?) {
++				checkProposedApiEnabled(extension, 'embedded' as any);
++				return _asExtensionEvent(extHostWindow.receiveMessage)(listener, thisArg, disposables);
++			},
++			sendMessage(message: any) {
++				checkProposedApiEnabled(extension, 'embedded' as any);
++				extHostWindow.sendMessage(message);
++			},
+ 			get activeTextEditor() {
+ 				return extHostEditors.getActiveTextEditor();
+ 			},
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+@@ -1698,6 +1698,7 @@ export interface MainThreadWindowShape e
+ 	$getInitialState(): Promise<{ isFocused: boolean; isActive: boolean }>;
+ 	$openUri(uri: UriComponents, uriString: string | undefined, options: IOpenUriOptions): Promise<boolean>;
+ 	$asExternalUri(uri: UriComponents, options: IOpenUriOptions): Promise<UriComponents>;
++	$sendMessage(message: any): void;
+ }
+ 
+ export enum CandidatePortSource {
+@@ -2556,6 +2557,7 @@ export interface ExtHostDecorationsShape
+ export interface ExtHostWindowShape {
+ 	$onDidChangeWindowFocus(value: boolean): void;
+ 	$onDidChangeWindowActive(value: boolean): void;
++	$receiveMessage(message: any): void;
+ }
+ 
+ export interface ExtHostLogLevelServiceShape {
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+@@ -22,6 +22,7 @@ export class ExtHostWindow implements Ex
+ 	private _proxy: MainThreadWindowShape;
+ 
+ 	private readonly _onDidChangeWindowState = new Emitter<WindowState>();
++	private _receiveMessage: Emitter<any>;
+ 	readonly onDidChangeWindowState: Event<WindowState> = this._onDidChangeWindowState.event;
+ 
+ 	private _state = ExtHostWindow.InitialState;
+@@ -46,6 +47,7 @@ export class ExtHostWindow implements Ex
+ 			this.onDidChangeWindowProperty('focused', isFocused);
+ 			this.onDidChangeWindowProperty('active', isActive);
+ 		});
++		this._receiveMessage = new Emitter<any>();
+ 	}
+ 
+ 	$onDidChangeWindowFocus(value: boolean) {
+@@ -91,6 +93,18 @@ export class ExtHostWindow implements Ex
+ 		const result = await this._proxy.$asExternalUri(uri, options);
+ 		return URI.from(result);
+ 	}
++
++	$receiveMessage(message: any): void {
++		this._receiveMessage.fire(message);
++	}
++
++	public get receiveMessage(): Event<any> {
++		return this._receiveMessage.event;
++	}
++
++	sendMessage(message: any): void {
++		this._proxy.$sendMessage(message);
++	}
+ }
+ 
+ export const IExtHostWindow = createDecorator<IExtHostWindow>('IExtHostWindow');
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+@@ -44,7 +44,7 @@ export class ExtensionsProposedApi {
+ 			for (const [k, value] of Object.entries(productService.extensionEnabledApiProposals)) {
+ 				const key = ExtensionIdentifier.toKey(k);
+ 				const proposalNames = value.filter(name => {
+-					if (!allApiProposals[<ApiProposalName>name]) {
++					if (!allApiProposals[<ApiProposalName>name] && name !== 'embedded') {
+ 						_logService.warn(`Via 'product.json#extensionEnabledApiProposals' extension '${key}' wants API proposal '${name}' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.`);
+ 						return false;
+ 					}
+Index: VSCodeEmbedded/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
++++ VSCodeEmbedded/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+@@ -10660,6 +10660,8 @@ declare module 'vscode' {
+ 	 * asking for user input.
+ 	 */
+ 	export namespace window {
++		export const receiveMessage: Event<any>;
++		export function sendMessage(message: any): void;
+ 
+ 		/**
+ 		 * Represents the grid widget within the main editor area

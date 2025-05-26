@@ -1,0 +1,80 @@
+Remove menu entries for merge conflict and call items
+
+This patch remove the context menu entries for merge conflict options and merge conflict navigation, call items in the references view.
+---
+ extensions/merge-conflict/package.json        | 26 -------
+ extensions/references-view/package.json       | 10 ---
+ .../parts/activitybar/activitybarPart.ts      |  2 +-
+ .../browser/parts/globalCompositeBar.ts       | 68 +++++++++----------
+ 4 files changed, 35 insertions(+), 71 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/merge-conflict/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+@@ -29,32 +29,6 @@
+     "watch": "gulp watch-extension:merge-conflict"
+   },
+   "contributes": {
+-    "menus": {
+-      "scm/resourceState/context": [
+-        {
+-          "command": "merge-conflict.accept.all-current",
+-          "when": "scmProvider == git && scmResourceGroup == merge",
+-          "group": "1_modification"
+-        },
+-        {
+-          "command": "merge-conflict.accept.all-incoming",
+-          "when": "scmProvider == git && scmResourceGroup == merge",
+-          "group": "1_modification"
+-        }
+-      ],
+-      "editor/title": [
+-        {
+-          "command": "merge-conflict.previous",
+-          "group": "navigation@1",
+-          "when": "!isMergeEditor && mergeConflictsCount && mergeConflictsCount != 0"
+-        },
+-        {
+-          "command": "merge-conflict.next",
+-          "group": "navigation@2",
+-          "when": "!isMergeEditor && mergeConflictsCount && mergeConflictsCount != 0"
+-        }
+-      ]
+-    },
+     "configuration": {
+       "title": "%config.title%",
+       "properties": {
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/references-view/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+@@ -260,16 +260,6 @@
+           "when": "view == references-view.tree && viewItem == file-item || view == references-view.tree && viewItem == reference-item"
+         },
+         {
+-          "command": "references-view.showOutgoingCalls",
+-          "group": "1",
+-          "when": "view == references-view.tree && viewItem == call-item"
+-        },
+-        {
+-          "command": "references-view.showIncomingCalls",
+-          "group": "1",
+-          "when": "view == references-view.tree && viewItem == call-item"
+-        },
+-        {
+           "command": "references-view.showSupertypes",
+           "group": "1",
+           "when": "view == references-view.tree && viewItem == type-item"
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+@@ -257,7 +257,6 @@ export class ActivityBarCompositeBar ext
+ 		// Global Composite Bar
+ 		if (this.globalCompositeBar) {
+ 			actions.push(new Separator());
+-			actions.push(...this.globalCompositeBar.getContextMenuActions());
+ 		}
+ 		actions.push(new Separator());
+ 		actions.push(...this.getActivityBarContextMenuActions());

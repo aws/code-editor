@@ -1,0 +1,26 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -299,21 +299,6 @@ registerWorkbenchContribution2(ChatEdito
+ registerWorkbenchContribution2(ChatViewsWelcomeHandler.ID, ChatViewsWelcomeHandler, WorkbenchPhase.BlockStartup);
+ registerWorkbenchContribution2(ChatGettingStartedContribution.ID, ChatGettingStartedContribution, WorkbenchPhase.Eventually);
+ 
+-registerChatActions();
+-registerChatCopyActions();
+-registerChatCodeBlockActions();
+-registerChatCodeCompareBlockActions();
+-registerChatFileTreeActions();
+-registerChatTitleActions();
+-registerChatExecuteActions();
+-registerQuickChatActions();
+-registerChatExportActions();
+-registerMoveActions();
+-registerNewChatActions();
+-registerChatContextActions();
+-registerChatDeveloperActions();
+-registerChatEditorActions();
+-
+ registerEditorFeature(ChatPasteProvidersFeature);
+ registerEditorContribution(ChatEditorController.ID, ChatEditorController, EditorContributionInstantiation.Eventually);
+ 

@@ -1,0 +1,54 @@
+clean up workbench and use TB CDN for webview in prod
+
+---
+ src/vs/code/browser/workbench/workbench.ts | 23 ++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+@@ -576,15 +576,32 @@ function readCookie(name: string): strin
+ 	return undefined;
+ }
+ 
+-(function () {
++(async function () {
+ 	const start = Date.now();
++	const urlSearch = new URLSearchParams(mainWindow.location.search);
++	const origin = urlSearch.get('origin');
++	const functionName = urlSearch.get('function');
++	const vsCodeCdn = urlSearch.get('vsCodeCdn');
++	const isDevo = urlSearch.get('isDevo') === 'true';
+ 	// Find config by checking for DOM
+ 	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');
+ 	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
++	let config: IWorkbenchConstructionOptions & { folderUri?: UriComponents; workspaceUri?: UriComponents; callbackRoute: string }
+ 	if (!configElement || !configElementAttribute) {
+-		throw new Error('Missing web configuration element');
++		const result = await fetch('./product.json');
++     	config = await result.json();
++	} else {
++		config = JSON.parse(configElementAttribute);
+ 	}
+-	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents; workspaceUri?: UriComponents; callbackRoute: string } = JSON.parse(configElementAttribute);
++
++	if(!isDevo) {
++		// We can remove the isDevo check if our local Code Editor server supports https
++		config = {
++			...config,
++			webviewEndpoint: vsCodeCdn + '/out/vs/workbench/contrib/webview/browser/pre/',
++		};
++	}
++
+ 	const secretStorageKeyPath = readCookie('vscode-secret-key-path');
+ 	const secretStorageCrypto = secretStorageKeyPath && ServerKeyedAESCrypto.supported()
+ 		? new ServerKeyedAESCrypto(secretStorageKeyPath) : new TransparentCrypto();
+@@ -601,7 +620,6 @@ function readCookie(name: string): strin
+ 			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
+ 	});
+ 	const totalLoadTime = Date.now() - start;
+-	const origin =/origin=([^&?#=]+)|$/.exec(mainWindow.location.search)?.[1];
+ 	if(origin) {
+ 		mainWindow.parent.postMessage({
+ 			channel: 'vscode.metrics',

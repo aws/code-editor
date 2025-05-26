@@ -1,0 +1,26 @@
+Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
++++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+@@ -182,6 +182,10 @@ function packageTask(sourceFolderName, d
+ 			gulp.src('resources/server/code-192.png', { base: 'resources/server' }),
+ 			gulp.src('resources/server/code-512.png', { base: 'resources/server' })
+ 		);
++		const indexHtml = gulp.src('resources/server/index.html', { base: 'resources/server' });
++
++		const productJsonStream = gulp.src(['product.json'], { base: '.' })
++			.pipe(json({ commit, date: readISODate('out-build'), version }));
+ 
+ 		const all = es.merge(
+ 			packageJsonStream,
+@@ -190,7 +194,9 @@ function packageTask(sourceFolderName, d
+ 			deps,
+ 			favicon,
+ 			manifest,
+-			pwaicons
++			pwaicons,
++			indexHtml,
++			productJsonStream
+ 		);
+ 
+ 		const result = all

@@ -1,0 +1,110 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+@@ -26,14 +26,14 @@ const TRUSTED_DOMAINS_STAT: IStat = {
+ 
+ const CONFIG_HELP_TEXT_PRE = `// Links matching one or more entries in the list below can be opened without link protection.
+ // The following examples show what entries can look like:
+-// - "https://microsoft.com": Matches this specific domain using https
+-// - "https://microsoft.com:8080": Matches this specific domain on this port using https
+-// - "https://microsoft.com:*": Matches this specific domain on any port using https
+-// - "https://microsoft.com/foo": Matches https://microsoft.com/foo and https://microsoft.com/foo/bar,
+-//   but not https://microsoft.com/foobar or https://microsoft.com/bar
+-// - "https://*.microsoft.com": Match all domains ending in "microsoft.com" using https
+-// - "microsoft.com": Match this specific domain using either http or https
+-// - "*.microsoft.com": Match all domains ending in "microsoft.com" using either http or https
++// - "https://amazon.com": Matches this specific domain using https
++// - "https://amazon.com:8080": Matches this specific domain on this port using https
++// - "https://amazon.com:*": Matches this specific domain on any port using https
++// - "https://amazon.com/foo": Matches https://amazon.com/foo and https://amazon.com/foo/bar,
++//   but not https://amazon.com/foobar or https://amazon.com/bar
++// - "https://*.amazon.com": Match all domains ending in "amazon.com" using https
++// - "amazon.com": Match this specific domain using either http or https
++// - "*.amazon.com": Match all domains ending in "amazon.com" using either http or https
+ // - "http://192.168.0.1: Matches this specific IP using http
+ // - "http://192.168.0.*: Matches all IP's with this prefix using http
+ // - "*": Match all domains using either http or https
+@@ -46,19 +46,19 @@ const CONFIG_HELP_TEXT_AFTER = `//
+ `;
+ 
+ const CONFIG_PLACEHOLDER_TEXT = `[
+-	// "https://microsoft.com"
++	// "https://aws.amazon.com"
+ ]`;
+ 
+ function computeTrustedDomainContent(defaultTrustedDomains: string[], trustedDomains: string[], configuring?: string) {
+ 	let content = CONFIG_HELP_TEXT_PRE;
+ 
+ 	if (defaultTrustedDomains.length > 0) {
+-		content += `// By default, VS Code trusts "localhost" as well as the following domains:\n`;
++		content += `// By default, Code Editor trusts "localhost" as well as the following domains:\n`;
+ 		defaultTrustedDomains.forEach(d => {
+ 			content += `// - "${d}"\n`;
+ 		});
+ 	} else {
+-		content += `// By default, VS Code trusts "localhost".\n`;
++		content += `// By default, Code Editor trusts "localhost".\n`;
+ 	}
+ 
+ 	content += CONFIG_HELP_TEXT_AFTER;
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+@@ -11,7 +11,7 @@ export default function content(accessor
+ 	const isServerless = platform.isWeb && !accessor.get(IWorkbenchEnvironmentService).remoteAuthority;
+ 	return `
+ ## Interactive Editor Playground
+-The core editor in VS Code is packed with features.  This page highlights a number of them and lets you interactively try them out through the use of a number of embedded editors.  For full details on the editor features for VS Code and more head over to our [documentation](https://code.visualstudio.com/docs).
++The core editor in Code Editor is packed with features.  This page highlights a number of them and lets you interactively try them out through the use of a number of embedded editors.  For full details on the editor features for Code Editor and more head over to our [documentation](https://code.visualstudio.com/docs).
+ 
+ * [Multi-cursor Editing](#multi-cursor-editing) - block selection, select all occurrences, add additional cursors and more.
+ * [IntelliSense](#intellisense) - get code assistance and parameter suggestions for your code and external modules.
+@@ -95,7 +95,7 @@ function Book(title, author) {
+ }
+ |||
+ 
+-> **JSDoc Tip:** VS Code's IntelliSense uses JSDoc comments to provide richer suggestions. The types and documentation from JSDoc comments show up when you hover over a reference to |Book| or in IntelliSense when you create a new instance of |Book|.
++> **JSDoc Tip:** Code Editor based on Code-OSS's IntelliSense uses JSDoc comments to provide richer suggestions. The types and documentation from JSDoc comments show up when you hover over a reference to |Book| or in IntelliSense when you create a new instance of |Book|.
+ 
+ ` : ''}
+ ### Formatting
+@@ -163,7 +163,7 @@ Emmet takes the snippets idea to a whole
+ ul>li.item$*5
+ |||
+ 
+->**Tip:** The [Emmet cheat sheet](https://docs.emmet.io/cheat-sheet/) is a great source of Emmet syntax suggestions. To expand Emmet abbreviations and snippets using the |tab| key use the |emmet.triggerExpansionOnTab| [setting](command:workbench.action.openGlobalSettings). Check out the docs on [Emmet in VS Code](https://code.visualstudio.com/docs/editor/emmet) to learn more.
++>**Tip:** The [Emmet cheat sheet](https://docs.emmet.io/cheat-sheet/) is a great source of Emmet syntax suggestions. To expand Emmet abbreviations and snippets using the |tab| key use the |emmet.triggerExpansionOnTab| [setting](command:workbench.action.openGlobalSettings). Check out the docs on [Emmet in Code Editor based on Code-OSS](https://code.visualstudio.com/docs/editor/emmet) to learn more.
+ 
+ 
+ 
+@@ -177,7 +177,7 @@ let easy = true;
+ easy = 42;
+ |||
+ 
+->**Tip:** You can also enable the checks workspace or application wide by adding |"js/ts.implicitProjectConfig.checkJs": true| to your workspace or user settings and explicitly ignoring files or lines using |// @ts-nocheck| and |// @ts-expect-error|. Check out the docs on [JavaScript in VS Code](https://code.visualstudio.com/docs/languages/javascript) to learn more.
++>**Tip:** You can also enable the checks workspace or application wide by adding |"js/ts.implicitProjectConfig.checkJs": true| to your workspace or user settings and explicitly ignoring files or lines using |// @ts-nocheck| and |// @ts-expect-error|. Check out the docs on [JavaScript in Code Editor based on Code-OSS'](https://code.visualstudio.com/docs/languages/javascript) to learn more.
+ 
+ 
+ ## Thanks!
+Index: AWSCodeOSS/build/private/code-editor-src/product.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/product.json
++++ AWSCodeOSS/build/private/code-editor-src/product.json
+@@ -80,5 +80,15 @@
+ 				"publisherDisplayName": "Microsoft"
+ 			}
+ 		}
++	],
++	"linkProtectionTrustedDomains": [
++		"https://docs.aws.amazon.com",
++		"https://docs.amazonaws.cn",
++		"https://dcaprod.www.docs.aws.a2z.com",
++		"https://lckprod.www.docs.aws.a2z.com",
++		"https://console.aws.amazon.com",
++		"https://console.amazonaws-us-gov.com",
++		"https://console.amazonaws.cn",
++		"https://aws.amazon.com*"
+ 	]
+ }

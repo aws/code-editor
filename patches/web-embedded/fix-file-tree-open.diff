@@ -1,0 +1,24 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+@@ -92,9 +92,10 @@ export class ExplorerItem {
+ 
+ 	public nestedParent: ExplorerItem | undefined;
+ 	public nestedChildren: ExplorerItem[] | undefined;
++	public resource: URI;
+ 
+ 	constructor(
+-		public resource: URI,
++		resource: URI,
+ 		private readonly fileService: IFileService,
+ 		private readonly configService: IConfigurationService,
+ 		private readonly filesConfigService: IFilesConfigurationService,
+@@ -107,6 +108,7 @@ export class ExplorerItem {
+ 		private _mtime?: number,
+ 		private _unknown = false
+ 	) {
++		this.resource = URI.isUri(resource) ? URI.revive(resource) : resource;
+ 		this._isDirectoryResolved = false;
+ 	}
+ 

@@ -1,0 +1,13 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+@@ -165,7 +165,7 @@ export class WebClientServer {
+ 			return serveError(req, res, 400, `Bad request.`);
+ 		}
+ 
+-		return serveFile(filePath, this._environmentService.isBuilt ? CacheControl.NO_EXPIRY : CacheControl.ETAG, this._logService, req, res, headers);
++		return serveFile(filePath, CacheControl.ETAG, this._logService, req, res, headers);
+ 	}
+ 
+ 	private _getResourceURLTemplateAuthority(uri: URI): string | undefined {

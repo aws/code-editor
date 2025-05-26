@@ -1,0 +1,42 @@
+emit load time metrics
+
+---
+ src/vs/code/browser/workbench/workbench.ts | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+@@ -22,6 +22,8 @@ import { AuthenticationSessionInfo } fro
+ import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
+ import { create } from '../../../workbench/workbench.web.main.internal.js';
+ 
++const MESSAGE_TYPE = 'application/x-cloud9-lite-v2+json';
++
+ interface ISecretStorageCrypto {
+ 	seal(data: string): Promise<string>;
+ 	unseal(data: string): Promise<string>;
+@@ -575,7 +577,7 @@ function readCookie(name: string): strin
+ }
+ 
+ (function () {
+-
++	const start = Date.now();
+ 	// Find config by checking for DOM
+ 	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');
+ 	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
+@@ -598,4 +600,13 @@ function readCookie(name: string): strin
+ 			? undefined /* with a remote without embedder-preferred storage, store on the remote */
+ 			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
+ 	});
++	const totalLoadTime = Date.now() - start;
++	const origin =/origin=([^&?#=]+)|$/.exec(mainWindow.location.search)?.[1];
++	if(origin) {
++		mainWindow.parent.postMessage({
++			channel: 'vscode.metrics',
++			type: MESSAGE_TYPE,
++			value: ['submitCustomTimer', 'ideLoad', totalLoadTime]
++		}, origin);
++	}
+ })();

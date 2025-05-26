@@ -1,0 +1,14 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+@@ -356,9 +356,6 @@ import './contrib/userDataSync/browser/u
+ // User Data Profiles
+ import './contrib/userDataProfile/browser/userDataProfile.contribution.js';
+ 
+-// Continue Edit Session
+-import './contrib/editSessions/browser/editSessions.contribution.js';
+-
+ // Code Actions
+ import './contrib/codeActions/browser/codeActions.contribution.js';
+ 

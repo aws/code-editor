@@ -1,0 +1,85 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+@@ -77,8 +77,8 @@
+ 			if (event.origin !== parentOrigin || event.data.type !== bootstrapNlsType) {
+ 				return;
+ 			}
+-			const { data } = event.data;
+-			createWorker(data.workerUrl, data.fileRoot, data.nls.messages, data.nls.language);
++			const { data: { workerUrl, ...bootstrapData } } = event.data;
++			createWorker(workerUrl, { type: bootstrapNlsType, data: bootstrapData });
+ 		};
+ 
+ 		window.parent.postMessage({
+@@ -87,26 +87,13 @@
+ 		}, '*');
+ 	}
+ 
+-	function createWorker(workerUrl, fileRoot, nlsMessages, nlsLanguage) {
++	function createWorker(workerUrl, bootstrapEvent) {
+ 		try {
+ 			if (globalThis.crossOriginIsolated) {
+ 				workerUrl += '?vscode-coi=2'; // COEP
+ 			}
+ 
+-			// In below blob code, we are using JSON.stringify to ensure the passed
+-			// in values are not breaking our script. The values may contain string
+-			// terminating characters (such as ' or ").
+-
+-			const blob = new Blob([[
+-				`/*extensionHostWorker*/`,
+-				`globalThis._VSCODE_NLS_MESSAGES = ${JSON.stringify(nlsMessages)};`,
+-				`globalThis._VSCODE_NLS_LANGUAGE = ${JSON.stringify(nlsLanguage)};`,
+-				`globalThis._VSCODE_FILE_ROOT = ${JSON.stringify(fileRoot)};`,
+-				`await import(${JSON.stringify(workerUrl)});`,
+-				`/*extensionHostWorker*/`
+-			].join('')], { type: 'application/javascript' });
+-
+-			const worker = new Worker(URL.createObjectURL(blob), { name, type: 'module' });
++			const worker = new Worker(workerUrl, { name, type: 'module' });
+ 			const nestedWorkers = new Map();
+ 
+ 			worker.onmessage = (event) => {
+@@ -125,6 +112,8 @@
+ 						nestedWorkers.get(id).terminate();
+ 						nestedWorkers.delete(id);
+ 					}
++				} else if (data?.type === '_initMainWorkerData') {
++					worker.postMessage(bootstrapEvent)
+ 				} else {
+ 					worker.onerror = console.error.bind(console);
+ 					window.parent.postMessage({
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+@@ -3,7 +3,25 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import { create } from './extensionHostWorker.js';
+-
++// extensionHostWorker.js relies on these globalThis variables. This section loads this
++// dynamically in the worker code before load the main worker. This way we can avoid creating
++// a blob-based worker, which would inherit CSP rules from the parent
++await new Promise<void>((resolve, reject) => {
++    self.onmessage = (e) => {
++        const { type, data } = e.data;
++        if (type === "vscode.bootstrap.nls") {
++            globalThis._VSCODE_NLS_MESSAGES = data?.nls?.messages;
++            globalThis._VSCODE_NLS_LANGUAGE = data?.nls?.language;
++            globalThis._VSCODE_FILE_ROOT = data?.fileRoot;
++            resolve();
++        }
++    };
++    self.onerror = reject;
++    self.postMessage({
++        type: "_initMainWorkerData",
++    });
++});
++const { create } = await import("./extensionHostWorker.js");
+ const data = create();
+ self.onmessage = (e) => data.onmessage(e.data);
++export {};

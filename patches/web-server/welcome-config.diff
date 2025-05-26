@@ -1,0 +1,21 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/startupPage.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/startupPage.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/startupPage.ts
+@@ -142,13 +142,14 @@ export class StartupPageRunnerContributi
+ 					this.logService.warn(`Warning: 'workbench.startupEditor: readme' setting ignored due to being set somewhere other than user or default settings (user=${startupEditorSetting.userValue}, default=${startupEditorSetting.defaultValue})`);
+ 				}
+ 
++				// always open terminal for new workspaces
++				this.commandService.executeCommand(TerminalCommandId.Focus);
++
+ 				const openWithReadme = isStartupEditorReadme && (isStartupEditorUserReadme || isStartupEditorDefaultReadme);
+ 				if (openWithReadme) {
+ 					await this.openReadme();
+ 				} else if (startupEditorSetting.value === 'welcomePage' || startupEditorSetting.value === 'welcomePageInEmptyWorkbench') {
+ 					await this.openGettingStarted();
+-				} else if (startupEditorSetting.value === 'terminal') {
+-					this.commandService.executeCommand(TerminalCommandId.CreateTerminalEditor);
+ 				}
+ 			}
+ 		}

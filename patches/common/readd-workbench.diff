@@ -1,0 +1,12 @@
+Index: VSCodeEmbedded/build/private/code-editor-src/build/gulpfile.vscode.web.js
+===================================================================
+--- VSCodeEmbedded.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
++++ VSCodeEmbedded/build/private/code-editor-src/build/gulpfile.vscode.web.js
+@@ -82,6 +82,7 @@ const vscodeWebEntryPoints = [
+ 	buildfile.workerBackgroundTokenization,
+ 	buildfile.keyboardMaps,
+ 	buildfile.workbenchWeb,
++	buildfile.entrypoint('vs/code/browser/workbench/workbench', ['../../../workbench/workbench.web.main.internal.js']),
+	buildfile.entrypoint('vs/workbench/workbench.web.main.internal') // TODO@esm remove line when we stop supporting web-amd-esm-bridge
+ ].flat();
+

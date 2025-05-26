@@ -1,0 +1,18 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -119,6 +119,13 @@ class RemoteExtensionHostAgentServer ext
+ 			pathname = pathname.substring(this._serverRootPath.length);
+ 		}
+ 
++		// Custom health check endpoint
++		if (pathname === '/healthz') {
++			res.writeHead(200, { 'Content-Type': 'application/json' });
++			const hasActiveConnections = !!Object.keys(this._extHostConnections).length;
++			return void res.end(JSON.stringify({ hasActiveConnections }));
++		}
++
+ 		// Version
+ 		if (pathname === '/version') {
+ 			res.writeHead(200, { 'Content-Type': 'text/plain' });

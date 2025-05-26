@@ -1,0 +1,15 @@
+Index: AWSCodeOSS/build/private/code-editor-src/scripts/code-web.sh
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/scripts/code-web.sh
++++ AWSCodeOSS/build/private/code-editor-src/scripts/code-web.sh
+@@ -24,4 +24,9 @@ function code() {
+ 	$NODE ./scripts/code-web.js "$@"
+ }
+ 
+-code "$@"
++if command -v node &> /dev/null; then
++	cd $ROOT
++	node ./scripts/code-web.js "$@"
++else
++	code "$@"
++fi
