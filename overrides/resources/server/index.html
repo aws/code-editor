@@ -7,6 +7,32 @@
 	</head>
 
 	<body aria-label=""></body>
+	<!-- Code OSS catches internal errors and reports them using console.error. This
+	prevents Code OSS from crashing on error, but also prevents us from listening to
+	these errors. Here, we monkey patch console.error to allow reporting of Code OSS
+	error metrics to parent origin using window.postMessage. The parent origin which hosts
+	Code OSS in an iFrame is then responsible for processing Code OSS errors. 
+	A more "correct" implementation would be to implement a custom Code OSS telemetry handler class.
+	-->
+	<script id="suppress-error-helper" error-file-dir="./out/vs/editor/common/errors" src="./out/vs/editor/common/errors/suppressedErrors.js"></script>
+	<script>
+		const parentOrigin = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
+		const originalLogError = window.console.error.bind(window.console);
+		window.console.error = (...args) => {
+			originalLogError(...args);
+			const [message, filename, line, column, error] = args;
+
+			if (!window.isErrorSuppressed(message)) {
+				window.parent.postMessage({
+				channel: 'code-editor.error',
+				type: 'application/x-code-editor+json',
+				value: ['report', { message, filename, line, column, error }]
+				}, parentOrigin);
+			}
+		}
+	</script>
 	<!-- Startup (do not modify order of script tags!) -->
 	<script>
 		globalThis._VSCODE_FILE_ROOT = window.location.origin + '/out/';

@@ -1,0 +1,65 @@
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
+===================================================================
+--- /dev/null
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
+@@ -0,0 +1,58 @@
++/**
++ * 
++ * This file contains a list of error messages that should be suppressed
++ * and not sent via the code-editor.error channel.
++ */
++
++// Load error patterns from JSON file
++let suppressedErrorStrings = [];
++let suppressedErrorRegexes = [];
++const errorFileDir = document.getElementById('suppress-error-helper').getAttribute('error-file-dir');
++
++// Fetch and process the ignore_errors.json file
++try {
++  const xhr = new XMLHttpRequest();
++  xhr.open('GET', `${errorFileDir}/ignored-errors.json`, false); 
++  // false makes the API call synchronous. The call needs to be sychronous as we always 
++  // want the data to be loaded before the isErrorSuppressed method is called. 
++  xhr.send();
++  
++  if (xhr.status === 200) {
++    const data = JSON.parse(xhr.responseText);
++    
++    if (data.stringPatterns && Array.isArray(data.stringPatterns)) {
++      suppressedErrorStrings = data.stringPatterns;
++    }
++    
++    if (data.regexPatterns && Array.isArray(data.regexPatterns)) {
++      suppressedErrorRegexes = data.regexPatterns.map(pattern => new RegExp(pattern, 'i'));
++    }
++  } else {
++    console.error("Failed to load ignored_errors.json: HTTP status", xhr.status);
++  }
++} catch (error) {
++  console.error("Failed to load ignored_errors.json:", error);
++}
++
++/**
++ * Checks if an error message should be suppressed
++ * @param {string} message - The error message to check
++ * @returns {boolean} - True if the error should be suppressed, false otherwise
++ */
++function isErrorSuppressed(message) {
++  if (!message) return false;
++  
++  // Check against string patterns
++  if (suppressedErrorStrings.some(pattern => message.includes(pattern))) {
++    return true;
++  }
++  
++  // Check against regex patterns
++  if (suppressedErrorRegexes.some(regex => regex.test(message))) {
++    return true;
++  }
++  
++  return false;
++}
++
++// Export the function for use in other files
++window.isErrorSuppressed = isErrorSuppressed;
+\ No newline at end of file

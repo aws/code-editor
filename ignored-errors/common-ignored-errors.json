@@ -1,0 +1,8 @@
+{
+	"stringPatterns": [
+		"Error that can be ignored - string"
+	], 
+	"regexPatterns": [
+		"Error that can be ignored - regex pattern"
+	]
+}

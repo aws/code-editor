@@ -15,6 +15,8 @@ common/readd-workbench.diff
 common/fix-ghsa-hwrx-jgf2-74hw.diff
 common/remove-disable-prompting-for-non-trusted-urls-option.diff
 common/fix-ghsa-742r-ggwg-vqxm.diff
+common/suppress-known-errors-script.diff
+web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/disable-builtin-ext-update.diff
 web-server/base-path.diff

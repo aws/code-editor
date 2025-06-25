@@ -1,0 +1,87 @@
+Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
++++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+@@ -75,6 +75,8 @@ const serverResourceIncludes = [
+ 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
+ 	'out-build/vs/workbench/contrib/terminal/common/scripts/fish_xdg_data/fish/vendor_conf.d/shellIntegration.fish',
+ 
++	// Error handler
++	'out-build/vs/editor/common/errors/suppressedErrors.js'
+ ];
+ 
+ const serverResourceExcludes = [
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+@@ -32,6 +32,32 @@
+ 	<body aria-label="">
+ 	</body>
+ 
++	<!-- Code OSS catches internal errors and reports them using console.error. This
++	prevents Code OSS from crashing on error, but also prevents us from listening to
++	these errors. Here, we monkey patch console.error to allow reporting of Code OSS
++	error metrics to parent origin using window.postMessage. The parent origin which hosts
++	Code OSS in an iFrame is then responsible for processing Code OSS errors. 
++	A more "correct" implementation would be to implement a custom Code OSS telemetry handler class.
++	-->
++	<script id="suppress-error-helper" error-file-dir="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors" src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors/suppressedErrors.js"></script>
++	<script>
++		const parentOrigin = (window.location != window.parent.location)
++            ? document.referrer
++            : document.location.href;
++		const originalLogError = window.console.error.bind(window.console);
++		window.console.error = (...args) => {
++			originalLogError(...args);
++			const [message, filename, line, column, error] = args;
++
++			if (!window.isErrorSuppressed(message)) {
++				window.parent.postMessage({
++				channel: 'code-editor.error',
++				type: 'application/x-code-editor+json',
++				value: ['report', { message, filename, line, column, error }]
++				}, parentOrigin);
++			}
++		}
++	</script>
+ 	<!-- Startup (do not modify order of script tags!) -->
+ 	<script>
+ 		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+@@ -35,6 +35,32 @@
+ 	<body aria-label="">
+ 	</body>
+ 
++	<!-- Code OSS catches internal errors and reports them using console.error. This
++	prevents Code OSS from crashing on error, but also prevents us from listening to
++	these errors. Here, we monkey patch console.error to allow reporting of Code OSS
++	error metrics to parent origin using window.postMessage. The parent origin which hosts
++	Code OSS in an iFrame is then responsible for processing Code OSS errors. 
++	A more "correct" implementation would be to implement a custom Code OSS telemetry handler class.
++	-->
++	<script id="suppress-error-helper" error-file-dir="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors" src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors/suppressedErrors.js"></script>
++	<script>
++		const parentOrigin = (window.location != window.parent.location)
++            ? document.referrer
++            : document.location.href;
++		const originalLogError = window.console.error.bind(window.console);
++		window.console.error = (...args) => {
++			originalLogError(...args);
++			const [message, filename, line, column, error] = args;
++
++			if (!window.isErrorSuppressed(message)) {
++				window.parent.postMessage({
++				channel: 'code-editor.error',
++				type: 'application/x-code-editor+json',
++				value: ['report', { message, filename, line, column, error }]
++				}, parentOrigin);
++			}
++		}
++	</script>
+ 	<!-- Startup (do not modify order of script tags!) -->
+ 	<script>
+ 		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
