@@ -1,5 +1,4 @@
-Disable built-in walkthroughs from command
- pallete
+Disable built-in walkthroughs from command pallete
 
 This patch disables the built-in walkthroughs and welcome page functionality in codebase to streamline the initial user experience or to make room for custom walkthroughs.
 ---

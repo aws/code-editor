@@ -1,5 +1,4 @@
-Remove option to disable prompting for non-trusted external
- URLs
+Remove option to disable prompting for non-trusted external URLs
 
 ---
  .../url/browser/trustedDomainsValidator.ts       |  6 ------

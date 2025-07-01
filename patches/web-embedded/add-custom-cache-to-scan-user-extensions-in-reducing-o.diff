@@ -1,5 +1,4 @@
-Add custom cache to scanUserExtensions in reducing of
- excessive extension fetch requests
+Add custom cache to scanUserExtensions in reducing of excessive extension fetch requests
 
 ---
  .../browser/webExtensionsScannerService.ts                   | 5 ++++-
@@ -23,6 +22,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
  		// Custom builtin extensions defined through `additionalBuiltinExtensions` API
 -		const customBuiltinExtensions = await this.readCustomBuiltinExtensions(scanOptions);
 +		const customBuiltinExtensions = this.customBuiltinExtensionsCache || await this.readCustomBuiltinExtensions(scanOptions);
++		// Set custom cache https://issues.amazon.com/issues/LambdaConsole-16657
 +		if (!this.customBuiltinExtensionsCache) this.customBuiltinExtensionsCache = customBuiltinExtensions;
  		for (const extension of customBuiltinExtensions) {
  			extensions.set(extension.identifier.id.toLowerCase(), extension);

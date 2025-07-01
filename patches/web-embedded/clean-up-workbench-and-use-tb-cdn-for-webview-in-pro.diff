@@ -1,4 +1,4 @@
-clean up workbench and use TB CDN for webview in prod
+Clean up workbench and use TB CDN for webview in prod
 
 ---
  src/vs/code/browser/workbench/workbench.ts | 23 ++++++++++++++--------

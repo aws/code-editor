@@ -1,5 +1,4 @@
-    fix ghsa-742r-ggwg-vqxm
-
+Fix CVE - ghsa-742r-ggwg-vqxm
 
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chatMarkdownRenderer.ts
 ===================================================================

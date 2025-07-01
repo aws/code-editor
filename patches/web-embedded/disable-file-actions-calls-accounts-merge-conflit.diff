@@ -1,4 +1,4 @@
-Disable file actions,calls,accounts,merge conflit
+Disable file actions,calls,accounts,merge conflict
 
 This patch disables or modifies various features and functionalities related to file actions, calls, accounts, and merge conflicts in the Code OSS codebase. 
 ---

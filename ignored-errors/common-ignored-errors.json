@@ -1,8 +1,29 @@
 {
-	"stringPatterns": [
-		"Error that can be ignored - string"
-	], 
-	"regexPatterns": [
-		"Error that can be ignored - regex pattern"
-	]
+  // Use a JSONC parser to support syntax highlighting for this file.
+  // The comments are for reference and will be stripped out during build time.
+  "stringPatterns": [
+    // Normal webview initialization checking if a service worker is already controlling the page.
+    "No service worker controller found. Waiting for controllerchange.",
+    // getKeyValues is called after close() has been called on the database, the transaction is aborted, or temporary performance issue
+    "IndexedDB getKeyValues(): Connection is closing.",
+    "IndexedDB getKeyValues(): The transaction was aborted, so the request cannot be fulfilled.",
+    "IndexedDB getKeyValues(): Database deleted by request of the user",
+    "IndexedDB getKeyValues(): Transaction timed out due to inactivity.",
+    // Private browser does not support service workers
+    "TypeError: navigator.serviceWorker is undefined",
+    "Error: Service Workers are not enabled. Webviews will not work. Try disabling private/incognito mode."
+  ],
+  "regexPatterns": [
+    // Error shows up for embedded VSCode hosted in an iFrame
+    "An iframe which has both allow-scripts and allow-same-origin for its sandbox attribute can (?:remove|escape) its sandboxing\\.",
+    // Async extension host disconnect and disposal is not supported on browser
+    "\\[lifecycle\\] Long running operations during shutdown are unsupported in the web \\(id: join\\.stopExtensionHosts\\)",
+    // When switching to another tab from 'Code' tab when Code OSS is hosted in an iFrame. There are promises waiting to do work inside code editor iframes,
+    // but as we switch away the iframe is gone. Because of the hanging promise on 'Code' tab that we already move away from, we ignore related errors
+    "Error: Trying to add a disposable to a Disposable.+ that has already been disposed of. The added object will be leaked!",
+    // tab/page navigation can lead to the IndexedDB connection and transactions becoming invalid.
+    "Failed to execute 'abort' on 'IDBTransaction': The transaction has finished\\.",
+    // Failed to fetch JSON configuration file for syntax highlighting in Code OSS loaded from TangerineBox CDN
+    "(?=.*Unable to load and parse grammar for scope).*"
+  ]
 }

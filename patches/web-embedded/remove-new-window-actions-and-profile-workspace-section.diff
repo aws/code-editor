@@ -1,5 +1,4 @@
-Remove new window actions and workspace section from profile
- page
+Remove new window actions and workspace section from profile page
 
 ---
  .../contrib/userDataProfile/browser/userDataProfile.ts   | 1 -

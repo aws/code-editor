@@ -1,4 +1,4 @@
-only have debug view container
+Only have debug view container
 
 ---
  .../debug/browser/debug.contribution.ts       | 579 +-----------------

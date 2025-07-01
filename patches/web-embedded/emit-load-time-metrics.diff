@@ -1,4 +1,4 @@
-emit load time metrics
+Emit load time metrics
 
 ---
  src/vs/code/browser/workbench/workbench.ts | 11 +++++++++++

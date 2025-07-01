@@ -1,5 +1,4 @@
-Add a bridge from the extension host to the grandparent
- window
+Add a bridge from the extension host to the grandparent window
 
 This allows an extension to do the following:
 

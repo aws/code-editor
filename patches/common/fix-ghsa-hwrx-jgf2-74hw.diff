@@ -1,12 +1,4 @@
-fix issue (#22)
-
-Co-authored-by: meganrogge <merogge@microsoft.com>
----
- .../terminal/node/terminalEnvironment.ts      |  31 ++++-
- .../platform/terminal/node/terminalProcess.ts |   2 +-
- .../test/node/terminalEnvironment.test.ts     | 113 +++++++++---------
- .../common/scripts/shellIntegration-rc.zsh    |   2 +-
- 4 files changed, 86 insertions(+), 62 deletions(-)
+Fix CVE - fix-ghsa-hwrx-jgf2-74hw
 
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/terminal/node/terminalEnvironment.ts
 ===================================================================

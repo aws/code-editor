@@ -1,5 +1,4 @@
-remove import/export profiles and revert file menu items in
- file menu
+Remove import/export profiles and revert file menu items in file menu
 
 ---
  .../files/browser/fileActions.contribution.ts |  45 +----

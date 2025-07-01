@@ -1,4 +1,4 @@
-override report issues with open webapp feedback command
+Override report issues with open webapp feedback command
 
 ---
  .../contrib/issue/common/issue.contribution.ts        | 11 ++---------
