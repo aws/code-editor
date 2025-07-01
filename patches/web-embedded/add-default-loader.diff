@@ -2,7 +2,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
 +++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
-@@ -182,6 +182,10 @@ function packageTask(sourceFolderName, d
+@@ -188,6 +188,10 @@ function packageTask(sourceFolderName, d
  			gulp.src('resources/server/code-192.png', { base: 'resources/server' }),
  			gulp.src('resources/server/code-512.png', { base: 'resources/server' })
  		);
@@ -13,7 +13,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
  
  		const all = es.merge(
  			packageJsonStream,
-@@ -190,7 +194,9 @@ function packageTask(sourceFolderName, d
+@@ -196,7 +200,9 @@ function packageTask(sourceFolderName, d
  			deps,
  			favicon,
  			manifest,

@@ -1,5 +1,5 @@
 Adjusted from (MIT licensed) original source:
-- https://github.com/coder/AWSCodeOSS/blob/6d9530aa6b84514b8b54700d88cbcc66c70b789f/patches/marketplace.diff
+- https://github.com/coder/code-server/blob/6d9530aa6b84514b8b54700d88cbcc66c70b789f/patches/marketplace.diff
 
 Add Open VSX as default marketplace
 
@@ -7,17 +7,8 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -115,7 +115,7 @@ export class WebClientServer {
- 
- 		this._staticRoute = `${serverRootPath}/static`;
- 		this._callbackRoute = `${serverRootPath}/callback`;
--		this._webExtensionRoute = `${serverRootPath}/web-extension-resource`;
-+		this._webExtensionRoute = `/web-extension-resource`;
- 	}
- 
- 	/**
-@@ -314,14 +314,7 @@ export class WebClientServer {
- 		const productConfiguration = {
+@@ -338,14 +338,7 @@ export class WebClientServer {
+ 		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			rootEndpoint: base,
  			embedderIdentifier: 'server-distro',
 -			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
@@ -25,18 +16,18 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
 -				resourceUrlTemplate: this._webExtensionResourceUrlTemplate.with({
 -					scheme: 'http',
 -					authority: remoteAuthority,
--					path: `${this._webExtensionRoute}/${this._webExtensionResourceUrlTemplate.authority}${this._webExtensionResourceUrlTemplate.path}`
+-					path: `${webExtensionRoute}/${this._webExtensionResourceUrlTemplate.authority}${this._webExtensionResourceUrlTemplate.path}`
 -				}).toString(true)
 -			} : undefined
 +			extensionsGallery: this._productService.extensionsGallery,
- 		} satisfies Partial<IProductConfiguration>;
+ 		};
  
- 		if (!this._environmentService.isBuilt) {
+ 		const proposedApi = this._environmentService.args['enable-proposed-api'];
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-@@ -140,9 +140,9 @@ export abstract class AbstractExtensionR
+@@ -163,9 +163,9 @@ export abstract class AbstractExtensionR
  	}
  
  	protected _isWebExtensionResourceEndPoint(uri: URI): boolean {

@@ -1,4 +1,4 @@
-override report issues with open webapp feedback command
+Override report issues with open webapp feedback command
 
 ---
  .../contrib/issue/common/issue.contribution.ts        | 11 ++---------
@@ -8,16 +8,16 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/issue/c
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
-@@ -7,7 +7,7 @@ import { localize, localize2 } from '../
+@@ -8,7 +8,7 @@ import { localize, localize2 } from '../
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';
  import { MenuId, MenuRegistry } from '../../../../platform/actions/common/actions.js';
 -import { CommandsRegistry, ICommandMetadata } from '../../../../platform/commands/common/commands.js';
 +import { CommandsRegistry, ICommandMetadata, ICommandService } from '../../../../platform/commands/common/commands.js';
+ import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+ import { INotificationService } from '../../../../platform/notification/common/notification.js';
  import { IProductService } from '../../../../platform/product/common/productService.js';
- import { IWorkbenchContribution } from '../../../common/contributions.js';
- import { IWorkbenchIssueService, IssueReporterData } from './issue.js';
-@@ -72,14 +72,7 @@ export class BaseIssueContribution exten
+@@ -85,14 +85,7 @@ export class BaseIssueContribution exten
  		this._register(CommandsRegistry.registerCommand({
  			id: OpenIssueReporterActionId,
  			handler: function (accessor, args?: string | [string] | OpenIssueReporterArgs) {

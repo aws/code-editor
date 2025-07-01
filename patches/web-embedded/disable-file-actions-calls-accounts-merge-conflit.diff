@@ -1,4 +1,4 @@
-Disable file actions,calls,accounts,merge conflit
+Disable file actions,calls,accounts,merge conflict
 
 This patch disables or modifies various features and functionalities related to file actions, calls, accounts, and merge conflicts in the Code OSS codebase. 
 ---
@@ -631,22 +631,22 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/authent
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
-@@ -19,7 +19,6 @@ import { AuthenticationProviderInformati
+@@ -16,7 +16,6 @@ import { SignOutOfAccountAction } from '
+ import { IAuthenticationService } from '../../../services/authentication/common/authentication.js';
  import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
  import { Extensions, IExtensionFeatureTableRenderer, IExtensionFeaturesRegistry, IRenderedData, IRowData, ITableData } from '../../../services/extensionManagement/common/extensionFeatures.js';
- import { ExtensionsRegistry } from '../../../services/extensions/common/extensionsRegistry.js';
 -import { ManageTrustedExtensionsForAccountAction } from './actions/manageTrustedExtensionsForAccountAction.js';
  import { ManageAccountPreferencesForExtensionAction } from './actions/manageAccountPreferencesForExtensionAction.js';
  import { IAuthenticationUsageService } from '../../../services/authentication/browser/authenticationUsageService.js';
- 
-@@ -182,7 +181,6 @@ class AuthenticationContribution extends
+ import { ManageAccountPreferencesForMcpServerAction } from './actions/manageAccountPreferencesForMcpServerAction.js';
+@@ -120,7 +119,6 @@ class AuthenticationContribution extends
  
  	private _registerActions(): void {
  		this._register(registerAction2(SignOutOfAccountAction));
 -		this._register(registerAction2(ManageTrustedExtensionsForAccountAction));
  		this._register(registerAction2(ManageAccountPreferencesForExtensionAction));
- 	}
- 
+ 		this._register(registerAction2(ManageTrustedMcpServersForAccountAction));
+ 		this._register(registerAction2(ManageAccountPreferencesForMcpServerAction));
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
@@ -668,7 +668,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/b
 -	command: {
 -		id: NEW_FOLDER_COMMAND_ID,
 -		title: NEW_FOLDER_LABEL,
--		precondition: ContextKeyExpr.and(ExplorerResourceNotReadonlyContext, WorkbenchTreeFindOpen.toNegated())
+-		precondition: ExplorerResourceWritableContext
 -	},
 -	when: ExplorerFolderContext
 -});
@@ -678,7 +678,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/b
  	order: 10,
  	command: openToSideCommand,
  	when: ContextKeyExpr.and(ExplorerFolderContext.toNegated(), ResourceContextKey.HasResource)
-@@ -691,36 +680,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -685,36 +674,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  });
  
  MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
@@ -732,9 +732,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEd
 -import { ctxIsMergeEditor, ctxMergeEditorLayout, ctxMergeEditorShowBase, ctxMergeEditorShowBaseAtTop, ctxMergeEditorShowNonConflictingChanges, StorageCloseWithConflicts } from '../../common/mergeEditor.js';
 +import { ctxIsMergeEditor, ctxMergeEditorLayout, ctxMergeEditorShowBase, ctxMergeEditorShowBaseAtTop, ctxMergeEditorShowNonConflictingChanges } from '../../common/mergeEditor.js';
  import { IEditorService } from '../../../../services/editor/common/editorService.js';
- 
- abstract class MergeEditorAction extends Action2 {
-@@ -563,20 +562,6 @@ export class ResetToBaseAndAutoMergeComm
+ import { transaction } from '../../../../../base/common/observable.js';
+ import { ModifiedBaseRangeStateKind } from '../model/modifiedBaseRange.js';
+@@ -567,20 +566,6 @@ export class ResetToBaseAndAutoMergeComm
  	}
  }
  
@@ -752,9 +752,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEd
 -	}
 -}
 -
- // this is an API command
- export class AcceptMerge extends MergeEditorAction2 {
+ export class AcceptAllCombination extends MergeEditorAction2 {
  	constructor() {
+ 		super({
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
@@ -776,16 +776,16 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/mergeEd
  	AcceptAllInput1, AcceptAllInput2, AcceptMerge, CompareInput1WithBaseCommand,
  	CompareInput2WithBaseCommand, GoToNextUnhandledConflict, GoToPreviousUnhandledConflict, OpenBaseFile, OpenMergeEditor,
  	OpenResultResource, ResetToBaseAndAutoMergeCommand, SetColumnLayout, SetMixedLayout, ShowHideTopBase, ShowHideCenterBase, ShowHideBase,
--	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2, ResetCloseWithConflictsChoice
-+	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2
+-	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2, ResetCloseWithConflictsChoice,
++	ShowNonConflictingChanges, ToggleActiveConflictInput1, ToggleActiveConflictInput2,
+ 	AcceptAllCombination, ToggleBetweenInputs
  } from './commands/commands.js';
  import { MergeEditorCopyContentsToJSON, MergeEditorLoadContentsFromFolder, MergeEditorSaveContentsToFolder } from './commands/devCommands.js';
- import { MergeEditorInput } from './mergeEditorInput.js';
-@@ -83,7 +83,6 @@ registerAction2(AcceptAllInput2);
+@@ -86,7 +86,6 @@ registerAction2(AcceptAllInput2);
  registerAction2(ResetToBaseAndAutoMergeCommand);
  
  registerAction2(AcceptMerge);
 -registerAction2(ResetCloseWithConflictsChoice);
+ registerAction2(AcceptAllCombination);
  
- // Dev Commands
- registerAction2(MergeEditorCopyContentsToJSON);
+ registerAction2(ToggleBetweenInputs);

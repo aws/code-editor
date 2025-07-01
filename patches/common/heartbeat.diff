@@ -2,8 +2,8 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-@@ -119,6 +119,13 @@ class RemoteExtensionHostAgentServer ext
- 			pathname = pathname.substring(this._serverRootPath.length);
+@@ -130,6 +130,13 @@ class RemoteExtensionHostAgentServer ext
+ 			pathname = pathname.substring(this._serverProductPath.length);
  		}
  
 +		// Custom health check endpoint

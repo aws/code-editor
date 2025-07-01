@@ -92,7 +92,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/product.json
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/product.json
 +++ AWSCodeOSS/build/private/code-editor-src/product.json
-@@ -80,5 +80,15 @@
+@@ -82,5 +82,15 @@
  				"publisherDisplayName": "Microsoft"
  			}
  		}

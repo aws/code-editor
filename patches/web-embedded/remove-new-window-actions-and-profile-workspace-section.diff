@@ -1,5 +1,4 @@
-Remove new window actions and workspace section from profile
- page
+Remove new window actions and workspace section from profile page
 
 ---
  .../contrib/userDataProfile/browser/userDataProfile.ts   | 1 -
@@ -11,7 +10,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDat
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -126,7 +126,6 @@ export class UserDataProfilesWorkbenchContribution extends Disposable implements
+@@ -126,7 +126,6 @@ export class UserDataProfilesWorkbenchCo
  		this._register(this.registerSwitchProfileAction());
  
  		this.registerOpenProfileSubMenu();
@@ -23,7 +22,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDat
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-@@ -747,9 +747,7 @@ class ProfileTreeDataSource implements IAsyncDataSource<AbstractUserDataProfileE
+@@ -758,9 +758,7 @@ class ProfileTreeDataSource implements I
  					children.push({ element: 'name', root: element });
  					children.push({ element: 'icon', root: element });
  				}
@@ -37,7 +36,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDat
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-@@ -964,17 +964,8 @@ export class UserDataProfilesEditorModel extends EditorModel {
+@@ -983,17 +983,8 @@ export class UserDataProfilesEditorModel
  			() => this.removeProfile(profileElement.profile)
  		));
  

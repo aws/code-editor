@@ -1,0 +1,17 @@
+Disable extension signature verification that was enabled for Linux in v1.100.
+It does not work since it depends on a closed-source proprietary package - @vscode/vsce-sign and it's not compatible with OpenVSX.
+
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
+@@ -339,8 +339,7 @@ export class ExtensionManagementService
+ 
+ 	private async downloadExtension(extension: IGalleryExtension, operation: InstallOperation, verifySignature: boolean, clientTargetPlatform?: TargetPlatform): Promise<{ readonly location: URI; readonly verificationStatus: ExtensionSignatureVerificationCode | undefined }> {
+ 		if (verifySignature) {
+-			const value = this.configurationService.getValue(VerifyExtensionSignatureConfigKey);
+-			verifySignature = isBoolean(value) ? value : true;
++			verifySignature = false;
+ 		}
+ 		const { location, verificationStatus } = await this.extensionsDownloader.download(extension, operation, verifySignature, clientTargetPlatform);
+ 		const shouldRequireSignature = shouldRequireRepositorySignatureFor(extension.private, await this.extensionGalleryManifestService.getExtensionGalleryManifest());

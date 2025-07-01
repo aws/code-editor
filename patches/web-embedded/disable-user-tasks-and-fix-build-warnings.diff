@@ -10,7 +10,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/b
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
-@@ -44,16 +44,6 @@ import { promiseWithResolvers } from '..
+@@ -50,16 +50,6 @@ import { ITerminalInstance, ITerminalSer
  const workbenchRegistry = Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench);
  workbenchRegistry.registerWorkbenchContribution(RunAutomaticTasks, LifecyclePhase.Eventually);
  
@@ -27,7 +27,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/b
  export class TaskStatusBarContributions extends Disposable implements IWorkbenchContribution {
  	private _runningTasksStatusItem: IStatusbarEntryAccessor | undefined;
  	private _activeTasksCount: number = 0;
-@@ -234,138 +224,9 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -240,138 +230,9 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  });
  
  
@@ -166,7 +166,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/b
  	}
  }
  workbenchRegistry.registerWorkbenchContribution(UserTasksGlobalActionContribution, LifecyclePhase.Restored);
-@@ -373,12 +234,6 @@ workbenchRegistry.registerWorkbenchContr
+@@ -379,12 +240,6 @@ workbenchRegistry.registerWorkbenchContr
  // MenuRegistry.addCommand( { id: 'workbench.action.tasks.rebuild', title: nls.localize('RebuildAction.label', 'Run Rebuild Task'), category: tasksCategory });
  // MenuRegistry.addCommand( { id: 'workbench.action.tasks.clean', title: nls.localize('CleanAction.label', 'Run Clean Task'), category: tasksCategory });
  
@@ -179,7 +179,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/b
  
  // Tasks Output channel. Register it before using it in Task Service.
  const outputChannelRegistry = Registry.as<IOutputChannelRegistry>(OutputExt.OutputChannels);
-@@ -386,16 +241,7 @@ outputChannelRegistry.registerChannel({
+@@ -392,16 +247,7 @@ outputChannelRegistry.registerChannel({
  
  
  // Register Quick Access

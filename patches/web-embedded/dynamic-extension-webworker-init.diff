@@ -2,7 +2,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-@@ -77,8 +77,8 @@
+@@ -79,8 +79,8 @@
  			if (event.origin !== parentOrigin || event.data.type !== bootstrapNlsType) {
  				return;
  			}
@@ -13,7 +13,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
  		};
  
  		window.parent.postMessage({
-@@ -87,26 +87,13 @@
+@@ -89,26 +89,13 @@
  		}, '*');
  	}
  
@@ -42,7 +42,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
  			const nestedWorkers = new Map();
  
  			worker.onmessage = (event) => {
-@@ -125,6 +112,8 @@
+@@ -127,6 +114,8 @@
  						nestedWorkers.get(id).terminate();
  						nestedWorkers.delete(id);
  					}

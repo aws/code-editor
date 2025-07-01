@@ -1,5 +1,4 @@
-remove import/export profiles and revert file menu items in
- file menu
+Remove import/export profiles and revert file menu items in file menu
 
 ---
  .../files/browser/fileActions.contribution.ts |  45 +----
@@ -21,7 +20,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/b
  import { KeybindingsRegistry, KeybindingWeight } from '../../../../platform/keybinding/common/keybindingsRegistry.js';
 @@ -20,7 +20,7 @@ import { CLOSE_SAVED_EDITORS_COMMAND_ID,
  import { AutoSaveAfterShortDelayContext } from '../../../services/filesConfiguration/common/filesConfigurationService.js';
- import { WorkbenchListDoubleSelection, WorkbenchTreeFindOpen } from '../../../../platform/list/browser/listService.js';
+ import { WorkbenchListDoubleSelection } from '../../../../platform/list/browser/listService.js';
  import { Schemas } from '../../../../base/common/network.js';
 -import { DirtyWorkingCopiesContext, EnterMultiRootWorkspaceSupportContext, HasWebFileSystemAccess, WorkbenchStateContext, WorkspaceFolderCountContext, SidebarFocusContext, ActiveEditorCanRevertContext, ActiveEditorContext, ResourceContextKey, ActiveEditorAvailableEditorIdsContext, MultipleEditorsSelectedInGroupContext, TwoEditorsSelectedInGroupContext, SelectedEditorsInGroupFileOrUntitledResourceContextKey } from '../../../common/contextkeys.js';
 +import { DirtyWorkingCopiesContext, EnterMultiRootWorkspaceSupportContext, HasWebFileSystemAccess, WorkbenchStateContext, WorkspaceFolderCountContext, SidebarFocusContext, ActiveEditorContext, ResourceContextKey, ActiveEditorAvailableEditorIdsContext, MultipleEditorsSelectedInGroupContext, TwoEditorsSelectedInGroupContext, SelectedEditorsInGroupFileOrUntitledResourceContextKey } from '../../../common/contextkeys.js';
@@ -68,7 +67,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/b
  	order: 30,
  	command: {
  		id: SAVE_ALL_IN_GROUP_COMMAND_ID,
-@@ -688,21 +662,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -682,21 +656,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	},
  	order: 1
  });

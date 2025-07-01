@@ -2,10 +2,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
-@@ -1049,6 +1049,25 @@ export class RemoteAgentConnectionStatus
+@@ -1048,6 +1048,25 @@ export class RemoteAgentConnectionStatus
  						break;
  				}
- 			});
+ 			}));
 +
 +			connection.onDidStateChange((e) => {
 +				let action = 'connected';
@@ -74,7 +74,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-@@ -472,6 +472,24 @@ class WorkspaceProvider implements IWork
+@@ -487,6 +487,24 @@ class WorkspaceProvider implements IWork
  
  		const targetHref = this.createTargetUrl(workspace, options);
  		if (targetHref) {
@@ -103,7 +103,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workben
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
-@@ -170,6 +170,8 @@ export class Workbench extends Layout {
+@@ -169,6 +169,8 @@ export class Workbench extends Layout {
  		} catch (error) {
  			onUnexpectedError(error);
  

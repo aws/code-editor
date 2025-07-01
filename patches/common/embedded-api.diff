@@ -1,5 +1,4 @@
-Add a bridge from the extension host to the grandparent
- window
+Add a bridge from the extension host to the grandparent window
 
 This allows an extension to do the following:
 
@@ -35,10 +34,10 @@ received.
  src/vscode-dts/vscode.d.ts                    |  2 ++
  6 files changed, 47 insertions(+), 1 deletion(-)
 
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 @@ -3,6 +3,7 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -47,10 +46,10 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser
  import { Event } from '../../../base/common/event.js';
  import { DisposableStore } from '../../../base/common/lifecycle.js';
  import { URI, UriComponents } from '../../../base/common/uri.js';
-@@ -29,6 +30,17 @@ export class MainThreadWindow implements
- 		Event.latch(hostService.onDidChangeFocus)
+@@ -31,6 +32,17 @@ export class MainThreadWindow implements
  			(this.proxy.$onDidChangeWindowFocus, this.proxy, this.disposables);
  		userActivityService.onDidChangeIsActive(this.proxy.$onDidChangeWindowActive, this.proxy, this.disposables);
+ 		this.registerNativeHandle();
 +
 +		mainWindow.addEventListener('message', (e) => {
 +			if (e.origin !== this.getOrigin() || e.source !== mainWindow.parent) {
@@ -65,7 +64,7 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser
  	}
  
  	dispose(): void {
-@@ -63,4 +75,12 @@ export class MainThreadWindow implements
+@@ -76,4 +88,12 @@ export class MainThreadWindow implements
  		const result = await this.openerService.resolveExternalUri(URI.revive(uriComponents), options);
  		return result.resolved;
  	}
@@ -78,11 +77,11 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/browser
 +		mainWindow.parent.postMessage(message, origin);
 +	}
  }
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
-@@ -676,6 +676,14 @@ export function createApiFactoryAndRegis
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+@@ -690,6 +690,14 @@ export function createApiFactoryAndRegis
  
  		// namespace: window
  		const window: typeof vscode.window = {
@@ -97,11 +96,11 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/
  			get activeTextEditor() {
  				return extHostEditors.getActiveTextEditor();
  			},
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
-@@ -1698,6 +1698,7 @@ export interface MainThreadWindowShape e
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+@@ -1744,6 +1744,7 @@ export interface MainThreadWindowShape e
  	$getInitialState(): Promise<{ isFocused: boolean; isActive: boolean }>;
  	$openUri(uri: UriComponents, uriString: string | undefined, options: IOpenUriOptions): Promise<boolean>;
  	$asExternalUri(uri: UriComponents, options: IOpenUriOptions): Promise<UriComponents>;
@@ -109,35 +108,35 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/
  }
  
  export enum CandidatePortSource {
-@@ -2556,6 +2557,7 @@ export interface ExtHostDecorationsShape
- export interface ExtHostWindowShape {
+@@ -2721,6 +2722,7 @@ export interface ExtHostWindowShape {
  	$onDidChangeWindowFocus(value: boolean): void;
  	$onDidChangeWindowActive(value: boolean): void;
+ 	$onDidChangeActiveNativeWindowHandle(handle: string | undefined): void;
 +	$receiveMessage(message: any): void;
  }
  
  export interface ExtHostLogLevelServiceShape {
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
-@@ -22,6 +22,7 @@ export class ExtHostWindow implements Ex
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+@@ -26,6 +26,7 @@ export class ExtHostWindow implements Ex
  	private _proxy: MainThreadWindowShape;
  
  	private readonly _onDidChangeWindowState = new Emitter<WindowState>();
 +	private _receiveMessage: Emitter<any>;
  	readonly onDidChangeWindowState: Event<WindowState> = this._onDidChangeWindowState.event;
  
- 	private _state = ExtHostWindow.InitialState;
-@@ -46,6 +47,7 @@ export class ExtHostWindow implements Ex
+ 	private _nativeHandle: Uint8Array | undefined;
+@@ -57,6 +58,7 @@ export class ExtHostWindow implements Ex
  			this.onDidChangeWindowProperty('focused', isFocused);
  			this.onDidChangeWindowProperty('active', isActive);
  		});
 +		this._receiveMessage = new Emitter<any>();
  	}
  
- 	$onDidChangeWindowFocus(value: boolean) {
-@@ -91,6 +93,18 @@ export class ExtHostWindow implements Ex
+ 	get nativeHandle(): Uint8Array | undefined {
+@@ -110,6 +112,18 @@ export class ExtHostWindow implements Ex
  		const result = await this._proxy.$asExternalUri(uri, options);
  		return URI.from(result);
  	}
@@ -156,10 +155,10 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/api/common/
  }
  
  export const IExtHostWindow = createDecorator<IExtHostWindow>('IExtHostWindow');
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 @@ -44,7 +44,7 @@ export class ExtensionsProposedApi {
  			for (const [k, value] of Object.entries(productService.extensionEnabledApiProposals)) {
  				const key = ExtensionIdentifier.toKey(k);
@@ -169,11 +168,11 @@ Index: VSCodeEmbedded/build/private/code-editor-src/src/vs/workbench/services/ex
  						_logService.warn(`Via 'product.json#extensionEnabledApiProposals' extension '${key}' wants API proposal '${name}' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.`);
  						return false;
  					}
-Index: VSCodeEmbedded/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
 ===================================================================
---- VSCodeEmbedded.orig/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
-+++ VSCodeEmbedded/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
-@@ -10660,6 +10660,8 @@ declare module 'vscode' {
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+@@ -11000,6 +11000,8 @@ declare module 'vscode' {
  	 * asking for user input.
  	 */
  	export namespace window {

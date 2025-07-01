@@ -1,5 +1,4 @@
-Remove option to disable prompting for non-trusted external
- URLs
+Remove option to disable prompting for non-trusted external URLs
 
 ---
  .../url/browser/trustedDomainsValidator.ts       |  6 ------
@@ -24,9 +23,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/bro
  import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
 -import { IWorkspaceTrustManagementService } from '../../../../platform/workspace/common/workspaceTrust.js';
  import { IWorkbenchContribution } from '../../../common/contributions.js';
- import { ITrustedDomainService, isURLDomainTrusted } from './trustedDomainService.js';
- import { configureOpenerTrustedDomainsHandler, readStaticTrustedDomains } from './trustedDomains.js';
-@@ -34,8 +32,6 @@ export class OpenerValidatorContribution
+ import { ITrustedDomainService } from './trustedDomainService.js';
+ import { isURLDomainTrusted } from '../common/trustedDomains.js';
+@@ -35,8 +33,6 @@ export class OpenerValidatorContribution
  		@IClipboardService private readonly _clipboardService: IClipboardService,
  		@ITelemetryService private readonly _telemetryService: ITelemetryService,
  		@IInstantiationService private readonly _instantiationService: IInstantiationService,
@@ -35,7 +34,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/bro
  		@ITrustedDomainService private readonly _trustedDomainService: ITrustedDomainService,
  	) {
  		this._openerService.registerValidator({ shouldOpen: (uri, options) => this.validateLink(uri, options) });
-@@ -46,10 +42,6 @@ export class OpenerValidatorContribution
+@@ -47,10 +43,6 @@ export class OpenerValidatorContribution
  			return true;
  		}
  

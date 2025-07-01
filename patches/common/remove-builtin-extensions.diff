@@ -2,7 +2,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/product.json
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/product.json
 +++ AWSCodeOSS/build/private/code-editor-src/product.json
-@@ -32,54 +32,6 @@
+@@ -34,54 +34,6 @@
  	"urlProtocol": "code-oss",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
  	"builtInExtensions": [
@@ -24,8 +24,8 @@ Index: AWSCodeOSS/build/private/code-editor-src/product.json
 -		},
 -		{
 -			"name": "ms-vscode.js-debug",
--			"version": "1.95.3",
--			"sha256": "77b61197558a46140534deb7d8dd3c9d5038b9cb7ea8195e272c6a3a882d8e73",
+-			"version": "1.100.1",
+-			"sha256": "8c2218df3422d45b95e96d9d28cdc4aa4426a2799aaaedd862d3f60ecab03844",
 -			"repo": "https://github.com/microsoft/vscode-js-debug",
 -			"metadata": {
 -				"id": "25629058-ddac-4e17-abba-74678e126c5d",

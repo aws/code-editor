@@ -2,10 +2,12 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
 +++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
-@@ -54,6 +54,9 @@ const vscodeWebResourceIncludes = [
+@@ -56,7 +56,10 @@ const vscodeWebResourceIncludes = [
+ 	'out-build/vs/editor/common/languages/injections/*.scm',
  
  	// Extension Host Worker
- 	'out-build/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html',
+-	'out-build/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html'
++	'out-build/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html',
 +
 +	// Error handler
 +	'out-build/vs/editor/common/errors/suppressedErrors.js'
