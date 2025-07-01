@@ -20,12 +20,12 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -328,6 +328,7 @@ export class WebClientServer {
+@@ -359,6 +359,7 @@ export class WebClientServer {
  
  		const workbenchWebConfiguration = {
  			remoteAuthority,
 +			userDataPath: this._environmentService.userDataPath,
- 			serverBasePath: this._basePath,
+ 			serverBasePath: basePath,
  			_wrapWebWorkerExtHostInIframe,
  			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/web.api.ts

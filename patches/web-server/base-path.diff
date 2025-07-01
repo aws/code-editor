@@ -8,7 +8,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/network.ts
  			authority: `${host}:${port}`,
 -			path: this._remoteResourcesPath,
 +			path: platform.isWeb
-+				? (globalThis._VSCODE_REMOTE_URL.pathname + "/" + this._remoteResourcesPath).replace(/\/\/+/g, "/")
++				? (window.location.pathname + "/" + this._remoteResourcesPath).replace(/\/\/+/g, "/")
 +				: this._remoteResourcesPath,
  			query
  		});
@@ -17,37 +17,24 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/product.ts
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/base/common/product.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/product.ts
-@@ -55,6 +55,7 @@ export type ExtensionVirtualWorkspaceSup
+@@ -56,6 +56,7 @@ export type ExtensionVirtualWorkspaceSup
  };
  
  export interface IProductConfiguration {
-+	readonly rootEndpoint?: string
++	readonly rootEndpoint?: string;
  	readonly version: string;
  	readonly date?: string;
  	readonly quality?: string;
-Index: AWSCodeOSS/build/private/code-editor-src/src/typings/vscode-globals-product.d.ts
-===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/typings/vscode-globals-product.d.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/typings/vscode-globals-product.d.ts
-@@ -11,6 +11,7 @@ declare global {
- 	 * Holds the file root for resources.
- 	 */
- 	var _VSCODE_FILE_ROOT: string;
-+	var _VSCODE_REMOTE_URL: URL;
- 
- 	/**
- 	 * CSS loader that's available during development time.
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
-@@ -37,7 +37,8 @@
- 
+@@ -63,7 +63,7 @@
+ 	</script>
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
 -		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
-+		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
-+		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', globalThis._VSCODE_REMOTE_URL).toString();
++		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location).toString();
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
@@ -55,29 +42,20 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
-@@ -34,14 +34,15 @@
- 
+@@ -60,7 +60,7 @@
+ 	</script>
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
 -		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
-+		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
-+		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', globalThis._VSCODE_REMOTE_URL).toString();
++		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location).toString();
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
- 		performance.mark('code/willLoadWorkbenchMain');
- 	</script>
- 	<!-- always ensure built in english NLS messages -->
--	<script type="module" src="{{WORKBENCH_NLS_FALLBACK_URL}}"></script>
-+	<script type="module" src="{{WORKBENCH_WEB_BASE_URL}}/out/nls.messages.js"></script>
- 	<!-- attempt to load NLS messages in case non-english -->
- 	<script type="module" src="{{WORKBENCH_NLS_URL}}"></script>
- 	<script type="module" src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/code/browser/workbench/workbench.js"></script>
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-@@ -317,7 +317,8 @@ class LocalStorageURLCallbackProvider ex
+@@ -332,7 +332,8 @@ class LocalStorageURLCallbackProvider ex
  			this.startListening();
  		}
  
@@ -91,7 +69,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourc
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-@@ -98,7 +98,7 @@ export abstract class AbstractExtensionR
+@@ -120,7 +120,7 @@ export abstract class AbstractExtensionR
  					: version,
  				path: 'extension'
  			}));
@@ -104,8 +82,20 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -280,7 +280,7 @@ export class WebClientServer {
- 		const remoteAuthority = (
+@@ -245,7 +245,10 @@ export class WebClientServer {
+ 		};
+ 
+ 		// Prefix routes with basePath for clients
+-		const basePath = getFirstHeader('x-forwarded-prefix') || this._basePath;
++		const proxyPath = this._environmentService.args["base-path"] || "/";
++		const base = relativeRoot(proxyPath);
++		const vscodeBase = relativePath(proxyPath);
++		const basePath = vscodeBase || getFirstHeader("x-forwarded-prefix") || this._basePath;
+ 
+ 		const queryConnectionToken = parsedUrl.query[connectionTokenQueryName];
+ 		if (typeof queryConnectionToken === 'string') {
+@@ -287,7 +290,7 @@ export class WebClientServer {
+ 		let remoteAuthority = (
  			useTestResolver
  				? 'test+test'
 -				: (getFirstHeader('x-original-host') || getFirstHeader('x-forwarded-host') || req.headers.host)
@@ -113,33 +103,35 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  		);
  		if (!remoteAuthority) {
  			return serveError(req, res, 400, `Bad request.`);
-@@ -307,7 +307,12 @@ export class WebClientServer {
- 			scopes: [['user:email'], ['repo']]
+@@ -333,6 +336,7 @@ export class WebClientServer {
  		} : undefined;
  
-+		const basePath: string = this._environmentService.args['base-path'] || "/"
-+		const base = relativeRoot(basePath)
-+		const vscodeBase = relativePath(basePath)
-+
- 		const productConfiguration = {
+ 		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
 +			rootEndpoint: base,
  			embedderIdentifier: 'server-distro',
  			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
  				...this._productService.extensionsGallery,
-@@ -354,8 +359,10 @@ export class WebClientServer {
- 		const values: { [key: string]: string } = {
- 			WORKBENCH_WEB_CONFIGURATION: asJSON(workbenchWebConfiguration),
+@@ -360,7 +364,7 @@ export class WebClientServer {
+ 		const workbenchWebConfiguration = {
+ 			remoteAuthority,
+ 			userDataPath: this._environmentService.userDataPath,
+-			serverBasePath: basePath,
++			serverBasePath: this._basePath,
+ 			_wrapWebWorkerExtHostInIframe,
+ 			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
+ 			settingsSyncOptions: !this._environmentService.isBuilt && this._environmentService.args['enable-sync'] ? { enabled: true } : undefined,
+@@ -387,7 +391,9 @@ export class WebClientServer {
  			WORKBENCH_AUTH_SESSION: authSessionInfo ? asJSON(authSessionInfo) : '',
--			WORKBENCH_WEB_BASE_URL: this._staticRoute,
--			WORKBENCH_NLS_URL,
-+			WORKBENCH_WEB_BASE_URL: vscodeBase + this._staticRoute,
-+			WORKBENCH_NLS_URL: WORKBENCH_NLS_URL ? vscodeBase + WORKBENCH_NLS_URL : WORKBENCH_NLS_URL,
+ 			WORKBENCH_WEB_BASE_URL: staticRoute,
+ 			WORKBENCH_NLS_URL,
+-			WORKBENCH_NLS_FALLBACK_URL: `${staticRoute}/out/nls.messages.js`
++			WORKBENCH_NLS_FALLBACK_URL: `${staticRoute}/out/nls.messages.js`,
 +			BASE: base,
-+			VS_BASE: vscodeBase,
- 			WORKBENCH_NLS_FALLBACK_URL: `${this._staticRoute}/out/nls.messages.js`
++			VS_BASE: vscodeBase
  		};
  
-@@ -466,3 +473,60 @@ export class WebClientServer {
+ 		// DEV ---------------------------------------------------------------------------------------
+@@ -497,3 +503,60 @@ export class WebClientServer {
  		return void res.end(data);
  	}
  }
@@ -204,7 +196,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnviron
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
-@@ -89,6 +89,9 @@ export const serverOptions: OptionDescri
+@@ -91,6 +91,9 @@ export const serverOptions: OptionDescri
  
  	'compatibility': { type: 'string' },
  
@@ -214,7 +206,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnviron
  	_: OPTIONS['_']
  };
  
-@@ -212,6 +215,9 @@ export interface ServerParsedArgs {
+@@ -217,6 +220,9 @@ export interface ServerParsedArgs {
  
  	compatibility: string;
  
@@ -232,7 +224,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/remote/browser/b
  	connect({ host, port }: WebSocketRemoteConnection, path: string, query: string, debugLabel: string): Promise<ISocket> {
  		return new Promise<ISocket>((resolve, reject) => {
  			const webSocketSchema = (/^https:/.test(mainWindow.location.href) ? 'wss' : 'ws');
-+			path = (globalThis._VSCODE_REMOTE_URL.pathname + "/" + path).replace(/\/\/+/g, "/")
++			path = (mainWindow.location.pathname + "/" + path).replace(/\/\/+/g, "/")
  			const socket = this._webSocketFactory.create(`${webSocketSchema}://${(/:/.test(host) && !/\[/.test(host)) ? `[${host}]` : host}:${port}${path}?${query}&skipWebSocketFrames=false`, debugLabel);
  			const errorListener = socket.onError(reject);
  			socket.onOpen(() => {

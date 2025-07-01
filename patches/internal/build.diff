@@ -1,0 +1,600 @@
+Patch that is needed for producing internal builds.
+
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+@@ -407,7 +407,7 @@ export class Mangler {
+ 	) {
+ 
+ 		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+-			maxWorkers: 4,
++			maxWorkers: 3,
+ 			minWorkers: 'max'
+ 		});
+ 	}
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+@@ -354,7 +354,7 @@ class Mangler {
+         this.log = log;
+         this.config = config;
+         this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
+-            maxWorkers: 4,
++            maxWorkers: 3,
+             minWorkers: 'max'
+         });
+     }
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.js
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+@@ -125,6 +125,21 @@ function fromLocal(extensionPath, forWeb
+     }
+     return input;
+ }
++async function asyncRetry(func, maxRetries) {
++	let retryNum = 0;
++	for(;;) {
++		try {
++			return await func();
++		} catch(err) {
++			retryNum++;
++			if (retryNum == maxRetries) {
++				throw err;
++			} else {
++				console.warn(`retrying operation, attempt ${retryNum} out of ${maxRetries}`);
++			}
++		}
++	}
++}
+ function fromLocalWebpack(extensionPath, webpackConfigFileName, disableMangle) {
+     const vsce = require('@vscode/vsce');
+     const webpack = require('webpack');
+@@ -140,12 +155,15 @@ function fromLocalWebpack(extensionPath,
+             }
+         }
+     }
++    // During building, some of the parallel `npm list --prod --json` calls were failing intermittently
++    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
++    // Added this retry to make the build process more stable
+     // TODO: add prune support based on packagedDependencies to vsce.PackageManager.Npm similar
+     // to vsce.PackageManager.Yarn.
+     // A static analysis showed there are no webpack externals that are dependencies of the current
+     // local extensions so we can use the vsce.PackageManager.None config to ignore dependencies list
+     // as a temporary workaround.
+-    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }).then(fileNames => {
++    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }), 3).then(fileNames => {
+         const files = fileNames
+             .map(fileName => path_1.default.join(extensionPath, fileName))
+             .map(filePath => new vinyl_1.default({
+@@ -228,7 +246,10 @@ function fromLocalWebpack(extensionPath,
+ function fromLocalNormal(extensionPath) {
+     const vsce = require('@vscode/vsce');
+     const result = event_stream_1.default.through();
+-    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm })
++    // During building, some of the parallel `npm list --prod --json` calls were failing intermittently
++    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
++    // Added this retry to make the build process more stable
++    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm }), 3)
+         .then(fileNames => {
+         const files = fileNames
+             .map(fileName => path_1.default.join(extensionPath, fileName))
+Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.ts
++++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+@@ -89,6 +89,21 @@ function fromLocal(extensionPath: string
+ 	return input;
+ }
+ 
++async function asyncRetry<T>(func: () => Promise<T>, maxRetries: number): Promise<T> {
++	let retryNum = 0;
++	for(;;) {
++		try {
++			return await func();
++		} catch(err: unknown) {
++			retryNum++;
++			if (retryNum == maxRetries) {
++				throw err;
++			} else {
++				console.warn(`retrying operation, attempt ${retryNum} out of ${maxRetries}`);
++			}
++		}
++	}
++}
+ 
+ function fromLocalWebpack(extensionPath: string, webpackConfigFileName: string, disableMangle: boolean): Stream {
+ 	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
+@@ -106,13 +121,15 @@ function fromLocalWebpack(extensionPath:
+ 			}
+ 		}
+ 	}
+-
++	// During building, some of the parallel `npm list --prod --json` calls were failing intermittently
++	// A failure causes the whole build process to fail, but the operation seems to succeed on retry
++	// Added this retry to make the build process more stable
+ 	// TODO: add prune support based on packagedDependencies to vsce.PackageManager.Npm similar
+ 	// to vsce.PackageManager.Yarn.
+ 	// A static analysis showed there are no webpack externals that are dependencies of the current
+ 	// local extensions so we can use the vsce.PackageManager.None config to ignore dependencies list
+ 	// as a temporary workaround.
+-	vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }).then(fileNames => {
++	asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }), 3).then(fileNames => {
+ 		const files = fileNames
+ 			.map(fileName => path.join(extensionPath, fileName))
+ 			.map(filePath => new File({
+@@ -208,8 +225,10 @@ function fromLocalWebpack(extensionPath:
+ function fromLocalNormal(extensionPath: string): Stream {
+ 	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
+ 	const result = es.through();
+-
+-	vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm })
++	// During building, some of the parallel `npm list --prod --json` calls were failing intermittently
++	// A failure causes the whole build process to fail, but the operation seems to succeed on retry
++	// Added this retry to make the build process more stable
++	asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm }), 3)
+ 		.then(fileNames => {
+ 			const files = fileNames
+ 				.map(fileName => path.join(extensionPath, fileName))
+Index: AWSCodeOSS/build/private/code-editor-src/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/package.json
++++ AWSCodeOSS/build/private/code-editor-src/package.json
+@@ -32,7 +32,7 @@
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+     "precommit": "node build/hygiene.js",
+-    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
++    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron",
+     "7z": "7z",
+     "update-grammars": "node build/npm/update-all-grammars.mjs",
+@@ -71,13 +71,12 @@
+   "dependencies": {
+     "@microsoft/1ds-core-js": "^3.2.13",
+     "@microsoft/1ds-post-js": "^3.2.13",
+-    "@parcel/watcher": "2.5.1",
++    "@parcel/watcher": "2.5.0",
+     "@types/semver": "^7.5.8",
+     "@vscode/deviceid": "^0.1.1",
+     "@vscode/iconv-lite-umd": "0.7.0",
+     "@vscode/policy-watcher": "^1.3.2",
+     "@vscode/proxy-agent": "^0.32.0",
+-    "@vscode/ripgrep": "^1.15.11",
+     "@vscode/spdlog": "^0.15.2",
+     "@vscode/sqlite3": "5.1.8-vscode",
+     "@vscode/sudo-prompt": "9.3.1",
+@@ -96,15 +95,14 @@
+     "@xterm/addon-webgl": "^0.19.0-beta.107",
+     "@xterm/headless": "^5.6.0-beta.107",
+     "@xterm/xterm": "^5.6.0-beta.107",
++    "http-proxy": "^1.18.1",
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-is-elevated": "0.7.0",
+-    "native-keymap": "^3.3.5",
+     "native-watchdog": "^1.4.1",
+-    "node-pty": "^1.1.0-beta33",
++    "node-pty": "1.1.0-beta33",
+     "open": "^8.4.2",
+     "tas-client-umd": "0.2.0",
+     "v8-inspect-profiler": "^0.1.1",
+@@ -121,6 +119,7 @@
+     "@types/debug": "^4.1.5",
+     "@types/eslint": "^9.6.1",
+     "@types/gulp-svgmin": "^1.2.1",
++    "@types/http-proxy": "^1.17.15",
+     "@types/http-proxy-agent": "^2.0.1",
+     "@types/kerberos": "^1.1.2",
+     "@types/minimist": "^1.2.1",
+@@ -139,7 +138,6 @@
+     "@typescript-eslint/utils": "^8.8.0",
+     "@vscode/gulp-electron": "^1.36.0",
+     "@vscode/l10n-dev": "0.0.35",
+-    "@vscode/telemetry-extractor": "^1.10.2",
+     "@vscode/test-cli": "^0.0.6",
+     "@vscode/test-electron": "^2.4.0",
+     "@vscode/test-web": "^0.0.62",
+Index: AWSCodeOSS/build/private/code-editor-src/remote/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/remote/package.json
++++ AWSCodeOSS/build/private/code-editor-src/remote/package.json
+@@ -5,11 +5,10 @@
+   "dependencies": {
+     "@microsoft/1ds-core-js": "^3.2.13",
+     "@microsoft/1ds-post-js": "^3.2.13",
+-    "@parcel/watcher": "2.5.1",
++    "@parcel/watcher": "2.5.0",
+     "@vscode/deviceid": "^0.1.1",
+     "@vscode/iconv-lite-umd": "0.7.0",
+     "@vscode/proxy-agent": "^0.32.0",
+-    "@vscode/ripgrep": "^1.15.11",
+     "@vscode/spdlog": "^0.15.2",
+     "@vscode/tree-sitter-wasm": "^0.1.4",
+     "@vscode/vscode-languagedetection": "1.0.21",
+@@ -26,10 +25,10 @@
+     "@xterm/headless": "^5.6.0-beta.107",
+     "@xterm/xterm": "^5.6.0-beta.107",
+     "cookie": "^0.7.0",
++    "http-proxy": "^1.18.1",
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta33",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/emmet/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+@@ -482,7 +482,7 @@
+     "@types/node": "22.x"
+   },
+   "dependencies": {
+-    "@emmetio/css-parser": "ramya-rao-a/css-parser#vscode",
++    "@emmetio/css-parser": "0.4.0",
+     "@emmetio/html-matcher": "^0.3.3",
+     "@emmetio/math-expression": "^1.0.5",
+     "@vscode/emmet-helper": "^2.8.8",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/github/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+@@ -229,7 +229,7 @@
+   },
+   "dependencies": {
+     "@octokit/graphql": "8.2.0",
+-    "@octokit/graphql-schema": "14.4.0",
++    "@octokit/graphql-schema": "14.58.0",
+     "@octokit/rest": "21.1.0",
+     "tunnel": "^0.0.6",
+     "@vscode/extension-telemetry": "^1.0.0"
+Index: AWSCodeOSS/build/private/code-editor-src/build/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/build/package.json
++++ AWSCodeOSS/build/private/code-editor-src/build/package.json
+@@ -36,7 +36,6 @@
+     "@types/workerpool": "^6.4.0",
+     "@types/xml2js": "0.0.33",
+     "@vscode/iconv-lite-umd": "0.7.0",
+-    "@vscode/ripgrep": "^1.15.10",
+     "@vscode/vsce": "2.20.1",
+     "byline": "^5.0.0",
+     "cssnano": "^7.0.7",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/package.json
+@@ -10,7 +10,7 @@
+     "postinstall": "node ./postinstall.mjs"
+   },
+   "devDependencies": {
+-    "@parcel/watcher": "2.5.1",
++    "@parcel/watcher": "2.5.0",
+     "esbuild": "0.25.0",
+     "vscode-grammar-updater": "^1.1.0"
+   },
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/package.json
+@@ -994,7 +994,7 @@
+     ]
+   },
+   "dependencies": {
+-    "vscode-languageclient": "^10.0.0-next.15",
++    "vscode-languageclient": "10.0.0-next.9",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
+@@ -1003,5 +1003,13 @@
+   "repository": {
+     "type": "git",
+     "url": "https://github.com/microsoft/vscode.git"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/package.json
+@@ -259,7 +259,7 @@
+   },
+   "dependencies": {
+     "@vscode/extension-telemetry": "^0.9.8",
+-    "vscode-languageclient": "^10.0.0-next.15",
++    "vscode-languageclient": "10.0.0-next.9",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
+@@ -268,5 +268,13 @@
+   "repository": {
+     "type": "git",
+     "url": "https://github.com/microsoft/vscode.git"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/package.json
+@@ -170,7 +170,7 @@
+   "dependencies": {
+     "@vscode/extension-telemetry": "^0.9.8",
+     "request-light": "^0.8.0",
+-    "vscode-languageclient": "^10.0.0-next.15"
++    "vscode-languageclient": "10.0.0-next.9"
+   },
+   "devDependencies": {
+     "@types/node": "22.x"
+@@ -178,5 +178,13 @@
+   "repository": {
+     "type": "git",
+     "url": "https://github.com/microsoft/vscode.git"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/markdown-language-features/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/markdown-language-features/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/markdown-language-features/package.json
+@@ -771,8 +771,8 @@
+     "morphdom": "^2.7.4",
+     "picomatch": "^2.3.1",
+     "punycode": "^2.3.1",
+-    "vscode-languageclient": "^8.0.2",
+-    "vscode-languageserver-textdocument": "^1.0.11",
++    "vscode-languageclient": "9.0.1",
++    "vscode-languageserver-textdocument": "1.0.11",
+     "vscode-markdown-languageserver": "^0.5.0-alpha.11",
+     "vscode-uri": "^3.0.3"
+   },
+@@ -785,11 +785,19 @@
+     "@types/vscode-webview": "^1.57.0",
+     "@vscode/markdown-it-katex": "^1.1.1",
+     "lodash.throttle": "^4.1.1",
+-    "vscode-languageserver-types": "^3.17.2",
++    "vscode-languageserver-types": "3.17.5",
+     "vscode-markdown-languageservice": "^0.3.0-alpha.3"
+   },
+   "repository": {
+     "type": "git",
+     "url": "https://github.com/microsoft/vscode.git"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "8.2.0",
++    "vscode-languageclient": "9.0.1",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "9.0.1",
++    "vscode-languageserver-protocol": "3.17.5",
++    "vscode-languageserver-textdocument": "1.0.11"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/server/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package.json
+@@ -12,7 +12,7 @@
+   "dependencies": {
+     "@vscode/l10n": "^0.0.18",
+     "vscode-css-languageservice": "^6.3.6",
+-    "vscode-languageserver": "^10.0.0-next.13",
++    "vscode-languageserver": "10.0.0-next.7",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
+@@ -27,5 +27,13 @@
+     "install-server-next": "npm install vscode-languageserver@next",
+     "install-server-local": "npm install vscode-languageserver",
+     "test": "node ./test/index.js"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package.json
+@@ -12,8 +12,8 @@
+     "@vscode/l10n": "^0.0.18",
+     "vscode-css-languageservice": "^6.3.6",
+     "vscode-html-languageservice": "^5.5.0",
+-    "vscode-languageserver": "^10.0.0-next.13",
+-    "vscode-languageserver-textdocument": "^1.0.12",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-textdocument": "1.0.12",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
+@@ -28,5 +28,13 @@
+     "install-server-next": "npm install vscode-languageserver@next",
+     "install-server-local": "npm install vscode-languageserver",
+     "test": "npm run compile && node ./test/index.js"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/server/package.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package.json
+@@ -16,7 +16,7 @@
+     "jsonc-parser": "^3.3.1",
+     "request-light": "^0.8.0",
+     "vscode-json-languageservice": "^5.6.0",
+-    "vscode-languageserver": "^10.0.0-next.13",
++    "vscode-languageserver": "10.0.0-next.7",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
+@@ -34,5 +34,13 @@
+     "install-server-next": "npm install vscode-languageserver@next",
+     "install-server-local": "npm link vscode-languageserver-server",
+     "version": "git commit -m \"JSON Language Server $npm_package_version\" package.json"
++  },
++  "overrides": {
++    "vscode-jsonrpc": "9.0.0-next.5",
++    "vscode-languageclient": "10.0.0-next.9",
++    "vscode-languageserver-types": "3.17.5",
++    "vscode-languageserver": "10.0.0-next.7",
++    "vscode-languageserver-protocol": "3.17.6-next.7",
++    "vscode-languageserver-textdocument": "1.0.12"
+   }
+ }
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
+@@ -93,12 +93,6 @@
+         "vscode-languageserver-types": "3.17.6-next.6"
+       }
+     },
+-    "node_modules/vscode-languageserver-protocol/node_modules/vscode-languageserver-types": {
+-      "version": "3.17.6-next.6",
+-      "resolved": "https://registry.npmjs.org/vscode-languageserver-types/-/vscode-languageserver-types-3.17.6-next.6.tgz",
+-      "integrity": "sha512-aiJY5/yW+xzw7KPNlwi3gQtddq/3EIn5z8X8nCgJfaiAij2R1APKePngv+MUdLdYJBVTLu+Qa0ODsT+pHgYguQ==",
+-      "license": "MIT"
+-    },
+     "node_modules/vscode-languageserver-textdocument": {
+       "version": "1.0.12",
+       "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
+@@ -107,12 +107,6 @@
+         "vscode-languageserver-types": "3.17.6-next.6"
+       }
+     },
+-    "node_modules/vscode-languageserver-protocol/node_modules/vscode-languageserver-types": {
+-      "version": "3.17.6-next.6",
+-      "resolved": "https://registry.npmjs.org/vscode-languageserver-types/-/vscode-languageserver-types-3.17.6-next.6.tgz",
+-      "integrity": "sha512-aiJY5/yW+xzw7KPNlwi3gQtddq/3EIn5z8X8nCgJfaiAij2R1APKePngv+MUdLdYJBVTLu+Qa0ODsT+pHgYguQ==",
+-      "license": "MIT"
+-    },
+     "node_modules/vscode-languageserver-textdocument": {
+       "version": "1.0.12",
+       "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
+@@ -109,12 +109,6 @@
+         "vscode-languageserver-types": "3.17.6-next.6"
+       }
+     },
+-    "node_modules/vscode-languageserver-protocol/node_modules/vscode-languageserver-types": {
+-      "version": "3.17.6-next.6",
+-      "resolved": "https://registry.npmjs.org/vscode-languageserver-types/-/vscode-languageserver-types-3.17.6-next.6.tgz",
+-      "integrity": "sha512-aiJY5/yW+xzw7KPNlwi3gQtddq/3EIn5z8X8nCgJfaiAij2R1APKePngv+MUdLdYJBVTLu+Qa0ODsT+pHgYguQ==",
+-      "license": "MIT"
+-    },
+     "node_modules/vscode-languageserver-textdocument": {
+       "version": "1.0.12",
+       "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package-lock.json
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/emmet/package-lock.json
++++ AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package-lock.json
+@@ -39,14 +39,6 @@
+         "@emmetio/scanner": "^1.0.4"
+       }
+     },
+-    "node_modules/@emmetio/css-parser": {
+-      "version": "0.4.0",
+-      "resolved": "git+ssh://git@github.com/ramya-rao-a/css-parser.git#370c480ac103bd17c7bcfb34bf5d577dc40d3660",
+-      "dependencies": {
+-        "@emmetio/stream-reader": "^2.2.0",
+-        "@emmetio/stream-reader-utils": "^0.1.0"
+-      }
+-    },
+     "node_modules/@emmetio/html-matcher": {
+       "version": "0.3.3",
+       "resolved": "https://registry.npmjs.org/@emmetio/html-matcher/-/html-matcher-0.3.3.tgz",
+Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
+===================================================================
+--- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
++++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
+@@ -7,12 +7,11 @@ import {
+ 	Connection, TextDocuments, InitializeParams, InitializeResult, RequestType,
+ 	DocumentRangeFormattingRequest, Disposable, ServerCapabilities,
+ 	ConfigurationRequest, ConfigurationParams, DidChangeWorkspaceFoldersNotification,
+-	DocumentColorRequest, ColorPresentationRequest, TextDocumentSyncKind, NotificationType, RequestType0, DocumentFormattingRequest, FormattingOptions, TextEdit,
+-	TextDocumentContentRequest
++	DocumentColorRequest, ColorPresentationRequest, TextDocumentSyncKind, NotificationType, RequestType0, DocumentFormattingRequest, FormattingOptions, TextEdit
+ } from 'vscode-languageserver';
+ import {
+ 	getLanguageModes, LanguageModes, Settings, TextDocument, Position, Diagnostic, WorkspaceFolder, ColorInformation,
+-	Range, DocumentLink, SymbolInformation, TextDocumentIdentifier, isCompletionItemData, FILE_PROTOCOL
++	Range, DocumentLink, SymbolInformation, TextDocumentIdentifier, isCompletionItemData
+ } from './modes/languageModes';
+ 
+ import { format } from './modes/formatting';
+@@ -215,9 +214,6 @@ export function startServer(connection:
+ 				interFileDependencies: false,
+ 				workspaceDiagnostics: false
+ 			},
+-			workspace: {
+-				textDocumentContent: { schemes: [FILE_PROTOCOL] }
+-			}
+ 		};
+ 		return { capabilities };
+ 	});
+@@ -588,18 +584,6 @@ export function startServer(connection:
+ 		});
+ 	});
+ 
+-	connection.onRequest(TextDocumentContentRequest.type, (params, token) => {
+-		return runSafe(runtime, async () => {
+-			for (const languageMode of languageModes.getAllModes()) {
+-				const content = await languageMode.getTextDocumentContent?.(params.uri);
+-				if (content) {
+-					return { text: content };
+-				}
+-			}
+-			return null;
+-		}, null, `Error while computing text document content for ${params.uri}`, token);
+-	});
+-
+ 	// Listen on the connection
+ 	connection.listen();
+ }

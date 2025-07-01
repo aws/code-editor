@@ -17,7 +17,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  interface ISecretStorageCrypto {
  	seal(data: string): Promise<string>;
  	unseal(data: string): Promise<string>;
-@@ -575,7 +577,7 @@ function readCookie(name: string): strin
+@@ -591,7 +593,7 @@ function readCookie(name: string): strin
  }
  
  (function () {
@@ -26,7 +26,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  	// Find config by checking for DOM
  	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');
  	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
-@@ -598,4 +600,13 @@ function readCookie(name: string): strin
+@@ -614,4 +616,13 @@ function readCookie(name: string): strin
  			? undefined /* with a remote without embedder-preferred storage, store on the remote */
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
  	});

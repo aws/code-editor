@@ -44,10 +44,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/product.json
  	"win32DirName": "Microsoft Code OSS",
  	"win32NameVersion": "Microsoft Code OSS",
  	"win32RegValueName": "CodeOSS",
-@@ -25,9 +39,9 @@
- 	"win32TunnelServiceMutex": "vscodeoss-tunnelservice",
- 	"win32TunnelMutex": "vscodeoss-tunnel",
+@@ -27,9 +41,9 @@
  	"darwinBundleIdentifier": "com.visualstudio.code.oss",
+ 	"darwinProfileUUID": "47827DD9-4734-49A0-AF80-7E19B11495CC",
+ 	"darwinProfilePayloadUUID": "CF808BE7-53F3-46C6-A7E2-7EDB98A5E959",
 -	"linuxIconName": "code-oss",
 +	"linuxIconName": "code-editor",
  	"licenseFileName": "LICENSE.txt",
@@ -60,7 +60,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/p
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/product/common/product.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/product.ts
-@@ -59,8 +59,8 @@ else {
+@@ -61,8 +61,8 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
  			version: '1.95.0-dev',
@@ -75,7 +75,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcome
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-@@ -822,8 +822,8 @@ export class GettingStartedPage extends
+@@ -872,8 +872,8 @@ export class GettingStartedPage extends
  		}));
  
  		const header = $('.header', {},
@@ -117,7 +117,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/d
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-@@ -78,7 +78,7 @@ export class BrowserDialogHandler extend
+@@ -79,7 +79,7 @@ export class BrowserDialogHandler extend
  	async about(): Promise<void> {
  		const detailString = (useAgo: boolean): string => {
  			return localize('aboutDetail',
@@ -130,7 +130,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.commo
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
-@@ -327,7 +327,7 @@ import './contrib/surveys/browser/langua
+@@ -339,7 +339,7 @@ import './contrib/surveys/browser/langua
  
  // Welcome
  import './contrib/welcomeGettingStarted/browser/gettingStarted.contribution.js';
@@ -139,30 +139,3 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.commo
  import './contrib/welcomeViews/common/viewsWelcome.contribution.js';
  import './contrib/welcomeViews/common/newFile.contribution.js';
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
-===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/themes/common/themeConfiguration.ts
-@@ -34,7 +34,7 @@ export const COLOR_THEME_CONFIGURATION_S
- const colorThemeSettingSchema: IConfigurationPropertySchema = {
- 	type: 'string',
- 	markdownDescription: nls.localize({ key: 'colorTheme', comment: ['{0} will become a link to another setting.'] }, "Specifies the color theme used in the workbench when {0} is not enabled.", formatSettingAsLink(ThemeSettings.DETECT_COLOR_SCHEME)),
--	default: isWeb ? ThemeSettingDefaults.COLOR_THEME_LIGHT : ThemeSettingDefaults.COLOR_THEME_DARK,
-+	default: new URL(location.href).searchParams.get("darkTheme") ? ThemeSettingDefaults.COLOR_THEME_DARK : ThemeSettingDefaults.COLOR_THEME_LIGHT,
- 	tags: [COLOR_THEME_CONFIGURATION_SETTINGS_TAG],
- 	enum: colorThemeSettingEnum,
- 	enumDescriptions: colorThemeSettingEnumDescriptions,
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
-===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/common/remote.contribution.ts
-@@ -45,7 +45,8 @@ export class LabelContribution implement
- 				separator: os === OperatingSystem.Windows ? '\\' : '/',
- 				tildify: os !== OperatingSystem.Windows,
- 				normalizeDriveLetter: os === OperatingSystem.Windows,
--				workspaceSuffix: isWeb ? undefined : Schemas.vscodeRemote
-+				// display environment name instead of vfs url
-+				workspaceSuffix: new URLSearchParams(location.search).get("env-name") || undefined
- 			};
- 			this.labelService.registerFormatter({
- 				scheme: Schemas.vscodeRemote,

@@ -11,7 +11,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  
  interface ISecretStorageCrypto {
  	seal(data: string): Promise<string>;
-@@ -613,6 +614,20 @@ function readCookie(name: string): strin
+@@ -629,6 +630,20 @@ function readCookie(name: string): strin
  		settingsSyncOptions: config.settingsSyncOptions ? { enabled: config.settingsSyncOptions.enabled, } : undefined,
  		workspaceProvider: WorkspaceProvider.create(config),
  		urlCallbackProvider: new LocalStorageURLCallbackProvider(config.callbackRoute),
@@ -21,7 +21,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 +			if (localhostMatch && resolvedUri.authority !== location.host) {
 +				if (config?.productConfiguration?.rootEndpoint) {
 +					const proxyUri = `${config?.productConfiguration.rootEndpoint}/ports/${localhostMatch.port}/`;
-+					resolvedUri = URI.parse(new URL(proxyUri, globalThis._VSCODE_REMOTE_URL.href).toString())
++					resolvedUri = URI.parse(new URL(proxyUri, window.location.href).toString())
 +				} else {
 +					throw new Error(`Failed to resolve external URI: ${uri.toString()}. Could not determine base url because productConfiguration missing.`)
 +				}
@@ -41,9 +41,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/proxyServer.t
 +import * as http from "http";
 +import * as net from "net";
 +import * as url from "url";
-+import {SocketServer} from "./serverServices";
-+import {RemoteAgentConnectionContext} from "../../platform/remote/common/remoteAgentEnvironment";
-+import {IServerChannel} from "../../base/parts/ipc/common/ipc";
++import {SocketServer} from "./serverServices.js";
++import {RemoteAgentConnectionContext} from "../../platform/remote/common/remoteAgentEnvironment.js";
++import {IServerChannel} from "../../base/parts/ipc/common/ipc.js";
 +import {Emitter, Event} from "../../base/common/event.js";
 +
 +type ProxyRequest = {
@@ -241,11 +241,11 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  	private readonly _allReconnectionTokens: Set<string>;
  	private readonly _webClientServer: WebClientServer | null;
 +	private readonly _proxyServer: ProxyServer | null;
- 	private readonly _webEndpointOriginChecker = WebEndpointOriginChecker.create(this._productService);
+ 	private readonly _webEndpointOriginChecker: WebEndpointOriginChecker;
  
- 	private readonly _serverRootPath: string;
-@@ -92,12 +95,24 @@ class RemoteExtensionHostAgentServer ext
- 				? this._instantiationService.createInstance(WebClientServer, this._connectionToken, serverBasePath ?? '/', this._serverRootPath)
+ 	private readonly _serverBasePath: string | undefined;
+@@ -99,12 +102,24 @@ class RemoteExtensionHostAgentServer ext
+ 				? this._instantiationService.createInstance(WebClientServer, this._connectionToken, serverBasePath ?? '/', this._serverProductPath)
  				: null
  		);
 +		this._proxyServer = (
@@ -269,7 +269,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  		// Only serve GET requests
  		if (req.method !== 'GET') {
  			return serveError(req, res, 405, `Unsupported method ${req.method}`);
-@@ -122,7 +137,6 @@ class RemoteExtensionHostAgentServer ext
+@@ -133,7 +148,6 @@ class RemoteExtensionHostAgentServer ext
  		// Custom health check endpoint
  		if (pathname === '/healthz') {
  			res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -277,7 +277,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  			return void res.end(JSON.stringify({ hasActiveConnections }));
  		}
  
-@@ -187,12 +201,17 @@ class RemoteExtensionHostAgentServer ext
+@@ -198,12 +212,17 @@ class RemoteExtensionHostAgentServer ext
  		return void res.end('Not found');
  	}
  
@@ -296,7 +296,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  			const query = url.parse(req.url, true).query;
  			if (typeof query.reconnectionToken === 'string') {
  				reconnectionToken = query.reconnectionToken;
-@@ -530,6 +549,8 @@ class RemoteExtensionHostAgentServer ext
+@@ -541,6 +560,8 @@ class RemoteExtensionHostAgentServer ext
  			return this._rejectWebSocketConnection(logPrefix, protocol, `Unknown initial data received`);
  
  		}
@@ -305,7 +305,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  	}
  
  	private async _createTunnel(protocol: PersistentProtocol, tunnelStartParams: ITunnelConnectionStartParams): Promise<void> {
-@@ -662,7 +683,7 @@ export interface IServerAPI {
+@@ -673,7 +694,7 @@ export interface IServerAPI {
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */

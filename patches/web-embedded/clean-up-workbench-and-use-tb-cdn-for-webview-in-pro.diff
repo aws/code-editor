@@ -8,7 +8,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-@@ -576,15 +576,32 @@ function readCookie(name: string): strin
+@@ -592,15 +592,32 @@ function readCookie(name: string): strin
  	return undefined;
  }
  
@@ -44,7 +44,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  	const secretStorageKeyPath = readCookie('vscode-secret-key-path');
  	const secretStorageCrypto = secretStorageKeyPath && ServerKeyedAESCrypto.supported()
  		? new ServerKeyedAESCrypto(secretStorageKeyPath) : new TransparentCrypto();
-@@ -601,7 +620,6 @@ function readCookie(name: string): strin
+@@ -617,7 +634,6 @@ function readCookie(name: string): strin
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
  	});
  	const totalLoadTime = Date.now() - start;

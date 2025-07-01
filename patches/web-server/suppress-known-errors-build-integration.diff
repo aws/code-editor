@@ -2,9 +2,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
 +++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
-@@ -75,6 +75,8 @@ const serverResourceIncludes = [
+@@ -78,6 +78,8 @@ const serverResourceIncludes = [
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
- 	'out-build/vs/workbench/contrib/terminal/common/scripts/fish_xdg_data/fish/vendor_conf.d/shellIntegration.fish',
+ 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',
  
 +	// Error handler
 +	'out-build/vs/editor/common/errors/suppressedErrors.js'
@@ -23,7 +23,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 +	prevents Code OSS from crashing on error, but also prevents us from listening to
 +	these errors. Here, we monkey patch console.error to allow reporting of Code OSS
 +	error metrics to parent origin using window.postMessage. The parent origin which hosts
-+	Code OSS in an iFrame is then responsible for processing Code OSS errors. 
++	Code OSS in an iFrame is then responsible for processing Code OSS errors.
 +	A more "correct" implementation would be to implement a custom Code OSS telemetry handler class.
 +	-->
 +	<script id="suppress-error-helper" error-file-dir="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors" src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors/suppressedErrors.js"></script>
@@ -47,7 +47,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 +	</script>
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
- 		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
+ 		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
 Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
@@ -60,7 +60,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 +	prevents Code OSS from crashing on error, but also prevents us from listening to
 +	these errors. Here, we monkey patch console.error to allow reporting of Code OSS
 +	error metrics to parent origin using window.postMessage. The parent origin which hosts
-+	Code OSS in an iFrame is then responsible for processing Code OSS errors. 
++	Code OSS in an iFrame is then responsible for processing Code OSS errors.
 +	A more "correct" implementation would be to implement a custom Code OSS telemetry handler class.
 +	-->
 +	<script id="suppress-error-helper" error-file-dir="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors" src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/editor/common/errors/suppressedErrors.js"></script>
@@ -84,4 +84,4 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
 +	</script>
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
- 		globalThis._VSCODE_REMOTE_URL = new URL(location.href.replace(/[?#].*/, "").replace(/\/+[^\/]*$/, "/"));
+ 		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();

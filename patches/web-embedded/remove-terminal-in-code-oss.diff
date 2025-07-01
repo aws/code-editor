@@ -9,9 +9,9 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
 ===================================================================
 --- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 +++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-@@ -4,9 +4,7 @@
-  *--------------------------------------------------------------------------------------------*/
+@@ -5,9 +5,7 @@
  
+ import { getFontSnippets } from '../../../../base/browser/fonts.js';
  import { KeyCode, KeyMod } from '../../../../base/common/keyCodes.js';
 -import { Schemas } from '../../../../base/common/network.js';
  import { isIOS, isWindows } from '../../../../base/common/platform.js';
@@ -19,7 +19,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
  import './media/terminal.css';
  import './media/terminalVoice.css';
  import './media/widgets.css';
-@@ -14,40 +12,26 @@ import './media/xterm.css';
+@@ -15,40 +13,26 @@ import './media/xterm.css';
  import * as nls from '../../../../nls.js';
  import { CONTEXT_ACCESSIBILITY_MODE_ENABLED } from '../../../../platform/accessibility/common/accessibility.js';
  import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
@@ -60,11 +60,11 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
  import { TerminalContextKeyStrings, TerminalContextKeys } from '../common/terminalContextKey.js';
 -import { terminalStrings } from '../common/terminalStrings.js';
  import { registerSendSequenceKeybinding } from './terminalKeybindings.js';
+ import { TerminalTelemetryContribution } from './terminalTelemetry.js';
  
- // Register services
-@@ -68,68 +52,6 @@ registerWorkbenchContribution2(RemoteTer
+@@ -71,68 +55,6 @@ registerWorkbenchContribution2(TerminalT
  registerTerminalPlatformConfiguration();
- registerTerminalConfiguration();
+ registerTerminalConfiguration(getFontSnippets);
  
 -// Register editor/dnd contributions
 -Registry.as<IEditorFactoryRegistry>(EditorExtensions.EditorFactory).registerEditorSerializer(TerminalEditorInput.ID, TerminalInputSerializer);
@@ -114,7 +114,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
 -	id: TERMINAL_VIEW_ID,
 -	name: nls.localize2('terminal', "Terminal"),
 -	containerIcon: terminalViewIcon,
--	canToggleVisibility: false,
+-	canToggleVisibility: true,
 -	canMoveView: true,
 -	ctorDescriptor: new SyncDescriptor(TerminalViewPane),
 -	openCommandActionDescriptor: {
@@ -131,7 +131,7 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
  // Register actions
  registerTerminalActions();
  
-@@ -244,8 +166,4 @@ registerSendSequenceKeybinding('\u001f',
+@@ -247,8 +169,4 @@ registerSendSequenceKeybinding('\u001f',
  	mac: { primary: KeyMod.WinCtrl | KeyCode.Slash }
  });
  
