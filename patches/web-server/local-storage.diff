@@ -16,10 +16,10 @@ To test install the Vim extension and make sure something that uses file storage
 works (history recall for example) and change settings from the UI and on disk
 while making sure they appear on the other side.
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -359,6 +359,7 @@ export class WebClientServer {
  
  		const workbenchWebConfiguration = {
@@ -28,10 +28,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  			serverBasePath: basePath,
  			_wrapWebWorkerExtHostInIframe,
  			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/web.api.ts
+Index: third-party-src/src/vs/workbench/browser/web.api.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/web.api.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/web.api.ts
+--- third-party-src.orig/src/vs/workbench/browser/web.api.ts
++++ third-party-src/src/vs/workbench/browser/web.api.ts
 @@ -298,6 +298,11 @@ export interface IWorkbenchConstructionO
  	 */
  	readonly configurationDefaults?: Record<string, any>;
@@ -44,10 +44,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/web.api
  	//#endregion
  
  	//#region Profile options
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
+Index: third-party-src/src/vs/workbench/services/environment/browser/environmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
+--- third-party-src.orig/src/vs/workbench/services/environment/browser/environmentService.ts
++++ third-party-src/src/vs/workbench/services/environment/browser/environmentService.ts
 @@ -102,7 +102,14 @@ export class BrowserWorkbenchEnvironment
  	get logFile(): URI { return joinPath(this.windowLogsPath, 'window.log'); }
  

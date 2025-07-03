@@ -1,9 +1,9 @@
 Patch that is needed for producing internal builds.
 
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+Index: third-party-src/build/lib/mangle/index.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.ts
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
+--- third-party-src.orig/build/lib/mangle/index.ts
++++ third-party-src/build/lib/mangle/index.ts
 @@ -407,7 +407,7 @@ export class Mangler {
  	) {
  
@@ -13,10 +13,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.ts
  			minWorkers: 'max'
  		});
  	}
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+Index: third-party-src/build/lib/mangle/index.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/mangle/index.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
+--- third-party-src.orig/build/lib/mangle/index.js
++++ third-party-src/build/lib/mangle/index.js
 @@ -354,7 +354,7 @@ class Mangler {
          this.log = log;
          this.config = config;
@@ -26,10 +26,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/mangle/index.js
              minWorkers: 'max'
          });
      }
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+Index: third-party-src/build/lib/extensions.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
+--- third-party-src.orig/build/lib/extensions.js
++++ third-party-src/build/lib/extensions.js
 @@ -125,6 +125,21 @@ function fromLocal(extensionPath, forWeb
      }
      return input;
@@ -81,10 +81,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.js
          .then(fileNames => {
          const files = fileNames
              .map(fileName => path_1.default.join(extensionPath, fileName))
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+Index: third-party-src/build/lib/extensions.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/extensions.ts
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
+--- third-party-src.orig/build/lib/extensions.ts
++++ third-party-src/build/lib/extensions.ts
 @@ -89,6 +89,21 @@ function fromLocal(extensionPath: string
  	return input;
  }
@@ -138,10 +138,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/extensions.ts
  		.then(fileNames => {
  			const files = fileNames
  				.map(fileName => path.join(extensionPath, fileName))
-Index: AWSCodeOSS/build/private/code-editor-src/package.json
+Index: third-party-src/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/package.json
+--- third-party-src.orig/package.json
++++ third-party-src/package.json
 @@ -32,7 +32,7 @@
      "watch-extensionsd": "deemon npm run watch-extensions",
      "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
@@ -200,10 +200,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/package.json
      "@vscode/test-cli": "^0.0.6",
      "@vscode/test-electron": "^2.4.0",
      "@vscode/test-web": "^0.0.62",
-Index: AWSCodeOSS/build/private/code-editor-src/remote/package.json
+Index: third-party-src/remote/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/remote/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/remote/package.json
+--- third-party-src.orig/remote/package.json
++++ third-party-src/remote/package.json
 @@ -5,11 +5,10 @@
    "dependencies": {
      "@microsoft/1ds-core-js": "^3.2.13",
@@ -229,10 +229,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/remote/package.json
      "minimist": "^1.2.6",
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta33",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+Index: third-party-src/extensions/emmet/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/emmet/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
+--- third-party-src.orig/extensions/emmet/package.json
++++ third-party-src/extensions/emmet/package.json
 @@ -482,7 +482,7 @@
      "@types/node": "22.x"
    },
@@ -242,10 +242,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package.json
      "@emmetio/html-matcher": "^0.3.3",
      "@emmetio/math-expression": "^1.0.5",
      "@vscode/emmet-helper": "^2.8.8",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+Index: third-party-src/extensions/github/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/github/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
+--- third-party-src.orig/extensions/github/package.json
++++ third-party-src/extensions/github/package.json
 @@ -229,7 +229,7 @@
    },
    "dependencies": {
@@ -255,10 +255,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/github/package.json
      "@octokit/rest": "21.1.0",
      "tunnel": "^0.0.6",
      "@vscode/extension-telemetry": "^1.0.0"
-Index: AWSCodeOSS/build/private/code-editor-src/build/package.json
+Index: third-party-src/build/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/build/package.json
+--- third-party-src.orig/build/package.json
++++ third-party-src/build/package.json
 @@ -36,7 +36,6 @@
      "@types/workerpool": "^6.4.0",
      "@types/xml2js": "0.0.33",
@@ -267,10 +267,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/package.json
      "@vscode/vsce": "2.20.1",
      "byline": "^5.0.0",
      "cssnano": "^7.0.7",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/package.json
+Index: third-party-src/extensions/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/package.json
+--- third-party-src.orig/extensions/package.json
++++ third-party-src/extensions/package.json
 @@ -10,7 +10,7 @@
      "postinstall": "node ./postinstall.mjs"
    },
@@ -280,10 +280,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/package.json
      "esbuild": "0.25.0",
      "vscode-grammar-updater": "^1.1.0"
    },
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/package.json
+Index: third-party-src/extensions/css-language-features/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/package.json
+--- third-party-src.orig/extensions/css-language-features/package.json
++++ third-party-src/extensions/css-language-features/package.json
 @@ -994,7 +994,7 @@
      ]
    },
@@ -307,10 +307,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/package.json
+Index: third-party-src/extensions/html-language-features/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/package.json
+--- third-party-src.orig/extensions/html-language-features/package.json
++++ third-party-src/extensions/html-language-features/package.json
 @@ -259,7 +259,7 @@
    },
    "dependencies": {
@@ -334,10 +334,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-feature
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/package.json
+Index: third-party-src/extensions/json-language-features/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/package.json
+--- third-party-src.orig/extensions/json-language-features/package.json
++++ third-party-src/extensions/json-language-features/package.json
 @@ -170,7 +170,7 @@
    "dependencies": {
      "@vscode/extension-telemetry": "^0.9.8",
@@ -361,10 +361,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-feature
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/markdown-language-features/package.json
+Index: third-party-src/extensions/markdown-language-features/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/markdown-language-features/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/markdown-language-features/package.json
+--- third-party-src.orig/extensions/markdown-language-features/package.json
++++ third-party-src/extensions/markdown-language-features/package.json
 @@ -771,8 +771,8 @@
      "morphdom": "^2.7.4",
      "picomatch": "^2.3.1",
@@ -397,10 +397,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/markdown-language-fea
 +    "vscode-languageserver-textdocument": "1.0.11"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package.json
+Index: third-party-src/extensions/css-language-features/server/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/server/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package.json
+--- third-party-src.orig/extensions/css-language-features/server/package.json
++++ third-party-src/extensions/css-language-features/server/package.json
 @@ -12,7 +12,7 @@
    "dependencies": {
      "@vscode/l10n": "^0.0.18",
@@ -424,10 +424,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package.json
+Index: third-party-src/extensions/html-language-features/server/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package.json
+--- third-party-src.orig/extensions/html-language-features/server/package.json
++++ third-party-src/extensions/html-language-features/server/package.json
 @@ -12,8 +12,8 @@
      "@vscode/l10n": "^0.0.18",
      "vscode-css-languageservice": "^6.3.6",
@@ -453,10 +453,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-feature
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package.json
+Index: third-party-src/extensions/json-language-features/server/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/server/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package.json
+--- third-party-src.orig/extensions/json-language-features/server/package.json
++++ third-party-src/extensions/json-language-features/server/package.json
 @@ -16,7 +16,7 @@
      "jsonc-parser": "^3.3.1",
      "request-light": "^0.8.0",
@@ -480,10 +480,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-feature
 +    "vscode-languageserver-textdocument": "1.0.12"
    }
  }
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
+Index: third-party-src/extensions/css-language-features/server/package-lock.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features/server/package-lock.json
+--- third-party-src.orig/extensions/css-language-features/server/package-lock.json
++++ third-party-src/extensions/css-language-features/server/package-lock.json
 @@ -93,12 +93,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
@@ -497,10 +497,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/css-language-features
      "node_modules/vscode-languageserver-textdocument": {
        "version": "1.0.12",
        "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
+Index: third-party-src/extensions/html-language-features/server/package-lock.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/package-lock.json
+--- third-party-src.orig/extensions/html-language-features/server/package-lock.json
++++ third-party-src/extensions/html-language-features/server/package-lock.json
 @@ -107,12 +107,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
@@ -514,10 +514,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-feature
      "node_modules/vscode-languageserver-textdocument": {
        "version": "1.0.12",
        "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
+Index: third-party-src/extensions/json-language-features/server/package-lock.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/json-language-features/server/package-lock.json
+--- third-party-src.orig/extensions/json-language-features/server/package-lock.json
++++ third-party-src/extensions/json-language-features/server/package-lock.json
 @@ -109,12 +109,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
@@ -531,10 +531,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/json-language-feature
      "node_modules/vscode-languageserver-textdocument": {
        "version": "1.0.12",
        "resolved": "https://registry.npmjs.org/vscode-languageserver-textdocument/-/vscode-languageserver-textdocument-1.0.12.tgz",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package-lock.json
+Index: third-party-src/extensions/emmet/package-lock.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/emmet/package-lock.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package-lock.json
+--- third-party-src.orig/extensions/emmet/package-lock.json
++++ third-party-src/extensions/emmet/package-lock.json
 @@ -39,14 +39,6 @@
          "@emmetio/scanner": "^1.0.4"
        }
@@ -550,10 +550,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/emmet/package-lock.js
      "node_modules/@emmetio/html-matcher": {
        "version": "0.3.3",
        "resolved": "https://registry.npmjs.org/@emmetio/html-matcher/-/html-matcher-0.3.3.tgz",
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
+Index: third-party-src/extensions/html-language-features/server/src/htmlServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/html-language-features/server/src/htmlServer.ts
+--- third-party-src.orig/extensions/html-language-features/server/src/htmlServer.ts
++++ third-party-src/extensions/html-language-features/server/src/htmlServer.ts
 @@ -7,12 +7,11 @@ import {
  	Connection, TextDocuments, InitializeParams, InitializeResult, RequestType,
  	DocumentRangeFormattingRequest, Disposable, ServerCapabilities,

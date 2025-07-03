@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+Index: third-party-src/build/gulpfile.reh.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+--- third-party-src.orig/build/gulpfile.reh.js
++++ third-party-src/build/gulpfile.reh.js
 @@ -78,6 +78,8 @@ const serverResourceIncludes = [
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',
@@ -11,10 +11,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
  ];
  
  const serverResourceExcludes = [
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+Index: third-party-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.html
++++ third-party-src/src/vs/code/browser/workbench/workbench.html
 @@ -32,6 +32,32 @@
  	<body aria-label="">
  	</body>
@@ -48,10 +48,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
  		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench-dev.html
++++ third-party-src/src/vs/code/browser/workbench/workbench-dev.html
 @@ -35,6 +35,32 @@
  	<body aria-label="">
  	</body>

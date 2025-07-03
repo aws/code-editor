@@ -6,10 +6,10 @@ Remove new window actions and workspace section from profile page
  .../browser/userDataProfilesEditorModel.ts               | 9 ---------
  3 files changed, 12 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 @@ -126,7 +126,6 @@ export class UserDataProfilesWorkbenchCo
  		this._register(this.registerSwitchProfileAction());
  
@@ -18,10 +18,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDat
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 @@ -758,9 +758,7 @@ class ProfileTreeDataSource implements I
  					children.push({ element: 'name', root: element });
  					children.push({ element: 'icon', root: element });
@@ -32,10 +32,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDat
  			}
  			return children;
  		}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 @@ -983,17 +983,8 @@ export class UserDataProfilesEditorModel
  			() => this.removeProfile(profileElement.profile)
  		));

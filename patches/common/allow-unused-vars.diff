@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/tsconfig.base.json
+Index: third-party-src/src/tsconfig.base.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/tsconfig.base.json
-+++ AWSCodeOSS/build/private/code-editor-src/src/tsconfig.base.json
+--- third-party-src.orig/src/tsconfig.base.json
++++ third-party-src/src/tsconfig.base.json
 @@ -6,7 +6,7 @@
  		"experimentalDecorators": true,
  		"noImplicitReturns": true,
@@ -11,10 +11,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/tsconfig.base.json
  		"noUncheckedSideEffectImports": true,
  		"allowUnreachableCode": false,
  		"strict": true,
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
+Index: third-party-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
+--- third-party-src.orig/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
++++ third-party-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
 @@ -30,7 +30,7 @@ export interface IEndpointDetails {
  export class PreferencesSearchService extends Disposable implements IPreferencesSearchService {
  	declare readonly _serviceBrand: undefined;
@@ -24,10 +24,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/prefere
  	private _installedExtensions: Promise<ILocalExtension[]>;
  	private _remoteSearchProvider: IRemoteSearchProvider | undefined;
  	private _aiSearchProvider: IAiSearchProvider | undefined;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
+Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
+--- third-party-src.orig/src/vs/workbench/contrib/remote/browser/tunnelView.ts
++++ third-party-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
 @@ -762,7 +762,7 @@ export class TunnelPanel extends ViewPan
  	private protocolChangableContextKey: IContextKey<boolean>;
  	private isEditing: boolean = false;

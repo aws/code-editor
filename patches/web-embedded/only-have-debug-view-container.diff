@@ -5,10 +5,10 @@ Only have debug view container
  .../contrib/debug/browser/debugCommands.ts    |  39 +-
  2 files changed, 8 insertions(+), 610 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
 @@ -4,447 +4,26 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -704,10 +704,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/debug/b
 -AccessibleViewRegistry.register(new RunAndDebugAccessibilityHelp());
 -registerWorkbenchContribution2(ReplAccessibilityAnnouncer.ID, ReplAccessibilityAnnouncer, WorkbenchPhase.AfterRestored);
 -registerWorkbenchContribution2(DebugWatchAccessibilityAnnouncer.ID, DebugWatchAccessibilityAnnouncer, WorkbenchPhase.AfterRestored);
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debugCommands.ts
+Index: third-party-src/src/vs/workbench/contrib/debug/browser/debugCommands.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debugCommands.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/debug/browser/debugCommands.ts
+--- third-party-src.orig/src/vs/workbench/contrib/debug/browser/debugCommands.ts
++++ third-party-src/src/vs/workbench/contrib/debug/browser/debugCommands.ts
 @@ -8,11 +8,11 @@ import { KeyCode, KeyMod } from '../../.
  import { List } from '../../../../base/browser/ui/list/listWidget.js';
  import { KeybindingsRegistry, KeybindingWeight } from '../../../../platform/keybinding/common/keybindingsRegistry.js';

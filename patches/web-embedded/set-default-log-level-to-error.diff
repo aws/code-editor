@@ -4,10 +4,10 @@ Set default log level to error
  src/vs/platform/log/common/log.ts | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/log/common/log.ts AWSCodeOSS/build/private/code-editor-src/src/vs/platform/log/common/log.ts
+diff --git third-party-src.orig/src/vs/platform/log/common/log.ts third-party-src/src/vs/platform/log/common/log.ts
 index 28fc419..fa75b46 100644
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/log/common/log.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/log/common/log.ts
+--- third-party-src.orig/src/vs/platform/log/common/log.ts
++++ third-party-src/src/vs/platform/log/common/log.ts
 @@ -38,7 +38,7 @@ export enum LogLevel {
  	Error
  }

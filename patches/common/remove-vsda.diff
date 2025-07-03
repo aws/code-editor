@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/sign/browser/signService.ts
+Index: third-party-src/src/vs/platform/sign/browser/signService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/sign/browser/signService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/sign/browser/signService.ts
+--- third-party-src.orig/src/vs/platform/sign/browser/signService.ts
++++ third-party-src/src/vs/platform/sign/browser/signService.ts
 @@ -58,40 +58,12 @@ export class SignService extends Abstrac
  
  	@memoize

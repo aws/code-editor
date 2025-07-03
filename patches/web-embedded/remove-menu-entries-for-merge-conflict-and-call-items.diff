@@ -8,10 +8,10 @@ This patch remove the context menu entries for merge conflict options and merge 
  .../browser/parts/globalCompositeBar.ts       | 68 +++++++++----------
  4 files changed, 35 insertions(+), 71 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+Index: third-party-src/extensions/merge-conflict/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/merge-conflict/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/package.json
+--- third-party-src.orig/extensions/merge-conflict/package.json
++++ third-party-src/extensions/merge-conflict/package.json
 @@ -29,32 +29,6 @@
      "watch": "gulp watch-extension:merge-conflict"
    },
@@ -45,10 +45,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/merge-conflict/packag
      "configuration": {
        "title": "%config.title%",
        "properties": {
-Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+Index: third-party-src/extensions/references-view/package.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/extensions/references-view/package.json
-+++ AWSCodeOSS/build/private/code-editor-src/extensions/references-view/package.json
+--- third-party-src.orig/extensions/references-view/package.json
++++ third-party-src/extensions/references-view/package.json
 @@ -260,16 +260,6 @@
            "when": "view == references-view.tree && viewItem == file-item || view == references-view.tree && viewItem == reference-item"
          },
@@ -66,10 +66,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/extensions/references-view/packa
            "command": "references-view.showSupertypes",
            "group": "1",
            "when": "view == references-view.tree && viewItem == type-item"
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+Index: third-party-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+--- third-party-src.orig/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
++++ third-party-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
 @@ -257,7 +257,6 @@ export class ActivityBarCompositeBar ext
  		// Global Composite Bar
  		if (this.globalCompositeBar) {

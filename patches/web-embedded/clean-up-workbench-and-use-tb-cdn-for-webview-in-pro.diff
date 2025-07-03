@@ -4,10 +4,10 @@ Clean up workbench and use TB CDN for webview in prod
  src/vs/code/browser/workbench/workbench.ts | 23 ++++++++++++++--------
  1 file changed, 15 insertions(+), 8 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
 @@ -592,15 +592,32 @@ function readCookie(name: string): strin
  	return undefined;
  }

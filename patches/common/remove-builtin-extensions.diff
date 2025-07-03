@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/product.json
+Index: third-party-src/product.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/product.json
-+++ AWSCodeOSS/build/private/code-editor-src/product.json
+--- third-party-src.orig/product.json
++++ third-party-src/product.json
 @@ -34,54 +34,6 @@
  	"urlProtocol": "code-oss",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",

@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+--- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 @@ -79,8 +79,8 @@
  			if (event.origin !== parentOrigin || event.data.type !== bootstrapNlsType) {
  				return;
@@ -51,10 +51,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
  				} else {
  					worker.onerror = console.error.bind(console);
  					window.parent.postMessage({
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+Index: third-party-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+--- third-party-src.orig/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
++++ third-party-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
 @@ -3,7 +3,25 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/

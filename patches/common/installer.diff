@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+Index: third-party-src/build/gulpfile.reh.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+--- third-party-src.orig/build/gulpfile.reh.js
++++ third-party-src/build/gulpfile.reh.js
 @@ -32,6 +32,7 @@ const { vscodeWebResourceIncludes, creat
  const cp = require('child_process');
  const log = require('fancy-log');
@@ -102,20 +102,20 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
  
  			const serverTaskCI = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci`, task.series(
  				compileNativeExtensionsBuildTask,
-Index: AWSCodeOSS/build/private/code-editor-src/build/npm/postinstall.js
+Index: third-party-src/build/npm/postinstall.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/npm/postinstall.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/npm/postinstall.js
+--- third-party-src.orig/build/npm/postinstall.js
++++ third-party-src/build/npm/postinstall.js
 @@ -170,5 +170,3 @@ for (let dir of dirs) {
  	npmInstall(dir, opts);
  }
  
 -cp.execSync('git config pull.rebase merges');
 -cp.execSync('git config blame.ignoreRevsFile .git-blame-ignore-revs');
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/compilation.js
+Index: third-party-src/build/lib/compilation.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/compilation.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/compilation.js
+--- third-party-src.orig/build/lib/compilation.js
++++ third-party-src/build/lib/compilation.js
 @@ -149,7 +149,7 @@ function compileTask(src, out, build, op
          }
          // mangle: TypeScript to TypeScript
@@ -125,10 +125,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/compilation.js
              let ts2tsMangler = new index_1.Mangler(compile.projectPath, (...data) => (0, fancy_log_1.default)(ansi_colors_1.default.blue('[mangler]'), ...data), { mangleExports: true, manglePrivateFields: true });
              const newContentsByFileName = ts2tsMangler.computeNewFileContents(new Set(['saveState']));
              mangleStream = event_stream_1.default.through(async function write(data) {
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/dependencies.js
+Index: third-party-src/build/lib/dependencies.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/dependencies.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/dependencies.js
+--- third-party-src.orig/build/lib/dependencies.js
++++ third-party-src/build/lib/dependencies.js
 @@ -24,13 +24,14 @@ function getNpmProductionDependencies(fo
              if (/ELSPROBLEMS/.test(match[0])) {
                  continue;
@@ -146,10 +146,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/dependencies.js
                  throw err;
              }
          }
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.extensions.js
+Index: third-party-src/build/gulpfile.extensions.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.extensions.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.extensions.js
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
 @@ -102,7 +102,7 @@ const tasks = compilations.map(function
  		headerOut = relativeDirname.substr(index + 1) + '/out';
  	}
@@ -159,10 +159,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.extensions.js
  		const tsb = require('./lib/tsb');
  		const sourcemaps = require('gulp-sourcemaps');
  
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.js
+Index: third-party-src/build/lib/optimize.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/optimize.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.js
+--- third-party-src.orig/build/lib/optimize.js
++++ third-party-src/build/lib/optimize.js
 @@ -144,6 +144,7 @@ function bundleESMTask(opts) {
                  outdir: path_1.default.join(REPO_ROOT_PATH, opts.src),
                  write: false, // enables res.outputFiles
@@ -171,10 +171,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.js
                  // minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
              }).then(res => {
                  for (const file of res.outputFiles) {
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.ts
+Index: third-party-src/build/lib/optimize.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/optimize.ts
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.ts
+--- third-party-src.orig/build/lib/optimize.ts
++++ third-party-src/build/lib/optimize.ts
 @@ -145,6 +145,7 @@ function bundleESMTask(opts: IBundleESMT
  				outdir: path.join(REPO_ROOT_PATH, opts.src),
  				write: false, // enables res.outputFiles
@@ -183,10 +183,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/optimize.ts
  				// minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
  			}).then(res => {
  				for (const file of res.outputFiles) {
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.js
+Index: third-party-src/build/lib/getVersion.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/getVersion.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.js
+--- third-party-src.orig/build/lib/getVersion.js
++++ third-party-src/build/lib/getVersion.js
 @@ -44,6 +44,6 @@ function getVersion(root) {
      if (!version || !/^[0-9a-f]{40}$/i.test(version.trim())) {
          version = git.getVersion(root);
@@ -196,10 +196,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.js
  }
  //# sourceMappingURL=getVersion.js.map
 \ No newline at end of file
-Index: AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.ts
+Index: third-party-src/build/lib/getVersion.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/lib/getVersion.ts
-+++ AWSCodeOSS/build/private/code-editor-src/build/lib/getVersion.ts
+--- third-party-src.orig/build/lib/getVersion.ts
++++ third-party-src/build/lib/getVersion.ts
 @@ -12,5 +12,5 @@ export function getVersion(root: string)
  		version = git.getVersion(root);
  	}

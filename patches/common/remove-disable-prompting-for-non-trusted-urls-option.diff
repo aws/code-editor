@@ -5,10 +5,10 @@ Remove option to disable prompting for non-trusted external URLs
  .../contrib/url/browser/url.contribution.ts      | 16 ----------------
  2 files changed, 22 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+--- third-party-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
++++ third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
 @@ -8,7 +8,6 @@ import Severity from '../../../../base/c
  import { URI } from '../../../../base/common/uri.js';
  import { localize } from '../../../../nls.js';
@@ -45,10 +45,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/bro
  		const originalResource = resource;
  		let resourceUri: URI;
  		if (typeof resource === 'string') {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/url/browser/url.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
 @@ -18,8 +18,6 @@ import { TrustedDomainsFileSystemProvide
  import { OpenerValidatorContributions } from './trustedDomainsValidator.js';
  import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';

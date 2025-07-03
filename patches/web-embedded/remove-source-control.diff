@@ -5,10 +5,10 @@ This patch removes the entire source control (SCM) feature from CODE OSS as it i
  .../contrib/scm/browser/scm.contribution.ts   | 444 +-----------------
  1 file changed, 1 insertion(+), 443 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 @@ -3,650 +3,15 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/

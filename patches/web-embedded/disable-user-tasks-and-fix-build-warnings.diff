@@ -6,10 +6,10 @@ This patch disables user-facing task-related functionality in the codebase.
  .../browser/configurationService.ts           |   1 -
  2 files changed, 159 insertions(+), 167 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
 @@ -50,16 +50,6 @@ import { ITerminalInstance, ITerminalSer
  const workbenchRegistry = Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench);
  workbenchRegistry.registerWorkbenchContribution(RunAutomaticTasks, LifecyclePhase.Eventually);

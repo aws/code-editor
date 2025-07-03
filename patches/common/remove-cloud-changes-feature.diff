@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+Index: third-party-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+--- third-party-src.orig/src/vs/workbench/workbench.common.main.ts
++++ third-party-src/src/vs/workbench/workbench.common.main.ts
 @@ -368,9 +368,6 @@ import './contrib/userDataSync/browser/u
  // User Data Profiles
  import './contrib/userDataProfile/browser/userDataProfile.contribution.js';

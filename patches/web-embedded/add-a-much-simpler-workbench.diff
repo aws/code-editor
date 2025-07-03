@@ -7,10 +7,10 @@ workbench HTML file at compile time.
  src/vs/code/browser/workbench/workbench.ts | 634 ++-------------------
  1 file changed, 52 insertions(+), 582 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
 @@ -3,594 +3,14 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/

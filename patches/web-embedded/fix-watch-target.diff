@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/scripts/code-web.sh
+Index: third-party-src/scripts/code-web.sh
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/scripts/code-web.sh
-+++ AWSCodeOSS/build/private/code-editor-src/scripts/code-web.sh
+--- third-party-src.orig/scripts/code-web.sh
++++ third-party-src/scripts/code-web.sh
 @@ -24,4 +24,9 @@ function code() {
  	$NODE ./scripts/code-web.js "$@"
  }

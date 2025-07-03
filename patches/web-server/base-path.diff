@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/network.ts
+Index: third-party-src/src/vs/base/common/network.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/base/common/network.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/network.ts
+--- third-party-src.orig/src/vs/base/common/network.ts
++++ third-party-src/src/vs/base/common/network.ts
 @@ -220,7 +220,9 @@ class RemoteAuthoritiesImpl {
  		return URI.from({
  			scheme: platform.isWeb ? this._preferredWebSchema : Schemas.vscodeRemoteResource,
@@ -13,10 +13,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/network.ts
  			query
  		});
  	}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/product.ts
+Index: third-party-src/src/vs/base/common/product.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/base/common/product.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/product.ts
+--- third-party-src.orig/src/vs/base/common/product.ts
++++ third-party-src/src/vs/base/common/product.ts
 @@ -56,6 +56,7 @@ export type ExtensionVirtualWorkspaceSup
  };
  
@@ -25,10 +25,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/base/common/product.ts
  	readonly version: string;
  	readonly date?: string;
  	readonly quality?: string;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench-dev.html
++++ third-party-src/src/vs/code/browser/workbench/workbench-dev.html
 @@ -63,7 +63,7 @@
  	</script>
  	<!-- Startup (do not modify order of script tags!) -->
@@ -38,10 +38,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+Index: third-party-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.html
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.html
++++ third-party-src/src/vs/code/browser/workbench/workbench.html
 @@ -60,7 +60,7 @@
  	</script>
  	<!-- Startup (do not modify order of script tags!) -->
@@ -51,10 +51,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
 @@ -332,7 +332,8 @@ class LocalStorageURLCallbackProvider ex
  			this.startListening();
  		}
@@ -65,10 +65,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  	}
  
  	private startListening(): void {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+--- third-party-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
++++ third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 @@ -120,7 +120,7 @@ export abstract class AbstractExtensionR
  					: version,
  				path: 'extension'
@@ -78,10 +78,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourc
  		}
  		return undefined;
  	}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -245,7 +245,10 @@ export class WebClientServer {
  		};
  
@@ -192,10 +192,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
 +	const parts = originalUrl.split("?", 1)[0].split("/")
 +	return normalizeUrlPath("./" + parts[parts.length - 1])
 +}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
+Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
+--- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
++++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
 @@ -91,6 +91,9 @@ export const serverOptions: OptionDescri
  
  	'compatibility': { type: 'string' },
@@ -216,10 +216,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnviron
  	_: string[];
  }
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/remote/browser/browserSocketFactory.ts
+Index: third-party-src/src/vs/platform/remote/browser/browserSocketFactory.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/remote/browser/browserSocketFactory.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/remote/browser/browserSocketFactory.ts
+--- third-party-src.orig/src/vs/platform/remote/browser/browserSocketFactory.ts
++++ third-party-src/src/vs/platform/remote/browser/browserSocketFactory.ts
 @@ -281,6 +281,7 @@ export class BrowserSocketFactory implem
  	connect({ host, port }: WebSocketRemoteConnection, path: string, query: string, debugLabel: string): Promise<ISocket> {
  		return new Promise<ISocket>((resolve, reject) => {

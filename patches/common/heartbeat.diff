@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+--- third-party-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 @@ -130,6 +130,13 @@ class RemoteExtensionHostAgentServer ext
  			pathname = pathname.substring(this._serverProductPath.length);
  		}

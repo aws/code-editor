@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/update/common/update.config.contribution.ts
+Index: third-party-src/src/vs/platform/update/common/update.config.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/update/common/update.config.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/update/common/update.config.contribution.ts
+--- third-party-src.orig/src/vs/platform/update/common/update.config.contribution.ts
++++ third-party-src/src/vs/platform/update/common/update.config.contribution.ts
 @@ -18,7 +18,7 @@ configurationRegistry.registerConfigurat
  		'update.mode': {
  			type: 'string',
@@ -29,10 +29,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/update/common/up
  			scope: ConfigurationScope.APPLICATION,
  			description: localize('showReleaseNotes', "Show Release Notes after an update. The Release Notes are fetched from a Microsoft online service."),
  			tags: ['usesOnlineServices']
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
+Index: third-party-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
++++ third-party-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
 @@ -111,7 +111,7 @@ registry.registerConfiguration({
  		'workbench.settings.enableNaturalLanguageSearch': {
  			'type': 'boolean',
@@ -42,10 +42,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/prefere
  			'scope': ConfigurationScope.WINDOW,
  			'tags': ['usesOnlineServices']
  		},
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/assignment/common/assignmentService.ts
+Index: third-party-src/src/vs/workbench/services/assignment/common/assignmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/assignment/common/assignmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/assignment/common/assignmentService.ts
+--- third-party-src.orig/src/vs/workbench/services/assignment/common/assignmentService.ts
++++ third-party-src/src/vs/workbench/services/assignment/common/assignmentService.ts
 @@ -146,7 +146,7 @@ registry.registerConfiguration({
  		'workbench.enableExperiments': {
  			'type': 'boolean',

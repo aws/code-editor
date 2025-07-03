@@ -4,10 +4,10 @@ Add custom cache to scanUserExtensions in reducing of excessive extension fetch 
  .../browser/webExtensionsScannerService.ts                   | 5 ++++-
  1 file changed, 4 insertions(+), 1 deletion(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+Index: third-party-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+--- third-party-src.orig/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
++++ third-party-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
 @@ -100,6 +100,7 @@ export class WebExtensionsScannerService
  	private readonly customBuiltinExtensionsCacheResource: URI | undefined = undefined;
  	private readonly resourcesAccessQueueMap = new ResourceMap<Queue<IWebExtension[]>>();

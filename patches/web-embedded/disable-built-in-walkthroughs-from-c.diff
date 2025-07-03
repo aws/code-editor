@@ -6,10 +6,10 @@ This patch disables the built-in walkthroughs and welcome page functionality in 
  .../common/gettingStartedContent.ts           | 851 +++++++++---------
  2 files changed, 464 insertions(+), 473 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.contribution.ts
 @@ -4,15 +4,13 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -132,10 +132,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcome
  			'description': localize('workbench.startupEditor', "Controls which editor is shown at startup, if none are restored from the previous session.")
  		},
  		'workbench.welcomePage.preferReducedMotion': {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
+Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
+--- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
++++ third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
 @@ -7,14 +7,11 @@ import themePickerContent from './media/
  import themePickerSmallContent from './media/theme_picker_small.js';
  import notebookProfileContent from './media/notebookProfile.js';

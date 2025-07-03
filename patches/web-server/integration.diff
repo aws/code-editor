@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/product.json
+Index: third-party-src/product.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/product.json
-+++ AWSCodeOSS/build/private/code-editor-src/product.json
+--- third-party-src.orig/product.json
++++ third-party-src/product.json
 @@ -1,18 +1,32 @@
  {
 -	"nameShort": "Code - OSS",
@@ -56,10 +56,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/product.json
  	"nodejsRepository": "https://nodejs.org",
  	"urlProtocol": "code-oss",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/product.ts
+Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/product/common/product.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/product.ts
+--- third-party-src.orig/src/vs/platform/product/common/product.ts
++++ third-party-src/src/vs/platform/product/common/product.ts
 @@ -61,8 +61,8 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
@@ -71,10 +71,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/product/common/p
  			applicationName: 'code-oss',
  			dataFolderName: '.vscode-oss',
  			urlProtocol: 'code-oss',
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+--- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
++++ third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 @@ -872,8 +872,8 @@ export class GettingStartedPage extends
  		}));
  
@@ -86,10 +86,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcome
  		);
  
  		const leftColumn = $('.categories-column.categories-column-left', {},);
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/nls.ts
+Index: third-party-src/src/vs/nls.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/nls.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/nls.ts
+--- third-party-src.orig/src/vs/nls.ts
++++ third-party-src/src/vs/nls.ts
 @@ -43,6 +43,7 @@ function _format(message: string, args:
  		// FF3B and FF3D is the Unicode zenkaku representation for [ and ]
  		result = '\uFF3B' + result.replace(/[aouei]/g, '$&$&') + '\uFF3D';
@@ -98,10 +98,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/nls.ts
  
  	return result;
  }
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+Index: third-party-src/src/vs/workbench/api/common/extHostLocalizationService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+--- third-party-src.orig/src/vs/workbench/api/common/extHostLocalizationService.ts
++++ third-party-src/src/vs/workbench/api/common/extHostLocalizationService.ts
 @@ -46,7 +46,9 @@ export class ExtHostLocalizationService
  		if (!str) {
  			this.logService.warn(`Using default string since no string found in i18n bundle that has the key: ${key}`);
@@ -113,10 +113,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extH
  	}
  
  	getBundle(extensionId: string): { [key: string]: string } | undefined {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+--- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 @@ -79,7 +79,7 @@ export class BrowserDialogHandler extend
  	async about(): Promise<void> {
  		const detailString = (useAgo: boolean): string => {
@@ -126,10 +126,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/d
  				this.productService.version || 'Unknown',
  				this.productService.commit || 'Unknown',
  				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+Index: third-party-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.common.main.ts
+--- third-party-src.orig/src/vs/workbench/workbench.common.main.ts
++++ third-party-src/src/vs/workbench/workbench.common.main.ts
 @@ -339,7 +339,7 @@ import './contrib/surveys/browser/langua
  
  // Welcome

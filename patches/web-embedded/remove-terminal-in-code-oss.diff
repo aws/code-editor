@@ -5,10 +5,10 @@ This patch removes the entire terminal functionality from Code OSS, including al
  .../terminal/browser/terminal.contribution.ts | 92 +------------------
  1 file changed, 2 insertions(+), 90 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 @@ -5,9 +5,7 @@
  
  import { getFontSnippets } from '../../../../base/browser/fonts.js';
@@ -140,10 +140,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/termina
 -setupTerminalMenus();
 -
  registerColors();
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 @@ -27,10 +27,6 @@ quickAccessRegistry.registerQuickAccessP
  	placeholder: nls.localize('tasksQuickAccessPlaceholder', "Type the name of a terminal to open."),
  	helpEntries: [{ description: nls.localize('tasksQuickAccessHelp', "Show All Opened Terminals"), commandId: TerminalQuickAccessCommandId.QuickOpenTerm }]

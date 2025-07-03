@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+Index: third-party-src/src/vs/workbench/contrib/files/common/explorerModel.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+--- third-party-src.orig/src/vs/workbench/contrib/files/common/explorerModel.ts
++++ third-party-src/src/vs/workbench/contrib/files/common/explorerModel.ts
 @@ -92,9 +92,10 @@ export class ExplorerItem {
  
  	public nestedParent: ExplorerItem | undefined;

@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
+Index: third-party-src/src/vs/editor/common/errors/suppressedErrors.js
 ===================================================================
 --- /dev/null
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
++++ third-party-src/src/vs/editor/common/errors/suppressedErrors.js
 @@ -0,0 +1,58 @@
 +/**
 + * 

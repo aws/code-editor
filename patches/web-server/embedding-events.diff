@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
+Index: third-party-src/src/vs/workbench/contrib/remote/browser/remote.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/remote.ts
+--- third-party-src.orig/src/vs/workbench/contrib/remote/browser/remote.ts
++++ third-party-src/src/vs/workbench/contrib/remote/browser/remote.ts
 @@ -1048,6 +1048,25 @@ export class RemoteAgentConnectionStatus
  						break;
  				}
@@ -28,10 +28,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/
  		}
  	}
  }
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+--- third-party-src.orig/src/vs/workbench/browser/actions/windowActions.ts
++++ third-party-src/src/vs/workbench/browser/actions/windowActions.ts
 @@ -410,6 +410,20 @@ class BlurAction extends Action2 {
  	}
  }
@@ -70,10 +70,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/actions
 +window.addEventListener('pagehide', function () {
 +	window.top?.postMessage({source: 'code-editor', action: 'reload'}, '*');
 +});
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
 @@ -487,6 +487,24 @@ class WorkspaceProvider implements IWork
  
  		const targetHref = this.createTargetUrl(workspace, options);
@@ -99,10 +99,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  			if (options?.reuse) {
  				mainWindow.location.href = targetHref;
  				return true;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
+Index: third-party-src/src/vs/workbench/browser/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/workbench.ts
+--- third-party-src.orig/src/vs/workbench/browser/workbench.ts
++++ third-party-src/src/vs/workbench/browser/workbench.ts
 @@ -169,6 +169,8 @@ export class Workbench extends Layout {
  		} catch (error) {
  			onUnexpectedError(error);

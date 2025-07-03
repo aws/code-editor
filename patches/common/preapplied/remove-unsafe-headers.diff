@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench-dev.html
+Index: third-party-src/src/vs/code/electron-sandbox/workbench/workbench-dev.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench-dev.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench-dev.html
+--- third-party-src.orig/src/vs/code/electron-sandbox/workbench/workbench-dev.html
++++ third-party-src/src/vs/code/electron-sandbox/workbench/workbench-dev.html
 @@ -26,7 +26,7 @@
  				;
  				script-src
@@ -11,10 +11,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/wor
  					blob:
  					'nonce-0c6a828f1297'
  				;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench.html
+Index: third-party-src/src/vs/code/electron-sandbox/workbench/workbench.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/workbench/workbench.html
+--- third-party-src.orig/src/vs/code/electron-sandbox/workbench/workbench.html
++++ third-party-src/src/vs/code/electron-sandbox/workbench/workbench.html
 @@ -26,7 +26,7 @@
  				;
  				script-src
@@ -24,10 +24,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/electron-sandbox/wor
  					blob:
  				;
  				style-src
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -423,7 +423,7 @@ export class WebClientServer {
  			'default-src \'self\';',
  			'img-src \'self\' https: data: blob:;',
@@ -37,10 +37,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  			'child-src \'self\';',
  			`frame-src 'self' https://*.vscode-cdn.net data:;`,
  			'worker-src \'self\' data: blob:;',
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+Index: third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+--- third-party-src.orig/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
++++ third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
 @@ -319,7 +319,7 @@ export class BackLayerWebView<T extends ICommonCellInfo> extends Themable {
  				${enableCsp ?
  				`<meta http-equiv="Content-Security-Policy" content="
@@ -50,10 +50,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/noteboo
  					style-src ${webviewGenericCspSource} 'unsafe-inline';
  					img-src ${webviewGenericCspSource} https: http: data:;
  					font-src ${webviewGenericCspSource} https:;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+--- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 @@ -4,7 +4,7 @@
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';

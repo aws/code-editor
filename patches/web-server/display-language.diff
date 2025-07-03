@@ -8,10 +8,10 @@ downloading language packs from a URL configured in the product.json. This patch
 supports language pack extensions and uses files on the remote to set the
 language instead, so it works like the desktop version.
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverServices.ts
+Index: third-party-src/src/vs/server/node/serverServices.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/serverServices.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverServices.ts
+--- third-party-src.orig/src/vs/server/node/serverServices.ts
++++ third-party-src/src/vs/server/node/serverServices.ts
 @@ -11,7 +11,7 @@ import * as path from '../../base/common
  import { IURITransformer } from '../../base/common/uriIpc.js';
  import { getMachineId, getSqmMachineId, getdevDeviceId } from '../../base/node/id.js';
@@ -31,10 +31,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverService
  		// clean up extensions folder
  		remoteExtensionsScanner.whenExtensionsReady().then(() => extensionManagementService.cleanUp());
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/environment/common/environmentService.ts
+Index: third-party-src/src/vs/platform/environment/common/environmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/environment/common/environmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/environment/common/environmentService.ts
+--- third-party-src.orig/src/vs/platform/environment/common/environmentService.ts
++++ third-party-src/src/vs/platform/environment/common/environmentService.ts
 @@ -101,7 +101,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
@@ -44,10 +44,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/environment/comm
  	}
  
  	@memoize
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteLanguagePacks.ts
+Index: third-party-src/src/vs/server/node/remoteLanguagePacks.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteLanguagePacks.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteLanguagePacks.ts
+--- third-party-src.orig/src/vs/server/node/remoteLanguagePacks.ts
++++ third-party-src/src/vs/server/node/remoteLanguagePacks.ts
 @@ -3,37 +3,111 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -177,10 +177,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteLanguag
 +
 +	return nlsFile;
 +}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -25,6 +25,7 @@ import { URI } from '../../base/common/u
  import { streamToBuffer } from '../../base/common/buffer.js';
  import { IProductConfiguration } from '../../base/common/product.js';
@@ -214,10 +214,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  		}
  
  		const values: { [key: string]: string } = {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
+Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnvironmentService.ts
+--- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
++++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
 @@ -13,6 +13,7 @@ import { memoize } from '../../base/comm
  import { URI } from '../../base/common/uri.js';
  
@@ -234,10 +234,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/serverEnviron
  
  	/* ----- server setup ----- */
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/languagePacks/browser/languagePacks.ts
+Index: third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/languagePacks/browser/languagePacks.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/languagePacks/browser/languagePacks.ts
+--- third-party-src.orig/src/vs/platform/languagePacks/browser/languagePacks.ts
++++ third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 @@ -5,18 +5,24 @@
  
  import { CancellationTokenSource } from '../../../base/common/cancellation.js';
@@ -272,10 +272,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/languagePacks/br
 +		return this.languagePackService.getInstalledLanguages();
  	}
  }
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+Index: third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+--- third-party-src.orig/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
++++ third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
 @@ -51,7 +51,8 @@ class NativeLocaleService implements ILo
  		@IProductService private readonly productService: IProductService
  	) { }
@@ -296,10 +296,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/locali
  		await this.jsonEditingService.write(this.environmentService.argvResource, [{ path: ['locale'], value: locale }], true);
  		return true;
  	}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
+Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
+--- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
++++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 @@ -475,9 +475,6 @@ export class InstallAction extends Exten
  		if (this.extension.isBuiltin) {
  			return;
@@ -363,10 +363,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensi
  	}
  
  	override async run(): Promise<any> {
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+Index: third-party-src/build/gulpfile.reh.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.reh.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
+--- third-party-src.orig/build/gulpfile.reh.js
++++ third-party-src/build/gulpfile.reh.js
 @@ -59,6 +59,7 @@ const serverResourceIncludes = [
  
  	// NLS
@@ -375,10 +375,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.reh.js
  
  	// Process monitor
  	'out-build/vs/base/node/cpuUsage.sh',
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
+Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
+--- third-party-src.orig/src/vs/workbench/workbench.web.main.internal.ts
++++ third-party-src/src/vs/workbench/workbench.web.main.internal.ts
 @@ -53,7 +53,7 @@ import './services/dialogs/browser/fileD
  import './services/host/browser/browserHostService.js';
  import './services/lifecycle/browser/lifecycleService.js';

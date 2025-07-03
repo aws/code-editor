@@ -40,10 +40,10 @@ check.
 Note: webviews will only work in secure contexts (i.e. accessing the server using https or localhost)
 And this change will not apply if using port forwarding to access the server from a different address
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
+Index: third-party-src/src/vs/workbench/services/environment/browser/environmentService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
+--- third-party-src.orig/src/vs/workbench/services/environment/browser/environmentService.ts
++++ third-party-src/src/vs/workbench/services/environment/browser/environmentService.ts
 @@ -227,7 +227,7 @@ export class BrowserWorkbenchEnvironment
  
  	@memoize
@@ -53,10 +53,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/enviro
  			|| this.productService.webviewContentExternalBaseUrlTemplate
  			|| 'https://{{uuid}}.vscode-cdn.net/{{quality}}/{{commit}}/out/vs/workbench/contrib/webview/browser/pre/';
  
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -364,6 +364,7 @@ export class WebClientServer {
  		const workbenchWebConfiguration = {
  			remoteAuthority,
@@ -65,10 +65,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  			serverBasePath: this._basePath,
  			_wrapWebWorkerExtHostInIframe,
  			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+--- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 @@ -351,6 +351,12 @@
  
  				const hostname = location.hostname;
@@ -82,10 +82,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/webview
  				if (!crypto.subtle) {
  					// cannot validate, not running in a secure context
  					throw new Error(`'crypto.subtle' is not available so webviews will not work. This is likely because the editor is not running in a secure context (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).`);
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+--- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 @@ -25,6 +25,13 @@
  			// validation not requested
  			return start();

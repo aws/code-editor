@@ -34,10 +34,10 @@ received.
  src/vscode-dts/vscode.d.ts                    |  2 ++
  6 files changed, 47 insertions(+), 1 deletion(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+Index: third-party-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+--- third-party-src.orig/src/vs/workbench/api/browser/mainThreadWindow.ts
++++ third-party-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 @@ -3,6 +3,7 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -77,10 +77,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/browser/mai
 +		mainWindow.parent.postMessage(message, origin);
 +	}
  }
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+Index: third-party-src/src/vs/workbench/api/common/extHost.api.impl.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+--- third-party-src.orig/src/vs/workbench/api/common/extHost.api.impl.ts
++++ third-party-src/src/vs/workbench/api/common/extHost.api.impl.ts
 @@ -690,6 +690,14 @@ export function createApiFactoryAndRegis
  
  		// namespace: window
@@ -96,10 +96,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extH
  			get activeTextEditor() {
  				return extHostEditors.getActiveTextEditor();
  			},
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+Index: third-party-src/src/vs/workbench/api/common/extHost.protocol.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+--- third-party-src.orig/src/vs/workbench/api/common/extHost.protocol.ts
++++ third-party-src/src/vs/workbench/api/common/extHost.protocol.ts
 @@ -1744,6 +1744,7 @@ export interface MainThreadWindowShape e
  	$getInitialState(): Promise<{ isFocused: boolean; isActive: boolean }>;
  	$openUri(uri: UriComponents, uriString: string | undefined, options: IOpenUriOptions): Promise<boolean>;
@@ -116,10 +116,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extH
  }
  
  export interface ExtHostLogLevelServiceShape {
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+Index: third-party-src/src/vs/workbench/api/common/extHostWindow.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
+--- third-party-src.orig/src/vs/workbench/api/common/extHostWindow.ts
++++ third-party-src/src/vs/workbench/api/common/extHostWindow.ts
 @@ -26,6 +26,7 @@ export class ExtHostWindow implements Ex
  	private _proxy: MainThreadWindowShape;
  
@@ -155,10 +155,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/api/common/extH
  }
  
  export const IExtHostWindow = createDecorator<IExtHostWindow>('IExtHostWindow');
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+Index: third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+--- third-party-src.orig/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
++++ third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 @@ -44,7 +44,7 @@ export class ExtensionsProposedApi {
  			for (const [k, value] of Object.entries(productService.extensionEnabledApiProposals)) {
  				const key = ExtensionIdentifier.toKey(k);
@@ -168,10 +168,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/extens
  						_logService.warn(`Via 'product.json#extensionEnabledApiProposals' extension '${key}' wants API proposal '${name}' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.`);
  						return false;
  					}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+Index: third-party-src/src/vscode-dts/vscode.d.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vscode-dts/vscode.d.ts
+--- third-party-src.orig/src/vscode-dts/vscode.d.ts
++++ third-party-src/src/vscode-dts/vscode.d.ts
 @@ -11000,6 +11000,8 @@ declare module 'vscode' {
  	 * asking for user input.
  	 */

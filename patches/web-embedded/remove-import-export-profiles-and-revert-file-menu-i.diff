@@ -5,10 +5,10 @@ Remove import/export profiles and revert file menu items in file menu
  .../browser/userDataProfile.ts                | 162 +-----------------
  2 files changed, 4 insertions(+), 203 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 @@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
@@ -89,10 +89,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/files/b
  
  MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
  	group: '6_close',
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 @@ -130,8 +130,6 @@ export class UserDataProfilesWorkbenchCo
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));

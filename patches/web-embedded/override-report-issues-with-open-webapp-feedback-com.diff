@@ -4,10 +4,10 @@ Override report issues with open webapp feedback command
  .../contrib/issue/common/issue.contribution.ts        | 11 ++---------
  1 file changed, 2 insertions(+), 9 deletions(-)
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/issue/common/issue.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
 @@ -8,7 +8,7 @@ import { localize, localize2 } from '../
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';

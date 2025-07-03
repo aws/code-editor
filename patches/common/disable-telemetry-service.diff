@@ -2,10 +2,10 @@ When pulling a new change from upstream, make sure to replace all .data.microsof
 Otherwise the OSS will still ping microsoft, even if the telemetry is set to OFF. 
 See: https://github.com/VSCodium/vscodium/issues/26
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/telemetry/common/telemetryService.ts
+Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/telemetry/common/telemetryService.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/telemetry/common/telemetryService.ts
+--- third-party-src.orig/src/vs/platform/telemetry/common/telemetryService.ts
++++ third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
 @@ -209,7 +209,7 @@ configurationRegistry.registerConfigurat
  	'properties': {
  		[TELEMETRY_SETTING_ID]: {
@@ -33,10 +33,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/telemetry/common
  			'restricted': true,
  			'markdownDeprecationMessage': localize('enableTelemetryDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated in favor of the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
  			'scope': ConfigurationScope.APPLICATION,
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+Index: third-party-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+--- third-party-src.orig/src/vs/workbench/electron-sandbox/desktop.contribution.ts
++++ third-party-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
 @@ -322,7 +322,7 @@ import { registerWorkbenchContribution2,
  			'telemetry.enableCrashReporter': {
  				'type': 'boolean',
@@ -46,10 +46,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/electron-sandbo
  				'tags': ['usesOnlineServices', 'telemetry'],
  				'markdownDeprecationMessage': localize('enableCrashReporterDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated due to being combined into the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
  			}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/telemetry/common/1dsAppender.ts
+Index: third-party-src/src/vs/platform/telemetry/common/1dsAppender.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/telemetry/common/1dsAppender.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/telemetry/common/1dsAppender.ts
+--- third-party-src.orig/src/vs/platform/telemetry/common/1dsAppender.ts
++++ third-party-src/src/vs/platform/telemetry/common/1dsAppender.ts
 @@ -19,8 +19,8 @@ export interface IAppInsightsCore {
  	unload(isAsync: boolean, unloadComplete: (unloadState: ITelemetryUnloadState) => void): void;
  }

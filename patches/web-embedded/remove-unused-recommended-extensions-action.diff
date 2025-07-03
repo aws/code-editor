@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+--- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 @@ -15,7 +15,7 @@ import { IExtensionIgnoredRecommendation
  import { IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions, IWorkbenchContribution, registerWorkbenchContribution2, WorkbenchPhase } from '../../../common/contributions.js';
  import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';

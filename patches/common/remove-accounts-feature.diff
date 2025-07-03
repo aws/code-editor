@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+Index: third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+--- third-party-src.orig/src/vs/workbench/browser/parts/globalCompositeBar.ts
++++ third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
 @@ -132,7 +132,7 @@ export class GlobalCompositeBar extends
  	}
  

@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+Index: third-party-src/build/gulpfile.vscode.web.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+--- third-party-src.orig/build/gulpfile.vscode.web.js
++++ third-party-src/build/gulpfile.vscode.web.js
 @@ -188,6 +188,10 @@ function packageTask(sourceFolderName, d
  			gulp.src('resources/server/code-192.png', { base: 'resources/server' }),
  			gulp.src('resources/server/code-512.png', { base: 'resources/server' })

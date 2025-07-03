@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+Index: third-party-src/build/gulpfile.vscode.web.js
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/build/gulpfile.vscode.web.js
-+++ AWSCodeOSS/build/private/code-editor-src/build/gulpfile.vscode.web.js
+--- third-party-src.orig/build/gulpfile.vscode.web.js
++++ third-party-src/build/gulpfile.vscode.web.js
 @@ -56,7 +56,10 @@ const vscodeWebResourceIncludes = [
  	'out-build/vs/editor/common/languages/injections/*.scm',
  

@@ -1,7 +1,7 @@
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+--- third-party-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
++++ third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
 @@ -26,14 +26,14 @@ const TRUSTED_DOMAINS_STAT: IStat = {
  
  const CONFIG_HELP_TEXT_PRE = `// Links matching one or more entries in the list below can be opened without link protection.
@@ -48,10 +48,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/url/bro
  	}
  
  	content += CONFIG_HELP_TEXT_AFTER;
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+Index: third-party-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+--- third-party-src.orig/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
++++ third-party-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
 @@ -11,7 +11,7 @@ export default function content(accessor
  	const isServerless = platform.isWeb && !accessor.get(IWorkbenchEnvironmentService).remoteAuthority;
  	return `
@@ -88,10 +88,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/welcome
  
  
  ## Thanks!
-Index: AWSCodeOSS/build/private/code-editor-src/product.json
+Index: third-party-src/product.json
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/product.json
-+++ AWSCodeOSS/build/private/code-editor-src/product.json
+--- third-party-src.orig/product.json
++++ third-party-src/product.json
 @@ -82,5 +82,15 @@
  				"publisherDisplayName": "Microsoft"
  			}

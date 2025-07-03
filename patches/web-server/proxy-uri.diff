@@ -1,8 +1,8 @@
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
 @@ -21,6 +21,7 @@ import type { IWorkbenchConstructionOpti
  import { AuthenticationSessionInfo } from '../../../workbench/services/authentication/browser/authenticationService.js';
  import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
@@ -32,10 +32,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/wo
  		secretStorageProvider: config.remoteAuthority && !secretStorageKeyPath
  			? undefined /* with a remote without embedder-preferred storage, store on the remote */
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/proxyServer.ts
+Index: third-party-src/src/vs/server/node/proxyServer.ts
 ===================================================================
 --- /dev/null
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/proxyServer.ts
++++ third-party-src/src/vs/server/node/proxyServer.ts
 @@ -0,0 +1,186 @@
 +import proxyServer from "http-proxy";
 +import * as http from "http";
@@ -223,10 +223,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/proxyServer.t
 +		}
 +	}
 +}
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+--- third-party-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 @@ -3,6 +3,8 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -314,10 +314,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/remoteExtensi
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */
-Index: AWSCodeOSS/build/private/code-editor-src/src/server-main.ts
+Index: third-party-src/src/server-main.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/server-main.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/server-main.ts
+--- third-party-src.orig/src/server-main.ts
++++ third-party-src/src/server-main.ts
 @@ -96,14 +96,14 @@ if (shouldSpawnCli) {
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
  		return remoteExtensionHostAgentServer.handleRequest(req, res);
@@ -335,10 +335,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/server-main.ts
  	});
  	server.on('error', async (err) => {
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+--- third-party-src.orig/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
++++ third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 @@ -4,7 +4,15 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -586,10 +586,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/remote/
 +		}
 +	}
  }
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/remote/common/tunnelModel.ts
+Index: third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/services/remote/common/tunnelModel.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/services/remote/common/tunnelModel.ts
+--- third-party-src.orig/src/vs/workbench/services/remote/common/tunnelModel.ts
++++ third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
 @@ -558,13 +558,7 @@ export class TunnelModel extends Disposa
  	}
  

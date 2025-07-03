@@ -3,10 +3,10 @@ Adjusted from (MIT licensed) original source:
 
 Add Open VSX as default marketplace
 
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServer.ts
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
 @@ -338,14 +338,7 @@ export class WebClientServer {
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			rootEndpoint: base,
@@ -23,10 +23,10 @@ Index: AWSCodeOSS/build/private/code-editor-src/src/vs/server/node/webClientServ
  		};
  
  		const proposedApi = this._environmentService.args['enable-proposed-api'];
-Index: AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
---- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-+++ AWSCodeOSS/build/private/code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+--- third-party-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
++++ third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 @@ -163,9 +163,9 @@ export abstract class AbstractExtensionR
  	}
  
