@@ -18,7 +18,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 +	const urlSearch = new URLSearchParams(mainWindow.location.search);
 +	const origin = urlSearch.get('origin');
 +	const functionName = urlSearch.get('function');
-+	const vsCodeCdn = urlSearch.get('vsCodeCdn');
++	const vsCodeCdn = urlSearch.get('vsCodeCdn') ?? mainWindow.location.origin;
 +	const isDevo = urlSearch.get('isDevo') === 'true';
  	// Find config by checking for DOM
  	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');

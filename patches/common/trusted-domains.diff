@@ -105,6 +105,6 @@ Index: third-party-src/product.json
 +		"https://console.aws.amazon.com",
 +		"https://console.amazonaws-us-gov.com",
 +		"https://console.amazonaws.cn",
-+		"https://aws.amazon.com*"
++		"https://aws.amazon.com"
  	]
  }

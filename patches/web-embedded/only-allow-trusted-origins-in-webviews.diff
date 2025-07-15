@@ -1,0 +1,61 @@
+Only allow opening webviews from same-origin or trusted parent origins
+
+Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+@@ -5,7 +5,7 @@
+ 	<meta charset="UTF-8">
+ 
+ 	<meta http-equiv="Content-Security-Policy"
+-		content="default-src 'none'; script-src 'sha256-gEAyFzmkyqMoTTnN+3KReFUYoHsK4RAJEb+6eiul+UY=' 'self'; frame-src 'self';">
++		content="default-src 'none'; script-src 'sha256-tUqLu+qwk/T12Lnj5zY5MJEBU4bPYFxPWddp8PCLxqA=' 'self'; frame-src 'self'; connect-src 'self';">
+ 
+ 	<!-- Disable pinch zooming -->
+ 	<meta name="viewport"
+@@ -343,11 +343,22 @@
+ 			}
+ 
+ 			async signalReady() {
++				const readTrustedOrigins = async () => {
++					const trustedOrigins = new Set([window.location.hostname]);
++					try {
++						const response = await fetch('/product.json', { mode: 'same-origin' });
++						const productConfig = await response.json();
++						return new Set(trustedOrigins.concat(productConfig.webviewTrustedOrigins ?? [])).union(trustedOrigins);
++					} catch (error) {
++						return trustedOrigins;
++					}
++				}
++
+ 				const start = (/** @type {string} */ parentOrigin) => {
+ 					window.parent.postMessage({ target: ID, channel: 'webview-ready', data: {} }, parentOrigin, [this.channel.port2]);
+ 				};
+ 
+-				const parentOrigin = searchParams.get('parentOrigin');
++				const parentOrigin = searchParams.get('parentOrigin') ?? '';
+ 
+ 				const hostname = location.hostname;
+ 
+@@ -356,6 +367,12 @@
+ 					throw new Error(`'crypto.subtle' is not available so webviews will not work. This is likely because the editor is not running in a secure context (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).`);
+ 				}
+ 
++				const trustedOrigins = await readTrustedOrigins();
++
++				if(trustedOrigins.has(URL.parse(parentOrigin)?.hostname)) {
++					return start(parentOrigin);
++				}
++
+ 				// Here the `parentOriginHash()` function from `src/vs/workbench/common/webview.ts` is inlined
+ 				// compute a sha-256 composed of `parentOrigin` and `salt` converted to base 32
+ 				let parentOriginHash;
+@@ -377,7 +394,7 @@
+ 					return start(parentOrigin);
+ 				}
+ 
+-				throw new Error(`Expected '${parentOriginHash}' as hostname or subdomain!`);
++				throw new Error('Parent origin is not trusted!');
+ 			}
+ 		}();
+ 

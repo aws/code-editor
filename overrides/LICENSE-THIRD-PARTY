@@ -3722,7 +3722,7 @@ SOFTWARE.
 ******************************
 
 @parcel/watcher
-2.5.0 <https://github.com/parcel-bundler/watcher>
+2.5.1 <https://github.com/parcel-bundler/watcher>
 MIT License
 
 Copyright (c) 2017-present Devon Govett
@@ -3749,7 +3749,7 @@ SOFTWARE.
 ******************************
 
 @parcel/watcher-linux-x64-glibc
-2.5.0 <https://github.com/parcel-bundler/watcher>
+2.5.1 <https://github.com/parcel-bundler/watcher>
 MIT License
 
 Copyright (c) 2017-present Devon Govett
@@ -3776,7 +3776,7 @@ SOFTWARE.
 ******************************
 
 @parcel/watcher-linux-x64-musl
-2.5.0 <https://github.com/parcel-bundler/watcher>
+2.5.1 <https://github.com/parcel-bundler/watcher>
 MIT License
 
 Copyright (c) 2017-present Devon Govett

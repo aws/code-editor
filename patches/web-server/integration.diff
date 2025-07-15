@@ -2,7 +2,7 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -1,18 +1,32 @@
+@@ -1,18 +1,33 @@
  {
 -	"nameShort": "Code - OSS",
 -	"nameLong": "Code - OSS",
@@ -12,6 +12,7 @@ Index: third-party-src/product.json
 +		"serviceUrl": "https://open-vsx.org/vscode/gallery",
 +		"itemUrl": "https://open-vsx.org/vscode/item",
 +		"resourceUrlTemplate": "https://open-vsx.org/vscode/unpkg/{publisher}/{name}/{version}/{path}",
++		"extensionUrlTemplate": "https://open-vsx.org/vscode/gallery/{publisher}/{name}/latest",
 +		"controlUrl": "",
 +		"recommendationsUrl": "",
 +		"nlsBaseUrl": "",

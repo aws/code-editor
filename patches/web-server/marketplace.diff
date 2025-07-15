@@ -3,6 +3,9 @@ Adjusted from (MIT licensed) original source:
 
 Add Open VSX as default marketplace
 
+Adjusted ExtensionLatestVersionUri endpoint to be compatible with OpenVSX API
+(see: https://open-vsx.org/swagger-ui/index.html?urls.primaryName=VSCode%20Adapter)
+
 Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- third-party-src.orig/src/vs/server/node/webClientServer.ts
@@ -40,3 +43,16 @@ Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionR
  	}
  
  }
+Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+===================================================================
+--- third-party-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
++++ third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+@@ -46,7 +46,7 @@ export class ExtensionGalleryManifestSer
+ 				type: ExtensionGalleryResourceType.ExtensionQueryService
+ 			},
+ 			{
+-				id: `${extensionsGallery.serviceUrl}/vscode/{publisher}/{name}/latest`,
++				id: `${extensionsGallery.serviceUrl}/{publisher}/{name}/latest`,
+ 				type: ExtensionGalleryResourceType.ExtensionLatestVersionUri
+ 			},
+ 			{
