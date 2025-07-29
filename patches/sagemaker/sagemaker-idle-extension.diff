@@ -1,0 +1,342 @@
+Index: third-party-src/extensions/sagemaker-idle-extension/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/README.md
+@@ -0,0 +1,3 @@
++# Code Editor Idle Extension
++
++The Code Editor Idle Extension tracks user activity and logs the last active timestamp (in UTC) to a local file. User activities monitored include file changes, text editor selection changes, and terminal interactions. Additionally, it provides an API endpoint `/api/idle` that returns the lastActiveTimestamp.
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-idle-extension/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/package.json
+@@ -0,0 +1,43 @@
++{
++  "name": "sagemaker-idle-extension",
++  "displayName": "Sagemaker Idle Extension",
++  "description": "Expose an API called /idle that returns latest activity timestamp",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "*"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++    "configuration": {
++      "type": "object",
++      "title": "Sagemaker Idle Extension",
++      "properties": {}
++    },
++    "commands": []
++  },
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-idle-extension",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-idle-extension",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-idle-extension ./tsconfig.json"
++  },
++  "dependencies": {},
++  "repository": {}
++}
+Index: third-party-src/extensions/sagemaker-idle-extension/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"../sagemaker-idle-extension/src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/extensions/sagemaker-idle-extension/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
+@@ -0,0 +1,112 @@
++import * as vscode from "vscode";
++import * as fs from "fs";
++import * as path from "path";
++
++let idleFilePath: string
++let terminalActivityInterval: NodeJS.Timeout | undefined
++const LOG_PREFIX = "[sagemaker-idle-extension]"
++const CHECK_INTERVAL = 60000; // 60 seconds interval
++
++export function activate(context: vscode.ExtensionContext) {
++	initializeIdleFilePath();
++	registerEventListeners(context);
++	startMonitoringTerminalActivity();
++}
++
++export function deactivate() {
++	if(terminalActivityInterval) {
++		clearInterval(terminalActivityInterval)
++	}
++}
++
++/**
++ * Initializes the file path where the idle timestamp will be stored.
++ * It sets the path to a hidden file in the /tmp/ directory.
++ */
++function initializeIdleFilePath() {
++	const tmpDirectory = "/tmp/"; 
++	idleFilePath = path.join(tmpDirectory, ".sagemaker-last-active-timestamp");
++
++	// Set initial lastActivetimestamp
++	updateLastActivityTimestamp()
++}
++
++/**
++ * Registers event listeners to monitor user activity within the VSCode editor.
++ * It listens to document changes, editor focus changes, text selection changes, and terminal events.
++ * @param context - The context in which the extension is running.
++ */
++function registerEventListeners(context: vscode.ExtensionContext) {
++	context.subscriptions.push(
++		vscode.workspace.onDidChangeTextDocument((_) => {
++			updateLastActivityTimestamp();
++		}),
++		vscode.window.onDidChangeActiveTextEditor((_) => {
++			updateLastActivityTimestamp();
++		}),
++		vscode.window.onDidChangeTextEditorSelection((_) => {
++			updateLastActivityTimestamp();
++		}),
++		vscode.window.onDidOpenTerminal((_) => {
++			updateLastActivityTimestamp();
++		}),
++		vscode.window.onDidCloseTerminal((_) => {
++			updateLastActivityTimestamp();
++		})
++	);
++}
++
++/**
++ * Starts monitoring terminal activity by setting an interval to check for activity in the /dev/pts directory.
++ */
++const startMonitoringTerminalActivity = () => {
++	terminalActivityInterval = setInterval(checkTerminalActivity, CHECK_INTERVAL);
++};
++
++
++/**
++ * Checks for terminal activity by reading the /dev/pts directory and comparing modification times of the files.
++ *
++ * The /dev/pts directory is used in Unix-like operating systems to represent pseudo-terminal (PTY) devices.
++ * Each active terminal session is assigned a PTY device. These devices are represented as files within the /dev/pts directory.
++ * When a terminal session has activity, such as when a user inputs commands or output is written to the terminal,
++ * the modification time (mtime) of the corresponding PTY device file is updated. By monitoring the modification
++ * times of the files in the /dev/pts directory, we can detect terminal activity.
++ *
++ * If activity is detected (i.e., if any PTY device file was modified within the CHECK_INTERVAL), this function
++ * updates the last activity timestamp.
++ */
++const checkTerminalActivity = () => {
++	fs.readdir("/dev/pts", (err, files) => {
++		if (err) {
++			console.error(`${LOG_PREFIX} Error reading /dev/pts directory:`, err);
++			return;
++		}
++
++		const now = Date.now();
++		const activityDetected = files.some((file) => {
++			const filePath = path.join("/dev/pts", file);
++			try {
++				const stats = fs.statSync(filePath);
++				const mtime = new Date(stats.mtime).getTime();
++				return now - mtime < CHECK_INTERVAL;
++			} catch (error) {
++				console.error(`${LOG_PREFIX} Error reading file stats:`, error);
++				return false;
++			}
++		});
++
++		if (activityDetected) {
++			updateLastActivityTimestamp();
++		}
++	});
++};
++
++/**
++ * Updates the last activity timestamp by recording the current timestamp in the idle file and
++ * refreshing the status bar. The timestamp should be in ISO 8601 format and set to the UTC timezone.
++ */
++function updateLastActivityTimestamp() {
++	const timestamp = new Date().toISOString();
++	fs.writeFileSync(idleFilePath, timestamp);
++}
+\ No newline at end of file
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -61,6 +61,7 @@ const compilations = [
+ 	'extensions/search-result/tsconfig.json',
+ 	'extensions/simple-browser/tsconfig.json',
+ 	'extensions/sagemaker-extension/tsconfig.json',
++	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
+ 	'extensions/sagemaker-extensions-sync/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -39,6 +39,7 @@ const dirs = [
+ 	'extensions/php-language-features',
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
++	'extensions/sagemaker-idle-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/sagemaker-extensions-sync',
+ 	'extensions/sagemaker-open-notebook-extension',
+Index: third-party-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
+@@ -3,7 +3,9 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import { createReadStream, promises } from 'fs';
++import { createReadStream, existsSync, writeFileSync, promises } from 'fs';
++import {readFile } from 'fs/promises';
++import * as path from 'path';
+ import { spawn } from 'child_process';
+ import * as fs from 'fs';
+ import * as http from 'http';
+@@ -103,6 +104,7 @@
+ const CALLBACK_PATH = `/callback`;
+ const WEB_EXTENSION_PATH = `/web-extension-resource`;
+ const POST_STARTUP_SCRIPT_ROUTE = `/api/poststartup`;
++const IDLE_ROUTE = `/api/idle`;
+ 
+ export class WebClientServer {
+ 
+@@ -147,6 +149,9 @@ export class WebClientServer {
+ 			if (pathname === POST_STARTUP_SCRIPT_ROUTE) {
+ 				return this._handlePostStartupScriptInvocation(req, res);
+ 			}
++			if (pathname === IDLE_ROUTE) {
++				return this._handleIdle(req, res);
++			}
+ 
+ 			return serveError(req, res, 404, 'Not found.');
+ 		} catch (error) {
+@@ -515,6 +520,31 @@ export class WebClientServer {
+ 		});
+ 		return void res.end(data);
+ 	}
++
++	/**
++ 	 * Handles API requests to retrieve the last activity timestamp.
++   */
++	private async _handleIdle(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
++		try {
++			const tmpDirectory = '/tmp/'
++			const idleFilePath = path.join(tmpDirectory, '.sagemaker-last-active-timestamp');
++
++			// If idle shutdown file does not exist, this indicates the app UI may never been opened
++			// Create the initial metadata file
++			if (!existsSync(idleFilePath)) {
++				const timestamp = new Date().toISOString();
++				writeFileSync(idleFilePath, timestamp);
++			}
++
++			const data = await readFile(idleFilePath, 'utf8');
++
++			res.statusCode = 200;
++			res.setHeader('Content-Type', 'application/json');
++			res.end(JSON.stringify({ lastActiveTimestamp: data }));
++		} catch (error) {
++			serveError(req, res, 500, error.message)
++		}
++	}
+ 
+     /**
+      * Handles API requests to run the post-startup script in SMD.

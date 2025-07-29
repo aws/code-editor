@@ -1,0 +1,450 @@
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -62,6 +62,7 @@ const compilations = [
+ 	'extensions/simple-browser/tsconfig.json',
+ 	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
++	'extensions/sagemaker-extensions-sync/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+ 	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
+ 	'extensions/post-startup-notifications/tsconfig.json',
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -40,6 +40,7 @@ const dirs = [
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
++	'extensions/sagemaker-extensions-sync',
+ 	'extensions/sagemaker-open-notebook-extension',
+ 	'extensions/sagemaker-ui-dark-theme',
+ 	'extensions/post-startup-notifications',
+Index: third-party-src/extensions/sagemaker-extensions-sync/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-extensions-sync/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/README.md
+@@ -0,0 +1,3 @@
++# SageMaker Code Editor Extensions Sync
++
++Notifies users if the extensions directory is missing pre-packaged extensions from SageMaker Distribution and give them the option to sync them.
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-extensions-sync/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-extensions-sync/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-extensions-sync/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/package.json
+@@ -0,0 +1,44 @@
++{
++  "name": "sagemaker-extensions-sync",
++  "displayName": "SageMaker Extensions Sync",
++  "description": "Sync pre-packaged extensions from SageMaker Distribution",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "*"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++		"commands": [
++			{
++				"command": "extensions-sync.syncExtensions",
++				"title": "Sync Extensions from SageMaker Distribution",
++				"category": "Extensions Sync"
++			}
++		]
++	},
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-extensions-sync",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-extensions-sync",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-idle-extension ./tsconfig.json"
++  },
++  "dependencies": {},
++  "repository": {}
++}
+Index: third-party-src/extensions/sagemaker-extensions-sync/src/constants.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/src/constants.ts
+@@ -0,0 +1,21 @@
++// constants
++export const PERSISTENT_VOLUME_EXTENSIONS_DIR = "/home/sagemaker-user/sagemaker-code-editor-server-data/extensions";
++export const IMAGE_EXTENSIONS_DIR = "/opt/amazon/sagemaker/sagemaker-code-editor-server-data/extensions";
++export const LOG_PREFIX = "[sagemaker-extensions-sync]";
++
++export class ExtensionInfo {
++    constructor(
++        public name: string,
++        public publisher: string,
++        public version: string,
++        public path: string | null
++    ) {}
++
++    get identifier(): string {
++        return `${this.publisher}.${this.name}@${this.version}`;
++    }
++
++    toString(): string {
++        return `ExtensionInfo: ${this.identifier} (${this.path})`;
++    }
++}
+Index: third-party-src/extensions/sagemaker-extensions-sync/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/src/extension.ts
+@@ -0,0 +1,100 @@
++import * as process from "process";
++import * as vscode from 'vscode';
++
++import {
++	ExtensionInfo,
++	IMAGE_EXTENSIONS_DIR,
++	LOG_PREFIX,
++	PERSISTENT_VOLUME_EXTENSIONS_DIR,
++} from "./constants"
++
++import { 
++	getExtensionsFromDirectory, 
++	getInstalledExtensions, 
++	installExtension, 
++	refreshExtensionsMetadata } from "./utils"
++
++export async function activate() {
++
++	// this extension will only activate within a sagemaker app
++	const isSageMakerApp = !!process.env?.SAGEMAKER_APP_TYPE_LOWERCASE;
++	if (!isSageMakerApp) {
++		return;
++	}
++
++	// get installed extensions. this could be different from pvExtensions b/c vscode sometimes doesn't delete the assets
++	// for an old extension when uninstalling or changing versions
++	const installedExtensions = new Set(await getInstalledExtensions());
++	console.log(`${LOG_PREFIX} Found installed extensions: `, Array.from(installedExtensions));
++
++	const prePackagedExtensions: ExtensionInfo[] = await getExtensionsFromDirectory(IMAGE_EXTENSIONS_DIR);
++	const prePackagedExtensionsById: Record<string, ExtensionInfo> = {};
++	prePackagedExtensions.forEach(extension => {
++		prePackagedExtensionsById[extension.identifier] = extension;
++	});
++
++	console.log(`${LOG_PREFIX} Found pre-packaged extensions: `, prePackagedExtensions);
++
++	const pvExtensions = await getExtensionsFromDirectory(PERSISTENT_VOLUME_EXTENSIONS_DIR);
++	const pvExtensionsByName: Record<string, ExtensionInfo> = {};
++	const pvExtensionsById: Record<string, ExtensionInfo> = {};
++	pvExtensions.forEach(extension => {
++		if (installedExtensions.has(extension.identifier)) {  // only index extensions that are installed
++			pvExtensionsByName[extension.name] = extension;
++			pvExtensionsById[extension.identifier] = extension;
++		}
++	});
++	console.log(`${LOG_PREFIX} Found installed extensions in persistent volume: `, pvExtensionsById);
++
++	// check each pre-packaged extension, record if it is not in installed extensions or version mismatch
++	// store unsynced extensions as {identifier pre-packaged ext: currently installed version}
++	const unsyncedExtensions: Record<string, string | null> = {}
++	prePackagedExtensions.forEach(extension => {
++		const id = extension.identifier;
++		if (!(installedExtensions.has(id))){
++			unsyncedExtensions[id] = pvExtensionsByName[extension.name]?.version ?? null;
++		}
++	});
++	console.log(`${LOG_PREFIX} Unsynced extensions: `, unsyncedExtensions);
++
++	if (Object.keys(unsyncedExtensions).length !== 0) {
++		const selection = await vscode.window.showWarningMessage(
++			'Warning: You have unsynchronized extensions from SageMaker Distribution \
++			which could result in incompatibilities with Code Editor. Do you want to install them?',
++			"Synchronize Extensions", "Dismiss");
++
++		if (selection === "Synchronize Extensions") {
++            const quickPick = vscode.window.createQuickPick();
++            quickPick.items = Object.keys(unsyncedExtensions).map(extensionId => ({
++				label: extensionId,
++				description: unsyncedExtensions[extensionId] ? `Currently installed version: ${unsyncedExtensions[extensionId]}` : undefined,
++			}));
++            quickPick.placeholder = 'Select extensions to install';
++            quickPick.canSelectMany = true;
++			quickPick.ignoreFocusOut = true;
++
++            quickPick.onDidAccept(async () => {
++                const selectedExtensions = quickPick.selectedItems.map(item => item.label);
++
++				for (const extensionId of selectedExtensions) {
++					const extensionName = prePackagedExtensionsById[extensionId].name;
++					await installExtension(prePackagedExtensionsById[extensionId], pvExtensionsByName[extensionName]);
++				}
++				await refreshExtensionsMetadata();
++
++                quickPick.hide();
++				await vscode.window.showInformationMessage(
++					'Extensions have been installed. \nWould you like to reload the window?',
++					{ modal: true },
++					'Reload'
++				).then(selection => {
++					if (selection === 'Reload') {
++						vscode.commands.executeCommand('workbench.action.reloadWindow');
++					}
++				});
++            });
++
++            quickPick.show();
++        }
++	}
++}
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-extensions-sync/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"../sagemaker-extensions-sync/src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
+@@ -0,0 +1,152 @@
++import * as fs from "fs/promises";
++import * as path from "path";
++import * as vscode from 'vscode';
++import { execFile } from "child_process";
++import { promisify } from "util";
++
++import {
++	ExtensionInfo,
++	LOG_PREFIX,
++	PERSISTENT_VOLUME_EXTENSIONS_DIR,
++} from "./constants"
++
++export async function getExtensionsFromDirectory(directoryPath: string): Promise<ExtensionInfo[]> {
++	const results: ExtensionInfo[] = [];
++	try {
++		const items = await fs.readdir(directoryPath);
++
++		for (const item of items) {
++			const itemPath = path.join(directoryPath, item);
++			try {
++				const stats = await fs.stat(itemPath);
++
++				if (stats.isDirectory()) {
++					const packageJsonPath = path.join(itemPath, "package.json");
++
++					const packageData = JSON.parse(await fs.readFile(packageJsonPath, "utf8"));
++
++					if (packageData.name && packageData.publisher && packageData.version) {
++						results.push(new ExtensionInfo(
++							packageData.name,
++							packageData.publisher,
++							packageData.version,
++							itemPath,
++						));
++					}
++				}
++			} catch (error) {
++				// fs.stat will break on dangling simlinks. Just skip to the next file
++				console.error(`${LOG_PREFIX} Error reading package.json in ${itemPath}:`, error);
++			}
++		}
++	} catch (error) {
++		console.error(`${LOG_PREFIX} Error reading directory ${directoryPath}:`, error);
++	}
++	return results;
++}
++
++export async function getInstalledExtensions(): Promise<string[]> {
++	const command = "sagemaker-code-editor";
++	const args = ["--list-extensions", "--show-versions", "--extensions-dir", PERSISTENT_VOLUME_EXTENSIONS_DIR];
++
++	const execFileAsync = promisify(execFile);
++	try {
++		const { stdout, stderr } = await execFileAsync(command, args);
++		if (stderr) {
++			throw new Error("stderr");
++		}
++		return stdout.split("\n").filter(line => line.trim() !== "");
++	} catch (error) {
++		console.error(`${LOG_PREFIX} Error getting list of installed extensions:`, error);
++		throw error;
++	}
++}
++
++export async function refreshExtensionsMetadata(): Promise<void> {
++	const metaDataFile = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, "extensions.json");
++	try {
++		await fs.unlink(metaDataFile);
++	} catch (error) {
++		if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
++			console.error(`${LOG_PREFIX} Error removing metadata file:`, error);
++		}
++	}
++}
++
++export async function installExtension(
++	prePackagedExtensionInfo: ExtensionInfo, installedExtensionInfo?: ExtensionInfo | undefined
++): Promise<void> {
++	if (installedExtensionInfo) {
++		console.log(`${LOG_PREFIX} Upgrading extension from ${installedExtensionInfo.identifier} to ${prePackagedExtensionInfo.identifier}`);
++	} else {
++		console.log(`${LOG_PREFIX} Installing extension ${prePackagedExtensionInfo.identifier}`);
++	}
++	try {
++		if (!prePackagedExtensionInfo.path) {
++			throw new Error(`Extension path missing for ${prePackagedExtensionInfo.identifier}`);
++		}
++
++		const targetPath = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, path.basename(prePackagedExtensionInfo.path));
++
++		// Remove existing symlink or directory if it exists
++		try {
++			console.log(`${LOG_PREFIX} Removing existing folder ${targetPath}`);
++			await fs.unlink(targetPath);
++		} catch (error) {
++			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
++				console.error(`${LOG_PREFIX} Error removing existing extension:`, error);
++				throw error;
++			}
++			// if file already doesn't exist then keep going
++		}
++
++		// Create new symlink
++		try {
++			console.log(`${LOG_PREFIX} Adding extension to persistent volume directory`);
++			await fs.symlink(prePackagedExtensionInfo.path, targetPath, 'dir');
++		} catch (error) {
++			console.error(`${LOG_PREFIX} Error adding extension to persistent volume directory:`, error);
++			throw error;
++		}
++
++		// Handle .obsolete file
++		const OBSOLETE_FILE = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, '.obsolete');
++		let obsoleteData: Record<string, boolean> = {};
++
++		try {
++			const obsoleteContent = await fs.readFile(OBSOLETE_FILE, 'utf-8');
++			console.log(`${LOG_PREFIX} .obsolete file found`);
++			obsoleteData = JSON.parse(obsoleteContent);
++		} catch (error) {
++			if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
++				console.log(`${LOG_PREFIX} .obsolete file not found. Creating a new one.`);
++			} else {
++				console.warn(`${LOG_PREFIX} Error reading .obsolete file:`, error);
++				// Backup malformed file
++				const backupPath = `${OBSOLETE_FILE}.bak`;
++				await fs.rename(OBSOLETE_FILE, backupPath);
++				console.log(`${LOG_PREFIX} Backed up malformed .obsolete file to ${backupPath}`);
++			}
++		}
++
++		if (installedExtensionInfo?.path) {
++			const obsoleteBasename = path.basename(installedExtensionInfo.path);
++			obsoleteData[obsoleteBasename] = true;
++		}
++		const obsoleteBasenamePrepackaged = path.basename(prePackagedExtensionInfo.path);
++		obsoleteData[obsoleteBasenamePrepackaged] = false;
++
++		try {
++			console.log(`${LOG_PREFIX} Writing to .obsolete file.`);
++			await fs.writeFile(OBSOLETE_FILE, JSON.stringify(obsoleteData, null, 2));
++		} catch (error) {
++			console.error(`${LOG_PREFIX} Error writing .obsolete file:`, error);
++			throw error;
++		}
++
++		console.log(`${LOG_PREFIX} Installed ${prePackagedExtensionInfo.identifier}`);
++	} catch (error) {
++		vscode.window.showErrorMessage(`Could not install extension ${prePackagedExtensionInfo.identifier}`);
++		console.error(`${LOG_PREFIX} ${error}`);
++	}
++}
+\ No newline at end of file

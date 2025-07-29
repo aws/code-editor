@@ -1,0 +1,84 @@
+Index: third-party-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
+@@ -4,6 +4,8 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import { createReadStream, promises } from 'fs';
++import { spawn } from 'child_process';
++import * as fs from 'fs';
+ import * as http from 'http';
+ import * as url from 'url';
+ import * as cookie from 'cookie';
+@@ -38,6 +40,10 @@ const textMimeType: { [ext: string]: str
+ 	'.svg': 'image/svg+xml',
+ };
+ 
++const enum ServiceName {
++	SAGEMAKER_UNIFIED_STUDIO = 'SageMakerUnifiedStudio',
++}
++
+ /**
+  * Return an error to the client.
+  */
+@@ -96,6 +102,7 @@
+ const STATIC_PATH = `/static`;
+ const CALLBACK_PATH = `/callback`;
+ const WEB_EXTENSION_PATH = `/web-extension-resource`;
++const POST_STARTUP_SCRIPT_ROUTE = `/api/poststartup`;
+ 
+ export class WebClientServer {
+ 
+@@ -137,6 +144,9 @@ export class WebClientServer {
+ 				// extension resource support
+ 				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
+ 			}
++			if (pathname === POST_STARTUP_SCRIPT_ROUTE) {
++				return this._handlePostStartupScriptInvocation(req, res);
++			}
+ 
+ 			return serveError(req, res, 404, 'Not found.');
+ 		} catch (error) {
+@@ -505,6 +515,41 @@ export class WebClientServer {
+ 		});
+ 		return void res.end(data);
+ 	}
++
++    /**
++     * Handles API requests to run the post-startup script in SMD.
++     */
++    private async _handlePostStartupScriptInvocation(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
++        const postStartupScriptPath = '/etc/sagemaker-ui/sagemaker_ui_post_startup.sh'
++        const logPath = '/var/log/apps/post_startup_default.log';
++        const logStream = fs.createWriteStream(logPath, { flags: 'a' });
++
++        // Only trigger post-startup script invocation for SageMakerUnifiedStudio app.
++        if (process.env['SERVICE_NAME'] != ServiceName.SAGEMAKER_UNIFIED_STUDIO) {
++            return serveError(req, res, 403, 'Forbidden');
++        } else {
++            //If postStartupScriptFile doesn't exist, it will throw FileNotFoundError (404)
++            //If exists, it will start the execution and add the execution logs in logFile.
++            try {
++                if (fs.existsSync(postStartupScriptPath)) {
++                    // Adding 0o755 to make script file executable
++                    fs.chmodSync(postStartupScriptPath, 0o755);
++
++                    const subprocess = spawn('bash', [`${postStartupScriptPath}`], { cwd: '/' });
++                    subprocess.stdout.pipe(logStream);
++                    subprocess.stderr.pipe(logStream);
++
++                    res.statusCode = 200;
++                    res.setHeader('Content-Type', 'application/json');
++                    res.end(JSON.stringify({ 'success': 'true' }));
++				} else {
++					serveError(req, res, 500, 'Poststartup script file not found at ' + postStartupScriptPath);
++				}
++			} catch (error) {
++				serveError(req, res, 500, error.message);
++			}
++		}
++	}
+ }
+ 
+ 

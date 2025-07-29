@@ -1,0 +1,397 @@
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/README.md
+@@ -0,0 +1 @@
++# SageMaker UI Dark Theme
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
+@@ -0,0 +1,51 @@
++import * as vscode from 'vscode';
++
++const SERVICE_NAME_ENV_KEY = 'SERVICE_NAME';
++const SERVICE_NAME_ENV_VALUE = 'SageMakerUnifiedStudio';
++const DEFAULT_THEME = 'Default Dark Modern';
++
++let outputChannel: vscode.OutputChannel;
++
++export function activate() {
++    // Check if in SageMaker Unified Studio
++    const envValue = process.env[SERVICE_NAME_ENV_KEY];
++    if (!envValue || envValue !== SERVICE_NAME_ENV_VALUE) {
++        return;
++    }
++
++    const config = vscode.workspace.getConfiguration();
++    const themeConfig = config.inspect('workbench.colorTheme');
++    outputChannel = vscode.window.createOutputChannel('SageMaker UI Dark Theme');
++
++    outputChannel.appendLine(`Current theme configuration: ${JSON.stringify(themeConfig, null, 2)}`);
++
++    // Check if theme is only set at default level
++    if (themeConfig?.globalValue === undefined &&
++        themeConfig?.workspaceValue === undefined &&
++        themeConfig?.workspaceFolderValue === undefined) {
++
++        outputChannel.appendLine('Theme only set at default level, applying theme update');
++
++        // Update the configuration
++        Promise.resolve(
++            config.update('workbench.colorTheme', DEFAULT_THEME, vscode.ConfigurationTarget.Global)
++                .then(() => {
++                    outputChannel.appendLine(`Theme configuration updated to ${DEFAULT_THEME}`);
++                    // Reload to apply theme
++                    return vscode.commands.executeCommand('workbench.action.reloadWindow');
++                })
++                .then(() => outputChannel.appendLine('Theme applied successfully'))
++        )
++        .catch((error) => {
++            outputChannel.appendLine(`Failed to apply theme: ${error}`);
++        });
++    } else {
++        outputChannel.appendLine('Theme already configured in user or workspace settings, not overriding');
++    }
++}
++
++export function deactivate() {
++    if (outputChannel) {
++        outputChannel.dispose();
++    }
++}
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -63,6 +63,7 @@ const compilations = [
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
++	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -41,6 +41,7 @@ const dirs = [
+ 	'extensions/sagemaker-idle-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/sagemaker-open-notebook-extension',
++	'extensions/sagemaker-ui-dark-theme',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/package.json
+@@ -0,0 +1,46 @@
++{
++  "name": "sagemaker-ui-dark-theme",
++  "displayName": "SageMaker UI Dark Theme",
++  "description": "SageMaker UI Dark Theme",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "onStartupFinished"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++    "configuration": {
++      "type": "object",
++      "title": "SageMaker UI Dark Theme",
++      "properties": {}
++    },
++    "commands": [
++    ]
++  },
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-ui-dark-theme",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-ui-dark-theme",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-ui-dark-theme ./tsconfig.json"
++  },
++  "dependencies": {
++  },
++  "repository": {
++  }
++}
+Index: third-party-src/.vscode-test.js
+===================================================================
+--- third-party-src.orig/.vscode-test.js
++++ third-party-src/.vscode-test.js
+@@ -79,6 +79,11 @@ const extensions = [
+        workspaceFolder: `extensions/vscode-api-tests/testworkspace.code-workspace`,
+ 		mocha: { timeout: 60_000 },
+ 		files: 'extensions/vscode-api-tests/out/workspace-tests/**/*.test.js',
++   },
++	{
++		label: 'sagemaker-ui-dark-theme',
++		workspaceFolder: `extensions/sagemaker-ui-dark-theme/test-workspace`,
++		mocha: { timeout: 60_000 }
+	}
+ ];
+ 
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
+@@ -0,0 +1,123 @@
++import * as assert from 'assert';
++import * as vscode from 'vscode';
++
++const DEFAULT_DARK_MODERN = 'Default Dark Modern';
++const DEFAULT_LIGHT_MODERN = 'Default Light Modern';
++
++async function waitForThemeChange(expectedTheme: string | undefined, timeoutMs: number): Promise<void> {
++    const startTime = Date.now();
++
++    while (Date.now() - startTime < timeoutMs) {
++        const currentTheme = vscode.workspace.getConfiguration('workbench').inspect('colorTheme');
++
++        if (currentTheme?.globalValue === expectedTheme) {
++            return;
++        }
++        await new Promise(resolve => setTimeout(resolve, 100));
++    }
++    throw new Error(`Theme did not change to ${expectedTheme} at the global level within ${timeoutMs}ms`);
++}
++
++suite('SageMaker UI Dark Theme Extension Tests - In SageMaker Unified Studio Environment', () => {
++    // Store original ENV variable value
++    const originalEnv = process.env.SERVICE_NAME;
++
++    suiteSetup(() => {
++        // Clear the theme configurations
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Global);
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Workspace);
++
++        // Set ENV variable value for SageMaker Unified Studio environment
++        process.env.SERVICE_NAME = 'SageMakerUnifiedStudio';
++    });
++
++    suiteTeardown(() => {
++        // Clear the theme configurations
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Global);
++
++        // Restore ENV variable value to original
++        originalEnv ? (process.env.SERVICE_NAME = originalEnv) : delete process.env.SERVICE_NAME;
++    });
++
++    test('Theme is set when global and workspace theme configurations are unset', async () => {
++        // Poll for theme update
++        await waitForThemeChange(DEFAULT_DARK_MODERN, 10000);
++
++        const config = vscode.workspace.getConfiguration();
++        const theme = config.inspect('workbench.colorTheme');
++
++        assert.strictEqual(theme?.globalValue, DEFAULT_DARK_MODERN, `Global theme should be set to ${DEFAULT_DARK_MODERN}`);
++    });
++});
++
++suite('SageMaker UI Dark Theme Extension Tests - In SageMaker Unified Studio Environment', () => {
++    // Store original ENV variable value
++    const originalEnv = process.env.SERVICE_NAME;
++
++    suiteSetup(() => {
++        // Set the global theme configuration to Default Light Modern
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', DEFAULT_LIGHT_MODERN, vscode.ConfigurationTarget.Global);
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Workspace);
++
++        // Set ENV variable value for SageMaker Unified Studio environment
++        process.env.SERVICE_NAME = 'SageMakerUnifiedStudio';
++    });
++
++    suiteTeardown(() => {
++        // Clear the theme configurations
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Global);
++
++        // Restore ENV variable value to original
++        originalEnv ? (process.env.SERVICE_NAME = originalEnv) : delete process.env.SERVICE_NAME;
++    });
++
++    test('Theme is not set when global theme configuration is set', async () => {
++        // Poll for theme update
++        await waitForThemeChange(DEFAULT_LIGHT_MODERN, 10000);
++
++        // Poll for Default Dark Modern theme update (expected to fail)
++        try {
++            await waitForThemeChange(DEFAULT_DARK_MODERN, 10000);
++            assert.fail(`Global theme should be kept as ${DEFAULT_LIGHT_MODERN}`);
++        } catch (error) {
++            // Expected behavior: Theme should not be set
++        }
++
++        const config = vscode.workspace.getConfiguration();
++        const theme = config.inspect('workbench.colorTheme');
++
++        assert.strictEqual(theme?.globalValue, DEFAULT_LIGHT_MODERN, `Global theme should be kept as ${DEFAULT_LIGHT_MODERN}`);
++    });
++});
++
++suite('SageMaker UI Dark Theme Extension Tests - In SageMaker AI Environment', () => {
++    // Store original ENV variable value
++    const originalEnv = process.env.SERVICE_NAME;
++
++    suiteSetup(() => {
++        // Clear the global theme configuration
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Global);
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Workspace);
++
++        // Ensure ENV variable value for SageMaker Unified Studio environment is NOT set
++        delete process.env.SERVICE_NAME;
++    });
++
++    suiteTeardown(() => {
++        // Clear the global theme configuration
++        vscode.workspace.getConfiguration('workbench').update('colorTheme', undefined, vscode.ConfigurationTarget.Global);
++
++        // Restore ENV variable value to original
++        originalEnv ? (process.env.SERVICE_NAME = originalEnv) : delete process.env.SERVICE_NAME;
++    });
++
++    test('Theme is not set', async () => {
++        // Poll for theme update
++        await waitForThemeChange(undefined, 10000);
++
++        const config = vscode.workspace.getConfiguration();
++        const theme = config.inspect('workbench.colorTheme');
++
++        assert.strictEqual(theme?.globalValue, undefined, 'Global theme should not be set');
++    });
++});
+Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
+@@ -0,0 +1,33 @@
++import * as path from 'path';
++import * as testRunner from '../../../../test/integration/electron/testrunner';
++
++const options: import('mocha').MochaOptions = {
++    ui: 'tdd',
++    color: true,
++    timeout: 60000
++};
++
++// Set the suite name
++let suite = '';
++if (process.env.VSCODE_BROWSER) {
++    suite = `${process.env.VSCODE_BROWSER} Browser Integration SageMaker UI Dark Theme Tests`;
++} else if (process.env.REMOTE_VSCODE) {
++    suite = 'Remote Integration SageMaker UI Dark Theme Tests';
++} else {
++    suite = 'Integration SageMaker UI Dark Theme Tests';
++}
++
++if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
++    options.reporter = 'mocha-multi-reporters';
++    options.reporterOptions = {
++        reporterEnabled: 'spec, mocha-junit-reporter',
++        mochaJunitReporterReporterOptions: {
++            testsuitesTitle: `${suite} ${process.platform}`,
++            mochaFile: path.join(process.env.BUILD_ARTIFACTSTAGINGDIRECTORY, `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, '-')}-results.xml`)
++        }
++    };
++}
++
++testRunner.configure(options);
++
++export = testRunner;

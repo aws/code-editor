@@ -1,0 +1,266 @@
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/README.md
+@@ -0,0 +1,2 @@
++# Terminal Crash Mitigation
++This extension addresses a critical issue where terminals fail to open. As of August 9, 2024, the root cause remains unidentified. The extension works by monitoring the creation of new terminals and detects if a terminal closes within 1 second of being opened. When this condition is met, it assumes the issue has occurred and attempts to mitigate it by terminating any background terminal processes. However, it will not terminate any terminal processes if there is an active terminal in the UI.
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/package.json
+@@ -0,0 +1,43 @@
++{
++  "name": "sagemaker-terminal-crash-mitigation",
++  "displayName": "Sagemaker terminal crash mitigation",
++  "description": "Mitgate issue where the terminal crashes when trying to open on app startup",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "*"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++    "configuration": {
++      "type": "object",
++      "title": "Sagemaker Idle Extension",
++      "properties": {}
++    },
++    "commands": []
++  },
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-terminal-crash-mitigation",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-terminal-crash-mitigation",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-terminal-crash-mitigation ./tsconfig.json"
++  },
++  "dependencies": {},
++  "repository": {}
++}
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
+@@ -0,0 +1,103 @@
++import * as vscode from 'vscode';
++import { exec } from 'child_process';
++
++const logPrefix = '[sagemaker-terminal-crash-mitigation]';
++
++export function activate(_context: vscode.ExtensionContext) {
++    let lastTerminal: vscode.Terminal | undefined;
++    let lastProcessId: number | undefined;
++    let lastOpenedTime: number | undefined;
++
++     /**
++     * Event listener for when a new terminal is opened.
++     * Tracks the terminal's process ID and the time it was opened.
++     */
++    vscode.window.onDidOpenTerminal(async terminal => {
++        lastTerminal = terminal;
++        lastOpenedTime = Date.now();
++        try {
++            lastProcessId = await terminal.processId;
++            console.log(`${logPrefix} Terminal opened: PID ${lastProcessId}, Time: ${lastOpenedTime}`);
++        } catch (error) {
++            console.error(`${logPrefix} Error getting process ID: ${error}`);
++        }
++    });
++
++    /**
++     * Event listener for when a terminal is closed.
++     * Checks if the closed terminal is the one that was last opened,
++     * and if it closed within 1 second. If no other terminals are active,
++     * executes a command to kill all bash processes.
++     */
++    vscode.window.onDidCloseTerminal(async terminal => {
++        if (lastTerminal && lastProcessId && lastOpenedTime) {
++            try {
++                const currentProcessId = await terminal.processId;
++                console.log(`${logPrefix} Terminal closed: PID ${currentProcessId}`);
++
++                if (currentProcessId === lastProcessId) {
++                    const timeElapsed = Date.now() - lastOpenedTime;
++                    console.log(`${logPrefix} Time elapsed since opening: ${timeElapsed}ms`);
++
++                    if (timeElapsed < 1000) {
++                        const remainingTerminals = vscode.window.terminals.length;
++                        console.log(`${logPrefix} Number of remaining terminals: ${remainingTerminals}`);
++
++                        if (remainingTerminals === 0) {
++                            console.log(`${logPrefix} No other active terminals. Executing kill command.`);
++                            execKillCommand();
++                        } else {
++                            console.log(`${logPrefix} There are other active terminals. Kill command not executed.`);
++                        }
++                    } else {
++                        console.log(`${logPrefix} Terminal closed after 1 second. No action taken.`);
++                    }
++                } else {
++                    console.log(`${logPrefix} Closed terminal PID does not match last opened terminal PID. No action taken.`);
++                }
++            } catch (error) {
++                console.error(`${logPrefix} Error getting process ID on close: ${error}`);
++            }
++        }
++    });
++}
++
++
++/**
++ * Executes the command to kill all bash processes.
++ * Fetches all bash process IDs and sends a `kill -9` signal to each one.
++ */
++function execKillCommand() {
++    exec("ps -eo pid,comm | grep bash | awk '{print $1}'", (error, stdout, stderr) => {
++        if (error) {
++            console.error(`${logPrefix} Error fetching bash PIDs: ${error.message}`);
++            return;
++        }
++        if (stderr) {
++            console.error(`${logPrefix} Error in command output: ${stderr}`);
++            return;
++        }
++
++        const pids = stdout.trim().split('\n').filter(pid => pid);
++        if (pids.length === 0) {
++            console.log(`${logPrefix} No bash processes found to kill.`);
++            return;
++        }
++
++        pids.forEach(pid => {
++            exec(`kill -9 ${pid}`, (killError, _killStdout, killStderr) => {
++                if (killError) {
++                    console.error(`${logPrefix} Error killing PID ${pid}: ${killError.message}`);
++                    return;
++                }
++                if (killStderr) {
++                    console.error(`${logPrefix} Error output while killing PID ${pid}: ${killStderr}`);
++                    return;
++                }
++                console.log(`${logPrefix} Killed bash process with PID ${pid}.`);
++            });
++        });
++    });
++}
++
++export function deactivate() {}
+Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"../sagemaker-terminal-crash-mitigation/src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -43,6 +43,7 @@ const dirs = [
+ 	'extensions/php-language-features',
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
++	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -65,6 +65,7 @@ const compilations = [
+ 	'extensions/search-result/tsconfig.json',
+ 	'extensions/simple-browser/tsconfig.json',
+ 	'extensions/sagemaker-extension/tsconfig.json',
++	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',

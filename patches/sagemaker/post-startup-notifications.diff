@@ -1,0 +1,703 @@
+Index: third-party-src/extensions/post-startup-notifications/.vscode/extensions.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/.vscode/extensions.json
+@@ -0,0 +1,5 @@
++{
++  // See http://go.microsoft.com/fwlink/?LinkId=827846
++  // for the documentation about the extensions.json format
++  "recommendations": ["dbaeumer.vscode-eslint", "amodio.tsl-problem-matcher", "ms-vscode.extension-test-runner"]
++}
+Index: third-party-src/extensions/post-startup-notifications/.vscode/launch.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/.vscode/launch.json
+@@ -0,0 +1,21 @@
++// A launch configuration that compiles the extension and then opens it inside a new window
++// Use IntelliSense to learn about possible attributes.
++// Hover to view descriptions of existing attributes.
++// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
++{
++    "version": "0.2.0",
++    "configurations": [
++        {
++            "name": "Run Extension",
++            "type": "extensionHost",
++            "request": "launch",
++            "args": [
++                "--extensionDevelopmentPath=${workspaceFolder}"
++            ],
++            "outFiles": [
++                "${workspaceFolder}/dist/**/*.js"
++            ],
++            "preLaunchTask": "${defaultBuildTask}"
++        }
++    ]
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/.vscode/settings.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/.vscode/settings.json
+@@ -0,0 +1,13 @@
++// Place your settings in this file to overwrite default and user settings.
++{
++    "files.exclude": {
++        "out": false, // set this to true to hide the "out" folder with the compiled JS files
++        "dist": false // set this to true to hide the "dist" folder with the compiled JS files
++    },
++    "search.exclude": {
++        "out": true, // set this to false to include "out" folder in search results
++        "dist": true // set this to false to include "dist" folder in search results
++    },
++    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
++    "typescript.tsc.autoDetect": "off"
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/.vscode/tasks.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/.vscode/tasks.json
+@@ -0,0 +1,40 @@
++// See https://go.microsoft.com/fwlink/?LinkId=733558
++// for the documentation about the tasks.json format
++{
++    "version": "2.0.0",
++    "tasks": [
++        {
++            "type": "npm",
++            "script": "watch",
++            "problemMatcher": "$ts-webpack-watch",
++            "isBackground": true,
++            "presentation": {
++                "reveal": "never",
++                "group": "watchers"
++            },
++            "group": {
++                "kind": "build",
++                "isDefault": true
++            }
++        },
++        {
++            "type": "npm",
++            "script": "watch-tests",
++            "problemMatcher": "$tsc-watch",
++            "isBackground": true,
++            "presentation": {
++                "reveal": "never",
++                "group": "watchers"
++            },
++            "group": "build"
++        },
++        {
++            "label": "tasks: watch-tests",
++            "dependsOn": [
++                "npm: watch",
++                "npm: watch-tests"
++            ],
++            "problemMatcher": []
++        }
++    ]
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/.vscodeignore
+@@ -0,0 +1,14 @@
++.vscode/**
++.vscode-test/**
++out/**
++node_modules/**
++src/**
++.gitignore
++.yarnrc
++webpack.config.js
++vsc-extension-quickstart.md
++**/tsconfig.json
++**/eslint.config.mjs
++**/*.map
++**/*.ts
++**/.vscode-test.*
+Index: third-party-src/extensions/post-startup-notifications/CHANGELOG.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/CHANGELOG.md
+@@ -0,0 +1,9 @@
++# Change Log
++
++All notable changes to the "post-startup-notifications" extension will be documented in this file.
++
++Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
++
++## [Unreleased]
++
++- Initial release
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/README.md
+@@ -0,0 +1,4 @@
++# post-startup-notifications README
++
++This extension monitors post startup script execution and notifies users on success/failure.
++
+Index: third-party-src/extensions/post-startup-notifications/eslint.config.mjs
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/eslint.config.mjs
+@@ -0,0 +1,28 @@
++import typescriptEslint from "@typescript-eslint/eslint-plugin";
++import tsParser from "@typescript-eslint/parser";
++
++export default [{
++    files: ["**/*.ts"],
++}, {
++    plugins: {
++        "@typescript-eslint": typescriptEslint,
++    },
++
++    languageOptions: {
++        parser: tsParser,
++        ecmaVersion: 2022,
++        sourceType: "module",
++    },
++
++    rules: {
++        "@typescript-eslint/naming-convention": ["warn", {
++            selector: "import",
++            format: ["camelCase", "PascalCase"],
++        }],
++
++        curly: "warn",
++        eqeqeq: "warn",
++        "no-throw-literal": "warn",
++        semi: "warn",
++    },
++}];
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/package.json
+@@ -0,0 +1,57 @@
++{
++    "name": "post-startup-notifications",
++    "displayName": "post-startup-notifications",
++    "description": "Extension for surfacing post startup script status notifications to users",
++    "version": "0.0.1",
++    "publisher": "sagemaker",
++    "license": "MIT",
++    "engines": {
++        "vscode": "^1.98.0"
++    },
++    "categories": [
++        "Other"
++    ],
++    "activationEvents": [
++        "*"
++    ],
++    "main": "./dist/extension.js",
++    "contributes": {
++        "commands": []
++    },
++    "scripts": {
++        "test": "jest",
++        "compile": "gulp compile-extension:post-startup-notifications",
++        "watch": "npm run build-preview && gulp watch-extension:post-startup-notifications",
++        "vscode:prepublish": "npm run build-ext",
++        "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:post-startup-notifications ./tsconfig.json"
++    },
++    "jest": {
++        "preset": "ts-jest",
++        "testEnvironment": "node",
++        "moduleFileExtensions": [
++            "ts",
++            "js"
++        ]
++    },
++    "devDependencies": {
++        "@types/jest": "^29.5.14",
++        "@types/mocha": "^10.0.10",
++        "@types/node": "20.x",
++        "@types/vscode": "^1.98.0",
++        "@typescript-eslint/eslint-plugin": "^8.25.0",
++        "@typescript-eslint/parser": "^8.25.0",
++        "@vscode/test-cli": "^0.0.10",
++        "@vscode/test-electron": "^2.4.1",
++        "eslint": "^9.21.0",
++        "jest": "^29.7.0",
++        "mocha": "^11.1.0",
++        "ts-jest": "^29.3.0",
++        "ts-loader": "^9.5.2",
++        "typescript": "^5.7.3",
++        "webpack": "^5.98.0",
++        "webpack-cli": "^6.0.1"
++    },
++    "dependencies": {
++        "chokidar": "^4.0.3"
++    }
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/src/constant.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/src/constant.ts
+@@ -0,0 +1,3 @@
++export const POST_START_UP_STATUS_FILE = '/tmp/.post-startup-status.json';
++export const SERVICE_NAME_ENV_VALUE = 'SageMakerUnifiedStudio';
++export const SERVICE_NAME_ENV_KEY = 'SERVICE_NAME';
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/src/extension.ts
+@@ -0,0 +1,80 @@
++import * as vscode from 'vscode';
++import * as fs from 'fs';
++import { POST_START_UP_STATUS_FILE, SERVICE_NAME_ENV_KEY, SERVICE_NAME_ENV_VALUE } from './constant';
++import { StatusFile } from './types';
++import * as chokidar from 'chokidar';
++
++
++let previousStatus: string | undefined;
++let watcher: chokidar.FSWatcher;
++let outputChannel: vscode.OutputChannel;
++
++export function activate(context: vscode.ExtensionContext) {
++    // Check if in SageMaker Unified Studio
++    const envValue = process.env[SERVICE_NAME_ENV_KEY];
++
++    if (!envValue || envValue !== SERVICE_NAME_ENV_VALUE) {
++        return;
++    }
++
++    outputChannel = vscode.window.createOutputChannel('SageMaker Unified Studio Post Startup Notifications');
++
++    try {
++        watcher = chokidar.watch(POST_START_UP_STATUS_FILE, {
++            persistent: true,
++            ignoreInitial: false,
++            awaitWriteFinish: {
++                stabilityThreshold: 2000,
++                pollInterval: 100
++            }
++        });
++
++        watcher.on('add', (path) => {
++            processStatusFile();
++        }).on('change', (path) => {
++            processStatusFile();
++        }).on('unlink', (path) => {
++            outputChannel.appendLine(`File ${path} has been removed`);
++        });
++
++    } catch (error: any) {
++        outputChannel.appendLine(`Error setting up file watcher: ${error}`);
++    }
++}
++
++function processStatusFile() {
++    try {
++        const content = fs.readFileSync(POST_START_UP_STATUS_FILE, 'utf8');
++        const statusData: StatusFile = JSON.parse(content);
++
++        // Only show message if status has changed
++        if (statusData.status && statusData.status !== previousStatus) {
++            previousStatus = statusData.status;
++
++            if (statusData.message) {
++                switch (statusData.status.toLowerCase()) {
++                    case 'error':
++                        vscode.window.showErrorMessage(statusData.message);
++                        break;
++                    case 'in-progress':
++                    default:
++                        vscode.window.showInformationMessage(statusData.message);
++                }
++            }
++        }
++    } catch (error: any) {
++        if (error.code !== 'ENOENT') {
++            outputChannel.appendLine(`Error processing status file: ${error.message}`);
++        }
++    }
++};
++
++export function deactivate() {
++    if (watcher) {
++        watcher.close();
++    }
++    outputChannel.appendLine('Status monitor deactivated');
++    if (outputChannel) {
++        outputChannel.dispose();
++    }
++}
+Index: third-party-src/extensions/post-startup-notifications/src/test/extension.test.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/src/test/extension.test.ts
+@@ -0,0 +1,201 @@
++import * as vscode from 'vscode';
++import * as fs from 'fs';
++import * as chokidar from 'chokidar';
++import { activate, deactivate } from '../extension';
++import { POST_START_UP_STATUS_FILE, SERVICE_NAME_ENV_KEY, SERVICE_NAME_ENV_VALUE } from '../constant';
++
++type MockCall = [string, (path: string) => void];
++
++interface MockFSWatcher extends chokidar.FSWatcher {
++    on: jest.Mock;
++    close: jest.Mock;
++}
++
++// Mocks setup
++jest.mock('vscode', () => ({
++    window: {
++        showErrorMessage: jest.fn(),
++        showInformationMessage: jest.fn(),
++        createOutputChannel: jest.fn()
++    }
++}));
++
++jest.mock('fs');
++jest.mock('chokidar');
++
++describe('SageMaker Unified Studio Extension Tests', () => {
++    let mockContext: vscode.ExtensionContext;
++    let mockWatcher: MockFSWatcher;
++    let mockOutputChannel: vscode.OutputChannel;
++
++    beforeEach(() => {
++        // Reset mocks
++        jest.resetAllMocks();
++
++        // Setup context
++        mockContext = { subscriptions: [] } as any;
++
++        // Setup watcher
++        mockWatcher = {
++            on: jest.fn().mockReturnThis(),
++            close: jest.fn()
++        } as any;
++
++        mockOutputChannel = {
++            appendLine: jest.fn(),
++            dispose: jest.fn()
++        } as any;
++
++        (chokidar.watch as jest.Mock).mockReturnValue(mockWatcher);
++        (vscode.window.createOutputChannel as jest.Mock).mockReturnValue(mockOutputChannel);
++        process.env[SERVICE_NAME_ENV_KEY] = SERVICE_NAME_ENV_VALUE;
++    });
++
++    // Helper function to get watcher callbacks
++    const getWatcherCallback = (eventType: string): ((path: string) => void) => {
++        const call = mockWatcher.on.mock.calls.find(
++            (call: MockCall) => call[0] === eventType
++        );
++        return call ? call[1] : jest.fn();
++    };
++
++    // Helper function to simulate file content
++    const simulateFileContent = (content: object): void => {
++        (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(content));
++    };
++
++    describe('Activation Tests', () => {
++        test('should not activate outside SageMaker environment', () => {
++            process.env[SERVICE_NAME_ENV_KEY] = 'wrong-value';
++            activate(mockContext);
++            expect(vscode.window.createOutputChannel).not.toHaveBeenCalled();
++        });
++
++        test('should initialize properly in SageMaker environment', () => {
++            activate(mockContext);
++            expect(vscode.window.createOutputChannel).toHaveBeenCalledWith(
++                'SageMaker Unified Studio Post Startup Notifications'
++            );
++            expect(chokidar.watch).toHaveBeenCalledWith(
++                POST_START_UP_STATUS_FILE,
++                expect.objectContaining({
++                    persistent: true,
++                    ignoreInitial: false
++                })
++            );
++        });
++
++        test('should handle watcher setup errors', () => {
++            const error = new Error('Setup error');
++            (chokidar.watch as jest.Mock).mockImplementation(() => { throw error; });
++            activate(mockContext);
++            expect(mockOutputChannel.appendLine).toHaveBeenCalled();
++        });
++    });
++
++    describe('File Processing Tests', () => {
++        test('should handle error status', () => {
++            simulateFileContent({
++                status: 'error',
++                message: 'Test error message'
++            });
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(vscode.window.showErrorMessage).toHaveBeenCalledWith('Test error message');
++        });
++
++        test('should handle in-progress status', () => {
++            simulateFileContent({
++                status: 'in-progress',
++                message: 'Processing message'
++            });
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Processing message');
++        });
++
++        test('should not show message for unchanged status', () => {
++            simulateFileContent({
++                status: 'error',
++                message: 'Error message'
++            });
++
++            activate(mockContext);
++            const addCallback = getWatcherCallback('add');
++            addCallback('test-path');
++            expect(vscode.window.showErrorMessage).toHaveBeenCalledTimes(1);
++
++            addCallback('test-path');
++            expect(vscode.window.showErrorMessage).toHaveBeenCalledTimes(1);
++        });
++
++        test('should handle file removal', () => {
++            activate(mockContext);
++            getWatcherCallback('unlink')('test-path');
++            expect(mockOutputChannel.appendLine).toHaveBeenCalledWith('File test-path has been removed');
++        });
++    });
++
++    describe('Error Handling Tests', () => {
++        test('should handle invalid JSON', () => {
++            (fs.readFileSync as jest.Mock).mockReturnValue('invalid json');
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(mockOutputChannel.appendLine).toHaveBeenCalledWith(
++                expect.stringContaining('Error processing status file')
++            );
++        });
++
++        test('should handle file read errors', () => {
++            (fs.readFileSync as jest.Mock).mockImplementation(() => {
++                throw new Error('Read error');
++            });
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(mockOutputChannel.appendLine).toHaveBeenCalledWith(
++                expect.stringContaining('Error processing status file')
++            );
++        });
++
++        test('should ignore ENOENT errors', () => {
++            const error = new Error('File not found');
++            (error as any).code = 'ENOENT';
++            (fs.readFileSync as jest.Mock).mockImplementation(() => {
++                throw error;
++            });
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(mockOutputChannel.appendLine).not.toHaveBeenCalled();
++        });
++
++        test('should handle missing status or message', () => {
++            simulateFileContent({});
++
++            activate(mockContext);
++            getWatcherCallback('add')('test-path');
++
++            expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();
++            expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
++        });
++    });
++
++    describe('Deactivation Tests', () => {
++        test('should cleanup resources properly', () => {
++            activate(mockContext);
++            deactivate();
++
++            expect(mockWatcher.close).toHaveBeenCalled();
++            expect(mockOutputChannel.dispose).toHaveBeenCalled();
++        });
++    });
++});
+Index: third-party-src/extensions/post-startup-notifications/src/types.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/src/types.ts
+@@ -0,0 +1,6 @@
++export interface StatusFile {
++    status: string;
++    message: string;
++    link: string;
++    label: string;
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/tsconfig.json
+@@ -0,0 +1,17 @@
++{
++    "compilerOptions": {
++        "module": "Node16",
++        "target": "ES2022",
++        "lib": [
++            "ES2022"
++        ],
++        "sourceMap": true,
++        "rootDir": "src",
++        "strict": true, /* enable all strict type-checking options */
++        "isolatedModules": true
++        /* Additional Checks */
++        // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
++        // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
++        // "noUnusedParameters": true,  /* Report errors on unused parameters. */
++    }
++}
+\ No newline at end of file
+Index: third-party-src/extensions/post-startup-notifications/webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/webpack.config.js
+@@ -0,0 +1,48 @@
++//@ts-check
++
++'use strict';
++
++const path = require('path');
++
++//@ts-check
++/** @typedef {import('webpack').Configuration} WebpackConfig **/
++
++/** @type WebpackConfig */
++const extensionConfig = {
++    target: 'node', // VS Code extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
++    mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
++
++    entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
++    output: {
++        // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
++        path: path.resolve(__dirname, 'dist'),
++        filename: 'extension.js',
++        libraryTarget: 'commonjs2'
++    },
++    externals: {
++        vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
++        // modules added here also need to be added in the .vscodeignore file
++    },
++    resolve: {
++        // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
++        extensions: ['.ts', '.js']
++    },
++    module: {
++        rules: [
++            {
++                test: /\.ts$/,
++                exclude: /node_modules/,
++                use: [
++                    {
++                        loader: 'ts-loader'
++                    }
++                ]
++            }
++        ]
++    },
++    devtool: 'nosources-source-map',
++    infrastructureLogging: {
++        level: "log", // enables logging required for problem matchers
++    },
++};
++module.exports = [extensionConfig];
+\ No newline at end of file
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -42,6 +42,7 @@ const dirs = [
+ 	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/sagemaker-open-notebook-extension',
+ 	'extensions/sagemaker-ui-dark-theme',
++	'extensions/post-startup-notifications',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -64,6 +64,7 @@ const compilations = [
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+ 	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
++	'extensions/post-startup-notifications/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+Index: third-party-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/post-startup-notifications/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/post-startup-notifications/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+\ No newline at end of file

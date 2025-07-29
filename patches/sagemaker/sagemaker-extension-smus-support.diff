@@ -1,0 +1,182 @@
+Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
+===================================================================
+--- third-party-src.orig/extensions/sagemaker-extension/src/constant.ts
++++ third-party-src/extensions/sagemaker-extension/src/constant.ts
+@@ -27,6 +27,10 @@ export const FIVE_MINUTES_INTERVAL_MILLI
+ 
+ export const SAGEMAKER_METADATA_PATH = '/opt/ml/metadata/resource-metadata.json';
+ 
++// Service name identifier for SageMaker Unified Studio
++export const SMUS_SERVICE_NAME = 'SageMakerUnifiedStudio';
++export const SERVICE_NAME_ENV_VAR = 'SERVICE_NAME';
++
+ export class SagemakerCookie {
+ 	authMode: string
+ 	expiryTime: number
+@@ -56,6 +60,11 @@ export class SagemakerResourceMetadata {
+ 	ResourceArn?: string
+ 	ResourceName?: string
+ 	AppImageVersion?: string
++	AdditionalMetadata?: {
++		DataZoneDomainId?: string
++		DataZoneProjectId?: string
++		DataZoneDomainRegion?: string
++	}
+ };
+ export function isSSOMode(cookie: SagemakerCookie) {
+ 	return (cookie.authMode === AUTH_MODE.SSO)
+@@ -69,4 +78,35 @@ export function getExpiryTime(cookie: Sa
+ 	} else {
+ 		return -1;
+ 	}
+-}
+\ No newline at end of file
++}
++
++/**
++ * Constructs the SMUS portal URL using domain, region, and project information
++ * Returns null if not in SMUS environment or if required fields are missing
++ */
++export const getSmusVscodePortalUrl = (metadata: SagemakerResourceMetadata | null): string | null => {
++	if (process.env[SERVICE_NAME_ENV_VAR] !== SMUS_SERVICE_NAME) {
++		return null;
++	}
++
++	if (!metadata || !metadata.AdditionalMetadata) {
++		// fail silently not to block users
++		console.error('[SMUS] Metadata is undefined or null');
++		return null;
++	}
++
++	const { DataZoneDomainId, DataZoneDomainRegion, DataZoneProjectId } = metadata.AdditionalMetadata;
++
++	if (!DataZoneDomainId || !DataZoneDomainRegion || !DataZoneProjectId) {
++		// fail silently not to block users
++		// TODO: add monitoring to detect such cases
++		console.error('[SMUS] Required fields missing in metadata:', {
++			DataZoneDomainId: !!DataZoneDomainId,
++			DataZoneDomainRegion: !!DataZoneDomainRegion,
++			DataZoneProjectId: !!DataZoneProjectId
++		});
++		return null;
++	}
++
++	return `https://${DataZoneDomainId}.sagemaker.${DataZoneDomainRegion}.on.aws/projects/${DataZoneProjectId}/overview`;
++}
+Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
+===================================================================
+--- third-party-src.orig/extensions/sagemaker-extension/src/extension.ts
++++ third-party-src/extensions/sagemaker-extension/src/extension.ts
+@@ -11,7 +11,8 @@ import {
+     WARNING_BUTTON_SAVE_AND_RENEW_SESSION,
+     SagemakerCookie,
+     SagemakerResourceMetadata,
+-    getExpiryTime
++    getExpiryTime,
++    getSmusVscodePortalUrl
+ } from "./constant";
+ import * as console from "console";
+ 
+@@ -19,6 +20,24 @@ import * as console from "console";
+ const PARSE_SAGEMAKER_COOKIE_COMMAND = 'sagemaker.parseCookies';
+ const ENABLE_AUTO_UPDATE_COMMAND = 'workbench.extensions.action.enableAutoUpdate';
+ 
++// Global redirect URL for SMUS environment
++let smusRedirectUrl: string | null = null;
++
++function fetchMetadata(): SagemakerResourceMetadata | null {
++    try {
++        const data = fs.readFileSync(SAGEMAKER_METADATA_PATH, 'utf-8');
++        return JSON.parse(data) as SagemakerResourceMetadata;
++    } catch (error) {
++        // fail silently not to block users
++        console.error('Error reading metadata file:', error);
++        return null;
++    }
++}
++
++function initializeSmusRedirectUrl() {
++    smusRedirectUrl = getSmusVscodePortalUrl(fetchMetadata());
++}
++
+ function showWarningDialog() {
+     vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(response => {
+ 
+@@ -59,11 +78,12 @@ function showWarningDialog() {
+ }
+ 
+ function signInError(sagemakerCookie: SagemakerCookie) {
++    const redirectUrl = getRedirectUrl(sagemakerCookie);
+     // The session has expired
+     SessionWarning.signInWarning(sagemakerCookie)
+         .then((selection) => {
+             if (selection === SIGN_IN_BUTTON) {
+-                vscode.env.openExternal(vscode.Uri.parse(<string>sagemakerCookie.redirectURL));
++                vscode.env.openExternal(vscode.Uri.parse(redirectUrl));
+             }
+         });
+ }
+@@ -94,32 +114,21 @@ function saveWorkspace() {
+     });
+ }
+ function renewSession(sagemakerCookie: SagemakerCookie) {
++    const redirectUrl = getRedirectUrl(sagemakerCookie);
+     // TODO: Log and trigger a Signin
+-    vscode.env.openExternal(vscode.Uri.parse(<string>sagemakerCookie.redirectURL));
++    vscode.env.openExternal(vscode.Uri.parse(redirectUrl));
+     // Trigger the function to show the warning again after 5 minutes again to validate.
+     setTimeout(showWarningDialog, FIVE_MINUTES_INTERVAL_MILLIS);
+ }
+ 
+ function updateStatusItemWithMetadata(context: vscode.ExtensionContext) {
+-    fs.readFile(SAGEMAKER_METADATA_PATH, 'utf-8', (err, data) => {
+-        if (err) {
+-            // fail silently not to block users
+-        } else {
+-            try {
+-                const jsonData = JSON.parse(data) as SagemakerResourceMetadata;
+-                const spaceName = jsonData.SpaceName;
+-
+-                if (spaceName != null) {
+-                    let spaceNameStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+-                    spaceNameStatusBarItem.text = `Space: ${spaceName}`;
+-                    spaceNameStatusBarItem.show();
+-                    context.subscriptions.push(spaceNameStatusBarItem);
+-                }
+-            } catch (jsonError) {
+-                // fail silently not to block users
+-            }
+-        }
+-    });
++    const metadata = fetchMetadata();
++    if (metadata?.SpaceName) {
++        let spaceNameStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
++        spaceNameStatusBarItem.text = `Space: ${metadata.SpaceName}`;
++        spaceNameStatusBarItem.show();
++        context.subscriptions.push(spaceNameStatusBarItem);
++    }
+ }
+ 
+ // Render warning message regarding auto upgrade disabled
+@@ -158,6 +167,9 @@ export function activate(context: vscode
+     // TODO: log activation of extension
+     console.log('Activating Sagemaker Extension...');
+ 
++    // First set smusRedirectUrl if we are in SMUS environment
++    initializeSmusRedirectUrl();
++
+     // execute the get cookie command and save the data to cookies
+     vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(r => {
+ 
+@@ -170,3 +182,11 @@ export function activate(context: vscode
+     // render warning message regarding auto upgrade disabled
+     renderExtensionAutoUpgradeDisabledNotification();
+ }
++
++/**
++ * Returns the appropriate redirect URL based on the environment
++ * Uses SMUS URL if available, falls back to original redirect URL
++ */
++function getRedirectUrl(sagemakerCookie: SagemakerCookie): string {
++    return smusRedirectUrl || sagemakerCookie.redirectURL;
++}

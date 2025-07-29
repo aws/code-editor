@@ -1,0 +1,475 @@
+Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/src/extension.ts
+@@ -0,0 +1,172 @@
++import * as vscode from 'vscode';
++import * as fs from 'fs';
++import { SessionWarning } from "./sessionWarning";
++import {
++    FIFTEEN_MINUTES_INTERVAL_MILLIS,
++    FIVE_MINUTES_INTERVAL_MILLIS,
++    SAGEMAKER_METADATA_PATH,
++    SIGN_IN_BUTTON,
++    WARNING_BUTTON_REMIND_ME_IN_5_MINS,
++    WARNING_BUTTON_SAVE,
++    WARNING_BUTTON_SAVE_AND_RENEW_SESSION,
++    SagemakerCookie,
++    SagemakerResourceMetadata,
++    getExpiryTime
++} from "./constant";
++import * as console from "console";
++
++
++const PARSE_SAGEMAKER_COOKIE_COMMAND = 'sagemaker.parseCookies';
++const ENABLE_AUTO_UPDATE_COMMAND = 'workbench.extensions.action.enableAutoUpdate';
++
++function showWarningDialog() {
++    vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(response => {
++
++        const sagemakerCookie: SagemakerCookie = response as SagemakerCookie
++        const remainingTime: number = getExpiryTime(sagemakerCookie) - Date.now();
++
++        if(!(Object.keys(sagemakerCookie).length === 0)) {
++            if (getExpiryTime(sagemakerCookie) != null && remainingTime > FIFTEEN_MINUTES_INTERVAL_MILLIS) {
++                // This means cookie has been reset, reinitializing again
++                initialize(sagemakerCookie);
++            } else if (getExpiryTime(sagemakerCookie) != null && remainingTime > 0) {
++                // READ COOKIE again to decide to show this up
++
++                SessionWarning.sessionExpiringWarning(remainingTime, sagemakerCookie)
++                    .then((selection) => {
++                        if (selection === WARNING_BUTTON_REMIND_ME_IN_5_MINS) {
++                            // Trigger the function to show the warning again after 5 minutes.
++                            setTimeout(showWarningDialog, FIVE_MINUTES_INTERVAL_MILLIS);
++                        } else if (selection === WARNING_BUTTON_SAVE) {
++                            saveWorkspace();
++                        } else if (selection === WARNING_BUTTON_SAVE_AND_RENEW_SESSION) {
++                            saveWorkspace();
++                            // Trigger the function to make an API call to renew the session.
++                            renewSession(sagemakerCookie);
++                        }
++                    });
++
++            } else {
++                // this means expiryTime cookie is either invalid or <0
++                signInError(sagemakerCookie);
++            }
++        } else {
++            // no cookie found so assuming its running locally
++        }
++
++    });
++
++}
++
++function signInError(sagemakerCookie: SagemakerCookie) {
++    // The session has expired
++    SessionWarning.signInWarning(sagemakerCookie)
++        .then((selection) => {
++            if (selection === SIGN_IN_BUTTON) {
++                vscode.env.openExternal(vscode.Uri.parse(<string>sagemakerCookie.redirectURL));
++            }
++        });
++}
++
++function initialize(sagemakerCookie: SagemakerCookie) {
++    const currentTime = Date.now();
++    const timeToExpiry = getExpiryTime(sagemakerCookie) - currentTime;
++
++    if (timeToExpiry <= 0) {
++        signInError(sagemakerCookie);
++    } else if (timeToExpiry >= FIFTEEN_MINUTES_INTERVAL_MILLIS) {
++        const warningTime = timeToExpiry - FIFTEEN_MINUTES_INTERVAL_MILLIS;
++        setTimeout(() => {
++            showWarningDialog();
++        }, warningTime);
++    } else {
++        // If less than or equal to 15 minutes left, set a timer for the remaining time
++        const warningTime = timeToExpiry % FIVE_MINUTES_INTERVAL_MILLIS;
++        setTimeout(() => {
++            showWarningDialog();
++        }, warningTime);
++    }
++}
++
++function saveWorkspace() {
++    vscode.workspace.saveAll().then(() => {
++        // TODO: log workspace saved
++    });
++}
++function renewSession(sagemakerCookie: SagemakerCookie) {
++    // TODO: Log and trigger a Signin
++    vscode.env.openExternal(vscode.Uri.parse(<string>sagemakerCookie.redirectURL));
++    // Trigger the function to show the warning again after 5 minutes again to validate.
++    setTimeout(showWarningDialog, FIVE_MINUTES_INTERVAL_MILLIS);
++}
++
++function updateStatusItemWithMetadata(context: vscode.ExtensionContext) {
++    fs.readFile(SAGEMAKER_METADATA_PATH, 'utf-8', (err, data) => {
++        if (err) {
++            // fail silently not to block users
++        } else {
++            try {
++                const jsonData = JSON.parse(data) as SagemakerResourceMetadata;
++                const spaceName = jsonData.SpaceName;
++
++                if (spaceName != null) {
++                    let spaceNameStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
++                    spaceNameStatusBarItem.text = `Space: ${spaceName}`;
++                    spaceNameStatusBarItem.show();
++                    context.subscriptions.push(spaceNameStatusBarItem);
++                }
++            } catch (jsonError) {
++                // fail silently not to block users
++            }
++        }
++    });
++}
++
++// Render warning message regarding auto upgrade disabled
++function renderExtensionAutoUpgradeDisabledNotification() {
++    // Get current extension auto disabled config
++    const autoUpdateEnabled = vscode.workspace.getConfiguration('extensions').get('autoUpdate');
++
++    // Check if customer has choose to disable this notification
++    const extensionConfig = vscode.workspace.getConfiguration('sagemaker-extension');
++    const showNotificationEnabled = extensionConfig.get('notification.extensionAutoUpdateDisabled', true);
++
++    // Only show notification, if auto update is disabled, and customer hasn't opt-out the notification
++    if (showNotificationEnabled && autoUpdateEnabled == false) {
++        const enableAutoUpdate = 'Enable Auto Update Extensions';
++        const doNotShowAgain = 'Do not show again';
++        vscode.window.showInformationMessage(
++            'Extension auto-update is disabled. This can be changed in Code Editor settings.',
++            enableAutoUpdate,
++            doNotShowAgain,
++        ).then(response => {
++            if (response === enableAutoUpdate) {
++                vscode.commands.executeCommand(ENABLE_AUTO_UPDATE_COMMAND)
++            } else if (response == doNotShowAgain) {
++                extensionConfig.update(
++                    'notification.extensionAutoUpdateDisabled',
++                    false,
++                    vscode.ConfigurationTarget.Global
++                );
++            }
++        })
++    }
++}
++
++export function activate(context: vscode.ExtensionContext) {
++
++    // TODO: log activation of extension
++    console.log('Activating Sagemaker Extension...');
++
++    // execute the get cookie command and save the data to cookies
++    vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(r => {
++
++        const sagemakerCookie: SagemakerCookie = r as SagemakerCookie
++
++        initialize(sagemakerCookie);
++        updateStatusItemWithMetadata(context);
++    });
++
++    // render warning message regarding auto upgrade disabled
++    renderExtensionAutoUpgradeDisabledNotification();
++}
+Index: third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
+@@ -0,0 +1,44 @@
++import * as vscode from "vscode";
++import {
++    IAM_MESSAGE,
++    isSSOMode, SagemakerCookie,
++    SIGN_IN_BUTTON,
++    SIGN_IN_HEADER,
++    SIGN_IN_MESSAGE, SIGN_IN_MESSAGE_WHEN_REDIRECT_URL_DOES_NOT_EXIST, SSO_MESSAGE,
++    WARNING_TIME_BUTTONS,
++    WARNING_TIME_HEADER
++} from "./constant";
++
++export class SessionWarning {
++
++    public static sessionExpiringWarning (warningTime: number, cookie: SagemakerCookie): Thenable<string | undefined> {
++        // convert warningTime from ms to minutes;
++        const warningTimeInMinutes: number = Math.floor(warningTime / 60000);
++        const detail: string = `Your session will expire in ${warningTimeInMinutes} minutes. If your session expires, you could lose unsaved changes \n ${isSSOMode(cookie) ? SSO_MESSAGE : IAM_MESSAGE}`
++        const sessionExpiringOptions: vscode.MessageOptions = {
++            detail: detail,
++            modal: true
++        };
++
++        // Session expiration warning...
++        if (isSSOMode(cookie)) {
++            return vscode.window.showWarningMessage(WARNING_TIME_HEADER, sessionExpiringOptions, ...WARNING_TIME_BUTTONS.SSO);
++        } else {
++            return vscode.window.showWarningMessage(WARNING_TIME_HEADER, sessionExpiringOptions, ...WARNING_TIME_BUTTONS.IAM);
++        }
++    }
++
++    public static signInWarning (cookie: SagemakerCookie): Thenable<string | undefined> {
++        const signInOptions: vscode.MessageOptions = {
++            detail: cookie.redirectURL ? SIGN_IN_MESSAGE : SIGN_IN_MESSAGE_WHEN_REDIRECT_URL_DOES_NOT_EXIST,
++            modal: true
++        };
++
++		// SignIn warning...
++        if (cookie.redirectURL) {
++            return vscode.window.showErrorMessage(SIGN_IN_HEADER, signInOptions, SIGN_IN_BUTTON);
++        } else {
++            return vscode.window.showErrorMessage(SIGN_IN_HEADER, signInOptions);
++        }
++    }
++}
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-extension/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-extension/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/package.json
+@@ -0,0 +1,52 @@
++{
++  "name": "sagemaker-extension",
++  "displayName": "Sagemaker Extension",
++  "description": "Sagemaker Extension",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "*"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++    "configuration": {
++      "type": "object",
++      "title": "SageMaker Extension",
++      "properties": {
++        "sagemaker-extension.notification.extensionAutoUpdateDisabled": {
++          "type": "boolean",
++          "default": true,
++          "markdownDescription": "Show notification if extension auto update is disabled"
++        }
++      }
++    },
++    "commands": [
++    ]
++  },
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-extension",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-extension",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-extension ./tsconfig.json"
++  },
++  "dependencies": {
++  },
++  "repository": {
++  }
++}
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -60,6 +60,7 @@ const compilations = [
+	'extensions/references-view/tsconfig.json',
+	'extensions/search-result/tsconfig.json',
+	'extensions/simple-browser/tsconfig.json',
++	'extensions/sagemaker-extension/tsconfig.json',
+	'extensions/tunnel-forwarding/tsconfig.json',
+	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+	'extensions/typescript-language-features/web/tsconfig.json',
+Index: third-party-src/extensions/sagemaker-extension/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/README.md
+@@ -0,0 +1,5 @@
++# Sagemaker Extension
++
++The SageMaker Extension alerts users to sign in again before their session expires. It remains active continuously and cannot be disabled.
++
++Session Management: The extension monitors the SageMaker cookie to ensure seamless session continuity. It proactively alerts users to sign in again before the session expires, enhancing the user experience by preventing unexpected session interruptions.
+\ No newline at end of file
+Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -38,6 +38,7 @@ const dirs = [
+ 	'extensions/npm',
+ 	'extensions/php-language-features',
+ 	'extensions/references-view',
++	'extensions/sagemaker-extension',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-extension/src/constant.ts
+@@ -0,0 +1,72 @@
++// Constants
++export const WARNING_TIME_HEADER = 'Session expiring soon';
++
++export const WARNING_BUTTON_REMIND_ME_IN_5_MINS = 'Remind me in 5 minutes';
++export const WARNING_BUTTON_SAVE = 'Save';
++export const WARNING_BUTTON_SAVE_AND_RENEW_SESSION = 'Save and renew session';
++export const WARNING_TIME_BUTTONS = {
++	SSO: [WARNING_BUTTON_REMIND_ME_IN_5_MINS, WARNING_BUTTON_SAVE],
++	IAM: [WARNING_BUTTON_REMIND_ME_IN_5_MINS, WARNING_BUTTON_SAVE_AND_RENEW_SESSION]
++};
++
++// Constants for signInWarning
++export const SIGN_IN_HEADER = 'Please sign in again';
++export const SIGN_IN_MESSAGE = "You were logged out of your account. Choose 'Sign In' to continue using this workplace.";
++export const SIGN_IN_MESSAGE_WHEN_REDIRECT_URL_DOES_NOT_EXIST = "You were logged out of your account. You are not able to\n" +
++	"                  perform actions in your workplace at this time. Please start a\n" +
++	"                  new session.";
++export const SIGN_IN_BUTTON = 'Sign In';
++export const SSO_MESSAGE = 'To renew the session, log out from Studio App via "File" -> "Log Out" and then "Sign out" from AWS IAM Identity Center (successor to AWS SSO) user portal. Do you want to save all changes now?';
++export const IAM_MESSAGE = 'Do you want to renew your session now?'
++export enum AUTH_MODE {
++	SSO = "Sso",
++	IAM = "Iam"
++}
++export const FIFTEEN_MINUTES_INTERVAL_MILLIS = 15 * 60 * 1000;
++export const FIVE_MINUTES_INTERVAL_MILLIS = 5 * 60 * 1000;
++
++export const SAGEMAKER_METADATA_PATH = '/opt/ml/metadata/resource-metadata.json';
++
++export class SagemakerCookie {
++	authMode: string
++	expiryTime: number
++	ssoExpiryTimestamp: number
++	studioUserProfileName: string
++	redirectURL: string
++
++	constructor(
++		authMode: string,
++		expiryTime: number,
++		ssoExpiryTimestamp: number,
++		studioUserProfileName: string,
++		redirectURL: string
++	) {
++		this.authMode = authMode;
++		this.expiryTime = expiryTime;
++		this.ssoExpiryTimestamp = ssoExpiryTimestamp
++		this.studioUserProfileName = studioUserProfileName
++		this.redirectURL = redirectURL
++	}
++};
++
++export class SagemakerResourceMetadata {
++	AppType?: string
++	DomainId?: string
++	SpaceName?: string
++	ResourceArn?: string
++	ResourceName?: string
++	AppImageVersion?: string
++};
++export function isSSOMode(cookie: SagemakerCookie) {
++	return (cookie.authMode === AUTH_MODE.SSO)
++}
++
++export function getExpiryTime(cookie: SagemakerCookie): number {
++	if (AUTH_MODE.SSO === cookie.authMode) {
++		return cookie.ssoExpiryTimestamp;
++	} else if (AUTH_MODE.IAM === cookie.authMode) {
++		return cookie.expiryTime;
++	} else {
++		return -1;
++	}
++}
+\ No newline at end of file

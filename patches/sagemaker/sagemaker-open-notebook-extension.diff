@@ -1,0 +1,319 @@
+Index: third-party-src/build/gulpfile.extensions.js
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.js
++++ third-party-src/build/gulpfile.extensions.js
+@@ -61,6 +61,7 @@ const compilations = [
+ 	'extensions/simple-browser/tsconfig.json',
+ 	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
++	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -39,6 +39,7 @@ const dirs = [
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
++	'extensions/sagemaker-open-notebook-extension',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+@@ -262,7 +262,12 @@ Registry.as<IConfigurationRegistry>(Conf
+ 				type: 'boolean',
+ 				description: localize('extensionsInQuickAccess', "When enabled, extensions can be searched for via Quick Access and report issues from there."),
+ 				default: true
+-			},
++			},
++			'extensions.openNotebookData': {
++				type: 'object',
++				scope: ConfigurationScope.APPLICATION,
++				default: {},
++			},
+ 			[VerifyExtensionSignatureConfigKey]: {
+ 				type: 'boolean',
+ 				description: localize('extensions.verifySignature', "When enabled, extensions are verified to be signed before getting installed."),
+Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
++++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
+@@ -1084,6 +1084,17 @@ export class ExtensionsWorkbenchService
+ 		urlService.registerHandler(this);
+ 
+ 		this.whenInitialized = this.initialize();
++
++		//Update workspace to open notebook
++        const urlParams = new URLSearchParams(window.location.search);
++        const notebookKey = urlParams.get('openNotebook');
++        const clusterId = urlParams.get('clusterId');
++		const region = urlParams.get('region');
++        configurationService.updateValue('extensions.openNotebookData', {
++            notebookKey: notebookKey,
++            clusterId: clusterId,
++			region: region,
++        });
+ 	}
+ 
+ 	private async initialize(): Promise<void> {
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
+@@ -0,0 +1,17 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withBrowserDefaults = require('../shared.webpack.config').browser;
++
++module.exports = withBrowserDefaults({
++    context: __dirname,
++    entry: {
++        extension: './src/extension.ts'
++    },
++});
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
+@@ -0,0 +1,20 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++//@ts-check
++
++'use strict';
++
++const withDefaults = require('../shared.webpack.config');
++
++module.exports = withDefaults({
++    context: __dirname,
++    resolve: {
++        mainFields: ['module', 'main']
++    },
++    entry: {
++        extension: './src/extension.ts',
++    }
++});
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/package.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/package.json
+@@ -0,0 +1,44 @@
++{
++  "name": "sagemaker-open-notebook-extension",
++  "displayName": "Sagemaker open notebook Extension",
++  "description": "To download and open sample notebook when open code editor",
++  "extensionKind": [
++    "workspace"
++  ],
++  "version": "1.0.0",
++  "publisher": "sagemaker",
++  "license": "MIT",
++  "engines": {
++    "vscode": "^1.70.0"
++  },
++  "main": "./out/extension",
++  "categories": [
++    "Other"
++  ],
++  "activationEvents": [
++    "*"
++  ],
++  "capabilities": {
++    "virtualWorkspaces": true,
++    "untrustedWorkspaces": {
++      "supported": true
++    }
++  },
++  "contributes": {
++    "configuration": {
++      "type": "object",
++      "title": "Sagemaker Open Notebook Extension",
++      "properties": {}
++    },
++    "commands": [
++    ]
++  },
++  "scripts": {
++    "compile": "gulp compile-extension:sagemaker-open-notebook-extension",
++    "watch": "npm run build-preview && gulp watch-extension:sagemaker-open-notebook-extension",
++    "vscode:prepublish": "npm run build-ext",
++    "build-ext": "node ../../node_modules/gulp/bin/gulp.js --gulpfile ../../build/gulpfile.extensions.js compile-extension:sagemaker-open-notebook-extension ./tsconfig.json"
++  },
++  "dependencies": {},
++  "repository": {}
++}
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
+@@ -0,0 +1,100 @@
++
++import * as vscode from 'vscode';
++import * as https from 'https';
++import * as fs from 'fs';
++import * as path from 'path';
++import * as os from 'os';
++import * as console from 'console';
++
++export function activate() {
++    const config = vscode.workspace.getConfiguration('extensions.openNotebookData');
++    const notebookKey = config.get('notebookKey') as string;
++    const clusterId = config.get('clusterId') as string;
++    const region = config.get('region') as string;
++    if(notebookKey){
++        loadAndDisplayNotebook(notebookKey, clusterId, region);
++    }
++
++}
++
++function isValidRegion(region: string): boolean {
++    // This regex allows for characters, numbers, and hyphens
++    const regionRegex = /^[a-zA-Z0-9-]+$/;
++    return regionRegex.test(region);
++}
++
++async function loadAndDisplayNotebook(fileKey: string, clusterId: string, region: string) {
++    if (!isValidRegion(region)) {
++        vscode.window.showErrorMessage('Invalid region format. Region should only contain characters, numbers, and hyphens.');
++        return;
++    }
++    
++    const bucketName = `jumpstart-cache-prod-${region}`;
++    const url = `https://${bucketName}.s3.${region}.amazonaws.com/${fileKey}`;
++    try {
++        let content = await downloadFile(url);
++        content = processNotebookContent(content, clusterId, region);
++        const tempDir = os.tmpdir();
++        const tempFilePath = path.join(tempDir, 'downloaded-notebook.ipynb');
++        fs.writeFileSync(tempFilePath, content);
++        const uri = vscode.Uri.file(tempFilePath);
++        await openNotebookDocument(uri);
++    } catch (error) {
++        vscode.window.showErrorMessage('Error downloading or opening notebook: ' + error.message);
++    }
++}
++
++function processNotebookContent(content: string, clusterId: string, region: string): string {
++    const notebook = JSON.parse(content);
++    notebook.cells = notebook.cells.map((cell: any) => {
++        if (cell.metadata && 
++            cell.metadata.jumpStartAlterations && 
++            cell.metadata.jumpStartAlterations.includes('clusterId')) {
++            cell.source = [
++                "%%bash\n",
++                `aws ssm start-session --target sagemaker-cluster:${clusterId} --region ${region}`
++            ];
++            cell.cell_type = "code";
++        }
++
++        if (cell.metadata && 
++            cell.metadata.jumpStartAlterations && 
++            cell.metadata.jumpStartAlterations.includes('clusterName')) {
++            cell.source = [
++                `!hyperpod connect-cluster --cluster-name ${clusterId}`
++            ]
++            cell.cell_type = "code";
++        }
++        return cell;
++    });
++    return JSON.stringify(notebook, null, 2);
++}
++
++async function openNotebookDocument(uri: vscode.Uri) {
++    try {
++        // Open the notebook document
++        const document = await vscode.workspace.openNotebookDocument(uri);
++        // Show the notebook document in a notebook editor
++        await vscode.window.showNotebookDocument(document);
++    } catch (error) {
++        console.error('Failed to open notebook:', error);
++        vscode.window.showErrorMessage('Failed to open notebook: ' + error.message);
++    }
++}
++
++function downloadFile(url: string): Promise<string> {
++    return new Promise((resolve, reject) => {
++        https.get(url, (response) => {
++            let data = '';
++            response.on('data', (chunk) => {
++                data += chunk;
++            });
++            response.on('end', () => {
++                resolve(data);
++            });
++        }).on('error', (error) => {
++            reject(error);
++        });
++    });
++}
++export function deactivate() {}
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
+@@ -0,0 +1,10 @@
++{
++	"extends": "../tsconfig.base.json",
++	"compilerOptions": {
++		"outDir": "./out"
++	},
++	"include": [
++		"../sagemaker-open-notebook-extension/src/**/*",
++		"../../src/vscode-dts/vscode.d.ts"
++	]
++}
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
+@@ -0,0 +1,11 @@
++.vscode/**
++.vscode-test/**
++out/test/**
++out/**
++test/**
++src/**
++tsconfig.json
++out/test/**
++out/**
++cgmanifest.json
++preview-src/**
+Index: third-party-src/extensions/sagemaker-open-notebook-extension/README.md
+===================================================================
+--- /dev/null
++++ third-party-src/extensions/sagemaker-open-notebook-extension/README.md
+@@ -0,0 +1,18 @@
++# Code Editor Open Notebook Extension
++
++The Open Notebook extension enables users to download, transform, and display sample notebooks from a public Amazon S3 bucket owned by the SageMaker team. This extension streamlines the process of accessing and working with SageMaker sample notebooks directly within Code Editor.
++
++## Features
++
++- Download sample notebooks from a specified S3 bucket
++- Transform notebooks for compatibility with VSCode
++- Display notebooks within the Code Editor environment
++- Utilize URL parameters to open specific notebooks
++
++## Usage
++
++The extension uses parameters from the URL to open the desired notebook. The required parameters are:
++- Notebook key: The identifier for the specific notebook in the S3 bucket
++- Cluster ID: The ID of the SageMaker cluster
++- Region: The AWS region where the S3 bucket is located
++
