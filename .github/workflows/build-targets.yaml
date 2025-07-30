@@ -1,0 +1,23 @@
+name: Build Code Editor Targets
+on:
+  push:
+    branches:
+      - 'main'
+      - '*.*.x'
+  
+jobs:
+  build:
+    name: Build Code Editor Targets
+    runs-on: ubuntu-latest
+    environment: build-targets-workflow-env
+    strategy:
+      matrix:
+        build-targets: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded]
+        exclude:
+          # Only build SageMaker for now, remove the excluded targets when needed in the future.
+          - build-targets: code-editor-server
+          - build-targets: code-editor-web-embedded
+    steps:
+      - name: Start Build Workflow
+        run: |
+          echo "Starting Build Workflow for target: ${{ matrix.build-targets }}"
