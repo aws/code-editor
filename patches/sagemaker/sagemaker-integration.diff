@@ -1,0 +1,126 @@
+Index: third-party-src/src/vs/workbench/browser/client.ts
+===================================================================
+--- /dev/null
++++ third-party-src/src/vs/workbench/browser/client.ts
+@@ -0,0 +1,61 @@
++import { Disposable } from '../../base/common/lifecycle.js';
++import { CommandsRegistry } from '../../platform/commands/common/commands.js';
++import { MenuId, MenuRegistry } from '../../platform/actions/common/actions.js';
++import { localize } from '../../nls.js';
++import { ILogService } from '../../platform/log/common/log.js';
++
++export class SagemakerServerClient extends Disposable {
++	constructor (
++		@ILogService private logService: ILogService
++	) {
++		super();
++
++		this.logService.debug('Initializing SagemakerServerClient...');
++		this.registerSagemakerCommands();
++	}
++
++	static LOGOUT_COMMAND_ID = 'sagemaker.logout';
++	static COOKIE_COMMAND_ID = 'sagemaker.parseCookies';
++
++	private registerSagemakerCommands() {
++		const authMode: string | undefined = this.getCookieValue('authMode');
++		const expiryTime: string | undefined = this.getCookieValue('expiryTime');
++		const studioUserProfileName: string | undefined = this.getCookieValue('studioUserProfileName')
++		const ssoExpiryTimestamp: string | undefined = this.getCookieValue('ssoExpiryTimestamp')
++		const redirectURL: string | undefined = this.getCookieValue('redirectURL')
++
++		this.logService.debug('Registering sagemaker commands...');
++
++		CommandsRegistry.registerCommand(SagemakerServerClient.COOKIE_COMMAND_ID, () => {
++			return {
++				authMode: authMode,
++				expiryTime: expiryTime,
++				ssoExpiryTimestamp: ssoExpiryTimestamp,
++				studioUserProfileName: studioUserProfileName,
++				redirectURL: redirectURL
++			};
++		});
++
++		CommandsRegistry.registerCommand(SagemakerServerClient.LOGOUT_COMMAND_ID, () => {
++			const currentUrl = new URL(window.location.href);
++			const hostname = currentUrl.hostname;
++			const pathComponents = currentUrl.pathname.split('/');
++			const logoutUrl = `https://${hostname}/${pathComponents[1]}/${pathComponents[2]}/logout`;
++			window.location.href = logoutUrl;
++		});
++
++		for (const menuId of [MenuId.CommandPalette, MenuId.MenubarHomeMenu]) {
++			MenuRegistry.appendMenuItem(menuId, {
++				command: {
++					id: SagemakerServerClient.LOGOUT_COMMAND_ID,
++					title: localize('logout', "{0}: Log out", 'Sagemaker'),
++				},
++			});
++		}
++	}
++
++	private getCookieValue(name: string): string | undefined {
++		const match = document.cookie.match('(^|[^;]+)\\s*' + name + '\\s*=\\s*([^;]+)'); // See https://stackoverflow.com/a/25490531
++		return match ? match.pop() : undefined;
++	}
++}
+\ No newline at end of file
+Index: third-party-src/src/vs/workbench/browser/web.main.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/browser/web.main.ts
++++ third-party-src/src/vs/workbench/browser/web.main.ts
+@@ -95,6 +95,7 @@ import { TunnelSource } from 'vs/workbench/services/re
+ import { TunnelSource } from '../services/remote/common/tunnelModel.js';
+ import { mainWindow } from '../../base/browser/window.js';
+ import { INotificationService, Severity } from '../../platform/notification/common/notification.js';
++import { SagemakerServerClient } from '../../workbench/browser/client.js';
+ 
+ export class BrowserMain extends Disposable {
+ 
+@@ -129,6 +130,9 @@ export class BrowserMain extends Disposable {
+ 
+ 		// Startup
+ 		const instantiationService = workbench.startup();
++
++		// Create instance of SagemakerServerClient
++		this._register(instantiationService.createInstance(SagemakerServerClient));
+ 
+ 		// Window
+ 		this._register(instantiationService.createInstance(BrowserWindow));
+Index: third-party-src/product.json
+===================================================================
+--- third-party-src.orig/product.json
++++ third-party-src/product.json
+@@ -16,6 +16,6 @@
+ 	],
+-	"nameShort": "Code Editor",
+-	"nameLong": "Code Editor",
++	"nameShort": "SageMaker Code Editor",
++	"nameLong": "SageMaker Code Editor",
+ 	"applicationName": "code",
+ 	"dataFolderName": ".vscode-editor",
+ 	"win32MutexName": "vscodeoss",
+Index: third-party-src/src/vs/platform/product/common/product.ts
+===================================================================
+--- third-party-src.orig/src/vs/platform/product/common/product.ts
++++ third-party-src/src/vs/platform/product/common/product.ts
+@@ -69,15 +69,17 @@ else {
+ 	if (Object.keys(product).length === 0) {
+ 		Object.assign(product, {
+ 			version: '1.95.0-dev',
+-			nameShort: 'Code Editor',
+-			nameLong: 'Code Editor',
++			nameShort: 'SageMaker Code Editor',
++			nameLong: 'SageMaker Code Editor',
+ 			applicationName: 'code-oss',
+ 			dataFolderName: '.vscode-oss',
++			commit: "hellocommit",
++			date: "hellodate",
+ 			urlProtocol: 'code-oss',
+ 			reportIssueUrl: 'https://github.com/microsoft/vscode/issues/new',
+ 			licenseName: 'MIT',
+ 			licenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
+			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt'
+ 		});
+ 	}
+ }

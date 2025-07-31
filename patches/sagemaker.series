@@ -11,6 +11,7 @@ common/remove-vsda.diff
 common/embedded-api.diff
 common/remove-disable-prompting-for-non-trusted-urls-option.diff
 common/suppress-known-errors-script.diff
+common/update-csp.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
@@ -29,4 +30,5 @@ sagemaker/sagemaker-extension-smus-support.diff
 sagemaker/post-startup-notifications.diff
 sagemaker/sagemaker-extensions-sync.diff
 sagemaker/sagemaker-ui-post-startup.diff
+sagemaker/sagemaker-integration.diff
 sagemaker/sagemaker-idle-extension.diff
