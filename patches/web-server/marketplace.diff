@@ -1,7 +1,8 @@
 Adjusted from (MIT licensed) original source:
 - https://github.com/coder/code-server/blob/6d9530aa6b84514b8b54700d88cbcc66c70b789f/patches/marketplace.diff
 
-Add Open VSX as default marketplace
+Add Open VSX as default marketplace. If environment variable EXTENSIONS_GALLERY is set,
+parse it as JSON and use as the custom extensions gallery configuration.
 
 Adjusted ExtensionLatestVersionUri endpoint to be compatible with OpenVSX API
 (see: https://open-vsx.org/swagger-ui/index.html?urls.primaryName=VSCode%20Adapter)
