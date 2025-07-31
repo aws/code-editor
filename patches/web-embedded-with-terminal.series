@@ -11,6 +11,7 @@ common/remove-vsda.diff
 common/embedded-api.diff
 common/remove-disable-prompting-for-non-trusted-urls-option.diff
 common/suppress-known-errors-script.diff
+common/service-worker-fix.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
@@ -37,3 +38,5 @@ web-embedded/fix-watch-target.diff
 web-embedded/remove-unused-recommended-extensions-action.diff
 web-embedded/remove-new-window-actions-and-profile-workspace-section.diff
 web-embedded/only-allow-trusted-origins-in-webviews.diff
+internal/build.diff
+internal/package-overrides.diff

@@ -1,0 +1,16 @@
+Do not use module type for service worker. Otherwise it will cause browser to not send cookies, which can result
+in a 401.
+
+Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+@@ -238,7 +238,7 @@
+ 			}
+ 
+ 			const swPath = encodeURI(`service-worker.js?v=${expectedWorkerVersion}&vscode-resource-base-authority=${searchParams.get('vscode-resource-base-authority')}&remoteAuthority=${searchParams.get('remoteAuthority') ?? ''}`);
+-			navigator.serviceWorker.register(swPath, { type: 'module' })
++			navigator.serviceWorker.register(swPath)
+ 				.then(async registration => {
+ 					/**
+ 					 * @param {MessageEvent} event
