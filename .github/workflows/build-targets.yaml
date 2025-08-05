@@ -41,7 +41,7 @@ jobs:
       - name: Run quilt help
         run: |
           which quilt
-          quilt --help
+          quilt --version
         
       - name: Run patches script
         run: |
