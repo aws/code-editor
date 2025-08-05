@@ -22,3 +22,18 @@ jobs:
       - name: Start Build Workflow
         run: |
           echo "Starting Build Workflow for target: ${{ matrix.build-targets }}"
+        
+      - name: Set up build environment
+        run: |
+          echo "Installing required dependencies"
+          sudo apt-get update
+          sudo apt-get install -y quilt
+      
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: List directory after checkout
+        run: |
+          ls
