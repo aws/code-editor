@@ -9,9 +9,9 @@ apply_changes() {
     echo "Creating patched source in directory: ${patched_src_dir}"
 
     # code_editor_module_path="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
-    # patch_dir="${code_editor_module_path}/patches"
+    patch_dir="patches"
     # echo "Code Editor module path: $code_editor_module_path"
-    # echo "Patch directory: $patch_dir"
+    echo "Patch directory: $patch_dir"
 
     export QUILT_PATCHES="${patch_dir}"
     export QUILT_SERIES="sagemaker.series"
