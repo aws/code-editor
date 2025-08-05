@@ -10,9 +10,11 @@ apply_changes() {
 
     code_editor_module_path="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
     patch_dir="${code_editor_module_path}/patches"
+    echo "Code Editor module path: $code_editor_module_path"
+    echo "Patch directory: $patch_dir"
 
     export QUILT_PATCHES="${patch_dir}"
-    export QUILT_SERIES="web-server.series"
+    export QUILT_SERIES="sagemaker.series"
 
     # Clean out the build directory
     echo "Cleaning build src dir"
@@ -29,6 +31,8 @@ apply_changes() {
     echo "Applying overrides"
     rsync -a "${code_editor_module_path}/overrides/" "${patched_src_dir}"
 
+    echo "Zipping patched source"
+    tar -chzvf "patched_source.tar.gz" $patched_src_dir
 }
 
 custom_path=""

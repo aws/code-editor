@@ -41,4 +41,8 @@ jobs:
       - name: Run quilt help
         run: |
           which quilt
-          quilt --version
+          quilt --help
+        
+      - name: Run patches script
+        run: |
+          ./scripts/prepare-src.sh
