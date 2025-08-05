@@ -37,3 +37,8 @@ jobs:
       - name: List directory after checkout
         run: |
           ls
+      
+      - name: Run quilt help
+        run: |
+          which quilt
+          quilt --version
