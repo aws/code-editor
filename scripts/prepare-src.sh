@@ -8,10 +8,10 @@ apply_changes() {
     local patched_src_dir="${1:-$(pwd)/vscode}"
     echo "Creating patched source in directory: ${patched_src_dir}"
 
-    code_editor_module_path="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
-    patch_dir="${code_editor_module_path}/patches"
-    echo "Code Editor module path: $code_editor_module_path"
-    echo "Patch directory: $patch_dir"
+    # code_editor_module_path="$(dirname "$(dirname "${BASH_SOURCE[0]}")")"
+    # patch_dir="${code_editor_module_path}/patches"
+    # echo "Code Editor module path: $code_editor_module_path"
+    # echo "Patch directory: $patch_dir"
 
     export QUILT_PATCHES="${patch_dir}"
     export QUILT_SERIES="sagemaker.series"
@@ -21,7 +21,7 @@ apply_changes() {
     rm -rf "${patched_src_dir}"
 
     # Copy third party source
-    rsync -a "${code_editor_module_path}/third-party-src/" "${patched_src_dir}"
+    rsync -a "third-party-src/" "${patched_src_dir}"
 
     echo "Applying base patches"
     pushd "${patched_src_dir}"
@@ -29,7 +29,7 @@ apply_changes() {
     popd
 
     echo "Applying overrides"
-    rsync -a "${code_editor_module_path}/overrides/" "${patched_src_dir}"
+    rsync -a "overrides/" "${patched_src_dir}"
 
     echo "Zipping patched source"
     tar -chzvf "patched_source.tar.gz" $patched_src_dir
