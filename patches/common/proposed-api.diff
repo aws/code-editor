@@ -1,0 +1,34 @@
+Original source: https://github.com/coder/code-server/blob/v4.101.2/patches/proposed-api.diff
+
+Unconditionally enable the proposed API, and disable the `isProposedApiEnabled` check.
+
+Index: third-party-src/src/vs/workbench/services/extensions/common/extensions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/services/extensions/common/extensions.ts
++++ third-party-src//src/vs/workbench/services/extensions/common/extensions.ts
+@@ -314,10 +314,7 @@ function extensionDescriptionArrayToMap(
+ }
+ 
+ export function isProposedApiEnabled(extension: IExtensionDescription, proposal: ApiProposalName): boolean {
+-	if (!extension.enabledApiProposals) {
+-		return false;
+-	}
+-	return extension.enabledApiProposals.includes(proposal);
++	return true;
+ }
+ 
+ export function checkProposedApiEnabled(extension: IExtensionDescription, proposal: ApiProposalName): void {
+Index: third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
++++ third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+@@ -31,7 +31,7 @@ export class ExtensionsProposedApi {
+ 
+ 		this._envEnabledExtensions = new Set((_environmentService.extensionEnabledProposedApi ?? []).map(id => ExtensionIdentifier.toKey(id)));
+ 
+-		this._envEnablesProposedApiForAll =
++		this._envEnablesProposedApiForAll = true ||
+ 			!_environmentService.isBuilt || // always allow proposed API when running out of sources
+ 			(_environmentService.isExtensionDevelopment && productService.quality !== 'stable') || // do not allow proposed API against stable builds when developing an extension
+ 			(this._envEnabledExtensions.size === 0 && Array.isArray(_environmentService.extensionEnabledProposedApi)); // always allow proposed API if --enable-proposed-api is provided without extension ID
+

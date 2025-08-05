@@ -12,6 +12,7 @@ common/embedded-api.diff
 common/remove-disable-prompting-for-non-trusted-urls-option.diff
 common/suppress-known-errors-script.diff
 common/service-worker-fix.diff
+common/proposed-api.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
