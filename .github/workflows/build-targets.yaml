@@ -33,15 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      
-      - name: List directory after checkout
-        run: |
-          ls
-      
-      - name: Run quilt help
-        run: |
-          which quilt
-          quilt --version
         
       - name: Run patches script
         run: |

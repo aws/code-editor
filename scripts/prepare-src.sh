@@ -30,19 +30,4 @@ apply_changes() {
     rsync -a "${present_working_dir}/overrides/" "${patched_src_dir}"
 }
 
-custom_path=""
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -h|--help)
-            echo "Usage: $0 [--path <directory>]"
-            echo "  --path: Custom build directory (default: ./vscode)"
-            exit 0
-            ;;
-        *)
-            echo "Invalid parameter - '$1'"
-            echo "Use --help for usage information"
-            exit 1
-            ;;
-    esac
-done
-apply_changes "${custom_path}"
+apply_changes
