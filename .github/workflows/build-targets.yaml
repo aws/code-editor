@@ -50,6 +50,6 @@ jobs:
           cd code-editor-src
           echo "Installing dependencies" && npm install --non-interactive --build-from-source=true
       
-      - name: Compile 
+      - name: Build artifacts 
         run: |
-          ./scripts/compile.sh ${{ matrix.build-targets }}
+          ./scripts/build-artifacts.sh ${{ matrix.build-targets }}
