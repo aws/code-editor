@@ -48,7 +48,7 @@ jobs:
       - name: Install code editor dependencies
         run: |
           cd code-editor-src
-          npm ci
+          echo "Installing dependencies" && npm install --non-interactive --build-from-source=true
       
       - name: Compile 
         run: |
