@@ -2,12 +2,10 @@
 
 set -euo pipefail
 
-# Function to get available memory in KB
 get_mem_available_kb() {
     grep MemAvailable /proc/meminfo | awk '{print $2}'
 }
 
-# Function to determine build target
 determine_build_target() {
     local target="$1"
     local arch=$(uname -m)
@@ -41,14 +39,11 @@ build() {
     local present_working_dir="$(pwd)"
     local build_src_dir="${present_working_dir}/code-editor-src"
     
-    # Determine build target (always prod, so always use -min)
     local build_target="${code_oss_build_target_base}-min"
     
     echo "Building Code Editor with '$build_target' as target with ${max_space_size_mb} MiB allocated heap"
     
-    # Execute the build
     cd "$build_src_dir"
-    
     env \
         NODE_OPTIONS="--max-old-space-size=${max_space_size_mb}" \
         npm run gulp "$build_target"
