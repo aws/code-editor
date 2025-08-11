@@ -41,14 +41,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: 'code-editor-src/package-lock.json'
       
       - name: Install code editor dependencies
         run: |
           cd code-editor-src
-          echo "Installing dependencies" && npm install --non-interactive --build-from-source=true
+          echo "Installing dependencies" && npm ci
       
       - name: Build artifacts 
         run: |
