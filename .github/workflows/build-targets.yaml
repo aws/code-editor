@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev
+          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
       
       - name: Checkout code
         uses: actions/checkout@v4

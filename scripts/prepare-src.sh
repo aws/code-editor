@@ -28,6 +28,9 @@ apply_changes() {
 
     echo "Applying overrides"
     rsync -a "${present_working_dir}/overrides/" "${patched_src_dir}"
+
+    echo "Applying package-lock overrides"
+    rsync -a "${present_working_dir}/package-lock-overrides/sagemaker.series/" "${patched_src_dir}"
 }
 
 apply_changes
