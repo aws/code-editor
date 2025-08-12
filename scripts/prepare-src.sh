@@ -5,13 +5,13 @@ set -euo pipefail
 PRESENT_WORKING_DIR="$(pwd)"
 PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
 # Manually update this list to include all files for which there are modified script-src CSP rules
-sha_update_filePaths=(
+UPDATE_CHECKSUM_FILEPATHS=(
     "/src/vs/workbench/contrib/webview/browser/pre/index.html"
     "/src/vs/workbench/contrib/webview/browser/pre/index-no-csp.html"
     "/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html"
 )
 
-calcScriptSHAs() {
+calc_script_SHAs() {
     local filepath="$1"
     
     if [[ ! -f "$filepath" ]]; then
@@ -104,16 +104,16 @@ update_inline_sha() {
         return 1
     fi
     
-    for filePath in "${sha_update_filePaths[@]}"; do
-        local fullPath="$PATCHED_SRC_DIR$filePath"
-        local shaResult
+    for file_path in "${UPDATE_CHECKSUM_FILEPATHS[@]}"; do
+        local full_path="$PATCHED_SRC_DIR$filePath"
+        local sha_result
         
-        if [[ -f "$fullPath" ]]; then
-            echo -n "$filePath: "
-            shaResult=$(calcScriptSHAs "$fullPath")
-            echo "$shaResult"
+        if [[ -f "$full_path" ]]; then
+            echo -n "$file_path: "
+            sha_result=$(calc_script_SHAs "$full_path")
+            echo "$sha_result"
         else
-            echo "$filePath: not found"
+            echo "$file_path: not found"
         fi
     done
 }
