@@ -4,3 +4,5 @@ build-artifacts
 .pc
 *~
 build-private
+code-editor-src
+vscode-reh-web-*
