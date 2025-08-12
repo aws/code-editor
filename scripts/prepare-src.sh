@@ -93,10 +93,10 @@ apply_changes() {
     popd
 
     echo "Applying overrides"
-    rsync -a "${present_working_dir}/overrides/" "${patched_src_dir}"
+    rsync -a "${PRESENT_WORKING_DIR}/overrides/" "${PATCHED_SRC_DIR}"
 
     echo "Applying package-lock overrides"
-    rsync -a "${present_working_dir}/package-lock-overrides/sagemaker.series/" "${patched_src_dir}"
+    rsync -a "${PRESENT_WORKING_DIR}/package-lock-overrides/sagemaker.series/" "${PATCHED_SRC_DIR}"
 }
 
 update_inline_sha() {
@@ -108,7 +108,7 @@ update_inline_sha() {
     fi
     
     for file_path in "${UPDATE_CHECKSUM_FILEPATHS[@]}"; do
-        local full_path="$PATCHED_SRC_DIR$filePath"
+        local full_path="$PATCHED_SRC_DIR$file_path"
         local sha_result
         
         if [[ -f "$full_path" ]]; then
