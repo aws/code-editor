@@ -93,7 +93,10 @@ apply_changes() {
     popd
 
     echo "Applying overrides"
-    rsync -a "${PRESENT_WORKING_DIR}/overrides/" "${PATCHED_SRC_DIR}"
+    rsync -a "${present_working_dir}/overrides/" "${patched_src_dir}"
+
+    echo "Applying package-lock overrides"
+    rsync -a "${present_working_dir}/package-lock-overrides/sagemaker.series/" "${patched_src_dir}"
 }
 
 update_inline_sha() {

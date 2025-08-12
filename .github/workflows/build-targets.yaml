@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt
+          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
       
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,3 +37,19 @@ jobs:
       - name: Run patches script
         run: |
           ./scripts/prepare-src.sh
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'code-editor-src/package-lock.json'
+      
+      - name: Install code editor dependencies
+        run: |
+          cd code-editor-src
+          echo "Installing dependencies" && npm ci
+      
+      - name: Build artifacts 
+        run: |
+          ./scripts/build-artifacts.sh ${{ matrix.build-targets }}
