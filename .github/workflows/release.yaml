@@ -1,0 +1,61 @@
+name: release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ github.sha }}-*-build
+          merge-multiple: true
+      
+      - name: Check artifacts exist
+        run: |
+          if [ ! -f *.tar.gz ]; then
+            echo "Error: No build artifacts found for commit ${{ github.sha }}"
+            exit 1
+          fi
+      
+      - name: Delete existing tag (if any)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const tag = '${{ github.event.inputs.version || github.ref_name }}';
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${tag}`
+              });
+              console.log(`Deleted existing tag: ${tag}`);
+            } catch (e) {
+              if (e.status !== 404 && e.status !== 422) {
+                throw e;
+              }
+              console.log(`Tag ${tag} does not exist or already deleted.`);
+            }
+      
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          files: '*.tar.gz'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
