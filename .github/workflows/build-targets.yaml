@@ -14,15 +14,15 @@ jobs:
     environment: build-targets-workflow-env
     strategy:
       matrix:
-        build-targets: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded]
+        build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded]
         exclude:
           # Only build SageMaker for now, remove the excluded targets when needed in the future.
-          - build-targets: code-editor-server
-          - build-targets: code-editor-web-embedded
+          - build-target: code-editor-server
+          - build-target: code-editor-web-embedded
     steps:
       - name: Start Build Workflow
         run: |
-          echo "Starting Build Workflow for target: ${{ matrix.build-targets }}"
+          echo "Starting Build Workflow for target: ${{ matrix.build-target }}"
         
       - name: Set up build environment
         run: |
@@ -53,4 +53,24 @@ jobs:
       
       - name: Build artifacts 
         run: |
-          ./scripts/build-artifacts.sh ${{ matrix.build-targets }}
+          ./scripts/build-artifacts.sh ${{ matrix.build-target }}
+      
+      - name: Prepare artifacts to upload
+        run: |
+          BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
+          tar -czf code-editor-src.tar.gz ./code-editor-src
+          tar -czf build.tar.gz ./$BUILD_TARGET
+      
+      - name: Upload src artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.sha }}-${{ matrix.build-target }}-src
+          path: code-editor-src.tar.gz
+          retention-days: 90
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.sha }}-${{ matrix.build-target }}-build
+          path: build.tar.gz
+          retention-days: 90
