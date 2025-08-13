@@ -5,6 +5,7 @@ on:
       - 'main'
       - '*.*.x'
       - '*.*.*'
+      - '*.*'
   workflow_dispatch:
   
 jobs:
@@ -53,9 +54,7 @@ jobs:
       
       - name: Build artifacts 
         run: |
-          BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
-          mkdir -p ./$BUILD_TARGET
-          echo "Mock build for ${{ matrix.build-target }}" > ./$BUILD_TARGET/README.txt
+          ./scripts/build-artifacts.sh ${{ matrix.build-target }}
       
       - name: Prepare artifacts to upload
         run: |
