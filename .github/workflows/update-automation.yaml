@@ -15,7 +15,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: true
+          
+      - name: Get latest semver branch
+        run: |
+          git fetch origin
+          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
+          if [ -z "$LATEST_SEMVER" ]; then
+            LATEST_SEMVER="main"
+            echo "No semver branches found, using main"
+          fi
+          echo "LATEST_SEMVER=$LATEST_SEMVER" >> $GITHUB_ENV
+          echo "Using branch: $LATEST_SEMVER"
+          git checkout "$LATEST_SEMVER"
+          git submodule update --init --recursive
           
       - name: Check if update needed
         run: |
@@ -56,16 +70,15 @@ jobs:
             git checkout "$LATEST_TAG"
             cd ..
             
-            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
-            echo "STAGING_BRANCH=$STAGING_BRANCH" >> $GITHUB_ENV
-          fi
+            # Configure git user and commit changes
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             
-      - name: Commit and push changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          add: 'third-party-src'
-          message: 'Update VS Code submodule to ${{ env.LATEST_TAG }}'
-          new_branch: ${{ env.STAGING_BRANCH }}
-          default_author: github_actions
+            git add third-party-src
+            git commit -m "Update VS Code submodule to $LATEST_TAG"
+            git push origin "$STAGING_BRANCH"
+            
+            echo "✅ Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
+          fi
             
     
