@@ -1,4 +1,4 @@
-name: release
+name: Create release
 on:
   workflow_dispatch:
     inputs:
@@ -24,9 +24,30 @@ jobs:
         with:
           pattern: ${{ github.sha }}-*-build
           merge-multiple: true
-      
+
+      - name: Download artifacts by commit ID
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          # Find artifact by pattern
+          ARTIFACT_ID=$(gh api repos/${{ github.repository }}/actions/artifacts \
+            --jq ".artifacts[] | select(.name | test(\"$COMMIT_SHA-code-editor-sagemaker-server-build\")) | .id" \
+            | head -1)
+          
+          if [ -n "$ARTIFACT_ID" ]; then
+            curl -L -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$ARTIFACT_ID/zip" \
+              -o artifact.zip
+            unzip artifact.zip
+          else
+            echo "No artifact found matching pattern: $COMMIT_SHA-code-editor-sagemaker-server-build"
+            exit 1
+          fi
+
       - name: Check artifacts exist
         run: |
+          ls -la
           if [ ! -f *.tar.gz ]; then
             echo "Error: No build artifacts found for commit ${{ github.sha }}"
             exit 1
