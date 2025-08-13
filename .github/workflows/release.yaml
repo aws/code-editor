@@ -18,14 +18,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ github.sha }}-*-build
-          merge-multiple: true
 
-      - name: Download artifacts by commit ID
+      - name: Download sagemaker artifacts by commit ID
         env:
           GH_TOKEN: ${{ github.token }}
           COMMIT_SHA: ${{ github.sha }}
@@ -45,13 +39,17 @@ jobs:
             exit 1
           fi
 
-      - name: Check artifacts exist
+      - name: Check artifacts exist and rename
         run: |
           ls -la
-          if [ ! -f *.tar.gz ]; then
+          VERSION_NUM="${{ github.event.inputs.version || github.ref_name }}"
+          TARBALL=$(ls *.tar.gz | head -1)
+          if [ -z "$TARBALL" ]; then
             echo "Error: No build artifacts found for commit ${{ github.sha }}"
             exit 1
           fi
+          mv "$TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
+          echo "Renamed $TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
       
       - name: Delete existing tag (if any)
         uses: actions/github-script@v7

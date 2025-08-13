@@ -60,19 +60,19 @@ jobs:
       - name: Prepare artifacts to upload
         run: |
           BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
-          tar -czf code-editor-src.tar.gz ./code-editor-src
-          tar -czf build.tar.gz ./$BUILD_TARGET
+          tar -czf ${{ matrix.build-target }}-src.tar.gz ./code-editor-src
+          tar -czf ${{ matrix.build-target }}-build.tar.gz ./$BUILD_TARGET
       
       - name: Upload src artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}-${{ matrix.build-target }}-src
-          path: code-editor-src.tar.gz
+          path: ${{ matrix.build-target }}-src.tar.gz
           retention-days: 90
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
-          path: build.tar.gz
+          path: ${{ matrix.build-target }}-build.tar.gz
           retention-days: 90
