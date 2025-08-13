@@ -21,7 +21,11 @@ jobs:
         run: |
           cd third-party-src
           git fetch --tags
-          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null | head -1 || echo "")
+          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null | head -1)
+          if [ -z "$CURRENT_TAG" ]; then
+            echo "Error: Submodule is not on a tagged commit"
+            exit 1
+          fi
           cd ..
           
           LATEST_TAG=$(curl -L \
@@ -43,7 +47,19 @@ jobs:
             echo "Creating staging branch: $STAGING_BRANCH"
             
             git checkout -b "$STAGING_BRANCH"
+            
+            # Update submodule to latest VS Code release
+            echo "Updating submodule to $LATEST_TAG"
+            cd third-party-src
+            git fetch --tags
+            git checkout "$LATEST_TAG"
+            cd ..
+            
+            # Commit the submodule update
+            git add third-party-src
+            git commit -m "Update VS Code submodule to $LATEST_TAG"
+            
             git push origin "$STAGING_BRANCH"
             
-            echo "Created staging branch: $STAGING_BRANCH"
+            echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
           fi
