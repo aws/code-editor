@@ -32,6 +32,8 @@ jobs:
           git submodule update --init --recursive
           
       - name: Check if update needed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cd third-party-src
           git fetch --tags
