@@ -6,7 +6,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  run:
+  update-automation:
+    name: Run Automation Tasks
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - run: echo "Scheduled job to run automation tasks"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          
+      - name: Check if update needed
+        run: |
+          cd third-party-src
+          git fetch --tags
+          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null | head -1 || echo "")
+          cd ..
+          
+          LATEST_TAG=$(curl -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/microsoft/vscode/releases/latest | jq -r '.tag_name')
+          
+          echo "Current tag: $CURRENT_TAG"
+          echo "Latest tag: $LATEST_TAG"
+          
+          if [ "$CURRENT_TAG" = "$LATEST_TAG" ]; then
+            echo "Submodule is up to date with latest VS Code release"
+            exit 0
+          else
+            echo "Update needed: $CURRENT_TAG -> $LATEST_TAG"
+            
+            # Create staging branch
+            STAGING_BRANCH="staging-code-editor-$LATEST_TAG"
+            echo "Creating staging branch: $STAGING_BRANCH"
+            
+            git checkout -b "$STAGING_BRANCH"
+            git push origin "$STAGING_BRANCH"
+            
+            echo "Created staging branch: $STAGING_BRANCH"
+          fi
