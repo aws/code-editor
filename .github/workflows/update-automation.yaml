@@ -55,11 +55,15 @@ jobs:
             git checkout "$LATEST_TAG"
             cd ..
             
-            # Commit the submodule update
-            git add third-party-src
-            git commit -m "Update VS Code submodule to $LATEST_TAG"
+            echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+            echo "STAGING_BRANCH=$STAGING_BRANCH" >> $GITHUB_ENV
             
-            git push origin "$STAGING_BRANCH"
+      - name: Commit and push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'third-party-src'
+          message: 'Update VS Code submodule to ${{ env.LATEST_TAG }}'
+          new_branch: ${{ env.STAGING_BRANCH }}
+          default_author: github_actions
             
-            echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
-          fi
+    
