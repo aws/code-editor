@@ -57,6 +57,7 @@ jobs:
             
             echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
             echo "STAGING_BRANCH=$STAGING_BRANCH" >> $GITHUB_ENV
+          fi
             
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
