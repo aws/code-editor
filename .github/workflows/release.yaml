@@ -51,26 +51,6 @@ jobs:
           mv "$TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
           echo "Renamed $TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
       
-      - name: Delete existing tag (if any)
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const tag = '${{ github.event.inputs.version || github.ref_name }}';
-            try {
-              await github.rest.git.deleteRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `tags/${tag}`
-              });
-              console.log(`Deleted existing tag: ${tag}`);
-            } catch (e) {
-              if (e.status !== 404 && e.status !== 422) {
-                throw e;
-              }
-              console.log(`Tag ${tag} does not exist or already deleted.`);
-            }
-      
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
