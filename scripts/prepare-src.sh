@@ -25,7 +25,7 @@ done
 
 PRESENT_WORKING_DIR="$(pwd)"
 PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
-CONFIG_FILE="$PRESENT_WORKING_DIR/configs/$TARGET.json"
+CONFIG_FILE="$PRESENT_WORKING_DIR/configuration/$TARGET.json"
 
 # Check if config file exists
 if [[ ! -f "$CONFIG_FILE" ]]; then
