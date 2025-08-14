@@ -90,7 +90,6 @@ jobs:
               \"prerelease\": false
             }")
           
-          # Extract upload URL and release ID
           UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r '.upload_url' | sed 's/{?name,label}//')
           RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
 
