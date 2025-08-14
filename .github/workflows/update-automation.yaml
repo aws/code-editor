@@ -73,13 +73,17 @@ jobs:
             git checkout "$LATEST_TAG"
             cd ..
             
-            # Configure git user and commit changes
+            # Configure git user and commit changes if needed
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             
             git add third-party-src
-            git commit -m "Update VS Code submodule to $LATEST_TAG"
-            git push origin "$STAGING_BRANCH"
+            if git diff --staged --quiet; then
+              echo "No changes to commit, submodule already up to date"
+            else
+              git commit -m "Update VS Code submodule to $LATEST_TAG"
+              git push origin "$STAGING_BRANCH"
+            fi
             
             echo "✅ Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
           fi
