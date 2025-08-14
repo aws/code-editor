@@ -1,0 +1,33 @@
+Index: third-party-src/package.json
+===================================================================
+--- third-party-src.orig/package.json
++++ third-party-src/package.json
+@@ -100,7 +100,6 @@
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-is-elevated": "0.7.0",
+     "native-keymap": "^3.3.5",
+@@ -144,7 +143,7 @@
+     "@vscode/telemetry-extractor": "^1.10.2",
+     "@vscode/test-cli": "^0.0.6",
+     "@vscode/test-electron": "^2.4.0",
+-    "@vscode/test-web": "^0.0.62",
++    "@vscode/test-web": "^0.0.72",
+     "@vscode/v8-heap-parser": "^0.1.0",
+     "@vscode/vscode-perf": "^0.0.19",
+     "@webgpu/types": "^0.1.44",
+Index: third-party-src/remote/package.json
+===================================================================
+--- third-party-src.orig/remote/package.json
++++ third-party-src/remote/package.json
+@@ -30,7 +30,6 @@
+     "http-proxy-agent": "^7.0.0",
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.6",
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta33",
