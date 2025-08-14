@@ -100,14 +100,26 @@ jobs:
           echo "Rebasing patches for all build targets"
           
           # Test each target sequentially with rebasing
+          FAILED_TARGETS=()
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
             echo "Rebasing prepare-src for target: $target"
-            ./scripts/prepare-src.sh --rebase "$target"
+            if ./scripts/prepare-src.sh --rebase "$target"; then
+              echo "✅ Successfully rebased $target"
+            else
+              echo "❌ Failed to rebase $target"
+              FAILED_TARGETS+=("$target")
+            fi
             
             # Clean up for next target
             rm -rf code-editor-src
             rm -rf .pc
           done
+          
+          # Report results
+          if [ ${#FAILED_TARGETS[@]} -gt 0 ]; then
+            echo "Failed targets: ${FAILED_TARGETS[*]}"
+            exit 1
+          fi
           
           echo "All targets rebased successfully"
             
