@@ -55,11 +55,16 @@ jobs:
           else
             echo "Update needed: $CURRENT_TAG -> $LATEST_TAG"
             
-            # Create staging branch
+            # Create or checkout staging branch
             STAGING_BRANCH="staging-code-editor-$LATEST_TAG"
-            echo "Creating staging branch: $STAGING_BRANCH"
             
-            git checkout -b "$STAGING_BRANCH"
+            if git show-ref --verify --quiet refs/remotes/origin/"$STAGING_BRANCH"; then
+              echo "Staging branch $STAGING_BRANCH already exists, checking it out"
+              git checkout -b "$STAGING_BRANCH" origin/"$STAGING_BRANCH"
+            else
+              echo "Creating new staging branch: $STAGING_BRANCH"
+              git checkout -b "$STAGING_BRANCH"
+            fi
             
             # Update submodule to latest VS Code release
             echo "Updating submodule to $LATEST_TAG"
