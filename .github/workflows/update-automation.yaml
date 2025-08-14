@@ -30,7 +30,7 @@ jobs:
           LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
           # For testing purposes
           if [ -z "$LATEST_SEMVER" ]; then
-            LATEST_SEMVER="main"
+            LATEST_SEMVER="rebase-patches"
             echo "No semver branches found, using main"
           fi
           echo "LATEST_SEMVER=$LATEST_SEMVER" >> $GITHUB_ENV
@@ -104,15 +104,12 @@ jobs:
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
             echo "Rebasing prepare-src for target: $target"
             if ./scripts/prepare-src.sh --rebase "$target"; then
-              echo "✅ Successfully rebased $target"
+              echo "Successfully rebased $target"
             else
-              echo "❌ Failed to rebase $target"
+              echo "Failed to rebase $target"
               FAILED_TARGETS+=("$target")
             fi
-            
-            # Clean up for next target
-            rm -rf code-editor-src
-            rm -rf .pc
+
           done
           
           # Report results
