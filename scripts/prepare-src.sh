@@ -107,27 +107,37 @@ check_unsaved_changes() {
         return
     fi
     
+    if [[ ! -d "${PATCHED_SRC_DIR}" ]]; then
+        return
+    fi
+    
     export QUILT_PATCHES="${PRESENT_WORKING_DIR}/patches"
     export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
+    
+    pushd "${PATCHED_SRC_DIR}"
     
     # Check if there are applied patches
     local applied_output
     applied_output=$(quilt applied 2>/dev/null || true)
-    
+
     if [[ -z "$applied_output" ]]; then
+        popd
         return
     fi
     
     # Check for unsaved changes with diff
     local diff_output
     diff_output=$(quilt diff -z 2>/dev/null || true)
-    
+
     if [[ -n "$diff_output" ]]; then
+        popd
         echo "Error: You have unsaved changes in the current patch."
         echo "Run 'quilt refresh' to update the patch with your changes."
         echo "Please refresh or revert your changes before rebasing again"
         exit 1
     fi
+    
+    popd
 }
 
 apply_changes() {
@@ -153,7 +163,6 @@ apply_changes() {
     # Clean out the build directory
     echo "Cleaning build src dir"
     rm -rf "${PATCHED_SRC_DIR}"
-    rm -rf "${PRESENT_WORKING_DIR}/.pc"
 
     # Copy third party source
     echo "Copying third party source to the patch directory"
