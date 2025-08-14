@@ -6,7 +6,87 @@ on:
   workflow_dispatch:
 
 jobs:
-  run:
+  update-automation:
+    name: Run Automation Tasks
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - run: echo "Scheduled job to run automation tasks"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+          
+      - name: Get latest semver branch
+        run: |
+          git fetch origin
+          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
+          # For testing purposes
+          if [ -z "$LATEST_SEMVER" ]; then
+            LATEST_SEMVER="main"
+            echo "No semver branches found, using main"
+          fi
+          echo "LATEST_SEMVER=$LATEST_SEMVER" >> $GITHUB_ENV
+          echo "Using branch: $LATEST_SEMVER"
+          git checkout "$LATEST_SEMVER"
+          git submodule update --init --recursive
+          
+      - name: Check if update needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd third-party-src
+          git fetch --tags
+          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null | head -1)
+          if [ -z "$CURRENT_TAG" ]; then
+            echo "Error: Submodule is not on a tagged commit"
+            exit 1
+          fi
+          cd ..
+          
+          LATEST_TAG=$(gh api repos/microsoft/vscode/releases/latest --template '{{.tag_name}}')
+          
+          echo "Current tag: $CURRENT_TAG"
+          echo "Latest tag: $LATEST_TAG"
+          
+          if [ "$CURRENT_TAG" = "$LATEST_TAG" ]; then
+            echo "Submodule is up to date with latest VS Code release"
+            exit 0
+          else
+            echo "Update needed: $CURRENT_TAG -> $LATEST_TAG"
+            
+            # Create or checkout staging branch
+            STAGING_BRANCH="staging-code-editor-$LATEST_TAG"
+            
+            if git show-ref --verify --quiet refs/remotes/origin/"$STAGING_BRANCH"; then
+              echo "Staging branch $STAGING_BRANCH already exists, checking it out"
+              git checkout -b "$STAGING_BRANCH" origin/"$STAGING_BRANCH"
+            else
+              echo "Creating new staging branch: $STAGING_BRANCH"
+              git checkout -b "$STAGING_BRANCH"
+            fi
+            
+            # Update submodule to latest VS Code release
+            echo "Updating submodule to $LATEST_TAG"
+            cd third-party-src
+            git fetch --tags
+            git checkout "$LATEST_TAG"
+            cd ..
+            
+            # Configure git user and commit changes if needed
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            git add third-party-src
+            if git diff --staged --quiet; then
+              echo "No changes to commit, submodule already up to date"
+            else
+              git commit -m "Update VS Code submodule to $LATEST_TAG"
+              git push origin "$STAGING_BRANCH"
+            fi
+            
+            echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
+          fi
+            
+    
