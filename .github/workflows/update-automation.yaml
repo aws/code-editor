@@ -22,6 +22,7 @@ jobs:
         run: |
           git fetch origin
           LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
+          # For testing purposes
           if [ -z "$LATEST_SEMVER" ]; then
             LATEST_SEMVER="main"
             echo "No semver branches found, using main"
@@ -85,7 +86,7 @@ jobs:
               git push origin "$STAGING_BRANCH"
             fi
             
-            echo "✅ Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
+            echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
           fi
             
     
