@@ -2,8 +2,20 @@
 
 set -euo pipefail
 
+# Get target from command line argument
+TARGET="${1:-code-editor-sagemaker-server}"
+
 PRESENT_WORKING_DIR="$(pwd)"
 PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
+CONFIG_FILE="$PRESENT_WORKING_DIR/configs/$TARGET.json"
+
+# Check if config file exists
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Error: Configuration file not found: $CONFIG_FILE" >&2
+    exit 1
+fi
+
+echo "Using configuration: $CONFIG_FILE"
 # Manually update this list to include all files for which there are modified script-src CSP rules
 UPDATE_CHECKSUM_FILEPATHS=(
     "/src/vs/workbench/contrib/webview/browser/pre/index.html"
@@ -73,16 +85,22 @@ calc_script_SHAs() {
 apply_changes() {
     echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
 
+    # Read configuration from JSON file
+    local patches_path=$(jq -r '.patches.path' "$CONFIG_FILE")
+    local overrides_path=$(jq -r '.overrides.path' "$CONFIG_FILE")
+    local package_lock_path=$(jq -r '."package-lock-overrides".path' "$CONFIG_FILE")
+    
     patch_dir="${PRESENT_WORKING_DIR}/patches"
     echo "Set patch directory as: $patch_dir"
 
     export QUILT_PATCHES="${patch_dir}"
-    export QUILT_SERIES="${PRESENT_WORKING_DIR}/patches/sagemaker.series"
+    export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
+    echo "Using series file: $QUILT_SERIES"
 
     # Clean out the build directory
     echo "Cleaning build src dir"
     rm -rf "${PATCHED_SRC_DIR}"
-
+    rm -rf "${PRESENT_WORKING_DIR}/.pc"
     # Copy third party source
     echo "Copying third party source to the patch directory"
     rsync -a "${PRESENT_WORKING_DIR}/third-party-src/" "${PATCHED_SRC_DIR}"
@@ -93,10 +111,10 @@ apply_changes() {
     popd
 
     echo "Applying overrides"
-    rsync -a "${PRESENT_WORKING_DIR}/overrides/" "${PATCHED_SRC_DIR}"
+    rsync -a "${PRESENT_WORKING_DIR}/$overrides_path/" "${PATCHED_SRC_DIR}"
 
     echo "Applying package-lock overrides"
-    rsync -a "${PRESENT_WORKING_DIR}/package-lock-overrides/sagemaker.series/" "${PATCHED_SRC_DIR}"
+    rsync -a "${PRESENT_WORKING_DIR}/$package_lock_path/" "${PATCHED_SRC_DIR}"
 }
 
 update_inline_sha() {
@@ -121,5 +139,7 @@ update_inline_sha() {
     done
 }
 
+echo "Preparing source for target: $TARGET"
 apply_changes
 update_inline_sha
+echo "Successfully prepared source for target: $TARGET"

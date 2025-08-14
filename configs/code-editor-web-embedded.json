@@ -1,0 +1,15 @@
+{
+  "patches": {
+    "path": "patches/web-embedded.series"
+  },
+  "overrides": {
+    "path": "overrides"
+  },
+  "package-lock-overrides": {
+    "path": "package-lock-overrides/web-embedded.series"
+  },
+  "target": "code-editor-web-embedded",
+  "ignoredErrors": {
+    "path": "ignored-errors"
+  }
+}

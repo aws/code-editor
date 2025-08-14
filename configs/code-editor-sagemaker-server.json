@@ -1,0 +1,15 @@
+{
+  "patches": {
+    "path": "patches/sagemaker.series"
+  },
+  "overrides": {
+    "path": "overrides"
+  },
+  "package-lock-overrides": {
+    "path": "package-lock-overrides/sagemaker.series"
+  },
+  "target": "code-editor-sagemaker-server",
+  "ignoredErrors": {
+    "path": "ignored-errors"
+  }
+}
