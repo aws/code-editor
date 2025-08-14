@@ -100,6 +100,36 @@ calc_script_SHAs() {
     return 0
 }
 
+check_unsaved_changes() {
+    local patches_path=$(jq -r '.patches.path' "$CONFIG_FILE")
+    
+    if [[ "$patches_path" == "null" || -z "$patches_path" ]]; then
+        return
+    fi
+    
+    export QUILT_PATCHES="${PRESENT_WORKING_DIR}/patches"
+    export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
+    
+    # Check if there are applied patches
+    local applied_output
+    applied_output=$(quilt applied 2>/dev/null || true)
+    
+    if [[ -z "$applied_output" ]]; then
+        return
+    fi
+    
+    # Check for unsaved changes with diff
+    local diff_output
+    diff_output=$(quilt diff -z 2>/dev/null || true)
+    
+    if [[ -n "$diff_output" ]]; then
+        echo "Error: You have unsaved changes in the current patch."
+        echo "Run 'quilt refresh' to update the patch with your changes."
+        echo "Please refresh or revert your changes before rebasing again"
+        exit 1
+    fi
+}
+
 apply_changes() {
     echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
 
@@ -114,6 +144,11 @@ apply_changes() {
     export QUILT_PATCHES="${patch_dir}"
     export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
     echo "Using series file: $QUILT_SERIES"
+
+    # Check for unsaved changes if in rebase mode
+    if [[ "$REBASE" == "true" ]]; then
+        check_unsaved_changes
+    fi
 
     # Clean out the build directory
     echo "Cleaning build src dir"
