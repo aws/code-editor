@@ -12,6 +12,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Setup environment
+        run: |
+          echo "Installing required dependencies"
+          sudo apt-get update
+          sudo apt-get install -y quilt libxml2-utils jq
+          
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -88,5 +94,21 @@ jobs:
             
             echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
           fi
+          
+      - name: Rebase patches for all targets
+        run: |
+          echo "Rebasing patches for all build targets"
+          
+          # Test each target sequentially with rebasing
+          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
+            echo "Rebasing prepare-src for target: $target"
+            ./scripts/prepare-src.sh --rebase "$target"
+            
+            # Clean up for next target
+            rm -rf code-editor-src
+            rm -rf .pc
+          done
+          
+          echo "All targets rebased successfully"
             
     

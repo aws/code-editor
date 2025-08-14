@@ -2,8 +2,26 @@
 
 set -euo pipefail
 
-# Get target from command line argument
-TARGET="${1:-code-editor-sagemaker-server}"
+# Parse command line arguments
+REBASE=false
+TARGET="code-editor-sagemaker-server"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --rebase)
+            REBASE=true
+            shift
+            ;;
+        -*)
+            echo "Unknown option $1" >&2
+            exit 1
+            ;;
+        *)
+            TARGET="$1"
+            shift
+            ;;
+    esac
+done
 
 PRESENT_WORKING_DIR="$(pwd)"
 PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
@@ -101,14 +119,20 @@ apply_changes() {
     echo "Cleaning build src dir"
     rm -rf "${PATCHED_SRC_DIR}"
     rm -rf "${PRESENT_WORKING_DIR}/.pc"
+
     # Copy third party source
     echo "Copying third party source to the patch directory"
     rsync -a "${PRESENT_WORKING_DIR}/third-party-src/" "${PATCHED_SRC_DIR}"
-
-    echo "Applying base patches"
-    pushd "${PATCHED_SRC_DIR}"
-    quilt push -a
-    popd
+    
+    # Handle rebase if requested
+    if [[ "$REBASE" == "true" ]]; then
+        rebase
+    else
+        echo "Applying patches"
+        pushd "${PATCHED_SRC_DIR}"
+        quilt push -a
+        popd
+    fi
 
     echo "Applying overrides"
     rsync -a "${PRESENT_WORKING_DIR}/$overrides_path/" "${PATCHED_SRC_DIR}"
@@ -139,7 +163,31 @@ update_inline_sha() {
     done
 }
 
+rebase() {
+    echo "Rebasing patches one by one..."
+    pushd "${PATCHED_SRC_DIR}"
+    
+    # Apply patches one by one with force and merge
+    while quilt push -f -m; do
+        echo "Successfully applied patch: $(quilt top)"
+    done
+    
+    # Check if we failed on a patch
+    if quilt next >/dev/null 2>&1; then
+        echo "Failed to apply patch: $(quilt next)"
+        echo "Rebase stopped. Manual intervention required."
+        exit 1
+    else
+        echo "All patches applied successfully"
+    fi
+    
+    popd
+}
+
 echo "Preparing source for target: $TARGET"
+if [[ "$REBASE" == "true" ]]; then
+    echo "Rebase mode enabled"
+fi
 apply_changes
 update_inline_sha
 echo "Successfully prepared source for target: $TARGET"
