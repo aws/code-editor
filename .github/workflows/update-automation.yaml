@@ -21,7 +21,7 @@ jobs:
       - name: Get latest semver branch
         run: |
           git fetch origin
-          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
+          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
           # For testing purposes
           if [ -z "$LATEST_SEMVER" ]; then
             LATEST_SEMVER="main"
