@@ -207,13 +207,58 @@ update_inline_sha() {
     done
 }
 
+parse_conflict_files() {
+    echo "$1" | grep -A1 "^patching file" | grep -B1 "NOT MERGED" | grep "^patching file" | sed 's/^patching file //'
+}
+
+parse_missing_files() {
+    echo "$1" | grep -E "^(Index:|\|\+\+\+|can't find file.*line [0-9]+|File to patch:)" | \
+        sed -E 's/^Index: +//; s/^\|\+\+\+ +([^ ]+).*/\1/; s/.*line [0-9]+ +//; s/^File to patch: +//' | \
+        sort -u
+}
+
 rebase() {
     echo "Rebasing patches one by one..."
     pushd "${PATCHED_SRC_DIR}"
     
     # Apply patches one by one with force and merge
-    while quilt push -f -m; do
-        echo "Successfully applied patch: $(quilt top)"
+    while true; do
+        local output
+        if output=$(quilt push -f -m 2>&1); then
+            echo "Successfully applied patch: $(quilt top)"
+        else
+            local failed_patch
+            failed_patch=$(quilt next 2>/dev/null || echo "unknown")
+            echo "Failed to apply patch: $failed_patch"
+            
+            # Parse conflict and missing files
+            local conflict_files
+            local missing_files
+            conflict_files=($(parse_conflict_files "$output"))
+            missing_files=($(parse_missing_files "$output"))
+            
+            if [[ ${#conflict_files[@]} -gt 0 ]]; then
+                echo ""
+                echo "Files with conflicts:"
+                printf '- %s\n' "${conflict_files[@]}"
+            fi
+            
+            if [[ ${#missing_files[@]} -gt 0 ]]; then
+                echo ""
+                echo "Missing files:"
+                printf '- %s\n' "${missing_files[@]}"
+            fi
+            
+            echo ""
+            echo "Required actions:"
+            echo "1. Edit the files to resolve any conflicts"
+            echo "2. Run 'quilt refresh' to update the patch"
+            echo "3. Then run the prepare-src script again to continue"
+            echo ""
+            
+            popd
+            exit 1
+        fi
     done
     
     # Check if we failed on a patch
