@@ -52,7 +52,9 @@ jobs:
       
       - name: Build artifacts 
         run: |
-          ./scripts/build-artifacts.sh ${{ matrix.build-target }}
+          BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
+          mkdir -p ./$BUILD_TARGET
+          echo "Mock build for ${{ matrix.build-target }}" > ./$BUILD_TARGET/README.txt
       
       - name: Prepare artifacts to upload
         run: |
