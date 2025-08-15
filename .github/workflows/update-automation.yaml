@@ -101,28 +101,22 @@ jobs:
           
           # Test each target sequentially with rebasing
           FAILED_TARGETS=()
-          TARGET_OUTPUTS=()
           
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
-            echo "Rebasing prepare-src for target: $target"
+            echo ""
+            echo "=== REBASING TARGET: $target ==="
             
-            # Capture only error output
-            if ./scripts/prepare-src.sh --rebase --skip-unsaved-check "$target" 2>"error_$target.log"; then
+            if ./scripts/prepare-src.sh --rebase "$target"; then
               echo "Successfully rebased $target"
             else
               echo "Failed to rebase $target"
               FAILED_TARGETS+=("$target")
-              TARGET_OUTPUTS+=("=== ERROR OUTPUT: $target ===")
-              TARGET_OUTPUTS+=("$(cat "error_$target.log")")
             fi
             
-          done
+            # Clean up for next target
+            rm -rf code-editor-src
           
-          # Print all captured outputs
-          echo ""
-          echo "=== DETAILED OUTPUT FOR ALL TARGETS ==="
-          for line in "${TARGET_OUTPUTS[@]}"; do
-            echo "$line"
+            echo "=== END TARGET: $target ==="
           done
           
           # Report results

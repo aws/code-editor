@@ -4,17 +4,12 @@ set -euo pipefail
 
 # Parse command line arguments
 REBASE=false
-SKIP_UNSAVED_CHECK=false
 TARGET="code-editor-sagemaker-server"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --rebase)
             REBASE=true
-            shift
-            ;;
-        --skip-unsaved-check)
-            SKIP_UNSAVED_CHECK=true
             shift
             ;;
         -*)
@@ -160,8 +155,8 @@ apply_changes() {
     export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
     echo "Using series file: $QUILT_SERIES"
 
-    # Check for unsaved changes if in rebase mode and not skipping
-    if [[ "$REBASE" == "true" && "$SKIP_UNSAVED_CHECK" == "false" ]]; then
+    # Check for unsaved changes if in rebase mode
+    if [[ "$REBASE" == "true" ]]; then
         check_unsaved_changes
     fi
 
@@ -236,9 +231,6 @@ rebase() {
 echo "Preparing source for target: $TARGET"
 if [[ "$REBASE" == "true" ]]; then
     echo "Rebase mode enabled"
-fi
-if [[ "$SKIP_UNSAVED_CHECK" == "true" ]]; then
-    echo "Skipping unsaved changes check"
 fi
 apply_changes
 update_inline_sha
