@@ -13,9 +13,11 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases
     environment: release-workflow-env
     env:
-      GH_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       COMMIT_SHA: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
@@ -90,10 +92,22 @@ jobs:
               \"prerelease\": false
             }")
           
+          echo "Release API response: $RELEASE_RESPONSE"
+          
+          if echo "$RELEASE_RESPONSE" | jq -e '.message' > /dev/null; then
+            echo "Error creating release: $(echo "$RELEASE_RESPONSE" | jq -r '.message')"
+            exit 1
+          fi
+          
           UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r '.upload_url' | sed 's/{?name,label}//')
           RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
-
-          echo UPLOAD_URL $UPLOAD_URL, RELEASE_ID $RELEASE_ID
+          
+          if [ "$UPLOAD_URL" = "null" ] || [ "$RELEASE_ID" = "null" ]; then
+            echo "Failed to extract upload URL or release ID from response"
+            exit 1
+          fi
+          
+          echo "UPLOAD_URL: $UPLOAD_URL, RELEASE_ID: $RELEASE_ID"
           
           # Upload each tar.gz file
           for file in *.tar.gz; do
