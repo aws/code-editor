@@ -25,7 +25,6 @@ We use major.minor branches (e.g., `1.0`, `1.1`, `2.1`) for releases.
      git tag 1.0.0
      git push origin 1.0.0
      ```
-   - **GitHub UI**: Go to Releases → Create a new release
    - **GitHub Actions**: Manually run "Create release" workflow from Actions tab
 
 3. **Release notes**: Include code-oss version information in the release description
