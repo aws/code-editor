@@ -14,6 +14,7 @@ common/suppress-known-errors-script.diff
 common/service-worker-fix.diff
 common/proposed-api.diff
 common/build.diff
+common/integration.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
