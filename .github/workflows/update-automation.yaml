@@ -103,7 +103,7 @@ jobs:
           FAILED_TARGETS=()
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
             echo "Rebasing prepare-src for target: $target"
-            if ./scripts/prepare-src.sh --rebase "$target"; then
+            if ./scripts/prepare-src.sh --rebase --skip-unsaved-check "$target"; then
               echo "Successfully rebased $target"
             else
               echo "Failed to rebase $target"
