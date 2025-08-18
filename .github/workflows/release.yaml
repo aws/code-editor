@@ -48,7 +48,6 @@ jobs:
       - name: Download sagemaker artifacts by commit ID
         run: |
           gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
-          ls -la
 
       - name: Check artifacts exist and rename
         run: |
@@ -76,7 +75,7 @@ jobs:
       
       - name: Create GitHub release
         run: |
-          # Check if release already exists
+          # Check if release already exists. Needed when release created via new release in guthub ui
           if gh release view "$VERSION_NUM" > /dev/null 2>&1; then
             echo "Release for tag $VERSION_NUM already exists, uploading additional assets..."
             gh release upload "$VERSION_NUM" *.tar.gz --clobber
