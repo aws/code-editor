@@ -13,11 +13,12 @@ jobs:
     environment: build-targets-workflow-env
     strategy:
       matrix:
-        build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded]
+        build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]
         exclude:
           # Only build SageMaker for now, remove the excluded targets when needed in the future.
           - build-target: code-editor-server
           - build-target: code-editor-web-embedded
+          - build-target: code-editor-web-embedded-with-terminal
     steps:
       - name: Start Build Workflow
         run: |

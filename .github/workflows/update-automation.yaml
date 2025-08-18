@@ -30,7 +30,7 @@ jobs:
           LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
           # For testing purposes
           if [ -z "$LATEST_SEMVER" ]; then
-            LATEST_SEMVER="rebase-patches"
+            LATEST_SEMVER="main"
             echo "No semver branches found, using main"
           fi
           echo "LATEST_SEMVER=$LATEST_SEMVER" >> $GITHUB_ENV
@@ -102,7 +102,7 @@ jobs:
           # Test each target sequentially with rebasing
           FAILED_TARGETS=()
           
-          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded; do
+          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
             echo ""
             echo "=== REBASING TARGET: $target ==="
             

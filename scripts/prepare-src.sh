@@ -140,13 +140,8 @@ check_unsaved_changes() {
     popd
 }
 
-apply_changes() {
-    echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
-
-    # Read configuration from JSON file
+setup_quilt_environment() {
     local patches_path=$(jq -r '.patches.path' "$CONFIG_FILE")
-    local overrides_path=$(jq -r '.overrides.path' "$CONFIG_FILE")
-    local package_lock_path=$(jq -r '."package-lock-overrides".path' "$CONFIG_FILE")
     
     patch_dir="${PRESENT_WORKING_DIR}/patches"
     echo "Set patch directory as: $patch_dir"
@@ -154,30 +149,45 @@ apply_changes() {
     export QUILT_PATCHES="${patch_dir}"
     export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
     echo "Using series file: $QUILT_SERIES"
+}
 
-    # Check for unsaved changes if in rebase mode
-    if [[ "$REBASE" == "true" ]]; then
-        check_unsaved_changes
-    fi
-
-    # Clean out the build directory
+prepare_patch_directory() {
     echo "Cleaning build src dir"
     rm -rf "${PATCHED_SRC_DIR}"
-
-    # Copy third party source
+    
     echo "Copying third party source to the patch directory"
     rsync -a "${PRESENT_WORKING_DIR}/third-party-src/" "${PATCHED_SRC_DIR}"
-    
-    # Handle rebase if requested
-    if [[ "$REBASE" == "true" ]]; then
-        rebase
-    else
-        echo "Applying patches"
-        pushd "${PATCHED_SRC_DIR}"
-        quilt push -a
-        popd
-    fi
+}
 
+apply_patches() {
+    echo "Applying patches"
+    pushd "${PATCHED_SRC_DIR}"
+    quilt push -a
+    popd
+}
+
+prepare_src() {
+    echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
+    setup_quilt_environment
+    prepare_patch_directory
+    apply_patches
+    apply_overrides
+}
+
+rebase_patches() {
+    echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
+    setup_quilt_environment
+    check_unsaved_changes
+    prepare_patch_directory
+    rebase
+    apply_overrides
+}
+
+apply_overrides() {
+    # Read configuration from JSON file
+    local overrides_path=$(jq -r '.overrides.path' "$CONFIG_FILE")
+    local package_lock_path=$(jq -r '."package-lock-overrides".path' "$CONFIG_FILE")
+    
     echo "Applying overrides"
     rsync -a "${PRESENT_WORKING_DIR}/$overrides_path/" "${PATCHED_SRC_DIR}"
 
@@ -276,7 +286,9 @@ rebase() {
 echo "Preparing source for target: $TARGET"
 if [[ "$REBASE" == "true" ]]; then
     echo "Rebase mode enabled"
+    rebase_patches
+else
+    prepare_src
 fi
-apply_changes
 update_inline_sha
 echo "Successfully prepared source for target: $TARGET"

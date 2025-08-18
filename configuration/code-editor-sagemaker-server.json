@@ -1,4 +1,5 @@
 {
+  "version": 1,
   "patches": {
     "path": "patches/sagemaker.series"
   },
