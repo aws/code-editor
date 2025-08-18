@@ -256,22 +256,23 @@ rebase() {
 COMMAND="prepare_src"
 TARGET="code-editor-sagemaker-server"
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --command)
-            COMMAND="$2"
-            shift 2
-            ;;
-        -*)
-            echo "Unknown option $1" >&2
-            exit 1
-            ;;
-        *)
-            TARGET="$1"
-            shift
-            ;;
-    esac
-done
+case "${1:-}" in
+    --command)
+        [[ $# -ge 2 ]] || { echo "--command requires a value" >&2; exit 1; }
+        COMMAND="$2"
+        TARGET="${3:-$TARGET}"
+        ;;
+    -*)
+        echo "Unknown option $1" >&2
+        exit 1
+        ;;
+    "")
+        # No arguments, use defaults
+        ;;
+    *)
+        TARGET="$1"
+        ;;
+esac
 
 PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
 CONFIG_FILE="$PRESENT_WORKING_DIR/configuration/$TARGET.json"
