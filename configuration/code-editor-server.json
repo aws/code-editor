@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "patches": {
+    "path": "patches/web-server.series"
+  },
+  "overrides": {
+    "path": "overrides"
+  },
+  "package-lock-overrides": {
+    "path": "package-lock-overrides/web-server.series"
+  },
+  "target": "code-editor-server",
+  "ignoredErrors": {
+    "path": "ignored-errors"
+  }
+}

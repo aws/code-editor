@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "patches": {
+    "path": "patches/web-embedded-with-terminal.series"
+  },
+  "overrides": {
+    "path": "overrides"
+  },
+  "package-lock-overrides": {
+    "path": "package-lock-overrides/web-embedded-with-terminal.series"
+  },
+  "target": "code-editor-web-embedded-with-terminal",
+  "ignoredErrors": {
+    "path": "ignored-errors"
+  }
+}
