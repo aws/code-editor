@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      failed: ${{ steps.rebase-check.outputs.failed }}
     steps:
       - name: Setup environment
         run: |
@@ -96,6 +98,7 @@ jobs:
           fi
           
       - name: Rebase patches for all targets
+        id: rebase-check
         run: |
           echo "Rebasing patches for all build targets"
           
@@ -122,16 +125,17 @@ jobs:
           # Report results
           if [ ${#FAILED_TARGETS[@]} -gt 0 ]; then
             echo "Failed targets: ${FAILED_TARGETS[*]}"
-            echo "REBASE_FAILED=true" >> $GITHUB_ENV
+            echo "failed=true" >> $GITHUB_OUTPUT
           else
             echo "All targets rebased successfully"
+            echo "failed=false" >> $GITHUB_OUTPUT
           fi
           
-  handle-rebase-failures:
-    name: Handle Rebase Failures
+  handle-failures:
+    name: Handle Failures
     runs-on: ubuntu-latest
     needs: update-automation
-    if: env.REBASE_FAILED == 'true'
+    if: needs.update-automation.outputs.failed == 'true'
     steps:
       - name: Report rebase failures
         run: |
