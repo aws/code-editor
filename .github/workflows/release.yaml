@@ -47,133 +47,41 @@ jobs:
 
       - name: Download sagemaker artifacts by commit ID
         run: |
-          # Download build artifact
-          BUILD_ARTIFACT_ID=$(curl -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$REPOSITORY/actions/artifacts?name=$COMMIT_SHA-code-editor-sagemaker-server-build" \
-            | jq -r ".artifacts[0].id // empty")
-          
-          # Download src artifact
-          SRC_ARTIFACT_ID=$(curl -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$REPOSITORY/actions/artifacts?name=$COMMIT_SHA-code-editor-sagemaker-server-src" \
-            | jq -r ".artifacts[0].id // empty")
-          
-          if [ -n "$BUILD_ARTIFACT_ID" ]; then
-            curl -L -H "Authorization: Bearer $GH_TOKEN" \
-              "https://api.github.com/repos/$REPOSITORY/actions/artifacts/$BUILD_ARTIFACT_ID/zip" \
-              -o build-artifact.zip
-            unzip build-artifact.zip
-          else
-            echo "No build artifact found matching pattern: $COMMIT_SHA-code-editor-sagemaker-server-build"
-            exit 1
-          fi
-          
-          if [ -n "$SRC_ARTIFACT_ID" ]; then
-            curl -L -H "Authorization: Bearer $GH_TOKEN" \
-              "https://api.github.com/repos/$REPOSITORY/actions/artifacts/$SRC_ARTIFACT_ID/zip" \
-              -o src-artifact.zip
-            unzip src-artifact.zip
-          else
-            echo "No src artifact found matching pattern: $COMMIT_SHA-code-editor-sagemaker-server-src"
-            exit 1
-          fi
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
 
       - name: Check artifacts exist and rename
         run: |
           ls -la
           
           # Rename build artifact
-          BUILD_TARBALL=$(ls *build*.tar.gz | head -1 || true)
+          BUILD_TARBALL=$(find . -name "*build*.tar.gz" | head -1 || true)
           if [ -n "$BUILD_TARBALL" ]; then
-            mv "$BUILD_TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
-            echo "Renamed $BUILD_TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
+            cp "$BUILD_TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
+            echo "Copied $BUILD_TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
           else
             echo "Error: No build artifacts found for commit $COMMIT_SHA"
             exit 1
           fi
           
           # Rename src artifact
-          SRC_TARBALL=$(ls *src*.tar.gz | head -1 || true)
+          SRC_TARBALL=$(find . -name "*src*.tar.gz" | head -1 || true)
           if [ -n "$SRC_TARBALL" ]; then
-            mv "$SRC_TARBALL" "code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
-            echo "Renamed $SRC_TARBALL to code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
+            cp "$SRC_TARBALL" "code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
+            echo "Copied $SRC_TARBALL to code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
           else
             echo "Error: No src artifacts found for commit $COMMIT_SHA"
             exit 1
           fi
       
-      - name: Create tag if not exists
-        run: |
-          # Check if tag already exists
-          if git rev-parse "$VERSION_NUM" >/dev/null 2>&1; then
-            echo "Tag $VERSION_NUM already exists"
-          else
-            echo "Creating tag $VERSION_NUM"
-            git tag "$VERSION_NUM" "$COMMIT_SHA"
-            git push origin "$VERSION_NUM"
-          fi
-      
       - name: Create GitHub release
         run: |
-          # Check if release already exists
-          EXISTING_RELEASE=$(curl -s -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/$REPOSITORY/releases/tags/$VERSION_NUM" 2>/dev/null)
-          
-          if echo "$EXISTING_RELEASE" | jq -e '.id' > /dev/null 2>&1; then
-            echo "Release for tag $VERSION_NUM already exists, skipping creation..."
-            RELEASE_RESPONSE="$EXISTING_RELEASE"
+          # Check if release already exists. Needed when release created via new release in guthub ui
+          if gh release view "$VERSION_NUM" > /dev/null 2>&1; then
+            echo "Release for tag $VERSION_NUM already exists, uploading additional assets..."
+            gh release upload "$VERSION_NUM" *.tar.gz --clobber
           else
             echo "Creating new release for tag $VERSION_NUM..."
-            RELEASE_RESPONSE=$(curl -L \
-              -X POST \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer $GH_TOKEN" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/$REPOSITORY/releases" \
-              -d "{
-                \"tag_name\": \"$VERSION_NUM\",
-                \"name\": \"Release $VERSION_NUM\",
-                \"draft\": false,
-                \"prerelease\": false
-              }")
-            
-            echo "Release API response: $RELEASE_RESPONSE"
-            
-            if echo "$RELEASE_RESPONSE" | jq -e '.message' > /dev/null; then
-              echo "Error creating release: $(echo "$RELEASE_RESPONSE" | jq -r '.message')"
-              exit 1
-            fi
+            gh release create "$VERSION_NUM" *.tar.gz \
+              --title "Release $VERSION_NUM" \
+              --notes "Release $VERSION_NUM"
           fi
-          
-          UPLOAD_URL=$(echo "$RELEASE_RESPONSE" | jq -r '.upload_url' | sed 's/{?name,label}//')
-          RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
-          
-          if [ "$UPLOAD_URL" = "null" ] || [ "$RELEASE_ID" = "null" ]; then
-            echo "Failed to extract upload URL or release ID from response"
-            exit 1
-          fi
-          
-          echo "UPLOAD_URL: $UPLOAD_URL, RELEASE_ID: $RELEASE_ID"
-          
-          # Upload each tar.gz file
-          for file in *.tar.gz; do
-            if [ -f "$file" ]; then
-              echo "Uploading $file..."
-              curl -L \
-                -X POST \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer $GH_TOKEN" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                -H "Content-Type: application/gzip" \
-                "${UPLOAD_URL}?name=${file}" \
-                --data-binary "@$file"
-            fi
-          done
