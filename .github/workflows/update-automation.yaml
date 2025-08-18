@@ -122,9 +122,20 @@ jobs:
           # Report results
           if [ ${#FAILED_TARGETS[@]} -gt 0 ]; then
             echo "Failed targets: ${FAILED_TARGETS[*]}"
-            exit 1
+            echo "REBASE_FAILED=true" >> $GITHUB_ENV
+          else
+            echo "All targets rebased successfully"
           fi
           
-          echo "All targets rebased successfully"
+  handle-rebase-failures:
+    name: Handle Rebase Failures
+    runs-on: ubuntu-latest
+    needs: update-automation
+    if: env.REBASE_FAILED == 'true'
+    steps:
+      - name: Report rebase failures
+        run: |
+          # TODO: Implement metric reporting to CW.
+          exit 1
             
     
