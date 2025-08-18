@@ -208,45 +208,53 @@ update_inline_sha() {
 }
 
 parse_conflict_files() {
-    echo "$1" | grep -A1 "^patching file" | grep -B1 "NOT MERGED" | grep "^patching file" | sed 's/^patching file //'
+    printf '%s\n' "$1" | grep -A1 "^patching file" | grep -B1 "NOT MERGED" | grep "^patching file" | sed 's/^patching file //'
 }
 
 parse_missing_files() {
-    echo "$1" | grep -E "^(Index:|\|\+\+\+|can't find file.*line [0-9]+|File to patch:)" | \
-        sed -E 's/^Index: +//; s/^\|\+\+\+ +([^ ]+).*/\1/; s/.*line [0-9]+ +//; s/^File to patch: +//' | \
-        sort -u
+    printf '%s\n' "$1" | grep -A5 "can't find file to patch" | grep "^|Index:" | sed 's/^|Index: //' | sort -u
 }
 
 rebase() {
     echo "Rebasing patches one by one..."
     pushd "${PATCHED_SRC_DIR}"
     
-    # Apply patches one by one with force and merge
-    while true; do
+    # Apply patches one by one with force
+    while quilt next >/dev/null 2>&1; do
+        
         local output
-        if output=$(quilt push -f -m 2>&1); then
+        set +e  # Disable exit on error
+        output=$(quilt push -f -m 2>&1)
+        local exit_code=$?
+        set -e  # Re-enable exit on error
+        
+        echo "$output"
+        
+        # Parse conflicts and missing files
+        local conflict_files
+        local missing_files
+        conflict_files=($(parse_conflict_files "$output" || true))
+        missing_files=($(parse_missing_files "$output" || true))
+        
+        if [[ $exit_code -eq 0 ]]; then
             echo "Successfully applied patch: $(quilt top)"
-        else
-            local failed_patch
-            failed_patch=$(quilt next 2>/dev/null || echo "unknown")
-            echo "Failed to apply patch: $failed_patch"
             
-            # Parse conflict and missing files
-            local conflict_files
-            local missing_files
-            conflict_files=($(parse_conflict_files "$output"))
-            missing_files=($(parse_missing_files "$output"))
+        else
             
             if [[ ${#conflict_files[@]} -gt 0 ]]; then
                 echo ""
                 echo "Files with conflicts:"
-                printf '- %s\n' "${conflict_files[@]}"
+                for file in "${conflict_files[@]}"; do
+                    echo "- $file"
+                done
             fi
             
             if [[ ${#missing_files[@]} -gt 0 ]]; then
                 echo ""
                 echo "Missing files:"
-                printf '- %s\n' "${missing_files[@]}"
+                for file in "${missing_files[@]}"; do
+                    echo "- $file"
+                done
             fi
             
             echo ""
@@ -255,21 +263,13 @@ rebase() {
             echo "2. Run 'quilt refresh' to update the patch"
             echo "3. Then run the prepare-src script again to continue"
             echo ""
-            
             popd
             exit 1
         fi
+        
     done
     
-    # Check if we failed on a patch
-    if quilt next >/dev/null 2>&1; then
-        echo "Failed to apply patch: $(quilt next)"
-        echo "Rebase stopped. Manual intervention required."
-        exit 1
-    else
-        echo "All patches applied successfully"
-    fi
-    
+    echo "All patches applied successfully"
     popd
 }
 
