@@ -52,9 +52,9 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 -		const detailString = (useAgo: boolean): string => {
 +		const detailString = (): string => {
  			return localize('aboutDetail',
--				"Version: {0}\nCommit: {1}\nDate: {2}\nBrowser: {3}",
+-				"Code OSS Version: {0}\nCode Editor Version: {1}\nDate: {2}\nBrowser: {3}",
 -				this.productService.version || 'Unknown',
--				this.productService.commit || 'Unknown',
+-				this.productService.codeEditorVersion || 'Unknown',
 -				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
 -				navigator.userAgent
 +				"Note: The Lambda Code Editor doesn't include all of the features available in the desktop application. To use features like the terminal and debugger, download your code and use the desktop version.",

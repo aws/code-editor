@@ -1,12 +1,3 @@
-Remove unsafe-eval and unsafe-inline from CSP directives
-
----
- src/vs/server/node/webClientServer.ts                       | 6 +++---
- .../notebook/browser/view/renderers/backLayerWebView.ts     | 4 ++--
- src/vs/workbench/contrib/webview/browser/pre/index.html     | 2 +-
- .../extensions/worker/webWorkerExtensionHostIframe.html     | 2 +-
- 4 files changed, 7 insertions(+), 7 deletions(-)
-
 Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- third-party-src.orig/src/vs/server/node/webClientServer.ts
@@ -15,7 +6,7 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  			'default-src \'self\';',
  			'img-src \'self\' https: data: blob:;',
  			'media-src \'self\';',
--			`script-src 'self' 'wasm-unsafe-eval' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+-			`script-src 'self' 'unsafe-eval' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 +			`script-src 'self' ${WORKBENCH_NLS_BASE_URL ?? ''} blob: 'nonce-1nline-m4p' ${this._getScriptCspHashes(data).join(' ')} '${webWorkerExtensionHostIframeScriptSHA}' 'sha256-/r7rqQ+yrxt57sxLuQ6AMYcy/lUpvAIzHjIJt/OeLWU=' ${useTestResolver ? '' : `http://${remoteAuthority}`};`,  // the sha is the same as in src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
  			'child-src \'self\';',
  			`frame-src 'self' https://*.vscode-cdn.net data:;`,
@@ -37,7 +28,7 @@ Index: third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/
  				${enableCsp ?
  				`<meta http-equiv="Content-Security-Policy" content="
  					default-src 'none';
--					script-src ${webviewGenericCspSource} 'unsafe-inline' 'wasm-unsafe-eval';
+-					script-src ${webviewGenericCspSource} 'unsafe-inline' 'unsafe-eval';
 -					style-src ${webviewGenericCspSource} 'unsafe-inline';
 +					script-src ${webviewGenericCspSource};
 +					style-src ${webviewGenericCspSource};
@@ -57,6 +48,7 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"
+
 Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
@@ -65,7 +57,7 @@ Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExte
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';
  			child-src 'self' data: blob:;
--			script-src 'self' 'wasm-unsafe-eval' 'sha256-cl8ijlOzEe+0GRCQNJQu2k6nUQ0fAYNYIuuKEm72JDs=' https: http://localhost:* blob:;
+-			script-src 'self' 'unsafe-eval' 'sha256-cl8ijlOzEe+0GRCQNJQu2k6nUQ0fAYNYIuuKEm72JDs=' https: http://localhost:* blob:;
 +			script-src 'self' 'sha256-cl8ijlOzEe+0GRCQNJQu2k6nUQ0fAYNYIuuKEm72JDs=' https: http://localhost:* blob:;
  			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
  	</head>
