@@ -2,38 +2,7 @@
 
 set -euo pipefail
 
-# Parse command line arguments
-REBASE=false
-TARGET="code-editor-sagemaker-server"
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --rebase)
-            REBASE=true
-            shift
-            ;;
-        -*)
-            echo "Unknown option $1" >&2
-            exit 1
-            ;;
-        *)
-            TARGET="$1"
-            shift
-            ;;
-    esac
-done
-
 PRESENT_WORKING_DIR="$(pwd)"
-PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
-CONFIG_FILE="$PRESENT_WORKING_DIR/configuration/$TARGET.json"
-
-# Check if config file exists
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Error: Configuration file not found: $CONFIG_FILE" >&2
-    exit 1
-fi
-
-echo "Using configuration: $CONFIG_FILE"
 # Manually update this list to include all files for which there are modified script-src CSP rules
 UPDATE_CHECKSUM_FILEPATHS=(
     "/src/vs/workbench/contrib/webview/browser/pre/index.html"
@@ -283,12 +252,51 @@ rebase() {
     popd
 }
 
-echo "Preparing source for target: $TARGET"
-if [[ "$REBASE" == "true" ]]; then
-    echo "Rebase mode enabled"
-    rebase_patches
-else
-    prepare_src
+# Parse command line arguments
+COMMAND="prepare_src"
+TARGET="code-editor-sagemaker-server"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --command)
+            COMMAND="$2"
+            shift 2
+            ;;
+        -*)
+            echo "Unknown option $1" >&2
+            exit 1
+            ;;
+        *)
+            TARGET="$1"
+            shift
+            ;;
+    esac
+done
+
+PATCHED_SRC_DIR="$PRESENT_WORKING_DIR/code-editor-src"
+CONFIG_FILE="$PRESENT_WORKING_DIR/configuration/$TARGET.json"
+
+# Check if config file exists
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Error: Configuration file not found: $CONFIG_FILE" >&2
+    exit 1
 fi
+
+echo "Using configuration: $CONFIG_FILE"
+echo "Preparing source for target: $TARGET"
+case "$COMMAND" in
+    prepare_src)
+        prepare_src
+        ;;
+    rebase_patches)
+        echo "Rebase mode enabled"
+        rebase_patches
+        ;;
+    *)
+        echo "Unknown command: $COMMAND" >&2
+        echo "Available commands: prepare_src, rebase_patches" >&2
+        exit 1
+        ;;
+esac
 update_inline_sha
 echo "Successfully prepared source for target: $TARGET"

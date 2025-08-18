@@ -106,7 +106,7 @@ jobs:
             echo ""
             echo "=== REBASING TARGET: $target ==="
             
-            if ./scripts/prepare-src.sh --rebase "$target"; then
+            if ./scripts/prepare-src.sh --command rebase_patches "$target"; then
               echo "Successfully rebased $target"
             else
               echo "Failed to rebase $target"
