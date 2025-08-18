@@ -287,6 +287,7 @@ echo "Preparing source for target: $TARGET"
 case "$COMMAND" in
     prepare_src)
         prepare_src
+        update_inline_sha
         ;;
     rebase_patches)
         echo "Rebase mode enabled"
@@ -298,5 +299,4 @@ case "$COMMAND" in
         exit 1
         ;;
 esac
-update_inline_sha
 echo "Successfully prepared source for target: $TARGET"
