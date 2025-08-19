@@ -91,15 +91,17 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -16,6 +16,6 @@
- 	],
+@@ -9,8 +9,8 @@
+ 		"nlsBaseUrl": "",
+ 		"publisherUrl": ""
+ 	},
 -	"nameShort": "Code Editor",
 -	"nameLong": "Code Editor",
 +	"nameShort": "SageMaker Code Editor",
 +	"nameLong": "SageMaker Code Editor",
+ 	"codeEditorVersion": "1.0.0",
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
- 	"win32MutexName": "vscodeoss",
 Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/product/common/product.ts
