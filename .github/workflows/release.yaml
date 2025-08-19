@@ -71,14 +71,14 @@ jobs:
         run: |
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           cd vscode-reh-web-linux-x64
-          jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
+          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
           cd ..
           tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
           rm -rf vscode-reh-web-linux-x64
 
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           cd code-editor-src
-          jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
+          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
           cd ..
           tar -czf "code-editor-sagemaker-src-$VERSION_NUM.tar.gz" code-editor-src/
           rm -rf code-editor-src
