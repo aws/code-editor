@@ -16,11 +16,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq
-          
-          # Configure git user
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          sudo apt-get install -y quilt libxml2-utils jq libkrb5-dev libx11-dev libxkbfile-dev
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,7 +79,9 @@ jobs:
             git fetch --tags
             git checkout "$LATEST_TAG"
             cd ..
-            
+            # Configure git user
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             git add third-party-src
             if git diff --staged --quiet; then
               echo "No changes to commit, submodule already up to date"
