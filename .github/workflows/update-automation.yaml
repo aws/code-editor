@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      staging-branch: ${{ env.STAGING_BRANCH }}
     steps:
       - name: Setup environment
         run: |
@@ -23,6 +25,11 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+          
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           
       - name: Get latest semver branch
         run: |
@@ -79,9 +86,7 @@ jobs:
             git fetch --tags
             git checkout "$LATEST_TAG"
             cd ..
-            # Configure git user
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
             git add third-party-src
             if git diff --staged --quiet; then
               echo "No changes to commit, submodule already up to date"
@@ -132,57 +137,74 @@ jobs:
             git commit -m "Rebase patches for all targets"
             git push origin "$STAGING_BRANCH"
           fi
-          
-      - name: Update package-lock overrides
+
+  update-package-locks:
+    name: Update Package Locks
+    runs-on: ubuntu-latest
+    needs: update-automation
+    if: needs.update-automation.outputs.staging-branch != ''
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]
+    steps:
+      - name: Setup environment
         run: |
-          echo "Updating package-lock.json files for all targets"
+          sudo apt-get update
+          sudo apt-get install -y quilt libxml2-utils jq libkrb5-dev libx11-dev libxkbfile-dev
           
-          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
-            echo "Processing $target"
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.update-automation.outputs.staging-branch }}
+          submodules: recursive
+          
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Update package-lock for target
+        run: |
+          OVERRIDE_PATH=$(jq -r '."package-lock-overrides".path' "configuration/${{ matrix.target }}.json")
+          
+          ./scripts/prepare-src.sh "${{ matrix.target }}"
+          
+          cd code-editor-src
+          npm install
+          cd ..
+          
+          rm -rf "$OVERRIDE_PATH"
+          mkdir -p "$OVERRIDE_PATH"
+          
+          find code-editor-src -name "package-lock.json" -type f | while read -r file; do
+            rel_path="${file#code-editor-src/}"
+            third_party_file="third-party-src/$rel_path"
             
-            # Get package-lock-overrides path from configuration
-            OVERRIDE_PATH=$(jq -r '."package-lock-overrides".path' "configuration/${target}.json")
-            
-            # Create patched source
-            ./scripts/prepare-src.sh "$target"
-            
-            # Install dependencies
-            cd code-editor-src
-            npm install
-            cd ..
-            
-            # Clear and create override directory
-            rm -rf "$OVERRIDE_PATH"
-            mkdir -p "$OVERRIDE_PATH"
-            
-            # Find and copy only updated package-lock.json files
-            find code-editor-src -name "package-lock.json" -type f | while read -r file; do
-              rel_path="${file#code-editor-src/}"
-              third_party_file="third-party-src/$rel_path"
-              
-              if [ ! -f "$third_party_file" ] || ! cmp -s "$file" "$third_party_file"; then
-                dest_dir="$OVERRIDE_PATH/$(dirname "$rel_path")"
-                mkdir -p "$dest_dir"
-                cp "$file" "$dest_dir/"
-                echo "Copied updated $rel_path to $OVERRIDE_PATH"
-              fi
-            done
-            
-            # Clean up
-            rm -rf code-editor-src
+            if [ ! -f "$third_party_file" ] || ! cmp -s "$file" "$third_party_file"; then
+              dest_dir="$OVERRIDE_PATH/$(dirname "$rel_path")"
+              mkdir -p "$dest_dir"
+              cp "$file" "$dest_dir/"
+              echo "Copied updated $rel_path to $OVERRIDE_PATH"
+            fi
           done
           
-          # Commit changes if any
+          rm -rf code-editor-src
+          
+      - name: Commit package-lock overrides
+        run: |
           git add package-lock-overrides/
           if ! git diff --staged --quiet; then
-            git commit -m "Update package-lock.json overrides for all targets"
-            git push origin "$STAGING_BRANCH"
+            git commit -m "Update package-lock.json overrides for ${{ matrix.target }}"
+            git pull --rebase origin "${{ needs.update-automation.outputs.staging-branch }}"
+            git push --force-with-lease origin "${{ needs.update-automation.outputs.staging-branch }}"
           fi
           
   handle-failures:
     name: Handle Failures
     runs-on: ubuntu-latest
-    needs: update-automation
+    needs: [update-automation, update-package-locks]
     if: failure()
     steps:
       - name: Report rebase failures
