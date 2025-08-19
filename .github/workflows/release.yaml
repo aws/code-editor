@@ -106,6 +106,6 @@ jobs:
         run: |
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
-            --metric-name "WorkflowExecution" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=Release,Status=Failed" \
+            --metric-name "ExecutionsFailed" \
+            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=Release" \
             --value 1
