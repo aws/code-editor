@@ -91,10 +91,10 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -14,8 +14,8 @@
- 		"https://oidc.*.amazonaws.com",
- 		"https://device.sso.*.amazonaws.com"
- 	],
+@@ -9,8 +9,8 @@
+ 		"nlsBaseUrl": "",
+ 		"publisherUrl": ""
+ 	},
 -	"nameShort": "Code Editor",
 -	"nameLong": "Code Editor",
 +	"nameShort": "SageMaker Code Editor",

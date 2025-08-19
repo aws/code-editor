@@ -2,7 +2,7 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -1,4 +1,19 @@
+@@ -1,4 +1,14 @@
  {
 +	"extensionsGallery": {
 +		"serviceUrl": "https://open-vsx.org/vscode/gallery",
@@ -14,14 +14,20 @@ Index: third-party-src/product.json
 +		"nlsBaseUrl": "",
 +		"publisherUrl": ""
 +	},
-+	"linkProtectionTrustedDomains": [
-+		"https://open-vsx.org",
-+		"https://oidc.*.amazonaws.com",
-+		"https://device.sso.*.amazonaws.com"
-+	],
  	"nameShort": "Code Editor",
  	"nameLong": "Code Editor",
  	"codeEditorVersion": "1.0.0",
+@@ -44,6 +54,9 @@
+ 		"https://console.aws.amazon.com",
+ 		"https://console.amazonaws-us-gov.com",
+ 		"https://console.amazonaws.cn",
+-		"https://aws.amazon.com"
++		"https://aws.amazon.com",
++		"https://open-vsx.org",
++		"https://oidc.*.amazonaws.com",
++		"https://device.sso.*.amazonaws.com"
+ 	]
+ }
 Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
