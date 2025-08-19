@@ -159,18 +159,15 @@ Index: third-party-src/package.json
      "@vscode/spdlog": "^0.15.2",
      "@vscode/sqlite3": "5.1.8-vscode",
      "@vscode/sudo-prompt": "9.3.1",
-@@ -100,10 +99,8 @@
-     "http-proxy-agent": "^7.0.0",
-     "https-proxy-agent": "^7.0.2",
+@@ -102,7 +101,6 @@
      "jschardet": "3.1.4",
--    "kerberos": "2.1.1",
      "minimist": "^1.2.6",
      "native-is-elevated": "0.7.0",
 -    "native-keymap": "^3.3.5",
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta33",
      "open": "^8.4.2",
-@@ -141,7 +138,6 @@
+@@ -140,7 +137,6 @@
      "@typescript-eslint/utils": "^8.8.0",
      "@vscode/gulp-electron": "^1.36.0",
      "@vscode/l10n-dev": "0.0.35",
@@ -190,14 +187,6 @@ Index: third-party-src/remote/package.json
      "@vscode/spdlog": "^0.15.2",
      "@vscode/tree-sitter-wasm": "^0.1.4",
      "@vscode/vscode-languagedetection": "1.0.21",
-@@ -30,7 +29,6 @@
-     "http-proxy-agent": "^7.0.0",
-     "https-proxy-agent": "^7.0.2",
-     "jschardet": "3.1.4",
--    "kerberos": "2.1.1",
-     "minimist": "^1.2.6",
-     "native-watchdog": "^1.4.1",
-     "node-pty": "^1.1.0-beta33",
 Index: third-party-src/build/package.json
 ===================================================================
 --- third-party-src.orig/build/package.json
