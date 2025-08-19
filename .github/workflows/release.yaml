@@ -21,6 +21,7 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
+      SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,8 +54,13 @@ jobs:
         run: |
           ls -la
 
+          FILES=(
+            "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+            "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          )
+          
           # Check build artifact exists
-          for file in "$COMMIT_SHA-code-editor-sagemaker-server-build.tar.gz" "$COMMIT_SHA-code-editor-sagemaker-server-src.tar.gz"; do
+          for file in "${FILES[@]}"; do
             if [ ! -f "$file" ]; then
               echo "Error: $file not found for commit $COMMIT_SHA"
               exit 1
@@ -63,16 +69,18 @@ jobs:
 
       - name: Untar, Inject current Code Editor Version and Re-tar
         run: |
-          tar xzf $COMMIT_SHA-code-editor-sagemaker-server-build.tar.gz
+          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           cd vscode-reh-web-linux-x64
           jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
-          tar -czf code-editor-sagemaker-server-${VERSION_NUM}.tar.gz vscode-reh-web-linux-x64
+          cd ..
+          tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
           rm -rf vscode-reh-web-linux-x64
 
-          tar xzf $COMMIT_SHA-code-editor-sagemaker-server-src.tar.gz
+          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           cd code-editor-src
           jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
-          tar -czf code-editor-sagemaker-src-${VERSION_NUM}.tar.gz code-editor-src
+          cd ..
+          tar -czf "code-editor-sagemaker-src-$VERSION_NUM.tar.gz" code-editor-src/
           rm -rf code-editor-src
       
       - name: Create GitHub release
