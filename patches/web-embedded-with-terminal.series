@@ -1,3 +1,4 @@
+common/preapplied/remove-unsafe-headers.diff
 common/disable-online-services.diff
 common/disable-telemetry-service.diff
 common/remove-accounts-feature.diff
