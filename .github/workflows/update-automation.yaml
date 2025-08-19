@@ -18,6 +18,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y quilt libxml2-utils jq
           
+          # Configure git user
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -80,10 +84,6 @@ jobs:
             git checkout "$LATEST_TAG"
             cd ..
             
-            # Configure git user and commit changes if needed
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            
             git add third-party-src
             if git diff --staged --quiet; then
               echo "No changes to commit, submodule already up to date"
@@ -92,6 +92,7 @@ jobs:
               git push origin "$STAGING_BRANCH"
             fi
             
+            echo "STAGING_BRANCH=$STAGING_BRANCH" >> $GITHUB_ENV
             echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_TAG"
           fi
           
@@ -125,6 +126,59 @@ jobs:
             exit 1
           else
             echo "All targets rebased successfully"
+          fi
+          
+          # Commit rebased patches if any changes
+          git add patches/
+          if ! git diff --staged --quiet; then
+            git commit -m "Rebase patches for all targets"
+            git push origin "$STAGING_BRANCH"
+          fi
+          
+      - name: Update package-lock overrides
+        run: |
+          echo "Updating package-lock.json files for all targets"
+          
+          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+            echo "Processing $target"
+            
+            # Get package-lock-overrides path from configuration
+            OVERRIDE_PATH=$(jq -r '."package-lock-overrides".path' "configuration/${target}.json")
+            
+            # Create patched source
+            ./scripts/prepare-src.sh "$target"
+            
+            # Install dependencies
+            cd code-editor-src
+            npm install
+            cd ..
+            
+            # Clear and create override directory
+            rm -rf "$OVERRIDE_PATH"
+            mkdir -p "$OVERRIDE_PATH"
+            
+            # Find and copy only updated package-lock.json files
+            find code-editor-src -name "package-lock.json" -type f | while read -r file; do
+              rel_path="${file#code-editor-src/}"
+              third_party_file="third-party-src/$rel_path"
+              
+              if [ ! -f "$third_party_file" ] || ! cmp -s "$file" "$third_party_file"; then
+                dest_dir="$OVERRIDE_PATH/$(dirname "$rel_path")"
+                mkdir -p "$dest_dir"
+                cp "$file" "$dest_dir/"
+                echo "Copied updated $rel_path to $OVERRIDE_PATH"
+              fi
+            done
+            
+            # Clean up
+            rm -rf code-editor-src
+          done
+          
+          # Commit changes if any
+          git add package-lock-overrides/
+          if ! git diff --staged --quiet; then
+            git commit -m "Update package-lock.json overrides for all targets"
+            git push origin "$STAGING_BRANCH"
           fi
           
   handle-failures:
