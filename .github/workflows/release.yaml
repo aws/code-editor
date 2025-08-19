@@ -49,29 +49,31 @@ jobs:
         run: |
           gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
 
-      - name: Check artifacts exist and rename
+      - name: Check artifacts exist
         run: |
           ls -la
-          
-          # Rename build artifact
-          BUILD_TARBALL=$(find . -name "*build*.tar.gz" | head -1 || true)
-          if [ -n "$BUILD_TARBALL" ]; then
-            cp "$BUILD_TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
-            echo "Copied $BUILD_TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
-          else
-            echo "Error: No build artifacts found for commit $COMMIT_SHA"
-            exit 1
-          fi
-          
-          # Rename src artifact
-          SRC_TARBALL=$(find . -name "*src*.tar.gz" | head -1 || true)
-          if [ -n "$SRC_TARBALL" ]; then
-            cp "$SRC_TARBALL" "code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
-            echo "Copied $SRC_TARBALL to code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
-          else
-            echo "Error: No src artifacts found for commit $COMMIT_SHA"
-            exit 1
-          fi
+
+          # Check build artifact exists
+          for file in "code-editor-sagemaker-server-build.tar.gz" "code-editor-sagemaker-server-src.tar.gz"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: $file not found for commit $COMMIT_SHA"
+              exit 1
+            fi
+          done
+
+      - name: Untar, Inject current Code Editor Version and Re-tar
+        run: |
+          tar xzf code-editor-sagemaker-server-build.tar.gz
+          cd vscode-reh-web-linux-x64
+          jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
+          tar -czf code-editor-sagemaker-server-${VERSION_NUM}.tar.gz vscode-reh-web-linux-x64
+          rm -rf vscode-reh-web-linux-x64
+
+          tar xzf code-editor-sagemaker-server-src.tar.gz
+          cd code-editor-src
+          jq '.codeEditorVersion = "$VERSION_NUM"' product.json > temp.json && mv temp.json product.json
+          tar -czf code-editor-sagemaker-src-${VERSION_NUM}.tar.gz code-editor-src
+          rm -rf code-editor-src
       
       - name: Create GitHub release
         run: |
