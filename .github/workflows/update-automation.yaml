@@ -158,7 +158,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
-          submodules: recursive
+          fetch-depth: 0
+          submodules: true
           
       - name: Configure git
         run: |
@@ -197,8 +198,14 @@ jobs:
           git add package-lock-overrides/
           if ! git diff --staged --quiet; then
             git commit -m "Update package-lock.json overrides for ${{ matrix.target }}"
-            git pull --rebase origin "${{ needs.update-automation.outputs.staging-branch }}"
-            git push --force-with-lease origin "${{ needs.update-automation.outputs.staging-branch }}"
+            
+            # Retry push with rebase until successful
+            for i in {1..5}; do
+              if git pull --rebase origin "${{ needs.update-automation.outputs.staging-branch }}" && git push origin "${{ needs.update-automation.outputs.staging-branch }}"; then
+                break
+              fi
+              sleep $((i * 2))
+            done
           fi
           
   handle-failures:
