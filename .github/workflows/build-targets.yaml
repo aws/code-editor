@@ -10,7 +10,6 @@ jobs:
   build:
     name: Build Code Editor Targets
     runs-on: ubuntu-latest
-    environment: build-targets-workflow-env
     strategy:
       matrix:
         build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]
@@ -74,3 +73,30 @@ jobs:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
           path: ${{ matrix.build-target }}-build.tar.gz
           retention-days: 90
+  handle-failures:
+    name: Handle Failures
+    runs-on: ubuntu-latest
+    needs: build
+    environment: build-targets-workflow-env
+    if: failure()
+    permissions:
+      id-token: write # Required for OIDC
+    env:
+      REPOSITORY: ${{ github.repository }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    steps:
+      - name: Use role credentials for metrics
+        id: aws-creds
+        continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+      - name: Report failure
+        if: steps.aws-creds.outcome == 'success'
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "ExecutionsFailed" \
+            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=BuildTargets" \
+            --value 1

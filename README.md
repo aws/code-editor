@@ -10,6 +10,10 @@ The repository structure is the following:
 - `patches`: Patch files created by [Quilt](https://linux.die.net/man/1/quilt), grouped around features.
 - `third-party-src`: Git submodule linking to the upstream [Code-OSS](https://github.com/microsoft/vscode/) commit. The patches are applied on top of this specific commit.
 
+## Creating a new release
+
+See [RELEASE](RELEASE.md) for more information.
+
 ## Troubleshooting and Feedback
 
 See [CONTRIBUTING](CONTRIBUTING.md#reporting-bugsfeature-requests) for more information.
