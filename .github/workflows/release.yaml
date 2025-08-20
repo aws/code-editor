@@ -67,22 +67,29 @@ jobs:
             fi
           done
 
-      - name: Verify Code Editor version in product.json
+      - name: Update Code Editor version
         run: |
-          echo "Running verification step"
-          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
-          cd vscode-reh-web-linux-x64
-          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
-          cd ..
-          tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
-          rm -rf vscode-reh-web-linux-x64
-
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           cd code-editor-src
+          CURRENT_VERSION=$(jq -r '.codeEditorVersion' product.json)
           jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
           cd ..
           tar -czf "code-editor-sagemaker-src-$VERSION_NUM.tar.gz" code-editor-src/
           rm -rf code-editor-src
+          
+          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+          cd vscode-reh-web-linux-x64
+
+          # Update Code Editor Version in all files
+          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
+          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/server-main.js
+          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/code/browser/workbench/workbench.js
+          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/platform/terminal/node/ptyHostMain.js
+          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/workbench/api/node/extensionHostProcess.js
+
+          cd ..
+          tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
+          rm -rf vscode-reh-web-linux-x64
       
       - name: Create GitHub release
         run: |
