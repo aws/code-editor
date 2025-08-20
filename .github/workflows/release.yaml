@@ -34,12 +34,13 @@ jobs:
           echo "Tag $VERSION_NUM follows valid semantic version pattern"
 
           # Verify release tag is made on the correct major.minor version branch.
-          # The command will fail with exit code 1 if the tag is not on a valid release branch.
           MAJOR_MINOR=$(echo "$VERSION_NUM" | cut -d'.' -f1,2)
-          git branch --remote --contains $COMMIT_SHA origin/$MAJOR_MINOR
-          
+          BRANCH_CONTAINS_OUTPUT=$(git branch --remote --contains "$COMMIT_SHA" "origin/$MAJOR_MINOR")
+          if [ -z "$BRANCH_CONTAINS_OUTPUT" ]; then
+              echo "Tag $VERSION_NUM is not on the correct branch. Skipping release."
+              exit 78
+          fi
           echo "Tag is from a valid branch."
-          echo "test"
 
       - name: Download sagemaker artifacts by commit ID
         run: |
