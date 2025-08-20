@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq libkrb5-dev libx11-dev libxkbfile-dev
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -137,6 +137,11 @@ jobs:
             git commit -m "Rebase patches for all targets"
             git push origin "$STAGING_BRANCH"
           fi
+          
+      - name: Generate OSS attribution
+        run: |
+          npm i -g license-checker
+          ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
 
   update-package-locks:
     name: Update Package Locks
@@ -152,7 +157,7 @@ jobs:
       - name: Setup environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq libkrb5-dev libx11-dev libxkbfile-dev
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev
           
       - name: Checkout code
         uses: actions/checkout@v4
