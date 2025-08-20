@@ -65,8 +65,8 @@ generate_unified_oss_attribution() {
         # Check for unapproved licenses
         echo "Checking for unapproved licenses in $target..."
         local excluded_packages=""
-        if [[ -f "$ROOT_DIR/build-tools/private/oss-attribution/excluded-packages.txt" ]]; then
-            excluded_packages=$(tr '\n' ',' < "$ROOT_DIR/build-tools/private/oss-attribution/excluded-packages.txt" | sed 's/,$//')
+        if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" ]]; then
+            excluded_packages=$(tr '\n' ',' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/,$//')
         fi
         
         local output
