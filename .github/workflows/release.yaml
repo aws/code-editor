@@ -82,10 +82,16 @@ jobs:
 
           # Update Code Editor Version in all files
           jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
-          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/server-main.js
-          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/code/browser/workbench/workbench.js
-          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/platform/terminal/node/ptyHostMain.js
-          sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" out/vs/workbench/api/node/extensionHostProcess.js
+          
+          FILES_TO_UPDATE=(
+            "out/server-main.js"
+            "out/vs/code/browser/workbench/workbench.js"
+            "out/vs/platform/terminal/node/ptyHostMain.js"
+            "out/vs/workbench/api/node/extensionHostProcess.js"
+          )
+          for file in "${FILES_TO_UPDATE[@]}"; do
+            sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" "$file"
+          done
 
           cd ..
           tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
