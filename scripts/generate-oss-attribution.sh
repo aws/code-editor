@@ -66,12 +66,12 @@ generate_unified_oss_attribution() {
         echo "Checking for unapproved licenses in $target..."
         local excluded_packages=""
         if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" ]]; then
-            excluded_packages=$(tr '\n' ',' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/,$//')
+            excluded_packages=$(tr '\n' ';' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/;$//')
         fi
         
         local output
         if [[ -n "$excluded_packages" ]]; then
-            output=$(cd "$ROOT_DIR/code-editor-src-$target" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages "$excluded_packages" 2>/dev/null || true)
+            output=$(cd "$ROOT_DIR/code-editor-src-$target" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages '$excluded_packages' 2>/dev/null || true)
         else
             output=$(cd "$ROOT_DIR/code-editor-src-$target" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD 2>/dev/null || true)
         fi
