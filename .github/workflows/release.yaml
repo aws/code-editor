@@ -25,7 +25,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate tag format
+      - name: Validate tag
         run: |
           if ! echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Tag $VERSION_NUM does not follow semantic version pattern (x.y.z). Skipping release."
@@ -33,15 +33,12 @@ jobs:
           fi
           echo "Tag $VERSION_NUM follows valid semantic version pattern"
 
-      - name: Check if tag is from release branch
-        run: |
-          # Get the branch that contains this tag
-          BRANCHES=$(git branch -r --contains $COMMIT_SHA | grep -E 'origin/[0-9]+\.[0-9]+' || true)
-          if [ -z "$BRANCHES" ]; then
-            echo "Tag $VERSION_NUM is not from a *.* release branch. Skipping release."
-            exit 78  # neutral exit code
-          fi
-          echo "Tag is from a valid release branch: $BRANCHES"
+          # Verify release tag is made on the correct major.minor version branch.
+          # The command will fail with exit code 1 if the tag is not on a valid release branch.
+          MAJOR_MINOR=$(echo "$VERSION_NUM" | cut -d'.' -f1,2)
+          git branch --remote --contains $COMMIT_SHA origin/$MAJOR_MINOR
+          
+          echo "Tag is from a valid branch."
 
       - name: Download sagemaker artifacts by commit ID
         run: |
