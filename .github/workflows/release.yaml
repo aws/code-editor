@@ -39,6 +39,7 @@ jobs:
           git branch --remote --contains $COMMIT_SHA origin/$MAJOR_MINOR
           
           echo "Tag is from a valid branch."
+          echo "test"
 
       - name: Download sagemaker artifacts by commit ID
         run: |
