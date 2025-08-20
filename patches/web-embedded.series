@@ -43,3 +43,4 @@ web-embedded/fix-watch-target.diff
 web-embedded/remove-unused-recommended-extensions-action.diff
 web-embedded/remove-new-window-actions-and-profile-workspace-section.diff
 web-embedded/only-allow-trusted-origins-in-webviews.diff
+web-embedded/enable-ts-features.diff
