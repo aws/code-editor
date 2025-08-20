@@ -67,7 +67,7 @@ jobs:
             fi
           done
 
-      - name: Untar, Inject current Code Editor Version and Re-tar
+      - name: Verify Code Editor version in product.json
         run: |
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           cd vscode-reh-web-linux-x64
