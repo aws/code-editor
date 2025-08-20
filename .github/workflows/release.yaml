@@ -69,6 +69,7 @@ jobs:
 
       - name: Verify Code Editor version in product.json
         run: |
+          echo "Running verification step"
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           cd vscode-reh-web-linux-x64
           jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
