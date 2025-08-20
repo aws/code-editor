@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq libx11-dev
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -141,6 +141,7 @@ jobs:
       - name: Generate OSS attribution
         run: |
           npm i -g license-checker
+          chmod +x ./scripts/generate-oss-attribution.sh
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
 
   update-package-locks:
@@ -157,7 +158,7 @@ jobs:
       - name: Setup environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq libx11-dev
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
           
       - name: Checkout code
         uses: actions/checkout@v4
