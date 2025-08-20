@@ -10,6 +10,14 @@ The repository structure is the following:
 - `patches`: Patch files created by [Quilt](https://linux.die.net/man/1/quilt), grouped around features.
 - `third-party-src`: Git submodule linking to the upstream [Code-OSS](https://github.com/microsoft/vscode/) commit. The patches are applied on top of this specific commit.
 
+## Creating a new release
+
+A new release will be automatically created when a new tag is published. The following are the steps to publish a new tag
+1. Checkout the branch locally on which you need to publish the new tag.
+1. Create a new tag locally using the command `git tag -a 2.0.1 commitHash -m "tag message"`
+1. Push the tag to GitHub using `git push origin 2.0.1`.
+1. This will create a new tag and will automatically start the release workflow for publishing a new release.
+
 ## Troubleshooting and Feedback
 
 See [CONTRIBUTING](CONTRIBUTING.md#reporting-bugsfeature-requests) for more information.
