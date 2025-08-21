@@ -95,6 +95,7 @@ generate_unified_oss_attribution() {
         # Move to target-specific directory
         mv "$ROOT_DIR/code-editor-src" "$ROOT_DIR/code-editor-src-$target"
         cd "$ROOT_DIR/code-editor-src-$target"
+        npm config set cache "$ROOT_DIR/.npm-cache" --global
         npm install
         cd "$ROOT_DIR"
         
