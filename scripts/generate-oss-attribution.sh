@@ -7,13 +7,49 @@ BUILD_SRC_DIR="$ROOT_DIR/code-editor-src"
 THIRD_PARTY_SRC_DIR="$ROOT_DIR/third-party-src"
 BUILD_DIR="$ROOT_DIR/build"
 
+check_unapproved_licenses() {
+    local target="$1"
+    local src_dir="$2"
+    
+    echo "Checking for unapproved licenses in $target..."
+    local excluded_packages=""
+    if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" ]]; then
+        excluded_packages=$(tr '\n' ';' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/;$//')
+    fi
+    
+    local output
+    if [[ -n "$excluded_packages" ]]; then
+        output=$(cd "$src_dir" && eval "license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages '$excluded_packages'" 2>/dev/null || true)
+    else
+        output=$(cd "$src_dir" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD 2>/dev/null || true)
+    fi
+    
+    if [ -n "$output" ]; then
+        echo "Unapproved licenses found in $target:"
+        echo "$output"
+        echo "Manual review required for unapproved licenses"
+        exit 1
+    fi
+}
+
 generate_oss_attribution() {
-    local oss_attribution_dir="$BUILD_DIR/private/oss-attribution"
     local combined_oss_attribution_output_dir="${1:-$ROOT_DIR/overrides}"
+    local target="$2"
+    local oss_attribution_dir="$BUILD_DIR/private/oss-attribution"
     local code_oss_version=$(jq -r ".version" "$THIRD_PARTY_SRC_DIR/package.json")
     local code_oss_license=$(cat "$THIRD_PARTY_SRC_DIR/LICENSE.txt")
     local code_oss_third_party_licenses=$(cat "$THIRD_PARTY_SRC_DIR/ThirdPartyNotices.txt")
     additional_third_party_licenses=$(cat "$ROOT_DIR/build-tools/oss-attribution/additional-third-party-licenses.txt")
+
+    # Prepare source for target if specified
+    if [ -n "$target" ]; then
+        "$ROOT_DIR/scripts/prepare-src.sh" "$target"
+        cd "$BUILD_SRC_DIR"
+        npm install
+        cd "$ROOT_DIR"
+        
+        check_unapproved_licenses "$target" "$BUILD_SRC_DIR"
+    fi
 
     npx --yes --package @electrovir/oss-attribution-generator -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
     attribution_licenses=$(cat "$oss_attribution_dir/attribution.txt")
@@ -62,29 +98,7 @@ generate_unified_oss_attribution() {
         npm install
         cd "$ROOT_DIR"
         
-        # Check for unapproved licenses
-        echo "Checking for unapproved licenses in $target..."
-        local excluded_packages=""
-        if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" ]]; then
-            excluded_packages=$(tr '\n' ';' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/;$//')
-            echo "Found excluded packages file with packages: $excluded_packages"
-        else
-            echo "No excluded packages file found at: $ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt"
-        fi
-        
-        local output
-        if [[ -n "$excluded_packages" ]]; then
-            output=$(cd "$ROOT_DIR/code-editor-src-$target" && eval "license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages '$excluded_packages'" 2>/dev/null || true)
-        else
-            output=$(cd "$ROOT_DIR/code-editor-src-$target" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD 2>/dev/null || true)
-        fi
-        
-        if [ -n "$output" ]; then
-            echo "Unapproved licenses found in $target:"
-            echo "$output"
-            echo "Manual review required for unapproved licenses"
-            exit 1
-        fi
+        check_unapproved_licenses "$target" "$ROOT_DIR/code-editor-src-$target"
         
         target_dirs+=("$ROOT_DIR/code-editor-src-$target")
     done
@@ -150,7 +164,8 @@ esac
 
 case "$COMMAND" in
     generate_oss_attribution)
-        generate_oss_attribution "$OUTPUT_DIR"
+        TARGET="${4:-code-editor-server}"
+        generate_oss_attribution "$OUTPUT_DIR" "$TARGET"
         ;;
     generate_unified_oss_attribution)
         generate_unified_oss_attribution "$OUTPUT_DIR"

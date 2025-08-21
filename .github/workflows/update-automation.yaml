@@ -143,6 +143,16 @@ jobs:
           npm i -g license-checker
           chmod +x ./scripts/generate-oss-attribution.sh
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
+          
+          # Copy LICENSE-THIRD-PARTY to root directory
+          cp overrides/LICENSE-THIRD-PARTY LICENSE-THIRD-PARTY
+          
+          # Commit OSS attribution if any changes
+          git add overrides/ LICENSE-THIRD-PARTY
+          if ! git diff --staged --quiet; then
+            git commit -m "Update OSS attribution"
+            git push origin "$STAGING_BRANCH"
+          fi
 
   update-package-locks:
     name: Update Package Locks
