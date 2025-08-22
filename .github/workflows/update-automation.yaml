@@ -198,12 +198,13 @@ jobs:
             fi
           done
           
-          # Move prepared source to target-specific directory and commit
+          # Move prepared source to target-specific directory
           mv code-editor-src "code-editor-src-${{ matrix.target }}"
           
       - name: Commit package-lock overrides and prepared source
         run: |
-          git add package-lock-overrides/ "code-editor-src-${{ matrix.target }}"
+          git add package-lock-overrides/
+          git add --force "code-editor-src-${{ matrix.target }}"
           if ! git diff --staged --quiet; then
             git commit -m "Update package-lock.json overrides and prepared source for ${{ matrix.target }}"
             
@@ -239,7 +240,11 @@ jobs:
         with:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
           fetch-depth: 0
-          submodules: true
+          submodules: false
+          
+      - name: Initialize only third-party-src submodule
+        run: |
+          git submodule update --init third-party-src
           
       - name: Configure git
         run: |

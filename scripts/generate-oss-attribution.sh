@@ -190,8 +190,8 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         *)
-            OUTPUT_DIR="$1"
-            shift
+            echo "Error: Unexpected argument '$1'" >&2
+            exit 1
             ;;
     esac
 done
