@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
+          sudo apt-get install -y quilt libxml2-utils jq
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -137,8 +137,6 @@ jobs:
             git commit -m "Rebase patches for all targets"
             git push origin "$STAGING_BRANCH"
           fi
-          
-
 
   update-package-locks:
     name: Update Package Locks
@@ -198,15 +196,18 @@ jobs:
             fi
           done
           
-          # Move prepared source to target-specific directory
-          mv code-editor-src "code-editor-src-${{ matrix.target }}"
+      - name: Upload prepared source as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.sha }}-prepared-source-${{ matrix.target }}
+          path: code-editor-src/
+          retention-days: 1
           
-      - name: Commit package-lock overrides and prepared source
+      - name: Commit package-lock overrides
         run: |
           git add package-lock-overrides/
-          git add --force "code-editor-src-${{ matrix.target }}"
           if ! git diff --staged --quiet; then
-            git commit -m "Update package-lock.json overrides and prepared source for ${{ matrix.target }}"
+            git commit -m "Update package-lock.json overrides for ${{ matrix.target }}"
             
             # Retry push with rebase until successful
             for i in {1..5}; do
@@ -251,22 +252,23 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-      - name: Verify prepared sources exist
+      - name: Download prepared sources from artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ github.sha }}-prepared-source-*
+          merge-multiple: false
+          
+      - name: Organize downloaded sources
         run: |
-          MISSING_TARGETS=()
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
-            if [[ ! -d "code-editor-src-$target" ]]; then
-              echo "Missing prepared source for target: $target"
-              MISSING_TARGETS+=("$target")
+            if [[ -d "${{ github.sha }}-prepared-source-$target" ]]; then
+              mv "${{ github.sha }}-prepared-source-$target" "code-editor-src-$target"
+              echo "Organized prepared source for $target"
             else
-              echo "Found prepared source for target: $target"
+              echo "Missing prepared source artifact for target: $target"
+              exit 1
             fi
           done
-          
-          if [[ ${#MISSING_TARGETS[@]} -gt 0 ]]; then
-            echo "Missing prepared sources for targets: ${MISSING_TARGETS[*]}"
-            exit 1
-          fi
           
       - name: Generate unified OSS attribution
         run: |
@@ -288,11 +290,7 @@ jobs:
       - name: Clean up prepared source directories
         run: |
           rm -rf code-editor-src-*
-          git add -A
-          if ! git diff --staged --quiet; then
-            git commit -m "Clean up prepared source directories"
-            git push origin "${{ needs.update-automation.outputs.staging-branch }}"
-          fi
+          echo "Cleaned up local prepared source directories"
           
   handle-failures:
     name: Handle Failures
@@ -304,5 +302,3 @@ jobs:
         run: |
           # TODO: Implement metric reporting to CW.
           exit 1
-            
-    
