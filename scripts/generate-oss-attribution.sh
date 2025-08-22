@@ -7,14 +7,52 @@ BUILD_SRC_DIR="$ROOT_DIR/code-editor-src"
 THIRD_PARTY_SRC_DIR="$ROOT_DIR/third-party-src"
 BUILD_DIR="$ROOT_DIR/build"
 
+check_excluded_package_licenses() {
+    local target="$1"
+    local src_dir="$2"
+    
+    echo "Checking excluded packages for license changes in $target..."
+    
+    # Check if excluded packages file exists
+    if [[ ! -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json" ]]; then
+        echo "No excluded packages JSON file found, skipping license change check"
+        return 0
+    fi
+    
+    # Read excluded packages with their approved licenses from JSON
+    local packages
+    packages=$(jq -r 'keys[]' "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
+    
+    while IFS= read -r package_name; do
+        local approved_license
+        approved_license=$(jq -r ".\"$package_name\"" "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
+        
+        echo "Checking $package_name for license changes (approved: $approved_license)..."
+        
+        # Check if this specific package has a different license than approved
+        local output
+        output=$(cd "$src_dir" && license-checker --production --packages "$package_name" --exclude "$approved_license" 2>/dev/null || true)
+        
+        if [ -n "$output" ]; then
+            echo "License change detected for excluded package $package_name:"
+            echo "$output"
+            echo "Expected: $approved_license"
+            echo "Manual review required for license change"
+            exit 1
+        fi
+    done <<< "$packages"
+}
+
 check_unapproved_licenses() {
     local target="$1"
     local src_dir="$2"
     
     echo "Checking for unapproved licenses in $target..."
+    
+    # Build excluded packages list from JSON file
     local excluded_packages=""
-    if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" ]]; then
-        excluded_packages=$(tr '\n' ';' < "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.txt" | sed 's/;$//')
+    if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json" ]]; then
+        excluded_packages=$(jq -r 'keys | join(";")' "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
     fi
     
     local output
@@ -30,6 +68,9 @@ check_unapproved_licenses() {
         echo "Manual review required for unapproved licenses"
         exit 1
     fi
+    
+    # Also check excluded packages for license changes
+    check_excluded_package_licenses "$target" "$src_dir"
 }
 
 generate_oss_attribution() {

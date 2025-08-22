@@ -221,6 +221,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Setup environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          npm i -g license-checker
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -258,7 +263,6 @@ jobs:
           
       - name: Generate unified OSS attribution
         run: |
-          npm i -g license-checker
           chmod +x ./scripts/generate-oss-attribution.sh
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
           
