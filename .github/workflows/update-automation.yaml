@@ -138,21 +138,7 @@ jobs:
             git push origin "$STAGING_BRANCH"
           fi
           
-      - name: Generate OSS attribution
-        run: |
-          npm i -g license-checker
-          chmod +x ./scripts/generate-oss-attribution.sh
-          ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
-          
-          # Copy LICENSE-THIRD-PARTY to root directory
-          cp overrides/LICENSE-THIRD-PARTY LICENSE-THIRD-PARTY
-          
-          # Commit OSS attribution if any changes
-          git add overrides/ LICENSE-THIRD-PARTY
-          if ! git diff --staged --quiet; then
-            git commit -m "Update OSS attribution"
-            git push origin "$STAGING_BRANCH"
-          fi
+
 
   update-package-locks:
     name: Update Package Locks
@@ -169,6 +155,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
           
       - name: Checkout code
         uses: actions/checkout@v4
@@ -207,13 +198,14 @@ jobs:
             fi
           done
           
-          rm -rf code-editor-src
+          # Move prepared source to target-specific directory and commit
+          mv code-editor-src "code-editor-src-${{ matrix.target }}"
           
-      - name: Commit package-lock overrides
+      - name: Commit package-lock overrides and prepared source
         run: |
-          git add package-lock-overrides/
+          git add package-lock-overrides/ "code-editor-src-${{ matrix.target }}"
           if ! git diff --staged --quiet; then
-            git commit -m "Update package-lock.json overrides for ${{ matrix.target }}"
+            git commit -m "Update package-lock.json overrides and prepared source for ${{ matrix.target }}"
             
             # Retry push with rebase until successful
             for i in {1..5}; do
@@ -223,11 +215,84 @@ jobs:
               sleep $((i * 2))
             done
           fi
+
+  generate-oss-attribution:
+    name: Generate OSS Attribution
+    runs-on: ubuntu-latest
+    needs: [update-automation, update-package-locks]
+    if: needs.update-automation.outputs.staging-branch != ''
+    permissions:
+      contents: write
+    steps:
+      - name: Setup environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.update-automation.outputs.staging-branch }}
+          fetch-depth: 0
+          submodules: true
+          
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Verify prepared sources exist
+        run: |
+          MISSING_TARGETS=()
+          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+            if [[ ! -d "code-editor-src-$target" ]]; then
+              echo "Missing prepared source for target: $target"
+              MISSING_TARGETS+=("$target")
+            else
+              echo "Found prepared source for target: $target"
+            fi
+          done
+          
+          if [[ ${#MISSING_TARGETS[@]} -gt 0 ]]; then
+            echo "Missing prepared sources for targets: ${MISSING_TARGETS[*]}"
+            exit 1
+          fi
+          
+      - name: Generate unified OSS attribution
+        run: |
+          npm i -g license-checker
+          chmod +x ./scripts/generate-oss-attribution.sh
+          ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
+          
+      - name: Commit OSS attribution
+        run: |
+          # Copy LICENSE-THIRD-PARTY to root directory
+          cp overrides/LICENSE-THIRD-PARTY LICENSE-THIRD-PARTY
+          
+          git add overrides/ LICENSE-THIRD-PARTY
+          if ! git diff --staged --quiet; then
+            git commit -m "Update unified OSS attribution"
+            git push origin "${{ needs.update-automation.outputs.staging-branch }}"
+          fi
+          
+      - name: Clean up prepared source directories
+        run: |
+          rm -rf code-editor-src-*
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Clean up prepared source directories"
+            git push origin "${{ needs.update-automation.outputs.staging-branch }}"
+          fi
           
   handle-failures:
     name: Handle Failures
     runs-on: ubuntu-latest
-    needs: [update-automation, update-package-locks]
+    needs: [update-automation, update-package-locks, generate-oss-attribution]
     if: failure()
     steps:
       - name: Report rebase failures

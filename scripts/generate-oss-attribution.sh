@@ -85,23 +85,41 @@ generate_unified_oss_attribution() {
     local targets=("code-editor-server" "code-editor-sagemaker-server" "code-editor-web-embedded" "code-editor-web-embedded-with-terminal")
     local target_dirs=()
     
-    # Prepare source for each target in separate directories
+    if [[ "$PREPARE_SOURCES" == "true" ]]; then
+        echo "Preparing sources from scratch"
+        for target in "${targets[@]}"; do
+            echo "Preparing source for $target"
+            
+            "$ROOT_DIR/scripts/prepare-src.sh" "$target"
+            mv "$ROOT_DIR/code-editor-src" "$ROOT_DIR/code-editor-src-$target"
+            cd "$ROOT_DIR/code-editor-src-$target"
+            npm install
+            cd "$ROOT_DIR"
+            
+            target_dirs+=("$ROOT_DIR/code-editor-src-$target")
+        done
+    else
+        # Check that all target directories exist
+        local missing_targets=()
+        for target in "${targets[@]}"; do
+            if [[ -d "$ROOT_DIR/code-editor-src-$target" ]]; then
+                echo "Found existing prepared source for $target"
+                target_dirs+=("$ROOT_DIR/code-editor-src-$target")
+            else
+                missing_targets+=("$target")
+            fi
+        done
+        
+        if [[ ${#missing_targets[@]} -gt 0 ]]; then
+            echo "Error: Missing prepared source directories for targets: ${missing_targets[*]}" >&2
+            echo "Use --prepare-sources flag to prepare sources automatically" >&2
+            exit 1
+        fi
+    fi
+    
+    # Check licenses for all targets
     for target in "${targets[@]}"; do
-        echo "Preparing source for $target"
-        
-        # Prepare source for this target
-        "$ROOT_DIR/scripts/prepare-src.sh" "$target"
-        
-        # Move to target-specific directory
-        mv "$ROOT_DIR/code-editor-src" "$ROOT_DIR/code-editor-src-$target"
-        cd "$ROOT_DIR/code-editor-src-$target"
-        npm config set cache "$ROOT_DIR/.npm-cache" --global
-        npm install
-        cd "$ROOT_DIR"
-        
         check_unapproved_licenses "$target" "$ROOT_DIR/code-editor-src-$target"
-        
-        target_dirs+=("$ROOT_DIR/code-editor-src-$target")
     done
     
     # Generate unified OSS attribution using multiple base directories
@@ -137,35 +155,49 @@ $additional_third_party_licenses
 $attribution_licenses
 EOF
     
-    # Clean up target directories
-    rm -rf "$ROOT_DIR/code-editor-src-"*
+    # Only clean up if we prepared the sources in this run
+    if [[ "$PREPARE_SOURCES" == "true" ]]; then
+        rm -rf "$ROOT_DIR/code-editor-src-"*
+    fi
 }
 
 # Parse command line arguments
 COMMAND="generate_oss_attribution"
 OUTPUT_DIR="$ROOT_DIR/overrides"
+PREPARE_SOURCES=false
+TARGET="code-editor-server"
 
-case "${1:-}" in
-    --command)
-        [[ $# -ge 2 ]] || { echo "--command requires a value" >&2; exit 1; }
-        COMMAND="$2"
-        OUTPUT_DIR="${3:-$OUTPUT_DIR}"
-        ;;
-    --*)
-        echo "Unknown option $1" >&2
-        exit 1
-        ;;
-    "")
-        # No arguments, use defaults
-        ;;
-    *)
-        OUTPUT_DIR="$1"
-        ;;
-esac
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --command)
+            COMMAND="$2"
+            shift 2
+            ;;
+        --output-dir)
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        --target)
+            TARGET="$2"
+            shift 2
+            ;;
+        --prepare-sources)
+            PREPARE_SOURCES=true
+            shift
+            ;;
+        --*)
+            echo "Unknown option $1" >&2
+            exit 1
+            ;;
+        *)
+            OUTPUT_DIR="$1"
+            shift
+            ;;
+    esac
+done
 
 case "$COMMAND" in
     generate_oss_attribution)
-        TARGET="${4:-code-editor-server}"
         generate_oss_attribution "$OUTPUT_DIR" "$TARGET"
         ;;
     generate_unified_oss_attribution)
