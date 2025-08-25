@@ -86,7 +86,7 @@ generate_oss_attribution() {
     if [ -n "$target" ]; then
         "$ROOT_DIR/scripts/prepare-src.sh" "$target"
         cd "$BUILD_SRC_DIR"
-        npm install
+        npm ci
         cd "$ROOT_DIR"
         
         check_unapproved_licenses "$target" "$BUILD_SRC_DIR"
@@ -134,7 +134,7 @@ generate_unified_oss_attribution() {
             "$ROOT_DIR/scripts/prepare-src.sh" "$target"
             mv "$ROOT_DIR/code-editor-src" "$ROOT_DIR/code-editor-src-$target"
             cd "$ROOT_DIR/code-editor-src-$target"
-            npm install
+            npm ci
             cd "$ROOT_DIR"
             
             target_dirs+=("$ROOT_DIR/code-editor-src-$target")
