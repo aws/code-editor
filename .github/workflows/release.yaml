@@ -12,13 +12,14 @@ jobs:
     env:
       COMMIT_SHA: ${{ github.sha }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
+      SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Validate tag format
+      - name: Validate tag
         run: |
           if ! echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Tag $VERSION_NUM does not follow semantic version pattern (x.y.z). Skipping release."
@@ -26,43 +27,65 @@ jobs:
           fi
           echo "Tag $VERSION_NUM follows valid semantic version pattern"
 
-      - name: Check if tag is from release branch
-        run: |
-          # Get the branch that contains this tag
-          BRANCHES=$(git branch -r --contains $COMMIT_SHA | grep -E 'origin/[0-9]+\.[0-9]+' || true)
-          if [ -z "$BRANCHES" ]; then
-            echo "Tag $VERSION_NUM is not from a *.* release branch. Skipping release."
-            exit 78  # neutral exit code
+          # Verify release tag is made on the correct major.minor version branch.
+          MAJOR_MINOR=$(echo "$VERSION_NUM" | cut -d'.' -f1,2)
+          BRANCH_CONTAINS_OUTPUT=$(git branch --remote --contains "$COMMIT_SHA" "origin/$MAJOR_MINOR")
+          if [ -z "$BRANCH_CONTAINS_OUTPUT" ]; then
+              echo "Tag $VERSION_NUM is not on the correct branch. Skipping release."
+              exit 78
           fi
-          echo "Tag is from a valid release branch: $BRANCHES"
+          echo "Tag is from a valid branch."
 
       - name: Download sagemaker artifacts by commit ID
         run: |
           gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
 
-      - name: Check artifacts exist and rename
+      - name: Check artifacts exist
         run: |
           ls -la
+
+          FILES=(
+            "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+            "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          )
           
-          # Rename build artifact
-          BUILD_TARBALL=$(find . -name "*build*.tar.gz" | head -1 || true)
-          if [ -n "$BUILD_TARBALL" ]; then
-            cp "$BUILD_TARBALL" "code-editor-sagemaker-${VERSION_NUM}.tar.gz"
-            echo "Copied $BUILD_TARBALL to code-editor-sagemaker-${VERSION_NUM}.tar.gz"
-          else
-            echo "Error: No build artifacts found for commit $COMMIT_SHA"
-            exit 1
-          fi
+          # Check build artifact exists
+          for file in "${FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: $file not found for commit $COMMIT_SHA"
+              exit 1
+            fi
+          done
+
+      - name: Update Code Editor version
+        run: |
+          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          cd code-editor-src
+          CURRENT_VERSION=$(jq -r '.codeEditorVersion' product.json)
+          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
+          cd ..
+          tar -czf "code-editor-sagemaker-src-$VERSION_NUM.tar.gz" code-editor-src/
+          rm -rf code-editor-src
           
-          # Rename src artifact
-          SRC_TARBALL=$(find . -name "*src*.tar.gz" | head -1 || true)
-          if [ -n "$SRC_TARBALL" ]; then
-            cp "$SRC_TARBALL" "code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
-            echo "Copied $SRC_TARBALL to code-editor-sagemaker-src-${VERSION_NUM}.tar.gz"
-          else
-            echo "Error: No src artifacts found for commit $COMMIT_SHA"
-            exit 1
-          fi
+          tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+          cd vscode-reh-web-linux-x64
+
+          # Update Code Editor Version in all files
+          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
+          
+          FILES_TO_UPDATE=(
+            "out/server-main.js"
+            "out/vs/code/browser/workbench/workbench.js"
+            "out/vs/platform/terminal/node/ptyHostMain.js"
+            "out/vs/workbench/api/node/extensionHostProcess.js"
+          )
+          for file in "${FILES_TO_UPDATE[@]}"; do
+            sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" "$file"
+          done
+
+          cd ..
+          tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
+          rm -rf vscode-reh-web-linux-x64
       
       - name: Create GitHub release
         run: |
