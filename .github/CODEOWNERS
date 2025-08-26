@@ -1,0 +1,4 @@
+* @aws/aws-code-editor
+/.github/ @aws/aws-code-editor
+/patches/sagemaker.series @aws/aws-code-editor @aws/sagemaker-code-editor
+/patches/sagemaker/ @aws/aws-code-editor @aws/sagemaker-code-editor
