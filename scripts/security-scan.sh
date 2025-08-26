@@ -212,12 +212,12 @@ download_nodejs_binaries() {
     cd nodejs-binaries
     
     # Read Node.js version from .npmrc file
-    if [ -f "../code-editor-src/remote/.npmrc" ]; then
-        NODE_VERSION=$(grep 'target=' ../code-editor-src/remote/.npmrc | cut -d'"' -f2)
+    if [ -f "../third-party-src/remote/.npmrc" ]; then
+        NODE_VERSION=$(grep 'target=' ../third-party-src/remote/.npmrc | cut -d'"' -f2)
         echo "Found Node.js version $NODE_VERSION in .npmrc"
     else
-        NODE_VERSION="22.15.1"  # fallback version
-        echo "Using fallback Node.js version $NODE_VERSION"
+        echo "ERROR: Unable to determine NODE_VERSION"
+        exit 1
     fi
     
     # Download Node.js binaries for both architectures
