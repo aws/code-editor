@@ -57,8 +57,7 @@ check_unapproved_licenses() {
     
     local output
     if [[ -n "$excluded_packages" ]]; then
-        excluded_packages="'$excluded_packages'"
-        output=$(cd "$src_dir" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages "$excluded_packages" 2>/dev/null || true)
+        output=$(cd "$src_dir" && eval "license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages '$excluded_packages'" 2>/dev/null || true)   
     else
         output=$(cd "$src_dir" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD 2>/dev/null || true)
     fi
