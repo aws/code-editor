@@ -108,7 +108,15 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: us-east-1
-          role-session-name: security-scan-${{ matrix.target }}
+          role-session-name: security-scan-${{ matrix.target }}-${{ matrix.branch }}
+      
+      - name: Publish Scan Invoked metric
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "SecurityScanInvoked" \
+            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScanning" \
+            --value 1
           
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -119,10 +127,9 @@ jobs:
       - name: Update security scan script from main
         run: |
           # Older branches may not have the latest versions of the
-          # security scan scripts. So we pull the latest one from main
-          echo "Pulling latest security-scan.sh script from main branch"
-          git fetch origin main
-          git checkout origin/main -- scripts/security-scan.sh
+          # security scan scripts. So we download the latest one from main
+          echo "Downloading latest security-scan.sh script from main branch"
+          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
           echo "Updated security-scan.sh to latest version from main"
       
       - name: Set up environment
@@ -153,9 +160,10 @@ jobs:
           echo "Installing CycloneDX SBOM for npm"
           npm i -g @cyclonedx/cyclonedx-npm
 
+
       - name: Run Security Scan
         run: |
-          ./scripts/security-scan.sh run-scan "${{ matrix.target }}" "${{ github.repository }}" "${{ matrix.branch }}"
+          ./scripts/security-scan.sh scan-main-dependencies "${{ matrix.target }}" "${{ matrix.branch }}"
       
       - name: Upload SBOM Files
         uses: actions/upload-artifact@v4
@@ -167,6 +175,7 @@ jobs:
             code-editor-src/extensions/*-sbom.json
             code-editor-src/remote/web/*-sbom.json
           retention-days: 90
+          if-no-files-found: error
     
       - name: Upload Scan Result Files
         uses: actions/upload-artifact@v4
@@ -178,11 +187,112 @@ jobs:
             code-editor-src/extensions/*-scan-result.json
             code-editor-src/remote/web/*-scan-result.json
           retention-days: 90
+          if-no-files-found: error
 
       - name: Analyze SBOM Scan Results
         run: |
-          ./scripts/security-scan.sh analyze-results "${{ matrix.target }}" "${{ github.repository }}"
+          ./scripts/security-scan.sh analyze-results "${{ matrix.target }}" "scan_results_paths.txt"
 
+      - name: Publish Scan Successful Metric
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "SecurityScanSuccessful" \
+            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScanning" \
+            --value 1
+
+      - name: Publish Failure Metrics
+        if: failure()
+        run: |
+          echo "Job failed - publishing failure metrics"
+          
+          # Publish workflow failure metric
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "SecurityScanFailed" \
+            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScanning" \
+            --value 1
+  
+  security-scan-global-dependencies:
+    runs-on: ubuntu-latest
+    needs: [get-branches-to-scan]
+    environment: security-scanning-workflow-env
+    permissions:
+      id-token: write # Required for OIDC
+    strategy:
+      matrix:
+        branch: ${{ fromJson(needs.get-branches-to-scan.outputs.branches) }}
+    steps:
+      - name: Assume IAM Role
+        id: assume-aws-iam-role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: security-scan-global-dependencies
+          
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          submodules: recursive
+
+      - name: Update security scan script from main
+        run: |
+          # Older branches may not have the latest versions of the
+          # security scan scripts. So we download the latest one from main
+          echo "Downloading latest security-scan.sh script from main branch"
+          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
+          echo "Updated security-scan.sh to latest version from main"
+      
+      - name: Install Security Scan Dependencies
+        run: |
+          echo "Installing CycloneDX SBOM for npm"
+          npm i -g @cyclonedx/cyclonedx-npm
+
+          echo "Installing OSS Attribution Generator"
+          oss_attribution_version=$(cat config/pinned-versions/oss-attribution-generator-version.txt)
+          npm i -g @electrovir/oss-attribution-generator@$oss_attribution_version
+
+          echo "Installing semver"
+          semver_version=$(cat config/pinned-versions/semver-version.txt)
+          npm i -g semver@$semver_version
+          
+          echo "Installing Syft for SBOM generation"
+          curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+          echo "Syft installation completed"
+          syft version
+      
+      - name: Prepare Additional Node JS Dependencies for Scanning
+        run: |
+          ./scripts/security-scan.sh scan-additional-dependencies
+
+      - name: Upload Additional Node.js SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: additional-nodejs-sboms-${{ matrix.branch }}
+          path: additional-node-js-sboms/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload Additional Inspector Scan Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: additional-inspector-results-${{ matrix.branch }}
+          path: additional-scan-results/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Analyze Additional SBOM Scan Results
+        run: |
+          ./scripts/security-scan.sh analyze-results "Global Dependencies" "additional_scan_results_paths.txt"
+
+      - name: Scan GitHub Security Advisories
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./scripts/security-scan.sh scan-github-advisories
+      
       - name: Publish Failure Metrics
         if: failure()
         run: |
