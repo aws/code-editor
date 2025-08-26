@@ -57,7 +57,8 @@ check_unapproved_licenses() {
     
     local output
     if [[ -n "$excluded_packages" ]]; then
-        output=$(cd "$src_dir" && eval "license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages '$excluded_packages'" 2>/dev/null || true)
+        excluded_packages="'$excluded_packages'"
+        output=$(cd "$src_dir" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD --excludePackages "$excluded_packages" 2>/dev/null || true)
     else
         output=$(cd "$src_dir" && license-checker --production --exclude MIT,Apache-2.0,BSD-2-Clause,BSD-3-Clause,ISC,0BSD 2>/dev/null || true)
     fi
@@ -92,7 +93,7 @@ generate_oss_attribution() {
         check_unapproved_licenses "$target" "$BUILD_SRC_DIR"
     fi
 
-    npx --yes --package @electrovir/oss-attribution-generator -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
+    npx --yes --package @electrovir/oss-attribution-generator@2.0.0 -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
     attribution_licenses=$(cat "$oss_attribution_dir/attribution.txt")
 
     read_status=0
@@ -167,7 +168,7 @@ generate_unified_oss_attribution() {
     echo "Generating unified OSS attribution for all targets"
     mkdir -p "$BUILD_DIR/private/oss-attribution"
     
-    npx --yes --package @electrovir/oss-attribution-generator -- generate-attribution \
+    npx --yes --package @electrovir/oss-attribution-generator@2.0.0 -- generate-attribution \
         -b "${target_dirs[0]}" "${target_dirs[1]}" "${target_dirs[2]}" "${target_dirs[3]}" \
         --outputDir "$BUILD_DIR/private/oss-attribution"
     

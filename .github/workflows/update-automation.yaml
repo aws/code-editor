@@ -259,7 +259,6 @@ jobs:
           
       - name: Generate unified OSS attribution
         run: |
-          chmod +x ./scripts/generate-oss-attribution.sh
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
           
       - name: Commit OSS attribution
