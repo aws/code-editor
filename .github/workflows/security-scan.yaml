@@ -1,0 +1,196 @@
+name: Security Scanning
+
+on:
+  # Trigger 1: PR created on main or version branches (*.*)
+  pull_request:
+    branches:
+      - main
+      - '*.*'
+    types: [opened, edited, reopened, synchronize]
+
+  # Trigger 2: Daily scheduled run at 22:13 UTC
+  # Schedule it a random minute because most Github Actions are scheduled
+  # at the start of the hour and their invocation can get delayed.
+  # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+  schedule:
+    - cron: '13 22 * * *'
+  
+  # Trigger 3: Manual trigger
+  workflow_dispatch:
+
+jobs:
+  get-branches-to-scan:
+    runs-on: ubuntu-latest
+    outputs:
+      branches: ${{ steps.determine-branches.outputs.branches }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine branches to scan
+        id: determine-branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PR events, validate base branch and use head ref if valid
+            base_ref="${{ github.base_ref }}"
+            echo "Base branch: $base_ref"
+            
+            if [[ "$base_ref" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$base_ref" == "main" ]]; then
+              echo "Base branch matches allowed pattern (main or digit.digit)"
+              echo "branches=[\"${{ github.head_ref }}\"]" >> $GITHUB_OUTPUT
+              echo "Branches to scan: [${{ github.head_ref }}]"
+            else
+              echo "Base branch does not match allowed pattern - no branches to scan"
+              echo "branches=[]" >> $GITHUB_OUTPUT
+            fi
+          else
+            # For scheduled/manual runs, get branches and filter by recent runs
+            echo "Getting branches for scheduled/manual run"
+            
+            # Get main branch and all version branches (*.*)
+            branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)' | sed 's/origin\///' | tr '\n' ' ')
+            echo "Found branches: $branches"
+            
+            branches_to_scan=""
+            workflow_name="Security Scanning"
+            since_date=$(date -d '24 hours ago' -u +%Y-%m-%dT%H:%M:%SZ)
+            
+            echo "Checking for workflow runs since: $since_date"
+            
+            # Check each branch for recent workflow runs
+            for branch in $branches; do
+              echo "Checking branch: $branch"
+              
+              # Get recent workflow runs for this specific workflow and branch
+              all_runs=$(gh run list --workflow="$workflow_name" --branch="$branch" --json startedAt,conclusion,headBranch --status success)
+              recent_runs=$(echo "$all_runs" | jq --arg since "$since_date" --arg branch "$branch" '.[] | select(.startedAt > $since and .headBranch == $branch)')
+              
+              if [ -n "$recent_runs" ]; then
+                echo "Skipping branch $branch - found recent workflow run in the last 24 hours"
+              else
+                echo "Adding branch $branch to scan list - no recent workflow runs"
+                branches_to_scan="$branches_to_scan $branch"
+              fi
+            done
+            
+            # Clean up extra spaces and convert to JSON array format
+            branches_to_scan=$(echo $branches_to_scan | xargs)
+            if [ -n "$branches_to_scan" ]; then
+              # Convert space-separated list to JSON array (compact format)
+              json_branches=$(echo "$branches_to_scan" | tr ' ' '\n' | jq -R . | jq -s -c .)
+              echo "branches=$json_branches" >> $GITHUB_OUTPUT
+              echo "Branches to scan: $json_branches"
+            else
+              echo "branches=[]" >> $GITHUB_OUTPUT
+              echo "No branches to scan - all have recent workflow runs"
+            fi
+          fi
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: [get-branches-to-scan]
+    if: needs.get-branches-to-scan.outputs.branches != '[]'
+    environment: security-scanning-workflow-env
+    permissions:
+      id-token: write # Required for OIDC
+    strategy:
+      matrix:
+        target: [code-editor-sagemaker-server]
+        branch: ${{ fromJson(needs.get-branches-to-scan.outputs.branches) }}
+    steps:
+      - name: Assume IAM Role
+        id: assume-aws-iam-role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: security-scan-${{ matrix.target }}-${{ matrix.branch }}
+          
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          submodules: recursive
+
+      - name: Update security scan script from main
+        run: |
+          # Older branches may not have the latest versions of the
+          # security scan scripts. So we pull the latest one from main
+          echo "Pulling latest security-scan.sh script from main branch"
+          git fetch origin main
+          git checkout origin/main -- scripts/security-scan.sh
+          echo "Updated security-scan.sh to latest version from main"
+      
+      - name: Set up environment
+        run: |
+          echo "Installing required dependencies"
+          sudo apt-get update
+          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
+
+      - name: Run patches script
+        run: |
+          ./scripts/prepare-src.sh ${{ matrix.target }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'code-editor-src/package-lock.json'
+      
+      - name: Install Code Editor Dependencies
+        run: |
+          cd code-editor-src
+          echo "Installing Dependencies"
+          npm ci
+      
+      - name: Install Security Scan Dependencies
+        run: |
+          echo "Installing CycloneDX SBOM for npm"
+          npm i -g @cyclonedx/cyclonedx-npm
+
+      - name: Run Security Scan
+        run: |
+          ./scripts/security-scan.sh run-scan "${{ matrix.target }}" "${{ github.repository }}" "${{ matrix.branch }}"
+      
+      - name: Upload SBOM Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-files-${{ matrix.target }}-${{ matrix.branch }}
+          path: |
+            code-editor-src/*-sbom.json
+            code-editor-src/remote/*-sbom.json
+            code-editor-src/extensions/*-sbom.json
+            code-editor-src/remote/web/*-sbom.json
+          retention-days: 90
+    
+      - name: Upload Scan Result Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-results-${{ matrix.target }}-${{ matrix.branch }}
+          path: |
+            code-editor-src/*-scan-result.json
+            code-editor-src/remote/*-scan-result.json
+            code-editor-src/extensions/*-scan-result.json
+            code-editor-src/remote/web/*-scan-result.json
+          retention-days: 90
+
+      - name: Analyze SBOM Scan Results
+        run: |
+          ./scripts/security-scan.sh analyze-results "${{ matrix.target }}" "${{ github.repository }}"
+
+      - name: Publish Failure Metrics
+        if: failure()
+        run: |
+          echo "Job failed - publishing failure metrics"
+          
+          # Publish workflow failure metric
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "SecurityScanFailed" \
+            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScanning" \
+            --value 1
