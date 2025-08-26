@@ -1,0 +1,32 @@
+Index: third-party-src/extensions/typescript-language-features/src/tsServer/spawner.ts
+===================================================================
+--- third-party-src.orig/extensions/typescript-language-features/src/tsServer/spawner.ts
++++ third-party-src/extensions/typescript-language-features/src/tsServer/spawner.ts
+@@ -208,9 +208,9 @@ export class TypeScriptServerSpawner {
+ 
+ 		args.push('--useInferredProjectPerProjectRoot');
+ 
+-		if (configuration.disableAutomaticTypeAcquisition || kind === TsServerProcessKind.Syntax || kind === TsServerProcessKind.Diagnostics) {
+-			args.push('--disableAutomaticTypingAcquisition');
+-		}
++		
++		args.push('--disableAutomaticTypingAcquisition');
++		
+ 
+ 		if (kind === TsServerProcessKind.Semantic || kind === TsServerProcessKind.Main) {
+ 			args.push('--enableTelemetry');
+Index: third-party-src/extensions/typescript-language-features/web/src/serverHost.ts
+===================================================================
+--- third-party-src.orig/extensions/typescript-language-features/web/src/serverHost.ts
++++ third-party-src/extensions/typescript-language-features/web/src/serverHost.ts
+@@ -348,7 +348,9 @@ function createServerHost(
+ 			&& !path.startsWith('/vscode-global-typings/')
+ 			// Handle the case where a local folder has been opened in VS Code
+ 			// In these cases we do not want to use the mapped node_module
+-			&& !path.startsWith('/file/');
++			&& !path.startsWith('/file/')
++			// Add any other file system providers used for code-editor-web-embedded
++			&& !path.startsWith('/memfs/');
+ 
+ 		// skip paths without .. or ./ or /
+ 		if (!isNm && !path.match(/\.\.|\/\.|\.\//)) {
