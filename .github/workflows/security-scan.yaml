@@ -108,7 +108,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: us-east-1
-          role-session-name: security-scan-${{ matrix.target }}-${{ matrix.branch }}
+          role-session-name: security-scan-${{ matrix.target }}
       
       - name: Publish Scan Invoked metric
         run: |
