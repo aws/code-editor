@@ -202,7 +202,7 @@ jobs:
             --value 1
 
       - name: Publish Failure Metrics
-        if: failure()
+        if: failure() && github.event_name == 'schedule'
         run: |
           echo "Job failed - publishing failure metrics"
           
@@ -294,7 +294,7 @@ jobs:
           ./scripts/security-scan.sh scan-github-advisories
       
       - name: Publish Failure Metrics
-        if: failure()
+        if: failure() && github.event_name == 'schedule'
         run: |
           echo "Job failed - publishing failure metrics"
           
