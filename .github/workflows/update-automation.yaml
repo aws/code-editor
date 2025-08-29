@@ -77,6 +77,15 @@ jobs:
             # Create or checkout staging branch
             STAGING_BRANCH="staging-code-editor-$LATEST_CODE_OSS_TAG"
             
+            # Check if PR already exists for this staging branch
+            EXISTING_STAGING_PR=$(gh pr list --head "$STAGING_BRANCH" --json number --jq '.[0].number' || echo "")
+            
+            if [ -n "$EXISTING_STAGING_PR" ]; then
+              echo "PR already exists for staging branch $STAGING_BRANCH: #$EXISTING_STAGING_PR"
+              echo "Skipping workflow as update is already in progress"
+              exit 0
+            fi
+            
             if git show-ref --verify --quiet refs/remotes/origin/"$STAGING_BRANCH"; then
               echo "Staging branch $STAGING_BRANCH already exists, checking it out"
               git checkout -b "$STAGING_BRANCH" origin/"$STAGING_BRANCH"
