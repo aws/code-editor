@@ -1,0 +1,32 @@
+Index: sagemaker-code-editor/vscode/src/vs/server/node/serverEnvironmentService.ts
+===================================================================
+--- third-party-src/src/vs/server/node/serverEnvironmentService.ts
++++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
+@@ -9,6 +9,7 @@
+ import { OPTIONS, OptionDescriptions } from '../../platform/environment/node/argv.js';
+ import { refineServiceDecorator } from '../../platform/instantiation/common/instantiation.js';
+ import { IEnvironmentService, INativeEnvironmentService } from '../../platform/environment/common/environment.js';
++import { IProductService } from '../../platform/product/common/productService.js';
+ import { memoize } from '../../base/common/decorators.js';
+ import { URI } from '../../base/common/uri.js';
+ 
+@@ -235,7 +235,17 @@
+ }
+ 
+ export class ServerEnvironmentService extends NativeEnvironmentService implements IServerEnvironmentService {
++
++	constructor(args: ServerParsedArgs, productService: IProductService) {
++		/* ----- sagemaker compatibility: map --base-path to --server-base-path ----- */
++		if (args['base-path']) {
++			args['server-base-path'] = args['base-path'];
++		}
++
++		super(args, productService);
++	}
++
+ 	@memoize
+ 	override get userRoamingDataHome(): URI { return this.appSettingsHome; }
+ 	override get args(): ServerParsedArgs { return super.args as ServerParsedArgs; }
+-}
++}
+\ No newline at end of file

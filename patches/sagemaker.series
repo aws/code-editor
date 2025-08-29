@@ -37,3 +37,4 @@ sagemaker/sagemaker-extensions-sync.diff
 sagemaker/sagemaker-ui-post-startup.diff
 sagemaker/sagemaker-integration.diff
 sagemaker/sagemaker-idle-extension.diff
+sagemaker/base-path-compatibility.diff

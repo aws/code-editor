@@ -328,7 +328,7 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 +				writeFileSync(idleFilePath, timestamp);
 +			}
 +
-+			const data = await readFile(idleFilePath, 'utf8');
++			const data = await promises.readFile(idleFilePath, 'utf8');
 +
 +			res.statusCode = 200;
 +			res.setHeader('Content-Type', 'application/json');
