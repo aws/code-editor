@@ -12,7 +12,7 @@ determine_build_target() {
         "code-editor-server"|"code-editor-sagemaker-server")
             echo "vscode-reh-web-linux-${arch}"
             ;;
-        "code-editor-web-embedded")
+        "code-editor-web-embedded"|"code-editor-web-embedded-with-terminal")
             echo "vscode-web"
             ;;
         *)

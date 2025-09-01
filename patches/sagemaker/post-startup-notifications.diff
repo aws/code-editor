@@ -253,13 +253,22 @@ Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/post-startup-notifications/src/extension.ts
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,117 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
 +import { POST_START_UP_STATUS_FILE, SERVICE_NAME_ENV_KEY, SERVICE_NAME_ENV_VALUE } from './constant';
 +import { StatusFile } from './types';
 +import * as chokidar from 'chokidar';
 +
++// Simple method to check if user has seen a notification
++function hasUserSeen(context: vscode.ExtensionContext, notificationId: string): boolean {
++  return context.globalState.get(`notification_seen_${notificationId}`) === true;
++}
++
++// Simple method to mark notification as seen
++function markAsSeen(context: vscode.ExtensionContext, notificationId: string): void {
++  context.globalState.update(`notification_seen_${notificationId}`, true);
++}
 +
 +let previousStatus: string | undefined;
 +let watcher: chokidar.FSWatcher;
@@ -274,6 +283,9 @@ Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
 +    }
 +
 +    outputChannel = vscode.window.createOutputChannel('SageMaker Unified Studio Post Startup Notifications');
++    
++    // Show Q CLI notification if user hasn't seen it before
++    showQCliNotification(context);
 +
 +    try {
 +        watcher = chokidar.watch(POST_START_UP_STATUS_FILE, {
@@ -325,6 +337,31 @@ Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
 +    }
 +};
 +
++// Show Q CLI notification if user hasn't seen it before
++function showQCliNotification(context: vscode.ExtensionContext): void {
++    const notificationId = 'smus_q_cli_notification';
++    const message = 'The Amazon Q Command Line Interface (CLI) is installed. You can now access AI-powered assistance in your terminal.';
++    const link = 'https://docs.aws.amazon.com/sagemaker-unified-studio/latest/userguide/q-actions.html';
++    const linkLabel = 'Learn More';
++    
++    if (!hasUserSeen(context, notificationId)) {
++        outputChannel.appendLine("User has not seen the notification")
++        // Show notification with Learn More button
++        vscode.window.showInformationMessage(
++            message,
++            { modal: false },
++            { title: linkLabel, isCloseAffordance: false }
++        ).then((selection) => {
++            if (selection && selection.title === linkLabel) {
++                vscode.env.openExternal(vscode.Uri.parse(link));
++            }
++            
++            // Mark as seen regardless of which button was clicked
++            markAsSeen(context, notificationId);
++        });
++    }
++}
++
 +export function deactivate() {
 +    if (watcher) {
 +        watcher.close();
@@ -338,7 +375,7 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/post-startup-notifications/src/test/extension.test.ts
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,267 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
 +import * as chokidar from 'chokidar';
@@ -356,8 +393,14 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 +jest.mock('vscode', () => ({
 +    window: {
 +        showErrorMessage: jest.fn(),
-+        showInformationMessage: jest.fn(),
++        showInformationMessage: jest.fn().mockReturnValue(Promise.resolve()),
 +        createOutputChannel: jest.fn()
++    },
++    env: {
++        openExternal: jest.fn()
++    },
++    Uri: {
++        parse: jest.fn(url => ({ toString: () => url }))
 +    }
 +}));
 +
@@ -373,8 +416,15 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 +        // Reset mocks
 +        jest.resetAllMocks();
 +
-+        // Setup context
-+        mockContext = { subscriptions: [] } as any;
++        // Setup context with globalState for storage
++        mockContext = { 
++            subscriptions: [],
++            globalState: {
++                get: jest.fn(),
++                update: jest.fn(),
++                keys: jest.fn().mockReturnValue([])
++            }
++        } as any;
 +
 +        // Setup watcher
 +        mockWatcher = {
@@ -529,7 +579,59 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 +            expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
 +        });
 +    });
-+
++    describe('Q CLI Notification Tests', () => {
++        test('should show Q CLI notification with Learn More button', () => {
++            // Set up globalState to simulate first-time user
++            (mockContext.globalState.get as jest.Mock).mockReturnValue(undefined);
++            
++            activate(mockContext);
++            
++            // Verify notification is shown with correct message and button
++            expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
++                'The Amazon Q Command Line Interface (CLI) is installed. You can now access AI-powered assistance in your terminal.',
++                { modal: false },
++                { title: 'Learn More', isCloseAffordance: false }
++            );
++        });
++        
++        test('should open documentation when Learn More is clicked', async () => {
++            // Set up globalState to simulate first-time user
++            (mockContext.globalState.get as jest.Mock).mockReturnValue(undefined);
++            
++            // Mock the user clicking "Learn More"
++            const mockSelection = { title: 'Learn More' };
++            (vscode.window.showInformationMessage as jest.Mock).mockReturnValue(Promise.resolve(mockSelection));
++            
++            activate(mockContext);
++            
++            // Wait for the promise to resolve
++            await new Promise(process.nextTick);
++            
++            // Verify the documentation link is opened
++            expect(vscode.env.openExternal).toHaveBeenCalledWith(
++                expect.objectContaining({
++                    toString: expect.any(Function)
++                })
++            );
++            
++            // Verify notification is marked as seen
++            expect(mockContext.globalState.update).toHaveBeenCalledWith(
++                'notification_seen_smus_q_cli_notification', 
++                true
++            );
++        });
++        
++        test('should not show notification if already seen', () => {
++            // Set up globalState to simulate returning user who has seen notification
++            (mockContext.globalState.get as jest.Mock).mockReturnValue(true);
++            
++            activate(mockContext);
++            
++            // Verify notification is not shown again
++            expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
++        });
++    });
++    
 +    describe('Deactivation Tests', () => {
 +        test('should cleanup resources properly', () => {
 +            activate(mockContext);
@@ -540,6 +642,7 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 +        });
 +    });
 +});
++
 Index: third-party-src/extensions/post-startup-notifications/src/types.ts
 ===================================================================
 --- /dev/null
