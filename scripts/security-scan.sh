@@ -38,13 +38,13 @@ scan_main_dependencies() {
         
         # Check if directory exists and has package-lock.json
         if [ ! -d "$check_dir" ]; then
-            echo "Warning: Directory $check_dir does not exist, skipping..."
-            continue
+            echo "Error: Directory $check_dir does not exist."
+            exit 1
         fi
         
         if [ ! -f "$check_dir/package-lock.json" ]; then
-            echo "Warning: No package-lock.json found in $check_dir, skipping..."
-            continue
+            echo "Error: No package-lock.json found in $check_dir."
+            exit 1
         fi
         
         # Generate SBOM for this directory
