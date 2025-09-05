@@ -233,7 +233,7 @@ jobs:
         id: assume-aws-iam-role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
           role-session-name: security-scan-${{ matrix.target }}-${{matrix.branch}}
       
@@ -437,7 +437,7 @@ jobs:
         id: assume-aws-iam-role
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
           role-session-name: security-scan-global-dependencies-${{matrix.branch}}
       
@@ -549,13 +549,13 @@ jobs:
       id-token: write # Required for OIDC
     env:
       REPOSITORY: ${{ github.repository }}
-      AWS_IAM_ROLE_ARN: ${{ secrets.AWS_IAM_ROLE_ARN }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     steps:
       - name: Use role credentials for metrics
         id: aws-creds
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.AWS_IAM_ROLE_ARN }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
       - name: Report failure
         run: |

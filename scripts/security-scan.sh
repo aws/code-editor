@@ -151,12 +151,10 @@ generate_additional_sboms() {
 # Function to scan additional SBOMs using AWS Inspector
 scan_additional_sboms() {
     echo "Scanning additional SBOMs with AWS Inspector"
-    
-    # First, download Node.js binaries
+      
     echo "Downloading Node.js binaries..."
     download_nodejs_binaries
     
-    # Then, generate additional SBOMs
     echo "Generating additional SBOMs..."
     generate_additional_sboms
     
@@ -220,14 +218,12 @@ download_nodejs_binaries() {
         exit 1
     fi
     
-    # Download Node.js binaries for both architectures
     echo "Downloading Node.js v$NODE_VERSION for linux-x64"
     curl -sSL "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" -o "node-v$NODE_VERSION-linux-x64.tar.xz"
     
     echo "Downloading Node.js v$NODE_VERSION for linux-arm64"
     curl -sSL "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-arm64.tar.xz" -o "node-v$NODE_VERSION-linux-arm64.tar.xz"
     
-    # Extract the downloaded files
     echo "Extracting Node.js binaries"
     tar -xf "node-v$NODE_VERSION-linux-x64.tar.xz"
     tar -xf "node-v$NODE_VERSION-linux-arm64.tar.xz"
@@ -246,13 +242,11 @@ analyze_sbom_results() {
     local target="$1"
     local results_file="$2"
     
-    # Check if results file parameter is provided
     if [ -z "$results_file" ]; then
         echo "Error: Results file path is required as second parameter"
         exit 1
     fi
-    
-    # Check if scan results paths file exists
+
     if [ ! -f "$results_file" ]; then
         echo "Error: Scan results paths file '$results_file' not found"
         exit 1
