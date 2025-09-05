@@ -92,7 +92,10 @@ generate_oss_attribution() {
         check_unapproved_licenses "$target" "$BUILD_SRC_DIR"
     fi
 
-    npx --yes --package @electrovir/oss-attribution-generator@2.0.0 -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
+    # Read OSS attribution generator version from packageversionrc
+    source "$ROOT_DIR/.packageversionrc"
+    
+    npx --yes --package @electrovir/oss-attribution-generator@$oss_attribution_generator_version -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
     attribution_licenses=$(cat "$oss_attribution_dir/attribution.txt")
 
     read_status=0
@@ -167,7 +170,10 @@ generate_unified_oss_attribution() {
     echo "Generating unified OSS attribution for all targets"
     mkdir -p "$BUILD_DIR/private/oss-attribution"
     
-    npx --yes --package @electrovir/oss-attribution-generator@2.0.0 -- generate-attribution \
+    # Read OSS attribution generator version from packageversionrc
+    source "$ROOT_DIR/.packageversionrc"
+    
+    npx --yes --package @electrovir/oss-attribution-generator@$oss_attribution_generator_version -- generate-attribution \
         -b "${target_dirs[0]}" "${target_dirs[1]}" "${target_dirs[2]}" "${target_dirs[3]}" \
         --outputDir "$BUILD_DIR/private/oss-attribution"
     
