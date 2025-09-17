@@ -302,8 +302,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [update-automation, build-and-update-package-locks, generate-oss-attribution]
     if: needs.update-automation.outputs.staging-branch != ''
-    outputs:
-      pr-created: ${{ env.PR_CREATED }}
     permissions:
       contents: write
       pull-requests: write
@@ -405,13 +403,11 @@ jobs:
             --head "${{ needs.update-automation.outputs.staging-branch }}"
             
           echo "Created PR from ${{ needs.update-automation.outputs.staging-branch }} to $TARGET_BRANCH"
-          echo "PR_CREATED=true" >> $GITHUB_ENV
 
   send-notification:
     name: Send Notification
     runs-on: ubuntu-latest
     needs: [update-automation, create-pr]
-    if: needs.create-pr.outputs.pr-created == 'true'
     environment: update-automation-workflow-env
     permissions:
       id-token: write # Required for OIDC
