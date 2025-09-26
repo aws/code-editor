@@ -431,12 +431,12 @@ jobs:
             --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
             --value 1
 
-  handle-failures:
-    name: Handle Failures
+  publish-execution-metrics:
+    name: Publish Execution Metrics
     runs-on: ubuntu-latest
     needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
     environment: update-automation-workflow-env
-    if: failure()
+    if: always()
     permissions:
       id-token: write # Required for OIDC
     env:
@@ -450,11 +450,19 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
-      - name: Report failure
+      - name: Publish execution metrics
         if: steps.aws-creds.outcome == 'success'
         run: |
+          if [ "${{ needs.update-automation.result }}" = "failure" ] || [ "${{ needs.build-and-update-package-locks.result }}" = "failure" ] || [ "${{ needs.generate-oss-attribution.result }}" = "failure" ] || [ "${{ needs.create-pr.result }}" = "failure" ] || [ "${{ needs.send-notification.result }}" = "failure" ]; then
+            METRIC_NAME="ExecutionsFailed"
+          else
+            METRIC_NAME="ExecutionsSucceeded"
+          fi
+          
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
-            --metric-name "ExecutionsFailed" \
+            --metric-name "$METRIC_NAME" \
             --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
             --value 1
+          
+          echo "Published metric: $METRIC_NAME"
