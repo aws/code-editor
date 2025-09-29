@@ -436,7 +436,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
     environment: update-automation-workflow-env
-    if: success ()
+    if: success()
     permissions:
       id-token: write # Required for OIDC
     env:
@@ -466,7 +466,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
     environment: update-automation-workflow-env
-    if: failure ()
+    if: failure()
     permissions:
       id-token: write # Required for OIDC
     env:
