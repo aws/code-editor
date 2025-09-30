@@ -43,15 +43,14 @@ jobs:
         run: |
           # For PR events, validate base branch and use head ref if valid
           base_ref="${{ github.base_ref }}"
-          head_ref="${{ env.HEAD_REF }}"
           echo "Base branch: $base_ref"
-          echo "Head branch: $head_ref"
+          echo "Head branch: $HEAD_REF"
           
           if [[ "$base_ref" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$base_ref" == "main" ]]; then
             echo "Base branch matches allowed pattern (main or digit.digit)"
-            echo "branches=[\"$head_ref\"]" >> $GITHUB_OUTPUT
+            echo "branches=[\"$HEAD_REF\"]" >> $GITHUB_OUTPUT
             echo "output-branch-name=$base_ref" >> $GITHUB_OUTPUT
-            echo "Branches to scan: [$head_ref]"
+            echo "Branches to scan: [$HEAD_REF]"
             echo "Output files will use branch name: $base_ref"
           else
             echo "Base branch does not match allowed pattern - no branches to scan"
