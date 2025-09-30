@@ -39,10 +39,11 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           # For PR events, validate base branch and use head ref if valid
           base_ref="${{ github.base_ref }}"
-          head_ref="${{ github.head_ref }}"
+          head_ref="${{ env.HEAD_REF }}"
           echo "Base branch: $base_ref"
           echo "Head branch: $head_ref"
           
