@@ -445,7 +445,6 @@ jobs:
     steps:
       - name: Use role credentials for metrics
         id: aws-creds
-        continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
