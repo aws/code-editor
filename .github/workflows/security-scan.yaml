@@ -5,7 +5,7 @@ env:
 
 on:
   # Trigger 1: PR created on main or version branches (*.*)
-  pull_request:
+  pull_request_target:
     branches:
       - main
       - '*.*'
@@ -257,6 +257,7 @@ jobs:
           # security scan scripts. So we download the latest one from main
           echo "Downloading latest security-scan.sh script from main branch"
           curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
+          sudo chmod +x scripts/security-scan.sh
           echo "Updated security-scan.sh to latest version from main"
       
       - name: Set up environment
@@ -461,6 +462,7 @@ jobs:
           # security scan scripts. So we download the latest one from main
           echo "Downloading latest security-scan.sh script from main branch"
           curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
+          sudo chmod +x scripts/security-scan.sh
           echo "Updated security-scan.sh to latest version from main"
       
       - name: Install Security Scan Dependencies
