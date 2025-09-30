@@ -63,7 +63,7 @@ jobs:
         if: github.event_name != 'pull_request'
         run: |
           # Get main branch and all version branches (*.*)
-          branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)' | sed 's/origin\///' | tr '\n' ' ')
+          branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)$' | sed 's/origin\///' | tr '\n' ' ')
           echo "Found upstream branches: $branches"
           echo "upstream-branches=$branches" >> $GITHUB_OUTPUT
           echo "output-branch-name=scheduled" >> $GITHUB_OUTPUT
