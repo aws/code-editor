@@ -36,7 +36,7 @@ jobs:
 
       - name: Determine branches for PR events
         id: determine-pr-branches
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_REF: ${{ github.head_ref }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: Get all upstream branches
         id: get-upstream-branches
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
         run: |
           # Get main branch and all version branches (*.*)
           branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)$' | sed 's/origin\///' | tr '\n' ' ')
@@ -70,7 +70,7 @@ jobs:
 
       - name: Get completed workflows from previous day
         id: get-completed-workflows
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -94,7 +94,7 @@ jobs:
 
       - name: Check for successful scan artifacts from previous day
         id: check-scan-artifacts
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -144,7 +144,7 @@ jobs:
 
       - name: Determine security scan branches for scheduled runs
         id: determine-scheduled-security-scan-branches
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-security-scan-branches }}"
@@ -181,7 +181,7 @@ jobs:
 
       - name: Determine global dependencies branches for scheduled runs
         id: determine-scheduled-global-dependencies-branches
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request_target'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-global-dependencies-branches }}"
@@ -324,7 +324,7 @@ jobs:
       - name: Create Success Indicator File
         run: |
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             output_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
           else
             output_branch="${{ matrix.branch }}"
@@ -334,8 +334,8 @@ jobs:
       - name: Upload Success Indicator File
         uses: actions/upload-artifact@v4
         with:
-          name: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
+          path: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
           retention-days: 90
 
       - name: Publish Scan Successful Metric
@@ -380,7 +380,7 @@ jobs:
           targets=($(echo "$targets_json" | jq -r '.[]'))
           
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             check_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
           else
             check_branch="${{ matrix.branch }}"
@@ -418,8 +418,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: scan-success-branch-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: scan-success-branch-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: scan-success-branch-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
+          path: scan-success-branch-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
           retention-days: 90
   
   security-scan-global-dependencies:
@@ -515,7 +515,7 @@ jobs:
       - name: Create Global Success Indicator File
         run: |
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             output_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
           else
             output_branch="${{ matrix.branch }}"
@@ -525,8 +525,8 @@ jobs:
       - name: Upload Global Success Indicator File
         uses: actions/upload-artifact@v4
         with:
-          name: global-scan-success-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: global-scan-success-${{ github.event_name == 'pull_request' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: global-scan-success-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
+          path: global-scan-success-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
           retention-days: 90
       
       - name: Publish Failure Metrics
