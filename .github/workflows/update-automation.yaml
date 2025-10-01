@@ -404,6 +404,36 @@ jobs:
             
           echo "Created PR from ${{ needs.update-automation.outputs.staging-branch }} to $TARGET_BRANCH"
 
+  publish-new-release-detected:
+    name: Publish New Release Detected Metric
+    runs-on: ubuntu-latest
+    needs: [update-automation]
+    if: needs.update-automation.outputs.staging-branch != ''
+    environment: update-automation-workflow-env
+    permissions:
+      id-token: write # Required for OIDC
+    env:
+      REPOSITORY: ${{ github.repository }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    steps:
+      - name: Use role credentials for metrics
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+      - name: Publish new release detected metric
+        if: steps.aws-creds.outcome == 'success'
+        run: |
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "NewReleaseDetected" \
+            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
+            --value 1 \
+            --timestamp $(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+          
+          echo "Published metric: NewReleaseDetected for version ${{ needs.update-automation.outputs.latest-code-oss-tag }}"
+
   send-notification:
     name: Send Notification
     runs-on: ubuntu-latest
@@ -434,7 +464,7 @@ jobs:
   publish-success-metrics:
     name: Publish Success Metrics
     runs-on: ubuntu-latest
-    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
+    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification, publish-new-release-detected]
     environment: update-automation-workflow-env
     if: always() && !failure() && !cancelled()
     permissions:
@@ -463,7 +493,7 @@ jobs:
   publish-failure-metrics:
     name: Publish Failure Metrics
     runs-on: ubuntu-latest
-    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
+    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification, publish-new-release-detected]
     environment: update-automation-workflow-env
     if: failure()
     permissions:
