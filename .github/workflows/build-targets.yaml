@@ -1,4 +1,4 @@
-name: Build Code Editor Targets
+name: Build Code Editor Targets - Test Change
 on:
   push:
     branches:
