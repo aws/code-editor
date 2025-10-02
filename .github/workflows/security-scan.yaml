@@ -235,7 +235,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
-          role-session-name: security-scan-${{ matrix.target }}-${{matrix.branch}}
+          role-session-name: scan-${{ matrix.target }}-${{matrix.branch}}
       
       - name: Publish Scan Invoked metric
         run: |
@@ -248,7 +248,9 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch }}
+          # For fork-origin PRs, we can't directly use matrix.branch as the branch does not exist in the 
+          # Code Editor repo. The branch only exists in the fork.
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || matrix.branch }}
           submodules: recursive
 
       - name: Update security scan script from main
@@ -440,7 +442,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
-          role-session-name: security-scan-global-dependencies-${{matrix.branch}}
+          role-session-name: scan-global-dependencies-${{matrix.branch}}
       
       - name: Publish Scan Invoked metric
         run: |
@@ -453,7 +455,9 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.branch }}
+          # For fork-origin PRs, we can't directly use matrix.branch as the branch does not exist in the 
+          # Code Editor repo. The branch only exists in the fork.
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || matrix.branch }}
           submodules: recursive
 
       - name: Update security scan script from main
