@@ -11,6 +11,6 @@
   },
   "target": "code-editor-web-embedded-with-terminal",
   "ignoredErrors": {
-    "path": "ignored-errors"
+    "path": null
   }
 }

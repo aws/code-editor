@@ -11,6 +11,6 @@
   },
   "target": "code-editor-server",
   "ignoredErrors": {
-    "path": "ignored-errors"
+    "path": null
   }
 }
