@@ -439,7 +439,7 @@ jobs:
           
           CURRENT_TIMESTAMP=$(date +%s)
           SECONDS_BEHIND=$((CURRENT_TIMESTAMP - SUBMODULE_COMMIT_TIMESTAMP))
-          NORMALIZED_VALUE=$(awk "BEGIN {printf \"%.6f\", $SECONDS_BEHIND / 2592000}") 
+          NORMALIZED_VALUE=$(awk "BEGIN {printf \"%.6f\", $SECONDS_BEHIND / 86400}") 
           
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
@@ -448,8 +448,7 @@ jobs:
             --value $NORMALIZED_VALUE \
             --unit None
           
-          DAYS_BEHIND=$((SECONDS_BEHIND / 86400))
-          echo "Published metric: CodeOSSReleaseLag = $NORMALIZED_VALUE (equivalent to $DAYS_BEHIND days behind upstream)"
+          echo "Published metric: CodeOSSReleaseLag = $NORMALIZED_VALUE (equivalent to $NORMALIZED_VALUE days behind upstream)"
 
   send-notification:
     name: Send Notification
