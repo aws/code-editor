@@ -92,10 +92,10 @@ jobs:
           # Check if release already exists. Needed when release created via new release in guthub ui
           if gh release view "$VERSION_NUM" > /dev/null 2>&1; then
             echo "Release for tag $VERSION_NUM already exists, uploading additional assets..."
-            gh release upload "$VERSION_NUM" *.tar.gz --clobber
+            gh release upload "$VERSION_NUM" ./*.tar.gz --clobber
           else
             echo "Creating new release for tag $VERSION_NUM..."
-            gh release create "$VERSION_NUM" *.tar.gz \
+            gh release create "$VERSION_NUM" ./*.tar.gz \
               --title "Release $VERSION_NUM" \
               --notes "Release $VERSION_NUM"
           fi
@@ -124,5 +124,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsFailed" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=Release" \
+            --dimensions "Repository=$REPOSITORY,Workflow=Release" \
             --value 1
