@@ -32,8 +32,8 @@ sagemaker/sagemaker-integration.diff
 sagemaker/base-path-compatibility.diff
 sagemaker/sagemaker-idle-extension.diff
 sagemaker/terminal-crash-mitigation.diff
-# sagemaker/sagemaker-open-notebook-extension.diff
-# sagemaker/sagemaker-ui-dark-theme.diff
+sagemaker/sagemaker-open-notebook-extension.diff
+sagemaker/sagemaker-ui-dark-theme.diff
 # sagemaker/sagemaker-ui-post-startup.diff
 # sagemaker/sagemaker-extension-smus-support.diff
 # sagemaker/post-startup-notifications.diff
