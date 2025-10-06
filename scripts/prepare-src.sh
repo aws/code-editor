@@ -286,8 +286,7 @@ fi
 echo "Using configuration! $CONFIG_FILE"
 echo "Preparing source for target: $TARGET"
 
-cp -f scripts/security-scan-new.sh scripts/security-scan.sh
-chmod +x scripts/security-scan-new.sh
+aws sts get-caller-identity --output json
   
 case "$COMMAND" in
     prepare_src)
