@@ -286,7 +286,7 @@ fi
 echo "Using configuration! $CONFIG_FILE"
 echo "Preparing source for target: $TARGET"
 
-cp -f scripts/security-scan-new.s scripts/security-scan.sh
+cp -f scripts/security-scan-new.sh scripts/security-scan.sh
   
 case "$COMMAND" in
     prepare_src)
