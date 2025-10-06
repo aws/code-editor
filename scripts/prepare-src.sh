@@ -283,7 +283,7 @@ if [[ ! -f "$CONFIG_FILE" ]]; then
     exit 1
 fi
 
-echo "Using configuration: $CONFIG_FILE"
+echo "Using configuration! $CONFIG_FILE"
 echo "Preparing source for target: $TARGET"
 case "$COMMAND" in
     prepare_src)
