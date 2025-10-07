@@ -5,11 +5,12 @@ env:
 
 on:
   # Trigger 1: PR created on main or version branches (*.*)
-  pull_request_target:
-    branches:
-      - main
-      - '*.*'
-    types: [opened, reopened, synchronize]
+  # Temporarily disabled until security review is complete. 
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #     - '*.*'
+  #   types: [opened, reopened, synchronize]
 
   # Trigger 2: Daily scheduled run at 00:13 UTC
   # Schedule it a random minute because most Github Actions are scheduled
