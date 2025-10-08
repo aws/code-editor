@@ -19,8 +19,10 @@ jobs:
           - build-target: code-editor-web-embedded-with-terminal
     steps:
       - name: Start Build Workflow
+        env:
+          BUILD_TARGET: ${{ matrix.build-target }}
         run: |
-          echo "Starting Build Workflow for target: ${{ matrix.build-target }}"
+          echo "Starting Build Workflow for target: $BUILD_TARGET"
         
       - name: Set up build environment
         run: |
@@ -34,8 +36,10 @@ jobs:
           submodules: recursive
         
       - name: Run patches script
+        env:
+          BUILD_TARGET: ${{ matrix.build-target }}
         run: |
-          ./scripts/prepare-src.sh ${{ matrix.build-target }}
+          ./scripts/prepare-src.sh "$BUILD_TARGET"
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -49,15 +53,19 @@ jobs:
           cd code-editor-src
           echo "Installing dependencies" && npm ci
       
-      - name: Build artifacts 
+      - name: Build artifacts
+        env:
+          BUILD_TARGET: ${{ matrix.build-target }}
         run: |
-          ./scripts/build-artifacts.sh ${{ matrix.build-target }}
+          ./scripts/build-artifacts.sh "$BUILD_TARGET"
       
       - name: Prepare artifacts to upload
+        env:
+          MATRIX_BUILD_TARGET: ${{ matrix.build-target }}
         run: |
-          BUILD_TARGET=$(./scripts/determine-build-target.sh ${{ matrix.build-target }})
-          tar -czf ${{ matrix.build-target }}-src.tar.gz ./code-editor-src
-          tar -czf ${{ matrix.build-target }}-build.tar.gz ./$BUILD_TARGET
+          CODE_EDITOR_BUILD_TARGET=$(./scripts/determine-build-target.sh "$MATRIX_BUILD_TARGET")
+          tar -czf "${MATRIX_BUILD_TARGET}-src.tar.gz" ./code-editor-src
+          tar -czf "${MATRIX_BUILD_TARGET}-build.tar.gz" "./$CODE_EDITOR_BUILD_TARGET"
       
       - name: Upload src artifact
         uses: actions/upload-artifact@v4
@@ -97,5 +105,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsFailed" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=BuildTargets" \
+            --dimensions "Repository=$REPOSITORY,Workflow=BuildTargets" \
             --value 1

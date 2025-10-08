@@ -5,11 +5,12 @@ env:
 
 on:
   # Trigger 1: PR created on main or version branches (*.*)
-  pull_request_target:
-    branches:
-      - main
-      - '*.*'
-    types: [opened, reopened, synchronize]
+  # Temporarily disabled until security review is complete. 
+  # pull_request_target:
+  #   branches:
+  #     - main
+  #     - '*.*'
+  #   types: [opened, reopened, synchronize]
 
   # Trigger 2: Daily scheduled run at 00:13 UTC
   # Schedule it a random minute because most Github Actions are scheduled
@@ -39,23 +40,21 @@ jobs:
         if: github.event_name == 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HEAD_REF: ${{ github.head_ref }}
         run: |
           # For PR events, validate base branch and use head ref if valid
-          base_ref="${{ github.base_ref }}"
-          echo "Base branch: $base_ref"
-          echo "Head branch: $HEAD_REF"
+          echo "Base branch: $GITHUB_BASE_REF"
+          echo "Head branch: $GITHUB_HEAD_REF"
           
-          if [[ "$base_ref" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$base_ref" == "main" ]]; then
+          if [[ "$GITHUB_BASE_REF" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$GITHUB_BASE_REF" == "main" ]]; then
             echo "Base branch matches allowed pattern (main or digit.digit)"
-            echo "branches=[\"$HEAD_REF\"]" >> $GITHUB_OUTPUT
-            echo "output-branch-name=$base_ref" >> $GITHUB_OUTPUT
-            echo "Branches to scan: [$HEAD_REF]"
-            echo "Output files will use branch name: $base_ref"
+            echo "branches=[\"$GITHUB_HEAD_REF\"]" >> "$GITHUB_OUTPUT"
+            echo "output-branch-name=$GITHUB_BASE_REF" >> "$GITHUB_OUTPUT"
+            echo "Branches to scan: [$GITHUB_HEAD_REF]"
+            echo "Output files will use branch name: $GITHUB_BASE_REF"
           else
             echo "Base branch does not match allowed pattern - no branches to scan"
-            echo "branches=[]" >> $GITHUB_OUTPUT
-            echo "output-branch-name=" >> $GITHUB_OUTPUT
+            echo "branches=[]" >> "$GITHUB_OUTPUT"
+            echo "output-branch-name=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Get all upstream branches
@@ -65,8 +64,8 @@ jobs:
           # Get main branch and all version branches (*.*)
           branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)$' | sed 's/origin\///' | tr '\n' ' ')
           echo "Found upstream branches: $branches"
-          echo "upstream-branches=$branches" >> $GITHUB_OUTPUT
-          echo "output-branch-name=scheduled" >> $GITHUB_OUTPUT
+          echo "upstream-branches=$branches" >> "$GITHUB_OUTPUT"
+          echo "output-branch-name=scheduled" >> "$GITHUB_OUTPUT"
 
       - name: Get completed workflows from previous day
         id: get-completed-workflows
@@ -90,13 +89,14 @@ jobs:
           
           # Store workflow run IDs for artifact checking
           run_ids=$(echo "$recent_runs" | jq -r '.databaseId' | tr '\n' ' ')
-          echo "workflow-run-ids=$run_ids" >> $GITHUB_OUTPUT
+          echo "workflow-run-ids=$run_ids" >> "$GITHUB_OUTPUT"
 
       - name: Check for successful scan artifacts from previous day
         id: check-scan-artifacts
         if: github.event_name != 'pull_request_target'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           run_ids="${{ steps.get-completed-workflows.outputs.workflow-run-ids }}"
           successful_security_scan_branches=""
@@ -109,7 +109,7 @@ jobs:
               echo "Checking artifacts for run ID: $run_id"
               
               # Get artifacts for this run
-              artifacts=$(gh api /repos/${{ github.repository }}/actions/runs/$run_id/artifacts --jq '.artifacts[].name')
+              artifacts=$(gh api "/repos/$REPOSITORY/actions/runs/$run_id/artifacts" --jq '.artifacts[].name')
               
               # Check for scan-success-branch-* artifacts
               security_scan_artifacts=$(echo "$artifacts" | grep "^scan-success-branch-" || true)
@@ -124,7 +124,7 @@ jobs:
               done
               
               for artifact in $global_dependencies_artifacts; do
-                branch_name=$(echo "$artifact" | sed 's/global-scan-success-//')
+                branch_name="${artifact/#global-scan-success-/}"
                 if [ -n "$branch_name" ]; then
                   successful_global_dependencies_branches="$successful_global_dependencies_branches $branch_name"
                 fi
@@ -133,14 +133,14 @@ jobs:
           done
           
           # Remove duplicates and clean up
-          successful_security_scan_branches=$(echo $successful_security_scan_branches | tr ' ' '\n' | sort -u | tr '\n' ' ')
-          successful_global_dependencies_branches=$(echo $successful_global_dependencies_branches | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          successful_security_scan_branches=$(echo "$successful_security_scan_branches" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+          successful_global_dependencies_branches=$(echo "$successful_global_dependencies_branches" | tr ' ' '\n' | sort -u | tr '\n' ' ')
           
           echo "Branches with successful security scans from previous day: $successful_security_scan_branches"
           echo "Branches with successful global dependency scans from previous day: $successful_global_dependencies_branches"
           
-          echo "successful-security-scan-branches=$successful_security_scan_branches" >> $GITHUB_OUTPUT
-          echo "successful-global-dependencies-branches=$successful_global_dependencies_branches" >> $GITHUB_OUTPUT
+          echo "successful-security-scan-branches=$successful_security_scan_branches" >> "$GITHUB_OUTPUT"
+          echo "successful-global-dependencies-branches=$successful_global_dependencies_branches" >> "$GITHUB_OUTPUT"
 
       - name: Determine security scan branches for scheduled runs
         id: determine-scheduled-security-scan-branches
@@ -156,7 +156,7 @@ jobs:
           
           # Check each upstream branch
           for branch in $upstream_branches; do
-            branch=$(echo $branch | xargs) # trim whitespace
+            branch=$(echo "$branch" | xargs) # trim whitespace
             if [ -n "$branch" ]; then
               # Check if this branch was successfully scanned in the previous day
               if echo "$successful_branches" | grep -q "\b$branch\b"; then
@@ -169,13 +169,13 @@ jobs:
           done
           
           # Clean up and convert to JSON array
-          branches_to_scan=$(echo $branches_to_scan | xargs)
+          branches_to_scan=$(echo "$branches_to_scan" | xargs)
           if [ -n "$branches_to_scan" ]; then
             json_branches=$(echo "$branches_to_scan" | tr ' ' '\n' | jq -R . | jq -s -c .)
-            echo "branches=$json_branches" >> $GITHUB_OUTPUT
+            echo "branches=$json_branches" >> "$GITHUB_OUTPUT"
             echo "Security scan branches to scan: $json_branches"
           else
-            echo "branches=[]" >> $GITHUB_OUTPUT
+            echo "branches=[]" >> "$GITHUB_OUTPUT"
             echo "No security scan branches to scan - all have successful scans from previous day"
           fi
 
@@ -193,7 +193,7 @@ jobs:
           
           # Check each upstream branch
           for branch in $upstream_branches; do
-            branch=$(echo $branch | xargs) # trim whitespace
+            branch=$(echo "$branch" | xargs) # trim whitespace
             if [ -n "$branch" ]; then
               # Check if this branch was successfully scanned in the previous day
               if echo "$successful_branches" | grep -q "\b$branch\b"; then
@@ -206,13 +206,13 @@ jobs:
           done
           
           # Clean up and convert to JSON array
-          branches_to_scan=$(echo $branches_to_scan | xargs)
+          branches_to_scan=$(echo "$branches_to_scan" | xargs)
           if [ -n "$branches_to_scan" ]; then
             json_branches=$(echo "$branches_to_scan" | tr ' ' '\n' | jq -R . | jq -s -c .)
-            echo "branches=$json_branches" >> $GITHUB_OUTPUT
+            echo "branches=$json_branches" >> "$GITHUB_OUTPUT"
             echo "Global dependencies branches to scan: $json_branches"
           else
-            echo "branches=[]" >> $GITHUB_OUTPUT
+            echo "branches=[]" >> "$GITHUB_OUTPUT"
             echo "No global dependencies branches to scan - all have successful scans from previous day"
           fi
 
@@ -238,11 +238,15 @@ jobs:
           role-session-name: scan-${{ matrix.target }}-${{matrix.branch}}
       
       - name: Publish Scan Invoked metric
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TARGET: ${{ matrix.target }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "SecurityScanInvoked" \
-            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScan,Target=${{ matrix.target }},Branch=${{matrix.branch}}" \
+            --dimensions "Repository=$REPOSITORY,Workflow=SecurityScan,Target=$TARGET,Branch=$BRANCH" \
             --value 1
           
       - name: Checkout branch
@@ -273,8 +277,10 @@ jobs:
           sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
 
       - name: Run patches script
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
-          ./scripts/prepare-src.sh ${{ matrix.target }}
+          ./scripts/prepare-src.sh "$TARGET"
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -296,8 +302,11 @@ jobs:
 
 
       - name: Run Security Scan
+        env:
+          TARGET: ${{ matrix.target }}
+          BRANCH: ${{ matrix.branch }}
         run: |
-          ./scripts/security-scan.sh scan-main-dependencies "${{ matrix.target }}" "${{ matrix.branch }}"
+          ./scripts/security-scan.sh scan-main-dependencies "$TARGET" "$BRANCH"
       
       - name: Upload SBOM Files
         uses: actions/upload-artifact@v4
@@ -324,18 +333,25 @@ jobs:
           if-no-files-found: error
 
       - name: Analyze SBOM Scan Results
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
-          ./scripts/security-scan.sh analyze-results "${{ matrix.target }}" "scan_results_paths.txt"
+          ./scripts/security-scan.sh analyze-results "$TARGET" "scan_results_paths.txt"
       
       - name: Create Success Indicator File
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
+          MATRIX_BRANCH: ${{ matrix.branch }}
+          TARGET: ${{ matrix.target }}
         run: |
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            output_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
+          if [ "$EVENT_NAME" = "pull_request_target" ]; then
+            output_branch="$OUTPUT_BRANCH_NAME"
           else
-            output_branch="${{ matrix.branch }}"
+            output_branch="$MATRIX_BRANCH"
           fi
-          echo "PASS" > scan-success-${{ matrix.target }}-${output_branch}.txt
+          echo "PASS" > "scan-success-$TARGET-${output_branch}.txt"
 
       - name: Upload Success Indicator File
         uses: actions/upload-artifact@v4
@@ -345,15 +361,23 @@ jobs:
           retention-days: 90
 
       - name: Publish Scan Successful Metric
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TARGET: ${{ matrix.target }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "SecurityScanSuccessful" \
-            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScan,Target=${{ matrix.target }},Branch=${{matrix.branch}}" \
+            --dimensions "Repository=$REPOSITORY,Workflow=SecurityScan,Target=$TARGET,Branch=$BRANCH" \
             --value 1
 
       - name: Publish Failure Metrics
         if: failure() && github.event_name == 'schedule'
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TARGET: ${{ matrix.target }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           echo "Job failed - publishing failure metrics"
           
@@ -361,7 +385,7 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "SecurityScanFailed" \
-            --dimensions "Repository=${{ github.repository }},Workflow=SecurityScan,Target=${{ matrix.target }},Branch=${{matrix.branch}}" \
+            --dimensions "Repository=$REPOSITORY,Workflow=SecurityScan,Target=$TARGET,Branch=$BRANCH" \
             --value 1
 
   generate-security-scan-output:
@@ -380,22 +404,25 @@ jobs:
           merge-multiple: true
       
       - name: Check if branch was successful for all targets
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
+          MATRIX_BRANCH: ${{ matrix.branch }}
         run: |
           # Parse targets from environment variable
-          targets_json='${{ env.CODE_EDITOR_TARGETS }}'
-          targets=($(echo "$targets_json" | jq -r '.[]'))
+          readarray -t targets < <(jq -r '.[]' <<< "$CODE_EDITOR_TARGETS")
           
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            check_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
+          if [ "$EVENT_NAME" = "pull_request_target" ]; then
+            check_branch="$OUTPUT_BRANCH_NAME"
           else
-            check_branch="${{ matrix.branch }}"
+            check_branch="$MATRIX_BRANCH"
           fi
           
           all_success=true
           
-          echo "Checking success for branch: $check_branch (matrix branch: ${{ matrix.branch }})"
-          echo "Targets to check: ${targets[@]}"
+          echo "Checking success for branch: $check_branch (matrix branch: $MATRIX_BRANCH)"
+          echo "Targets to check:" "${targets[@]}"
           
           # Check if all target success files exist for this branch
           for target in "${targets[@]}"; do
@@ -414,7 +441,7 @@ jobs:
           # Create branch success file only if all targets succeeded
           if [ "$all_success" = true ]; then
             echo "✓ All scans successful for branch $check_branch - creating branch success file"
-            echo "PASS" > scan-success-branch-${check_branch}.txt
+            echo "PASS" > "scan-success-branch-${check_branch}.txt"
           else
             echo "✗ Some scans failed for branch $check_branch - not creating branch success file"
             exit 1
@@ -449,11 +476,14 @@ jobs:
           role-session-name: scan-global-dependencies-${{matrix.branch}}
       
       - name: Publish Scan Invoked metric
+        env:
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "GlobalDependenciesSecurityScanInvoked" \
-            --dimensions "Repository=${{ github.repository }},Workflow=GlobalDependenciesSecurityScan,Branch=${{matrix.branch}}" \
+            --dimensions "Repository=$REPOSITORY,Workflow=GlobalDependenciesSecurityScan,Branch=$BRANCH" \
             --value 1
           
       - name: Checkout branch
@@ -465,11 +495,13 @@ jobs:
           submodules: recursive
 
       - name: Update security scan script from main
+        env:
+          REPOSITORY: ${{ github.repository }}
         run: |          
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest one from main
           echo "Downloading latest security-scan.sh script from main branch"
-          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
+          curl -sSL "https://raw.githubusercontent.com/$REPOSITORY/main/scripts/security-scan.sh" -o scripts/security-scan.sh
           sudo chmod +x scripts/security-scan.sh
           echo "Updated security-scan.sh to latest version from main"
       
@@ -521,14 +553,18 @@ jobs:
           ./scripts/security-scan.sh scan-github-advisories
       
       - name: Create Global Success Indicator File
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
+          MATRIX_BRANCH: ${{ matrix.branch }}
         run: |
           # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
-            output_branch="${{ needs.get-branches-to-scan.outputs.output-branch-name }}"
+          if [ "$EVENT_NAME" = "pull_request_target" ]; then
+            output_branch="$OUTPUT_BRANCH_NAME"
           else
-            output_branch="${{ matrix.branch }}"
+            output_branch="$MATRIX_BRANCH"
           fi
-          echo "PASS" > global-scan-success-${output_branch}.txt
+          echo "PASS" > "global-scan-success-${output_branch}.txt"
 
       - name: Upload Global Success Indicator File
         uses: actions/upload-artifact@v4
@@ -539,6 +575,9 @@ jobs:
       
       - name: Publish Failure Metrics
         if: failure() && github.event_name == 'schedule'
+        env:
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ matrix.branch }}
         run: |
           echo "Job failed - publishing failure metrics"
           
@@ -546,7 +585,7 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "SecurityScanFailed" \
-            --dimensions "Repository=${{ github.repository }},Workflow=GlobalDependenciesSecurityScan,Branch=${{matrix.branch}}" \
+            --dimensions "Repository=$REPOSITORY,Workflow=GlobalDependenciesSecurityScan,Branch=$BRANCH" \
             --value 1
   
   handle-failures:
@@ -572,5 +611,5 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsFailed" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=SecurityScan" \
+            --dimensions "Repository=$REPOSITORY,Workflow=SecurityScan" \
             --value 1

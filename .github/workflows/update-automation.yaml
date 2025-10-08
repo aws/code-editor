@@ -42,7 +42,7 @@ jobs:
             LATEST_SEMVER="main"
             echo "No semver branches found, using main"
           fi
-          echo "LATEST_SEMVER=$LATEST_SEMVER" >> $GITHUB_ENV
+          echo "LATEST_SEMVER=$LATEST_SEMVER" >> "$GITHUB_ENV"
           echo "Using branch: $LATEST_SEMVER"
           git checkout "$LATEST_SEMVER"
           git submodule update --init --recursive
@@ -62,8 +62,8 @@ jobs:
           
           LATEST_CODE_OSS_TAG=$(gh api repos/microsoft/vscode/releases/latest --template '{{.tag_name}}')
           
-          echo "EXISTING_CODE_OSS_TAG=$EXISTING_CODE_OSS_TAG" >> $GITHUB_ENV
-          echo "LATEST_CODE_OSS_TAG=$LATEST_CODE_OSS_TAG" >> $GITHUB_ENV
+          echo "EXISTING_CODE_OSS_TAG=$EXISTING_CODE_OSS_TAG" >> "$GITHUB_ENV"
+          echo "LATEST_CODE_OSS_TAG=$LATEST_CODE_OSS_TAG" >> "$GITHUB_ENV"
           
           echo "Existing tag: $EXISTING_CODE_OSS_TAG"
           echo "Latest tag: $LATEST_CODE_OSS_TAG"
@@ -109,7 +109,7 @@ jobs:
               git push origin "$STAGING_BRANCH"
             fi
             
-            echo "STAGING_BRANCH=$STAGING_BRANCH" >> $GITHUB_ENV
+            echo "STAGING_BRANCH=$STAGING_BRANCH" >> "$GITHUB_ENV"
             echo "Created staging branch: $STAGING_BRANCH with VS Code $LATEST_CODE_OSS_TAG"
           fi
           
@@ -181,20 +181,24 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
       
       - name: Build target
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
-          ./scripts/prepare-src.sh "${{ matrix.target }}"
+          ./scripts/prepare-src.sh "$TARGET"
           
           cd code-editor-src
           npm install
           cd ..
 
-          ./scripts/build-artifacts.sh ${{ matrix.target }}
+          ./scripts/build-artifacts.sh "$TARGET"
 
-          echo "Built target: ${{ matrix.target }}"
+          echo "Built target: $TARGET"
     
       - name: Update package-lock for target
+        env:
+          TARGET: ${{ matrix.target }}
         run: |
-          OVERRIDE_PATH=$(jq -r '."package-lock-overrides".path' "configuration/${{ matrix.target }}.json")
+          OVERRIDE_PATH=$(jq -r '."package-lock-overrides".path' "configuration/$TARGET.json")
           
           rm -rf "$OVERRIDE_PATH"
           mkdir -p "$OVERRIDE_PATH"
@@ -219,14 +223,17 @@ jobs:
           retention-days: 1
           
       - name: Commit package-lock overrides
+        env:
+          TARGET: ${{ matrix.target }}
+          STAGING_BRANCH: ${{ needs.update-automation.outputs.staging-branch }}
         run: |
           git add package-lock-overrides/
           if ! git diff --staged --quiet; then
-            git commit -m "Update package-lock.json overrides for ${{ matrix.target }}"
+            git commit -m "Update package-lock.json overrides for $TARGET"
             
             # Retry push with rebase until successful
             for i in {1..5}; do
-              if git pull --rebase origin "${{ needs.update-automation.outputs.staging-branch }}" && git push origin "${{ needs.update-automation.outputs.staging-branch }}"; then
+              if git pull --rebase origin "$STAGING_BRANCH" && git push origin "$STAGING_BRANCH"; then
                 break
               fi
               sleep $((i * 2))
@@ -268,8 +275,8 @@ jobs:
       - name: Organize downloaded sources
         run: |
           for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
-            if [[ -d "${{ github.run_id }}-prepared-source-$target" ]]; then
-              mv "${{ github.run_id }}-prepared-source-$target" "code-editor-src-$target"
+            if [[ -d "$GITHUB_RUN_ID-prepared-source-$target" ]]; then
+              mv "$GITHUB_RUN_ID-prepared-source-$target" "code-editor-src-$target"
               echo "Organized prepared source for $target"
             else
               echo "Missing prepared source artifact for target: $target"
@@ -282,6 +289,8 @@ jobs:
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
           
       - name: Commit OSS attribution
+        env:
+          STAGING_BRANCH: ${{ needs.update-automation.outputs.staging-branch }}
         run: |
           # Copy LICENSE-THIRD-PARTY to root directory
           cp overrides/LICENSE-THIRD-PARTY LICENSE-THIRD-PARTY
@@ -289,7 +298,7 @@ jobs:
           git add overrides/ LICENSE-THIRD-PARTY
           if ! git diff --staged --quiet; then
             git commit -m "Update unified OSS attribution"
-            git push origin "${{ needs.update-automation.outputs.staging-branch }}"
+            git push origin "$STAGING_BRANCH"
           fi
           
       - name: Clean up prepared source directories
@@ -315,17 +324,17 @@ jobs:
       - name: Determine target branch and create PR
         env:
           GH_TOKEN: ${{ github.token }}
+          STAGING_BRANCH: ${{ needs.update-automation.outputs.staging-branch }}
+          EXISTING_CODE_OSS_TAG: ${{ needs.update-automation.outputs.existing-code-oss-tag }}
+          LATEST_CODE_OSS_TAG: ${{ needs.update-automation.outputs.latest-code-oss-tag }}
         run: |
           # Check if PR already exists for this staging branch
-          EXISTING_PR=$(gh pr list --head "${{ needs.update-automation.outputs.staging-branch }}" --json number --jq '.[0].number' || echo "")
+          EXISTING_PR=$(gh pr list --head "$STAGING_BRANCH" --json number --jq '.[0].number' || echo "")
           
           if [ -n "$EXISTING_PR" ]; then
-            echo "PR already exists for branch ${{ needs.update-automation.outputs.staging-branch }}: #$EXISTING_PR"
+            echo "PR already exists for branch $STAGING_BRANCH: #$EXISTING_PR"
             exit 0
           fi
-          
-          EXISTING_CODE_OSS_TAG="${{ needs.update-automation.outputs.existing-code-oss-tag }}"
-          LATEST_CODE_OSS_TAG="${{ needs.update-automation.outputs.latest-code-oss-tag }}"
           
           # Parse version numbers
           EXISTING_CODE_OSS_MAJOR=$(echo "$EXISTING_CODE_OSS_TAG" | cut -d. -f1)
@@ -366,7 +375,7 @@ jobs:
           fi
           
           # Get release body and generate links
-          RELEASE_BODY=$(gh api repos/microsoft/vscode/releases/tags/$LATEST_CODE_OSS_TAG --template '{{.body}}')
+          RELEASE_BODY=$(gh api "repos/microsoft/vscode/releases/tags/$LATEST_CODE_OSS_TAG" --template '{{.body}}')
           VERSION_NUMBER=$(echo "$LATEST_CODE_OSS_TAG" | cut -d. -f1,2 | sed 's/\./\_/g')
           VSCODE_RELEASE_NOTES="https://code.visualstudio.com/updates/v$VERSION_NUMBER"
           
@@ -400,9 +409,55 @@ jobs:
             --title "$PR_TITLE" \
             --body "$PR_BODY" \
             --base "$TARGET_BRANCH" \
-            --head "${{ needs.update-automation.outputs.staging-branch }}"
+            --head "$STAGING_BRANCH"
             
-          echo "Created PR from ${{ needs.update-automation.outputs.staging-branch }} to $TARGET_BRANCH"
+          echo "Created PR from $STAGING_BRANCH to $TARGET_BRANCH"
+
+  publish-release-lag-metric:
+    name: Publish Release Lag Metric
+    runs-on: ubuntu-latest
+    needs: [update-automation]
+    if: always()
+    environment: update-automation-workflow-env
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
+    env:
+      REPOSITORY: ${{ github.repository }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 1
+          
+      - name: Use role credentials for metrics
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-east-1
+          
+      - name: Calculate and publish release lag metric
+        if: steps.aws-creds.outcome == 'success'
+        run: |
+          cd third-party-src
+          SUBMODULE_COMMIT_TIMESTAMP=$(git log -1 --format=%ct)
+          cd ..
+          
+          CURRENT_TIMESTAMP=$(date +%s)
+          SECONDS_BEHIND=$((CURRENT_TIMESTAMP - SUBMODULE_COMMIT_TIMESTAMP))
+          NORMALIZED_VALUE=$(awk "BEGIN {printf \"%.6f\", $SECONDS_BEHIND / 86400}") 
+          
+          aws cloudwatch put-metric-data \
+            --namespace "GitHub/Workflows" \
+            --metric-name "CodeOSSReleaseLag" \
+            --dimensions "Repository=$REPOSITORY,Workflow=UpdateAutomation" \
+            --value "$NORMALIZED_VALUE" \
+            --unit None
+          
+          echo "Published metric: CodeOSSReleaseLag = $NORMALIZED_VALUE (equivalent to $NORMALIZED_VALUE days behind upstream)"
 
   send-notification:
     name: Send Notification
@@ -428,13 +483,13 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "PRCreated" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
+            --dimensions "Repository=$REPOSITORY,Workflow=UpdateAutomation" \
             --value 1
 
   publish-success-metrics:
     name: Publish Success Metrics
     runs-on: ubuntu-latest
-    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
+    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification, publish-release-lag-metric]
     environment: update-automation-workflow-env
     if: always() && !failure() && !cancelled()
     permissions:
@@ -455,7 +510,7 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsSucceeded" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
+            --dimensions "Repository=$REPOSITORY,Workflow=UpdateAutomation" \
             --value 1
           
           echo "Published metric: ExecutionsSucceeded"
@@ -463,7 +518,7 @@ jobs:
   publish-failure-metrics:
     name: Publish Failure Metrics
     runs-on: ubuntu-latest
-    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification]
+    needs: [update-automation, build-and-update-package-locks, generate-oss-attribution, create-pr, send-notification, publish-release-lag-metric]
     environment: update-automation-workflow-env
     if: failure()
     permissions:
@@ -485,7 +540,7 @@ jobs:
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsFailed" \
-            --dimensions "Repository=${{ env.REPOSITORY }},Workflow=UpdateAutomation" \
+            --dimensions "Repository=$REPOSITORY,Workflow=UpdateAutomation" \
             --value 1
           
           echo "Published metric: ExecutionsFailed"
