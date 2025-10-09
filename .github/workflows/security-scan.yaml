@@ -605,15 +605,7 @@ jobs:
       contents: read
     steps:
       - name: Trigger Build Workflow
-        uses: actions/github-script@v8
-        with:
-          script: |
-            github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: "build-targets.yaml",
-              ref: context.ref
-            })
+        uses: ./.github/workflows/build-targets.yaml
           
   handle-failures:
     name: Handle Failures
