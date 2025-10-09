@@ -261,7 +261,7 @@ jobs:
 
       - name: Update scripts from main branch
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest scripts folder from main
