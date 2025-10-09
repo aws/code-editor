@@ -1,6 +1,6 @@
 name: Build Code Editor Targets
 on:
-  workflow_dispatch:
+  workflow_call:
   
 jobs:
   build:
