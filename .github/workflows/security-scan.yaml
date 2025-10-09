@@ -288,8 +288,11 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
         run: |
+          ls -la
+          cd scripts
+          ls -la
           ./scripts/prepare-src.sh "$TARGET"
-          ls
+          ls -la
           cd code-editor-src
           ls
       
