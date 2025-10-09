@@ -262,6 +262,7 @@ jobs:
       - name: Update scripts from main branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest scripts folder from main
@@ -270,10 +271,10 @@ jobs:
           cd scripts
           rm -f *.sh
         
-          gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
+          gh api "/repos/$REPOSITORY/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
           while read filename; do
             echo "Downloading: $filename"
-            raw_url="https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/$filename"
+            raw_url="https://raw.githubusercontent.com/$REPOSITORY/main/scripts/$filename"
             curl -sSL "$raw_url" -o "$filename"
             if [ -s "$filename" ]; then
               echo "✓ Successfully downloaded: $filename ($(wc -c < "$filename") bytes)"
@@ -495,6 +496,7 @@ jobs:
       - name: Update scripts from main branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
         run: |          
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest one from main
@@ -503,10 +505,10 @@ jobs:
           cd scripts
           rm -f *.sh
         
-          gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
+          gh api "/repos/$REPOSITORY/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
           while read filename; do
             echo "Downloading: $filename"
-            raw_url="https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/$filename"
+            raw_url="https://raw.githubusercontent.com/$REPOSITORY/main/scripts/$filename"
             curl -sSL "$raw_url" -o "$filename"
             if [ -s "$filename" ]; then
               echo "✓ Successfully downloaded: $filename ($(wc -c < "$filename") bytes)"
