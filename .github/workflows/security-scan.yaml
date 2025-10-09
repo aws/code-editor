@@ -611,7 +611,7 @@ jobs:
             github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: "build-targets.yml",
+              workflow_id: "build-targets.yaml",
               ref: context.ref
             })
           
