@@ -1,16 +1,11 @@
 name: Security Scan
 
-env:
-  CODE_EDITOR_TARGETS: '["code-editor-sagemaker-server"]'
-
 on:
-  # Trigger 1: PR created on main or version branches (*.*)
-  # Temporarily disabled until security review is complete. 
-  # pull_request_target:
-  #   branches:
-  #     - main
-  #     - '*.*'
-  #   types: [opened, reopened, synchronize]
+  # Trigger 1: Merge to main or version branches (*.*)
+  push:
+    branches:
+      - main
+      - '*.*'
 
   # Trigger 2: Daily scheduled run at 00:13 UTC
   # Schedule it a random minute because most Github Actions are scheduled
@@ -21,6 +16,16 @@ on:
   
   # Trigger 3: Manual trigger
   workflow_dispatch:
+    inputs:
+      standalone-run:
+        description: 'Run as standalone workflow (skip build workflow invocation)'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  CODE_EDITOR_TARGETS: '["code-editor-sagemaker-server"]'
+  STANDALONE_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.standalone-run || false }}
 
 jobs:
   get-branches-to-scan:
@@ -35,31 +40,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine branches for PR events
+      - name: Determine branches for merge events
         id: determine-pr-branches
-        if: github.event_name == 'pull_request_target'
+        if: github.event_name == 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # For PR events, validate base branch and use head ref if valid
-          echo "Base branch: $GITHUB_BASE_REF"
-          echo "Head branch: $GITHUB_HEAD_REF"
+          # For merge events, use the branch that was merged to
+          echo "Merged to branch: $GITHUB_REF_NAME"
           
-          if [[ "$GITHUB_BASE_REF" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$GITHUB_BASE_REF" == "main" ]]; then
-            echo "Base branch matches allowed pattern (main or digit.digit)"
-            echo "branches=[\"$GITHUB_HEAD_REF\"]" >> "$GITHUB_OUTPUT"
-            echo "output-branch-name=$GITHUB_BASE_REF" >> "$GITHUB_OUTPUT"
-            echo "Branches to scan: [$GITHUB_HEAD_REF]"
-            echo "Output files will use branch name: $GITHUB_BASE_REF"
+          if [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+$ ]] || [[ "$GITHUB_REF_NAME" == "main" ]]; then
+            echo "Branch matches allowed pattern (main or digit.digit)"
+            echo "branches=[\"$GITHUB_REF_NAME\"]" >> "$GITHUB_OUTPUT"
+            echo "output-branch-name=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "Branches to scan: [$GITHUB_REF_NAME]"
+            echo "Output files will use branch name: $GITHUB_REF_NAME"
           else
-            echo "Base branch does not match allowed pattern - no branches to scan"
+            echo "Branch does not match allowed pattern - no branches to scan"
             echo "branches=[]" >> "$GITHUB_OUTPUT"
             echo "output-branch-name=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Get all upstream branches
         id: get-upstream-branches
-        if: github.event_name != 'pull_request_target'
+        if: github.event_name != 'push'
         run: |
           # Get main branch and all version branches (*.*)
           branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)$' | sed 's/origin\///' | tr '\n' ' ')
@@ -69,7 +73,7 @@ jobs:
 
       - name: Get completed workflows from previous day
         id: get-completed-workflows
-        if: github.event_name != 'pull_request_target'
+        if: github.event_name != 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -93,7 +97,7 @@ jobs:
 
       - name: Check for successful scan artifacts from previous day
         id: check-scan-artifacts
-        if: github.event_name != 'pull_request_target'
+        if: github.event_name != 'push'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
@@ -144,7 +148,7 @@ jobs:
 
       - name: Determine security scan branches for scheduled runs
         id: determine-scheduled-security-scan-branches
-        if: github.event_name != 'pull_request_target'
+        if: github.event_name != 'push'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-security-scan-branches }}"
@@ -181,7 +185,7 @@ jobs:
 
       - name: Determine global dependencies branches for scheduled runs
         id: determine-scheduled-global-dependencies-branches
-        if: github.event_name != 'pull_request_target'
+        if: github.event_name != 'push'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-global-dependencies-branches }}"
@@ -252,23 +256,25 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          # For fork-origin PRs, we can't directly use matrix.branch as the branch does not exist in the 
-          # Code Editor repo. The branch only exists in the fork.
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || matrix.branch }}
+          ref: ${{ matrix.branch }}
           submodules: recursive
-      
-      - name: Make sure code changes from PR branch are present
-        run: |
-          ls -l
 
-      - name: Update security scan script from main
+      - name: Update scripts from main branch
         run: |
           # Older branches may not have the latest versions of the
-          # security scan scripts. So we download the latest one from main
-          echo "Downloading latest security-scan.sh script from main branch"
-          curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/security-scan.sh" -o scripts/security-scan.sh
-          sudo chmod +x scripts/security-scan.sh
-          echo "Updated security-scan.sh to latest version from main"
+          # security scan scripts. So we download the latest scripts folder from main
+          echo "Downloading latest scripts folder from main branch"
+
+          cd scripts
+          rm -f *.sh
+        
+          gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
+          while read filename; do
+            gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
+          done
+          sudo chmod +x *.sh
+          
+          echo "Updated scripts folder to latest version from main"
       
       - name: Set up environment
         run: |
@@ -340,24 +346,17 @@ jobs:
       
       - name: Create Success Indicator File
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
           MATRIX_BRANCH: ${{ matrix.branch }}
           TARGET: ${{ matrix.target }}
         run: |
-          # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "$EVENT_NAME" = "pull_request_target" ]; then
-            output_branch="$OUTPUT_BRANCH_NAME"
-          else
-            output_branch="$MATRIX_BRANCH"
-          fi
+          output_branch="$MATRIX_BRANCH"
           echo "PASS" > "scan-success-$TARGET-${output_branch}.txt"
 
       - name: Upload Success Indicator File
         uses: actions/upload-artifact@v4
         with:
-          name: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: scan-success-${{ matrix.target }}-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: scan-success-${{ matrix.target }}-${{ matrix.branch }}
+          path: scan-success-${{ matrix.target }}-${{ matrix.branch }}.txt
           retention-days: 90
 
       - name: Publish Scan Successful Metric
@@ -373,7 +372,7 @@ jobs:
             --value 1
 
       - name: Publish Failure Metrics
-        if: failure() && github.event_name == 'schedule'
+        if: failure() && github.event_name != 'workflow_dispatch'
         env:
           REPOSITORY: ${{ github.repository }}
           TARGET: ${{ matrix.target }}
@@ -405,19 +404,11 @@ jobs:
       
       - name: Check if branch was successful for all targets
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
           MATRIX_BRANCH: ${{ matrix.branch }}
         run: |
           # Parse targets from environment variable
           readarray -t targets < <(jq -r '.[]' <<< "$CODE_EDITOR_TARGETS")
-          
-          # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "$EVENT_NAME" = "pull_request_target" ]; then
-            check_branch="$OUTPUT_BRANCH_NAME"
-          else
-            check_branch="$MATRIX_BRANCH"
-          fi
+          check_branch="$MATRIX_BRANCH"
           
           all_success=true
           
@@ -451,8 +442,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: scan-success-branch-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: scan-success-branch-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: scan-success-branch-${{ matrix.branch }}
+          path: scan-success-branch-${{ matrix.branch }}.txt
           retention-days: 90
   
   security-scan-global-dependencies:
@@ -489,20 +480,26 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          # For fork-origin PRs, we can't directly use matrix.branch as the branch does not exist in the 
-          # Code Editor repo. The branch only exists in the fork.
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || matrix.branch }}
+          ref: ${{ matrix.branch }}
           submodules: recursive
 
-      - name: Update security scan script from main
+      - name: Update scripts from main branch
         env:
           REPOSITORY: ${{ github.repository }}
         run: |          
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest one from main
           echo "Downloading latest security-scan.sh script from main branch"
-          curl -sSL "https://raw.githubusercontent.com/$REPOSITORY/main/scripts/security-scan.sh" -o scripts/security-scan.sh
-          sudo chmod +x scripts/security-scan.sh
+          
+          cd scripts
+          rm -f *.sh
+        
+          gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
+          while read filename; do
+            gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
+          done
+          sudo chmod +x *.sh
+
           echo "Updated security-scan.sh to latest version from main"
       
       - name: Install Security Scan Dependencies
@@ -554,27 +551,20 @@ jobs:
       
       - name: Create Global Success Indicator File
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          OUTPUT_BRANCH_NAME: ${{ needs.get-branches-to-scan.outputs.output-branch-name }}
           MATRIX_BRANCH: ${{ matrix.branch }}
         run: |
-          # For PR events, use base_ref as output branch name, otherwise use actual branch
-          if [ "$EVENT_NAME" = "pull_request_target" ]; then
-            output_branch="$OUTPUT_BRANCH_NAME"
-          else
-            output_branch="$MATRIX_BRANCH"
-          fi
+          output_branch="$MATRIX_BRANCH"
           echo "PASS" > "global-scan-success-${output_branch}.txt"
 
       - name: Upload Global Success Indicator File
         uses: actions/upload-artifact@v4
         with:
-          name: global-scan-success-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}
-          path: global-scan-success-${{ github.event_name == 'pull_request_target' && needs.get-branches-to-scan.outputs.output-branch-name || matrix.branch }}.txt
+          name: global-scan-success-${{ matrix.branch }}
+          path: global-scan-success-${{ matrix.branch }}.txt
           retention-days: 90
       
       - name: Publish Failure Metrics
-        if: failure() && github.event_name == 'schedule'
+        if: failure() && github.event_name != 'workflow_dispatch'
         env:
           REPOSITORY: ${{ github.repository }}
           BRANCH: ${{ matrix.branch }}
@@ -588,12 +578,32 @@ jobs:
             --dimensions "Repository=$REPOSITORY,Workflow=GlobalDependenciesSecurityScan,Branch=$BRANCH" \
             --value 1
   
+  invoke-build-workflow:
+    name: Invoke Build Workflow
+    runs-on: ubuntu-latest
+    needs: [generate-security-scan-output, security-scan-global-dependencies]
+    if: success() && (github.event_name != 'workflow_dispatch' || !inputs.standalone-run)
+    permissions:
+      actions: write # Required for workflow invocation
+      contents: read
+    steps:
+      - name: Trigger Build Workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "build-targets.yml",
+              ref: context.ref
+            })
+          
   handle-failures:
     name: Handle Failures
     runs-on: ubuntu-latest
-    needs: [get-branches-to-scan, generate-security-scan-output]
+    needs: [generate-security-scan-output]
     environment: security-scanning-workflow-env
-    if: failure() && github.event_name == 'schedule'
+    if: failure() && github.event_name != 'workflow_dispatch'
     permissions:
       id-token: write # Required for OIDC
     env:
