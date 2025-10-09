@@ -272,6 +272,7 @@ jobs:
           while read filename; do
             gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
           done
+          ls
           sudo chmod +x *.sh
           
           echo "Updated scripts folder to latest version from main"
