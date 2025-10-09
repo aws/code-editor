@@ -274,7 +274,6 @@ jobs:
           while read filename; do
             gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
           done
-          ls
           sudo chmod +x *.sh
           
           echo "Updated scripts folder to latest version from main"
@@ -290,6 +289,9 @@ jobs:
           TARGET: ${{ matrix.target }}
         run: |
           ./scripts/prepare-src.sh "$TARGET"
+          ls
+          cd code-editor-src
+          ls
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -308,7 +310,6 @@ jobs:
         run: |
           echo "Installing CycloneDX SBOM for npm"
           npm i -g @cyclonedx/cyclonedx-npm
-
 
       - name: Run Security Scan
         env:
