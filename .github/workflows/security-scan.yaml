@@ -266,8 +266,9 @@ jobs:
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest scripts folder from main
           echo "Downloading latest scripts folder from main branch"
-
+          ls -la
           cd scripts
+          ls -la
           rm -f *.sh
         
           gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
@@ -275,14 +276,15 @@ jobs:
             gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
           done
           sudo chmod +x *.sh
+          ls -la
           
           echo "Updated scripts folder to latest version from main"
       
-      - name: Set up environment
-        run: |
-          echo "Installing required dependencies"
-          sudo apt-get update
-          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
+      # - name: Set up environment
+      #   run: |
+      #     echo "Installing required dependencies"
+      #     sudo apt-get update
+      #     sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
 
       - name: Run patches script
         env:
@@ -291,6 +293,7 @@ jobs:
           ls -la
           cd scripts
           ls -la
+          cd ..
           ./scripts/prepare-src.sh "$TARGET"
           ls -la
           cd code-editor-src
