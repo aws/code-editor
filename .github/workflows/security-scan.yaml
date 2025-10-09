@@ -627,6 +627,7 @@ jobs:
           aws-region: us-east-1
       - name: Report failure
         run: |
+          echo "Test"
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
             --metric-name "ExecutionsFailed" \
