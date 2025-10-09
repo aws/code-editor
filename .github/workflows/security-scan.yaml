@@ -599,10 +599,24 @@ jobs:
   
   invoke-build-workflow:
     name: Invoke Build Workflow
+    runs-on: ubuntu-latest
     needs: [generate-security-scan-output, security-scan-global-dependencies]
     if: success() && (github.event_name != 'workflow_dispatch' || !inputs.standalone-run)
-    uses: ./.github/workflows/build-targets.yaml
-
+    permissions:
+      actions: write # Required for workflow invocation
+      contents: read
+    steps:
+      - name: Trigger Build Workflow
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "build-targets.yaml",
+              ref: context.ref
+            })
+          
   handle-failures:
     name: Handle Failures
     runs-on: ubuntu-latest
