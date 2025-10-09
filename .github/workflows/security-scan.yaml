@@ -266,38 +266,37 @@ jobs:
           # Older branches may not have the latest versions of the
           # security scan scripts. So we download the latest scripts folder from main
           echo "Downloading latest scripts folder from main branch"
-          ls -la
+
           cd scripts
-          ls -la
           rm -f *.sh
         
           gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
           while read filename; do
-            gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
+            echo "Downloading: $filename"
+            raw_url="https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/$filename"
+            curl -sSL "$raw_url" -o "$filename"
+            if [ -s "$filename" ]; then
+              echo "✓ Successfully downloaded: $filename ($(wc -c < "$filename") bytes)"
+            else
+              echo "✗ Failed to download: $filename"
+              exit 1
+            fi
           done
           sudo chmod +x *.sh
-          ls -la
           
           echo "Updated scripts folder to latest version from main"
       
-      # - name: Set up environment
-      #   run: |
-      #     echo "Installing required dependencies"
-      #     sudo apt-get update
-      #     sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
+      - name: Set up environment
+        run: |
+          echo "Installing required dependencies"
+          sudo apt-get update
+          sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
 
       - name: Run patches script
         env:
           TARGET: ${{ matrix.target }}
         run: |
-          ls -la
-          cd scripts
-          ls -la
-          cd ..
           ./scripts/prepare-src.sh "$TARGET"
-          ls -la
-          cd code-editor-src
-          ls
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -506,7 +505,15 @@ jobs:
         
           gh api "/repos/${{ github.repository }}/contents/scripts?ref=main" --jq '.[] | select(.type == "file" and (.name | endswith(".sh"))) | .name' | \
           while read filename; do
-            gh api "/repos/${{ github.repository }}/contents/scripts/$filename?ref=main" --jq -r '.content' | base64 -d > "$filename"
+            echo "Downloading: $filename"
+            raw_url="https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/$filename"
+            curl -sSL "$raw_url" -o "$filename"
+            if [ -s "$filename" ]; then
+              echo "✓ Successfully downloaded: $filename ($(wc -c < "$filename") bytes)"
+            else
+              echo "✗ Failed to download: $filename"
+              exit 1
+            fi
           done
           sudo chmod +x *.sh
 
