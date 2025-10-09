@@ -240,27 +240,27 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.j
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/build/npm/dirs.js
-===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -43,6 +43,7 @@ const dirs = [
- 	'extensions/php-language-features',
- 	'extensions/references-view',
- 	'extensions/sagemaker-extension',
-+	'extensions/sagemaker-terminal-crash-mitigation',
- 	'extensions/search-result',
- 	'extensions/simple-browser',
- 	'extensions/tunnel-forwarding',
 Index: third-party-src/build/gulpfile.extensions.js
 ===================================================================
 --- third-party-src.orig/build/gulpfile.extensions.js
 +++ third-party-src/build/gulpfile.extensions.js
-@@ -65,6 +65,7 @@ const compilations = [
- 	'extensions/search-result/tsconfig.json',
+@@ -62,6 +62,7 @@ const compilations = [
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
 +	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/tunnel-forwarding/tsconfig.json',
  	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
+Index: third-party-src/build/npm/dirs.js
+===================================================================
+--- third-party-src.orig/build/npm/dirs.js
++++ third-party-src/build/npm/dirs.js
+@@ -40,6 +40,7 @@ const dirs = [
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-idle-extension',
++	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',

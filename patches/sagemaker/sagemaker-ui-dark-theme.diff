@@ -217,18 +217,19 @@ Index: third-party-src/.vscode-test.js
 ===================================================================
 --- third-party-src.orig/.vscode-test.js
 +++ third-party-src/.vscode-test.js
-@@ -79,6 +79,11 @@ const extensions = [
-        workspaceFolder: `extensions/vscode-api-tests/testworkspace.code-workspace`,
- 		mocha: { timeout: 60_000 },
- 		files: 'extensions/vscode-api-tests/out/workspace-tests/**/*.test.js',
-+   },
-+	{
+@@ -63,6 +63,11 @@ const extensions = [
+ 		mocha: { timeout: 60_000 }
+ 	},
+ 	{
 +		label: 'sagemaker-ui-dark-theme',
 +		workspaceFolder: `extensions/sagemaker-ui-dark-theme/test-workspace`,
 +		mocha: { timeout: 60_000 }
-	}
- ];
- 
++	},
++	{
+ 		label: 'microsoft-authentication',
+ 		mocha: { timeout: 60_000 }
+ 	},
+
 Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
 ===================================================================
 --- /dev/null
