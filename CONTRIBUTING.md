@@ -21,9 +21,9 @@ reported the issue. Please try to include as much information as you can. Detail
 
 
 ## Ensure security before each commit
-Configure git-secrets and run it before every commit. Make sure that secrets are not committed to Git version control.
+1. Configure git-secrets and run it before every commit. Make sure that secrets are not committed to Git version  control.
 Follow [this guide](https://github.com/awslabs/git-secrets) before making a commit and push to your branch.
-
+1. All variable interpolation should be considered unsafe by default. Extract all GitHub expressions to an environment variable before using them in inline scripts for GitHub Actions. Refer GitHub's guide [here](https://docs.github.com/en/enterprise-cloud@latest/actions/reference/security/secure-use#use-an-intermediate-environment-variable) for more information.
 
 ## Contributing via Pull Requests
 Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
