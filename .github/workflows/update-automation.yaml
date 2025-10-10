@@ -206,7 +206,10 @@ jobs:
           find code-editor-src -name "package-lock.json" -type f | while read -r file; do
             rel_path="${file#code-editor-src/}"
             third_party_file="third-party-src/$rel_path"
-            
+            # Skip files in node_modules
+            if [[ "$rel_path" == node_modules/* ]]; then
+              continue
+            fi
             if [ ! -f "$third_party_file" ] || ! cmp -s "$file" "$third_party_file"; then
               dest_dir="$OVERRIDE_PATH/$(dirname "$rel_path")"
               mkdir -p "$dest_dir"
