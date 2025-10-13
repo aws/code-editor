@@ -603,7 +603,7 @@ jobs:
     name: Invoke Build Workflow
     runs-on: ubuntu-latest
     needs: [generate-security-scan-output, security-scan-global-dependencies]
-    if: success() && (github.event_name != 'workflow_dispatch' || !inputs.standalone-run)
+    if: success() && (github.event_name != 'workflow_dispatch' || !inputs.standalone-run) && github.event_name != 'schedule'
     permissions:
       actions: write # Required for workflow invocation
       contents: read
