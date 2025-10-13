@@ -440,6 +440,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
           
       - name: Calculate and publish release lag metric
@@ -479,6 +480,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
       - name: Send notification
         if: steps.aws-creds.outcome == 'success'
@@ -506,6 +508,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
       - name: Publish success metrics
         if: steps.aws-creds.outcome == 'success'
@@ -536,6 +539,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
       - name: Publish failure metrics
         if: steps.aws-creds.outcome == 'success'

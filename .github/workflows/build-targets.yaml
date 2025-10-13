@@ -95,6 +95,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
       - name: Report failure
         if: steps.aws-creds.outcome == 'success'

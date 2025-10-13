@@ -238,6 +238,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
           role-session-name: scan-${{ matrix.target }}-${{matrix.branch}}
       
@@ -475,6 +476,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
           role-session-name: scan-global-dependencies-${{matrix.branch}}
+          role-duration-seconds: 900
       
       - name: Publish Scan Invoked metric
         env:
@@ -634,6 +636,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 900
           aws-region: us-east-1
       - name: Report failure
         run: |
