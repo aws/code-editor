@@ -38,6 +38,25 @@ jobs:
         run: |
           ./scripts/prepare-src.sh "$BUILD_TARGET"
       
+      # Verify CSP line exists in target TypeScript file
+      - name: Check CSP configuration in webClientServer.ts
+        if: matrix.build-target == 'code-editor-sagemaker-server'
+        run: |
+          TARGET_FILE="code-editor-src/src/vs/server/node/webClientServer.ts"
+          REQUIRED_TEXT="connect-src \\'self\\' ws: wss: https://main.vscode-cdn.net http://localhost:* https://localhost:* https://login.microsoftonline.com/ https://update.code.visualstudio.com https://*.vscode-unpkg.net/ https://default.exp-tas.com/vscode/ab https://vscode-sync.trafficmanager.net https://vscode-sync-insiders.trafficmanager.net https://*.gallerycdn.vsassets.io https://marketplace.visualstudio.com https://openvsxorg.blob.core.windows.net https://az764295.vo.msecnd.net  https://code.visualstudio.com https://*.gallery.vsassets.io https://*.rel.tunnels.api.visualstudio.com wss://*.rel.tunnels.api.visualstudio.com https://*.servicebus.windows.net/ https://vscode.blob.core.windows.net https://vscode.search.windows.net https://vsmarketplacebadges.dev https://vscode.download.prss.microsoft.com https://download.visualstudio.microsoft.com https://*.vscode-unpkg.net https://open-vsx.org;"
+
+          if [ ! -f "$TARGET_FILE" ]; then
+            echo "❌ FAIL: Target file $TARGET_FILE does not exist."
+            exit 1
+          fi
+
+          if grep -F "$REQUIRED_TEXT" "$TARGET_FILE" > /dev/null; then
+            echo "✅ PASS: Required CSP text exists."
+          else
+            echo "❌ FAIL: Required CSP text NOT found in $TARGET_FILE"
+            exit 1
+          fi
+      
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
