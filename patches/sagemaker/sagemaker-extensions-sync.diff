@@ -2,9 +2,9 @@ Index: third-party-src/build/gulpfile.extensions.js
 ===================================================================
 --- third-party-src.orig/build/gulpfile.extensions.js
 +++ third-party-src/build/gulpfile.extensions.js
-@@ -62,6 +62,7 @@ const compilations = [
- 	'extensions/simple-browser/tsconfig.json',
+@@ -63,6 +63,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
 +	'extensions/sagemaker-extensions-sync/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
@@ -14,9 +14,9 @@ Index: third-party-src/build/npm/dirs.js
 ===================================================================
 --- third-party-src.orig/build/npm/dirs.js
 +++ third-party-src/build/npm/dirs.js
-@@ -40,6 +40,7 @@ const dirs = [
- 	'extensions/references-view',
+@@ -41,6 +41,7 @@ const dirs = [
  	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-idle-extension',
  	'extensions/sagemaker-terminal-crash-mitigation',
 +	'extensions/sagemaker-extensions-sync',
  	'extensions/sagemaker-open-notebook-extension',
@@ -294,7 +294,7 @@ Index: third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
-@@ -0,0 +1,152 @@
+@@ -0,0 +1,168 @@
 +import * as fs from "fs/promises";
 +import * as path from "path";
 +import * as vscode from 'vscode';
@@ -383,18 +383,34 @@ Index: third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
 +			throw new Error(`Extension path missing for ${prePackagedExtensionInfo.identifier}`);
 +		}
 +
++		// Remove the currently installed version if it exists
++		if (installedExtensionInfo?.path) {
++			try {
++				console.log(`${LOG_PREFIX} Removing existing extension ${installedExtensionInfo.path}`);
++				const stats = await fs.lstat(installedExtensionInfo.path);
++				if (stats.isSymbolicLink()) {
++					await fs.unlink(installedExtensionInfo.path);
++				} else if (stats.isDirectory()) {
++					await fs.rm(installedExtensionInfo.path, { recursive: true });
++				}
++			} catch (error) {
++				if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
++					console.error(`${LOG_PREFIX} Error removing existing extension:`, error);
++				}
++			}
++		}
++
 +		const targetPath = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, path.basename(prePackagedExtensionInfo.path));
 +
-+		// Remove existing symlink or directory if it exists
++		// Remove existing target symlink if it exists
 +		try {
-+			console.log(`${LOG_PREFIX} Removing existing folder ${targetPath}`);
++			console.log(`${LOG_PREFIX} Removing existing target ${targetPath}`);
 +			await fs.unlink(targetPath);
 +		} catch (error) {
 +			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-+				console.error(`${LOG_PREFIX} Error removing existing extension:`, error);
-+				throw error;
++				console.error(`${LOG_PREFIX} Error removing existing target:`, error);
 +			}
-+			// if file already doesn't exist then keep going
++			// Continue if previous link didn't exist
 +		}
 +
 +		// Create new symlink
