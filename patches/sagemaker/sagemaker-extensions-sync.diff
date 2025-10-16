@@ -294,7 +294,7 @@ Index: third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,168 @@
 +import * as fs from "fs/promises";
 +import * as path from "path";
 +import * as vscode from 'vscode';
@@ -401,6 +401,17 @@ Index: third-party-src/extensions/sagemaker-extensions-sync/src/utils.ts
 +		}
 +
 +		const targetPath = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, path.basename(prePackagedExtensionInfo.path));
++
++		// Remove existing target symlink if it exists
++		try {
++			console.log(`${LOG_PREFIX} Removing existing target ${targetPath}`);
++			await fs.unlink(targetPath);
++		} catch (error) {
++			if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
++				console.error(`${LOG_PREFIX} Error removing existing target:`, error);
++			}
++			// Continue if previous link didn't exist
++		}
 +
 +		// Create new symlink
 +		try {
