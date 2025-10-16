@@ -10,7 +10,7 @@ Index: third-party-src/build/gulpfile.extensions.js
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
  	'extensions/post-startup-notifications/tsconfig.json',
-Index: code-editor-src/build/npm/dirs.js
+Index: third-party-src/build/npm/dirs.js
 ===================================================================
 --- third-party-src.orig/build/npm/dirs.js
 +++ third-party-src/build/npm/dirs.js
