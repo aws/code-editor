@@ -17,12 +17,12 @@ Index: third-party-src/product.json
  	"nameShort": "Code Editor",
  	"nameLong": "Code Editor",
  	"codeEditorVersion": "1.0.0",
-@@ -44,6 +54,9 @@
- 		"https://console.aws.amazon.com",
+@@ -45,6 +55,9 @@
  		"https://console.amazonaws-us-gov.com",
  		"https://console.amazonaws.cn",
--		"https://aws.amazon.com"
-+		"https://aws.amazon.com",
+ 		"https://aws.amazon.com",
+-		"https://*.amazon.com"
++		"https://*.amazon.com",
 +		"https://open-vsx.org",
 +		"https://oidc.*.amazonaws.com",
 +		"https://device.sso.*.amazonaws.com"
