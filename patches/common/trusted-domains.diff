@@ -92,7 +92,7 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -82,5 +82,15 @@
+@@ -82,5 +82,16 @@
  				"publisherDisplayName": "Microsoft"
  			}
  		}
@@ -105,6 +105,7 @@ Index: third-party-src/product.json
 +		"https://console.aws.amazon.com",
 +		"https://console.amazonaws-us-gov.com",
 +		"https://console.amazonaws.cn",
-+		"https://aws.amazon.com"
++		"https://aws.amazon.com",
++		"https://*.amazon.com"
  	]
  }
