@@ -388,3 +388,32 @@ Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
  import './services/path/browser/pathService.js';
  import './services/themes/browser/browserHostColorSchemeService.js';
  import './services/encryption/browser/encryptionService.js';
+Index: third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/localization/common/localizationsActions.ts
++++ third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+@@ -12,6 +12,7 @@ import { ServicesAccessor } from '../../
+ import { ILanguagePackItem, ILanguagePackService } from '../../../../platform/languagePacks/common/languagePacks.js';
+ import { ILocaleService } from '../../../services/localization/common/locale.js';
+ import { IExtensionsWorkbenchService } from '../../extensions/common/extensions.js';
++import { language } from '../../../../base/common/platform.js';
+ 
+ export class ConfigureDisplayLanguageAction extends Action2 {
+ 	public static readonly ID = 'workbench.action.configureLocale';
+@@ -37,6 +38,16 @@ export class ConfigureDisplayLanguageAct
+ 
+ 		const installedLanguages = await languagePackService.getInstalledLanguages();
+ 
++		// Clean any existing (Current) text and add it back only to the correct locale
++		installedLanguages?.forEach(lang => {
++			if (lang.description) {
++				lang.description = lang.description.replace(/ \(Current\)$/, '');
++			}
++			if (lang.id?.toLowerCase() === language.toLowerCase()) {
++				lang.description = (lang.description || '') + localize('currentDisplayLanguage', " (Current)");
++			}
++		});
++
+ 		const disposables = new DisposableStore();
+ 		const qp = disposables.add(quickInputService.createQuickPick<ILanguagePackItem>({ useSeparators: true }));
+ 		qp.matchOnDescription = true;
