@@ -38,3 +38,4 @@ sagemaker/sagemaker-ui-post-startup.diff
 sagemaker/sagemaker-extension-smus-support.diff
 sagemaker/post-startup-notifications.diff
 sagemaker/sagemaker-extensions-sync.diff
+sagemaker/fix-port-forwarding.diff

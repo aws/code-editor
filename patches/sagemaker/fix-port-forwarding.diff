@@ -1,0 +1,13 @@
+Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+===================================================================
+--- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ third-party-src/src/vs/code/browser/workbench/workbench.ts
+@@ -635,7 +635,7 @@ function readCookie(name: string): strin
+ 			const localhostMatch = extractLocalHostUriMetaDataForPortMapping(resolvedUri)
+ 			if (localhostMatch && resolvedUri.authority !== location.host) {
+ 				if (config?.productConfiguration?.rootEndpoint) {
+-					const proxyUri = `${config?.productConfiguration.rootEndpoint}/ports/${localhostMatch.port}/`;
++					const proxyUri = `${config?.productConfiguration.rootEndpoint}/codeeditor/default/ports/${localhostMatch.port}/`;
+ 					resolvedUri = URI.parse(new URL(proxyUri, window.location.href).toString())
+ 				} else {
+ 					throw new Error(`Failed to resolve external URI: ${uri.toString()}. Could not determine base url because productConfiguration missing.`)
