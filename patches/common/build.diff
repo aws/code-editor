@@ -37,12 +37,13 @@ Index: third-party-src/package.json
      "eslint": "^9.11.1",
      "eslint-formatter-compact": "^8.40.0",
      "eslint-plugin-header": "3.1.1",
-@@ -221,9 +220,24 @@
+@@ -221,9 +220,20 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
 -    "kerberos@2.1.1": {
 -      "node-addon-api": "7.1.0"
+-    }
 +    "@types/node-fetch@^2.5.12": {
 +      "form-data": "^3.0.4"
 +    },
@@ -54,12 +55,8 @@ Index: third-party-src/package.json
 +      "tar-fs": "^3.1.1",
 +      "koa": "^3.0.3"
 +    },
-+    
 +    "postcss": "^8.4.31",
-+
-+    "@vscode/vscode-perf@^0.0.19": {
-+      "playwright": "^1.55.1"
-     }
++    "playwright": "^1.55.1"
 +
    },
    "repository": {
