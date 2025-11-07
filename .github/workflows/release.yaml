@@ -13,6 +13,7 @@ jobs:
       COMMIT_SHA: ${{ github.sha }}
       VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
       SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
