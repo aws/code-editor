@@ -287,6 +287,12 @@ jobs:
             fi
           done
           
+      - name: Update excluded packages
+        env:
+          LATEST_CODE_OSS_TAG: ${{ needs.update-automation.outputs.latest-code-oss-tag }}
+        run: |
+          jq --arg version "$LATEST_CODE_OSS_TAG" 'to_entries | map(if .key | startswith("code-oss-dev@") then .key = "code-oss-dev@" + $version else . end) | from_entries' build-tools/oss-attribution/excluded-packages.json > tmp.json && mv tmp.json build-tools/oss-attribution/excluded-packages.json
+          
       - name: Generate unified OSS attribution
         run: |
           ./scripts/generate-oss-attribution.sh --command generate_unified_oss_attribution
