@@ -1,0 +1,343 @@
+name: Smoke Tests for SageMaker
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  smoke-tests-sagemaker:
+    name: Run Smoke Tests for SageMaker
+    runs-on: ubuntu-latest
+    environment: smoke-tests-sagemaker-workflow-env
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      COMMIT_SHA: ${{ github.sha }}
+      SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
+      GH_TOKEN: ${{ github.token }}
+      AWS_REGION: us-east-2
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+      SAGEMAKER_DOMAIN_NAME: ${{ secrets.SAGEMAKER_DOMAIN_NAME }}
+      SAGEMAKER_EXECUTION_ROLE_ARN: ${{ secrets.SAGEMAKER_EXECUTION_ROLE_ARN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download sagemaker artifacts by commit ID
+        run: |
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
+
+      - name: Check artifacts exist
+        run: |
+          ls -la
+
+          FILES=(
+              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          )
+          
+          # Check build artifact exists
+          for file in "${FILES[@]}"; do
+              if [ ! -f "$file" ]; then
+              echo "Error: $file not found for commit $COMMIT_SHA"
+              exit 1
+              fi
+          done
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.SAGEMAKER_EXECUTION_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Extract artifacts
+        run: |
+          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+
+      - name: Build and push Docker image
+        run: | 
+          # Login to ECR
+          ECR_REGISTRY="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+          
+          # Create image tag with branch-commit format
+          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
+          
+          # Build image
+          docker build -f .github/workflows/dockerfiles/Dockerfile.sagemaker -t $ECR_REPOSITORY:$IMAGE_TAG .
+          
+          # Tag image
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          # Push image
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG > /dev/null
+          echo "Docker image pushed successfully"
+          
+          # Get and store the image SHA digest
+          IMAGE_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG | cut -d'@' -f2)
+          IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY@$IMAGE_SHA"
+          
+          echo "ECR_IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          echo "Image pushed successfully with SHA: ${IMAGE_SHA:0:12}..."
+
+      - name: Create SageMaker code editor image
+        run: |
+          # Find SageMaker domain by name
+          DOMAIN_ID=$(aws sagemaker list-domains --query "Domains[?DomainName=='$SAGEMAKER_DOMAIN_NAME'].DomainId" --output text)
+          
+          if [ -z "$DOMAIN_ID" ]; then
+            echo "Error: SageMaker domain '$SAGEMAKER_DOMAIN_NAME' not found"
+            exit 1
+          fi
+          
+          echo "SageMaker domain found successfully"
+          echo "SAGEMAKER_DOMAIN_ID=$DOMAIN_ID" >> $GITHUB_ENV
+          
+          # Create SageMaker image
+          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          IMAGE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
+          aws sagemaker create-image \
+            --image-name "$IMAGE_NAME" \
+            --role-arn $SAGEMAKER_EXECUTION_ROLE_ARN
+          
+          # Wait for image to be ready (max 30 retries = 5 minutes)
+          echo "Waiting for SageMaker image to be ready..."
+          RETRY_COUNT=0
+          MAX_RETRIES=30
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            STATUS=$(aws sagemaker describe-image --image-name "$IMAGE_NAME" --query 'ImageStatus' --output text)
+            echo "Image status: $STATUS (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            if [ "$STATUS" = "CREATED" ]; then
+              break
+            elif [ "$STATUS" = "CREATE_FAILED" ]; then
+              echo "Image creation failed"
+              exit 1
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 10
+          done
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "Timeout waiting for image to be ready"
+            exit 1
+          fi
+          
+          # Create image version
+          aws sagemaker create-image-version \
+            --image-name "$IMAGE_NAME" \
+            --base-image "$ECR_IMAGE_URI"
+          
+          echo "SAGEMAKER_IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Attach image to domain
+        run: |
+          # Wait for image version to be ready (100 seconds)
+          echo "Waiting for image version to be ready..."
+          RETRY_COUNT=0
+          MAX_RETRIES=10
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            VERSION_STATUS=$(aws sagemaker describe-image-version --image-name "$SAGEMAKER_IMAGE_NAME" --query 'ImageVersionStatus' --output text)
+            echo "Image version status: $VERSION_STATUS (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            if [ "$VERSION_STATUS" = "CREATED" ]; then
+              break
+            elif [ "$VERSION_STATUS" = "CREATE_FAILED" ]; then
+              echo "Image version creation failed"
+              exit 1
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 10
+          done
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "Timeout waiting for image version to be ready"
+            exit 1
+          fi
+          
+          # Create universal AppImageConfig (if it doesn't exist)
+          APP_IMAGE_CONFIG_NAME="code-editor-app-config"
+          if ! aws sagemaker describe-app-image-config --app-image-config-name "$APP_IMAGE_CONFIG_NAME" >/dev/null 2>&1; then
+            aws sagemaker create-app-image-config \
+              --app-image-config-name "$APP_IMAGE_CONFIG_NAME" \
+              --code-editor-app-image-config '{}'
+            echo "Created universal AppImageConfig: $APP_IMAGE_CONFIG_NAME"
+          else
+            echo "Universal AppImageConfig already exists: $APP_IMAGE_CONFIG_NAME"
+          fi
+          
+          # Get existing custom images and append new one
+          EXISTING_IMAGES=$(aws sagemaker describe-domain --domain-id "$SAGEMAKER_DOMAIN_ID" --query 'DefaultUserSettings.CodeEditorAppSettings.CustomImages' --output json 2>/dev/null || echo '[]')
+          
+          # Create new custom images array with existing + new image
+          NEW_IMAGES=$(echo "$EXISTING_IMAGES" | jq --arg imageName "$SAGEMAKER_IMAGE_NAME" --arg configName "$APP_IMAGE_CONFIG_NAME" '. + [{"ImageName": $imageName, "ImageVersionNumber": 1, "AppImageConfigName": $configName}] | unique_by(.ImageName)')
+          
+          # Update domain with all custom images
+          aws sagemaker update-domain \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --default-user-settings "{\"CodeEditorAppSettings\": {\"CustomImages\": $NEW_IMAGES}}"
+          
+          echo "Image attached to domain successfully"
+
+      - name: Create SageMaker code editor space
+        run: |
+          # Create space name using branch-commit format
+          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          SPACE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
+          
+          # Create the space with project ownership
+          aws sagemaker create-space \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --space-name "$SPACE_NAME" \
+            --ownership-settings '{
+              "OwnerUserProfileName": "'$(aws sagemaker list-user-profiles --domain-id "$SAGEMAKER_DOMAIN_ID" --query 'UserProfiles[0].UserProfileName' --output text)'"
+            }' \
+            --space-sharing-settings '{
+              "SharingType": "Private"
+            }' \
+            --space-settings '{
+              "AppType": "CodeEditor",
+              "RemoteAccess": "DISABLED",
+              "SpaceStorageSettings": {
+                "EbsStorageSettings": {
+                  "EbsVolumeSizeInGb": 16
+                }
+              },
+              "CodeEditorAppSettings": {
+                "DefaultResourceSpec": {
+                  "SageMakerImageArn": "arn:aws:sagemaker:'$AWS_REGION':'$AWS_ACCOUNT_ID':image/'$SAGEMAKER_IMAGE_NAME'",
+                  "InstanceType": "ml.t3.medium"
+                }
+              }
+            }'
+          
+          echo "Created SageMaker space: $SPACE_NAME"
+          echo "SAGEMAKER_SPACE_NAME=$SPACE_NAME" >> $GITHUB_ENV
+
+      - name: Start SageMaker code editor space
+        run: |
+          # Wait for space to be ready (200 seconds)
+          echo "Waiting for space to be ready..."
+          RETRY_COUNT=0
+          MAX_RETRIES=20
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            SPACE_STATUS=$(aws sagemaker describe-space --domain-id "$SAGEMAKER_DOMAIN_ID" --space-name "$SAGEMAKER_SPACE_NAME" --query 'Status' --output text)
+            echo "Space status: $SPACE_STATUS (attempt $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            if [ "$SPACE_STATUS" = "InService" ]; then
+              break
+            elif [ "$SPACE_STATUS" = "Failed" ]; then
+              echo "Space creation failed"
+              exit 1
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 10
+          done
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "Timeout waiting for space to be ready"
+            exit 1
+          fi
+          
+          # Create app to start the space
+          aws sagemaker create-app \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --space-name "$SAGEMAKER_SPACE_NAME" \
+            --app-type "CodeEditor" \
+            --app-name "default"
+          
+          echo "Started SageMaker space: $SAGEMAKER_SPACE_NAME"
+
+      - name: E2E testing
+        run: |
+          # Waiting for app to be in service for 8 minutes
+          echo "Waiting for app to be in service..."
+          RETRY_COUNT=0
+          MAX_RETRIES=16
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            APP_STATUS=$(aws sagemaker describe-app --domain-id "$SAGEMAKER_DOMAIN_ID" --space-name "$SAGEMAKER_SPACE_NAME" --app-type "CodeEditor" --app-name "default" --query 'Status' --output text 2>/dev/null || echo "NotFound")
+            echo "App status: $APP_STATUS (check $((RETRY_COUNT + 1))/$MAX_RETRIES)"
+            
+            if [ "$APP_STATUS" = "InService" ]; then
+              echo "App is running successfully"
+              break
+            elif [ "$APP_STATUS" = "Failed" ]; then
+              echo "App failed to start"
+              exit 1
+            elif [ "$APP_STATUS" = "Deleted" ]; then
+              echo "App was deleted"
+              exit 1
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              sleep 30
+            fi
+          done
+          
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "Timeout waiting for app to be in service"
+            exit 1
+          fi
+          echo "TESTING NOT YET IMPLEMENTED"
+
+      - name: Cleanup resources
+        if: always()
+        run: |
+          echo "Starting cleanup of resources..."
+          
+          # Delete app first
+          echo "Deleting app..."
+          aws sagemaker delete-app \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --space-name "$SAGEMAKER_SPACE_NAME" \
+            --app-type "CodeEditor" \
+            --app-name "default"
+          
+          # Wait for app to be deleted
+          echo "Waiting for app to be deleted..."
+          RETRY_COUNT=0
+          MAX_RETRIES=10
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            APP_STATUS=$(aws sagemaker describe-app --domain-id "$SAGEMAKER_DOMAIN_ID" --space-name "$SAGEMAKER_SPACE_NAME" --app-type "CodeEditor" --app-name "default" --query 'Status' --output text 2>/dev/null || echo "Deleted")
+            echo "App status: $APP_STATUS"
+            if [ "$APP_STATUS" = "Deleted" ]; then
+              break
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            sleep 10
+          done
+          
+          # Delete space
+          echo "Deleting space..."
+          aws sagemaker delete-space \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --space-name "$SAGEMAKER_SPACE_NAME"
+          
+          # Remove image from domain
+          echo "Removing image from domain..."
+          EXISTING_IMAGES=$(aws sagemaker describe-domain --domain-id "$SAGEMAKER_DOMAIN_ID" --query 'DefaultUserSettings.CodeEditorAppSettings.CustomImages' --output json 2>/dev/null || echo '[]')
+          FILTERED_IMAGES=$(echo "$EXISTING_IMAGES" | jq --arg imageName "$SAGEMAKER_IMAGE_NAME" 'map(select(.ImageName != $imageName))')
+          aws sagemaker update-domain \
+            --domain-id "$SAGEMAKER_DOMAIN_ID" \
+            --default-user-settings "{\"CodeEditorAppSettings\": {\"CustomImages\": $FILTERED_IMAGES}}"
+          
+          # Delete SageMaker image version
+          echo "Deleting SageMaker image version..."
+          aws sagemaker delete-image-version \
+            --image-name "$SAGEMAKER_IMAGE_NAME" \
+            --version 1
+          
+          # Delete SageMaker image
+          echo "Deleting SageMaker image..."
+          aws sagemaker delete-image \
+            --image-name "$SAGEMAKER_IMAGE_NAME"
+          
+          # Delete ECR image
+          echo "Deleting ECR image..."
+          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
+          aws ecr batch-delete-image \
+            --repository-name "$ECR_REPOSITORY" \
+            --image-ids imageTag="$IMAGE_TAG"
+          
+          echo "Cleanup completed successfully"
+            
