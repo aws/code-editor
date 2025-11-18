@@ -56,6 +56,7 @@ jobs:
       - name: Extract artifacts
         run: |
           tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
 
       - name: Build and push Docker image
         run: | 
