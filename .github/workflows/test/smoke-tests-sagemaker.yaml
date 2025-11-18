@@ -13,6 +13,7 @@ jobs:
       contents: read
     env:
       COMMIT_SHA: ${{ github.sha }}
+      GH_REF_NAME: ${{ github.ref_name }}
       SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
       GH_TOKEN: ${{ github.token }}
       AWS_REGION: us-east-2
@@ -28,7 +29,7 @@ jobs:
 
       - name: Download sagemaker artifacts by commit ID
         run: |
-          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build" --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build"
 
       - name: Check artifacts exist
         run: |
@@ -36,7 +37,6 @@ jobs:
 
           FILES=(
               "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
-              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           )
           
           # Check build artifact exists
@@ -56,7 +56,6 @@ jobs:
       - name: Extract artifacts
         run: |
           tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
-          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
 
       - name: Build and push Docker image
         run: | 
@@ -65,7 +64,7 @@ jobs:
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
           
           # Create image tag with branch-commit format
-          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
           
           # Build image
@@ -99,7 +98,7 @@ jobs:
           echo "SAGEMAKER_DOMAIN_ID=$DOMAIN_ID" >> $GITHUB_ENV
           
           # Create SageMaker image
-          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
           aws sagemaker create-image \
             --image-name "$IMAGE_NAME" \
@@ -183,7 +182,7 @@ jobs:
       - name: Create SageMaker code editor space
         run: |
           # Create space name using branch-commit format
-          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           SPACE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
           
           # Create the space with project ownership
@@ -334,7 +333,7 @@ jobs:
           
           # Delete ECR image
           echo "Deleting ECR image..."
-          BRANCH_NAME=$(echo "${{ github.ref_name }}" | sed 's/[^a-zA-Z0-9-]/-/g')
+          BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
           aws ecr batch-delete-image \
             --repository-name "$ECR_REPOSITORY" \
