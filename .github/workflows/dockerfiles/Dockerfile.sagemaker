@@ -1,5 +1,8 @@
 FROM public.ecr.aws/sagemaker/sagemaker-distribution:latest-cpu
 COPY vscode-reh-web-linux-x64/ /opt/conda/share/sagemaker-code-editor/
+# The commands below are used to prepare the server instance for the smoke tests
+RUN sudo sed -i '/--without-connection-token \\/a\    --enable-smoke-test-driver \\\n    --disable-workspace-trust \\' /usr/local/bin/start-code-editor && \
+    sudo sed -i '/--without-connection-token \\/a\    --enable-smoke-test-driver \\\n    --disable-workspace-trust \\' /usr/local/bin/start-sagemaker-ui-code-editor
 # Only enable this line for testing custom extensions marketplace feature
 # ENV EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery", "itemUrl": "https://marketplace.visualstudio.com/items"}'
 ENTRYPOINT ["entrypoint-code-editor"]

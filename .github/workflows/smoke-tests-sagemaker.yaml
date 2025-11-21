@@ -27,11 +27,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download sagemaker artifacts by commit ID
+      - name: Setup environment
+        run: |
+          echo "Installing required dependencies"
+          sudo apt-get update
+          sudo apt-get install -y quilt jq
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download sagemaker build artifact by commit ID
         run: |
           gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build"
 
-      - name: Check artifacts exist
+      - name: Check build artifacts exist
         run: |
           ls -la
 
@@ -83,6 +94,13 @@ jobs:
           
           echo "ECR_IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
           echo "Image pushed successfully with SHA: ${IMAGE_SHA:0:12}..."
+          
+          # Clean up local Docker images and build artifacts to free disk space
+          docker rmi $ECR_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "Local Docker images cleaned up"
+          rm -rf vscode-reh-web-linux-x64
+          rm -rf $COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build
+          echo "Local build artifacts cleaned up"
 
       - name: Create SageMaker code editor image
         run: |
@@ -90,13 +108,14 @@ jobs:
           DOMAIN_ID=$(aws sagemaker list-domains --query "Domains[?DomainName=='$SAGEMAKER_DOMAIN_NAME'].DomainId" --output text)
           
           if [ -z "$DOMAIN_ID" ]; then
-            echo "Error: SageMaker domain '$SAGEMAKER_DOMAIN_NAME' not found"
+            echo "Error: SageMaker domain not found"
             exit 1
           fi
           
           echo "SageMaker domain found successfully"
+          echo "::add-mask::$DOMAIN_ID"
           echo "SAGEMAKER_DOMAIN_ID=$DOMAIN_ID" >> $GITHUB_ENV
-          
+
           # Create SageMaker image
           BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
@@ -245,8 +264,32 @@ jobs:
             --app-name "default"
           
           echo "Started SageMaker space: $SAGEMAKER_SPACE_NAME"
+      
+      - name: Fetch source artifact by commit ID
+        run: |
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
+          ls -la
+
+          FILES=(
+              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          )
+          
+          # Check build artifact exists
+          for file in "${FILES[@]}"; do
+              if [ ! -f "$file" ]; then
+              echo "Error: $file not found for commit $COMMIT_SHA"
+              exit 1
+              fi
+          done
+
+          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+          rm -rf $COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src
+
 
       - name: E2E testing
+        env:
+            SSO_USERNAME: ${{ secrets.SSO_USERNAME }}
+            SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
         run: |
           # Waiting for app to be in service for 8 minutes
           echo "Waiting for app to be in service..."
@@ -277,12 +320,44 @@ jobs:
             echo "Timeout waiting for app to be in service"
             exit 1
           fi
-          echo "TESTING NOT YET IMPLEMENTED"
+          
+          # Get DataZone domain ID and project information
+          DATAZONE_DOMAIN_ID=$(aws datazone list-domains --query "items[?name=='$DATAZONE_DOMAIN_NAME'].id" --output text)
+          echo "::add-mask::$DATAZONE_DOMAIN_ID"
+          
+          if [ -z "$DATAZONE_DOMAIN_ID" ]; then
+            echo "Error: DataZone domain not found"
+            exit 1
+          fi
+          
+          # Extract project ID from SageMaker domain name
+          PROJECT_ID=$(echo "$SAGEMAKER_DOMAIN_NAME" | cut -d'-' -f2)
+          
+          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-west-2.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
+          
+          # Apply E2E testing patches
+
+          cd code-editor-src
+          rm -rf .pc
+          export QUILT_PATCHES=../patches/test 
+          export QUILT_SERIES=../patches/test/sagemaker-testing.series
+          quilt push -a -f
+  
+          # Run smoke tests with DataZone authentication
+          cd test/smoke
+          npm i
+          cd ..
+          npm install mocha
+          cd smoke
+          npm run compile
+          npx playwright install
+          SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run mocha -- --web --timeout 300000 --headless
 
       - name: Cleanup resources
         if: always()
         run: |
           echo "Starting cleanup of resources..."
+          CLEANUP_FAILED=0
           
           # Delete app first
           echo "Deleting app..."
@@ -290,7 +365,7 @@ jobs:
             --domain-id "$SAGEMAKER_DOMAIN_ID" \
             --space-name "$SAGEMAKER_SPACE_NAME" \
             --app-type "CodeEditor" \
-            --app-name "default"
+            --app-name "default" || CLEANUP_FAILED=1
           
           # Wait for app to be deleted
           echo "Waiting for app to be deleted..."
@@ -310,7 +385,7 @@ jobs:
           echo "Deleting space..."
           aws sagemaker delete-space \
             --domain-id "$SAGEMAKER_DOMAIN_ID" \
-            --space-name "$SAGEMAKER_SPACE_NAME"
+            --space-name "$SAGEMAKER_SPACE_NAME" || CLEANUP_FAILED=1
           
           # Remove image from domain
           echo "Removing image from domain..."
@@ -318,18 +393,18 @@ jobs:
           FILTERED_IMAGES=$(echo "$EXISTING_IMAGES" | jq --arg imageName "$SAGEMAKER_IMAGE_NAME" 'map(select(.ImageName != $imageName))')
           aws sagemaker update-domain \
             --domain-id "$SAGEMAKER_DOMAIN_ID" \
-            --default-user-settings "{\"CodeEditorAppSettings\": {\"CustomImages\": $FILTERED_IMAGES}}"
+            --default-user-settings "{\"CodeEditorAppSettings\": {\"CustomImages\": $FILTERED_IMAGES}}" || CLEANUP_FAILED=1
           
           # Delete SageMaker image version
           echo "Deleting SageMaker image version..."
           aws sagemaker delete-image-version \
             --image-name "$SAGEMAKER_IMAGE_NAME" \
-            --version 1
+            --version 1 || CLEANUP_FAILED=1
           
           # Delete SageMaker image
           echo "Deleting SageMaker image..."
           aws sagemaker delete-image \
-            --image-name "$SAGEMAKER_IMAGE_NAME"
+            --image-name "$SAGEMAKER_IMAGE_NAME" || CLEANUP_FAILED=1
           
           # Delete ECR image
           echo "Deleting ECR image..."
@@ -337,7 +412,12 @@ jobs:
           IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
           aws ecr batch-delete-image \
             --repository-name "$ECR_REPOSITORY" \
-            --image-ids imageTag="$IMAGE_TAG"
+            --image-ids imageTag="$IMAGE_TAG" || CLEANUP_FAILED=1
           
-          echo "Cleanup completed successfully"
+          if [ $CLEANUP_FAILED -eq 1 ]; then
+            echo "Cleanup completed with some failures"
+            exit 1
+          else
+            echo "Cleanup completed successfully"
+          fi
             

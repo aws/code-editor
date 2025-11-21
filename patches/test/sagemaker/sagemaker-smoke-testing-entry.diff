@@ -1,0 +1,237 @@
+Index: code-editor-src/test/automation/src/playwrightBrowser.ts
+===================================================================
+--- code-editor-src.orig/test/automation/src/playwrightBrowser.ts
++++ code-editor-src/test/automation/src/playwrightBrowser.ts
+@@ -18,7 +18,16 @@ let port = 9000;
+ 
+ export async function launch(options: LaunchOptions): Promise<{ serverProcess: ChildProcess; driver: PlaywrightDriver }> {
+ 
+-	// Launch server
++	// For SageMaker: skip server launch and navigate via DataZone
++	if (process.env.VSCODE_REMOTE_SERVER_PATH && process.env.DATAZONE_URL && process.env.SPACE_NAME) {
++		const { browser, context, page, pageLoadedPromise } = await launchBrowserForSageMaker(options);
++		return {
++			serverProcess: null as any, // No server process for SageMaker
++			driver: new PlaywrightDriver(browser, context, page, null as any, pageLoadedPromise, options)
++		};
++	}
++
++	// Launch server (original flow)
+ 	const { serverProcess, endpoint } = await launchServer(options);
+ 
+ 	// Launch browser
+@@ -100,7 +109,7 @@ async function launchBrowser(options: La
+ 	browser.on('disconnected', () => logger.log(`Playwright: browser disconnected`));
+ 
+ 	const context = await measureAndLog(() => browser.newContext(), 'browser.newContext', logger);
+-
++	
+ 	if (tracing) {
+ 		try {
+ 			await measureAndLog(() => context.tracing.start({ screenshots: true, snapshots }), 'context.tracing.start()', logger);
+@@ -149,6 +158,151 @@ async function launchBrowser(options: La
+ 	return { browser, context, page, pageLoadedPromise };
+ }
+ 
++async function launchBrowserForSageMaker(options: LaunchOptions) {
++	const { logger, tracing, snapshots, headless } = options;
++	const datazoneUrl = process.env.DATAZONE_URL!;
++	const spaceName = process.env.SPACE_NAME!;
++
++	const [browserType, browserChannel] = (options.browser ?? 'chromium').split('-');
++	const browser = await measureAndLog(() => playwright[browserType as unknown as 'chromium' | 'webkit' | 'firefox'].launch({
++		headless: headless ?? false,
++		timeout: 0,
++		channel: browserChannel,
++	}), 'playwright#launch', logger);
++
++	browser.on('disconnected', () => logger.log(`Playwright: browser disconnected`));
++
++	const context = await measureAndLog(() => browser.newContext(), 'browser.newContext', logger);
++	
++	if (tracing) {
++		try {
++			await measureAndLog(() => context.tracing.start({ screenshots: true, snapshots }), 'context.tracing.start()', logger);
++		} catch (error) {
++			logger.log(`Playwright (Browser): Failed to start playwright tracing (${error})`);
++		}
++	}
++	
++	let page = await measureAndLog(() => context.newPage(), 'context.newPage()', logger);
++	await measureAndLog(() => page.setViewportSize({ width: 1200, height: 800 }), 'page.setViewportSize', logger);
++	
++	if (options.verbose) {
++		context.on('page', () => logger.log(`Playwright (Browser): context.on('page')`));
++		context.on('requestfailed', e => logger.log(`Playwright (Browser): context.on('requestfailed') [${e.failure()?.errorText} for ${e.url()}]`));
++		
++		page.on('console', e => logger.log(`Playwright (Browser): window.on('console') [${e.text()}]`));
++		page.on('dialog', () => logger.log(`Playwright (Browser): page.on('dialog')`));
++		page.on('domcontentloaded', () => logger.log(`Playwright (Browser): page.on('domcontentloaded')`));
++		page.on('load', () => logger.log(`Playwright (Browser): page.on('load')`));
++		page.on('popup', () => logger.log(`Playwright (Browser): page.on('popup')`));
++		page.on('framenavigated', () => logger.log(`Playwright (Browser): page.on('framenavigated')`));
++		page.on('requestfailed', e => logger.log(`Playwright (Browser): page.on('requestfailed') [${e.failure()?.errorText} for ${e.url()}]`));
++	}
++	
++	page.on('pageerror', async (error) => logger.log(`Playwright (Browser) ERROR: page error: ${error}`));
++	page.on('crash', () => logger.log('Playwright (Browser) ERROR: page crash'));
++	page.on('close', () => logger.log('Playwright (Browser): page close'));
++	page.on('response', async (response) => {
++		if (response.status() >= 400) {
++			logger.log(`Playwright (Browser) ERROR: HTTP status ${response.status()} for ${response.url()}`);
++		}
++	});
++
++	// Navigate to DataZone and authenticate
++	logger.log(`Authenticating through DataZone: ${datazoneUrl}`);
++	await page.goto(datazoneUrl, { waitUntil: 'networkidle' });
++
++	// Handle SSO login if credentials are provided
++	if (process.env.SSO_USERNAME && process.env.SSO_PASSWORD) {
++		logger.log('Performing SSO login...');
++		
++		// Click SSO button
++		await page.click('button:has-text("Sign in with SSO"), button:has-text("SSO"), a:has-text("Sign in with SSO")');
++		await page.waitForLoadState('networkidle', { timeout: 30000 });
++		
++		// Fill username
++		await page.waitForSelector('#awsui-input-0', { timeout: 30000 });
++		await page.fill('#awsui-input-0', process.env.SSO_USERNAME);
++		
++		// Click Next
++		await page.click('button:has-text("Next"), button[type="submit"]');
++		await page.waitForLoadState('networkidle', { timeout: 30000 });
++		
++		// Fill password
++		await page.waitForSelector('input[name="password"], input[type="password"], #password', { timeout: 30000 });
++		await page.fill('input[name="password"], input[type="password"], #password', process.env.SSO_PASSWORD);
++		
++		// Click login
++		await page.click('button[type="submit"], input[type="submit"], button:has-text("Sign in"), button:has-text("Login")');
++		await page.waitForLoadState('networkidle', { timeout: 60000 });
++	}
++
++	// Wait for Compute heading and click space
++	await page.waitForSelector('h2:has-text("Compute")', { timeout: 60000 });
++	logger.log(`Opening space: ${spaceName}`);
++	
++	// Wait for new page to open when clicking the space button
++	const [newPage] = await Promise.all([
++		context.waitForEvent('page'),
++		page.click(`[data-id="${spaceName}"] button[data-testid="space-open-button"]`)
++	]);
++	
++	// Switch to the new Code Editor page
++	await newPage.waitForLoadState('networkidle', { timeout: 60000 });
++	logger.log(`Switched to Code Editor page: ${newPage.url()}`);
++	
++	// Switch page reference to the new Code Editor window
++	page = newPage;
++	
++	// Wait for Code Editor to fully load
++	await page.waitForTimeout(10000);
++	const currentUrl1 = page.url();
++	const workspacePath1 = '/home/sagemaker-user';
++	const baseUrl1 = currentUrl1.split('?')[0];
++	const finalUrl1 = `${baseUrl1}?folder=${URI.file(workspacePath1).path}`;
++	await page.goto(finalUrl1, { waitUntil: 'networkidle' });
++	
++	// Set up test workspace in SageMaker by cloning the test repo
++	logger.log('Setting up test workspace in SageMaker...');
++	
++	// Open integrated terminal
++	await page.waitForTimeout(10000);
++	await page.keyboard.press('Control+Shift+`');
++	await page.waitForSelector('.terminal', { timeout: 30000 });
++	
++	// Clone the test repository to home directory (if not exists)
++	await page.keyboard.type('cd /home/sagemaker-user && [ ! -d "vscode-smoketest-express" ] && git clone https://github.com/microsoft/vscode-smoketest-express.git || echo "Directory exists"');
++	await page.keyboard.press('Enter');
++	
++	// Wait for clone to complete
++	await page.waitForTimeout(10000);
++	
++	// Install npm dependencies for the test project
++	await page.keyboard.type('cd /home/sagemaker-user/vscode-smoketest-express && npm install');
++	await page.keyboard.press('Enter');
++	
++	// Wait for npm install to complete
++	await page.waitForTimeout(10000);
++
++	// Navigate to workspace with payload parameters (like launchBrowser)
++	const payloadParam = `[${[
++		'["enableProposedApi",""]',
++		'["skipWelcome", "true"]',
++		'["skipReleaseNotes", "true"]',
++		`["logLevel","${options.verbose ? 'trace' : 'info'}"]`
++	].join(',')}]`;
++	
++	const currentUrl = page.url();
++	const workspacePath = '/home/sagemaker-user/vscode-smoketest-express';
++	const baseUrl = currentUrl.split('?')[0];
++	const finalUrl = `${baseUrl}?folder=${URI.file(workspacePath).path}&payload=${payloadParam}`;
++	await page.goto(finalUrl, { waitUntil: 'networkidle' });
++	
++	logger.log(`Successfully opened SageMaker Code Editor space: ${spaceName}`);
++
++	const pageLoadedPromise = page.waitForLoadState('load');
++	return { browser, context, page, pageLoadedPromise };
++}
++
+ function waitForEndpoint(server: ChildProcess, logger: Logger): Promise<string> {
+ 	return new Promise<string>((resolve, reject) => {
+ 		let endpointFound = false;
+Index: code-editor-src/test/smoke/src/main.ts
+===================================================================
+--- code-editor-src.orig/test/smoke/src/main.ts
++++ code-editor-src/test/smoke/src/main.ts
+@@ -211,7 +211,10 @@ else {
+ 	const testCodeServerPath = opts.build || process.env.VSCODE_REMOTE_SERVER_PATH;
+ 
+ 	if (typeof testCodeServerPath === 'string') {
+-		if (!fs.existsSync(testCodeServerPath)) {
++		// Skip file existence check for SageMaker/DataZone testing
++		if (process.env.DATAZONE_URL && process.env.SPACE_NAME) {
++			logger.log(`Running web smoke tests against SageMaker DataZone space: ${process.env.SPACE_NAME}`);
++		} else if (!fs.existsSync(testCodeServerPath)) {
+ 			fail(`Cannot find Code server at ${testCodeServerPath}.`);
+ 		} else {
+ 			logger.log(`Running web smoke tests against ${testCodeServerPath}`);
+Index: code-editor-src/test/automation/src/code.ts
+===================================================================
+--- code-editor-src.orig/test/automation/src/code.ts
++++ code-editor-src/test/automation/src/code.ts
+@@ -88,7 +88,9 @@ export async function launch(options: La
+ 	// Browser smoke tests
+ 	if (options.web) {
+ 		const { serverProcess, driver } = await measureAndLog(() => launchPlaywrightBrowser(options), 'launch playwright (browser)', options.logger);
+-		registerInstance(serverProcess, options.logger, 'server');
++		if (serverProcess) {
++			registerInstance(serverProcess, options.logger, 'server');
++		}
+ 
+ 		return new Code(driver, options.logger, serverProcess, undefined, options.quality, options.version);
+ 	}
+@@ -109,7 +111,7 @@ export class Code {
+ 	constructor(
+ 		driver: PlaywrightDriver,
+ 		readonly logger: Logger,
+-		private readonly mainProcess: cp.ChildProcess,
++		private readonly mainProcess: cp.ChildProcess | null,
+ 		private readonly safeToKill: Promise<void> | undefined,
+ 		readonly quality: Quality,
+ 		readonly version: { major: number; minor: number; patch: number }
+@@ -155,6 +157,13 @@ export class Code {
+ 
+ 	async exit(): Promise<void> {
+ 		return measureAndLog(() => new Promise<void>(resolve => {
++			// For SageMaker (no server process), just close driver and resolve
++			if (!this.mainProcess) {
++				this.driver.close();
++				resolve();
++				return;
++			}
++
+ 			const pid = this.mainProcess.pid!;
+ 
+ 			let done = false;
