@@ -9,7 +9,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 -	// Launch server
 +	// For SageMaker: skip server launch and navigate via DataZone
 +	if (process.env.VSCODE_REMOTE_SERVER_PATH && process.env.DATAZONE_URL && process.env.SPACE_NAME) {
-+		const { browser, context, page, pageLoadedPromise } = await launchBrowserForSageMaker(options);
++		const { browser, context, page, pageLoadedPromise } = await launchCodeEditorInSageMaker(options);
 +		return {
 +			serverProcess: null as any, // No server process for SageMaker
 +			driver: new PlaywrightDriver(browser, context, page, null as any, pageLoadedPromise, options)
@@ -33,7 +33,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
  	return { browser, context, page, pageLoadedPromise };
  }
  
-+async function launchBrowserForSageMaker(options: LaunchOptions) {
++async function launchCodeEditorInSageMaker(options: LaunchOptions) {
 +	const { logger, tracing, snapshots, headless } = options;
 +	const datazoneUrl = process.env.DATAZONE_URL!;
 +	const spaceName = process.env.SPACE_NAME!;
