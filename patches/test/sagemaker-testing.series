@@ -1,1 +1,2 @@
 sagemaker/sagemaker-smoke-testing-entry.diff
+sagemaker/fix-smoke-tests.diff

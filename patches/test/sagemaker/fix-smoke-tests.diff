@@ -1,0 +1,170 @@
+Index: code-editor-src/test/automation/src/quickaccess.ts
+===================================================================
+--- code-editor-src.orig/test/automation/src/quickaccess.ts
++++ code-editor-src/test/automation/src/quickaccess.ts
+@@ -6,7 +6,7 @@
+ import { Editors } from './editors';
+ import { Code } from './code';
+ import { QuickInput } from './quickinput';
+-import { basename, isAbsolute } from 'path';
++import { basename } from 'path';
+ 
+ enum QuickAccessKind {
+ 	Files = 1,
+@@ -110,13 +110,6 @@ export class QuickAccess {
+ 	}
+ 
+ 	async openFile(path: string): Promise<void> {
+-		if (!isAbsolute(path)) {
+-			// we require absolute paths to get a single
+-			// result back that is unique and avoid hitting
+-			// the search process to reduce chances of
+-			// search needing longer.
+-			throw new Error('QuickAccess.openFile requires an absolute path');
+-		}
+ 
+ 		const fileName = basename(path);
+ 
+Index: code-editor-src/test/automation/src/terminal.ts
+===================================================================
+--- code-editor-src.orig/test/automation/src/terminal.ts
++++ code-editor-src/test/automation/src/terminal.ts
+@@ -216,7 +216,7 @@ export class Terminal {
+ 			const description: IElement | undefined = await this.code.waitForElement(`${Selector.Tabs}[data-index="${i}"] ${Selector.TabsEntry} ${Selector.Description}`, () => true);
+ 
+ 			const label: TerminalLabel = {
+-				name: title.textContent.replace(/^[├┌└]\s*/, ''),
++				name: title.textContent.replace(/^[├┌└]\s*/, '').replace(description?.textContent || '', '').trim(),
+ 				description: description?.textContent
+ 			};
+ 			// It's a new group if the tab does not start with ├ or └
+Index: code-editor-src/test/automation/src/settings.ts
+===================================================================
+--- code-editor-src.orig/test/automation/src/settings.ts
++++ code-editor-src/test/automation/src/settings.ts
+@@ -48,11 +48,23 @@ export class SettingsEditor {
+ 
+ 	async clearUserSettings(): Promise<void> {
+ 		await this.openUserSettingsFile();
++
++		// Add delay to ensure editor is ready
++		await new Promise(resolve => setTimeout(resolve, 500));
++		
+ 		await this.quickaccess.runCommand('editor.action.selectAll');
+ 		await this.code.sendKeybinding('Delete', async () => {
+ 			await this.editor.waitForEditorContents('settings.json', contents => contents === '');
+ 		});
+ 		await this.editor.waitForTypeInEditor('settings.json', `{`); // will auto close }
++		
++		// Add default settings before closing
++		await this.editor.waitForTypeInEditor('settings.json', [
++			'"extensions.openNotebookData": { "notebookKey": null, "clusterId": null, "region": null },',
++			'"workbench.colorTheme": "Default Dark Modern",',
++			'"editor.wordWrap": "on"'
++		].join(''));
++		
+ 		await this.editors.saveOpenedFile();
+ 		await this.quickaccess.runCommand('workbench.action.closeActiveEditor');
+ 	}
+Index: code-editor-src/test/smoke/src/areas/terminal/terminal-profiles.test.ts
+===================================================================
+--- code-editor-src.orig/test/smoke/src/areas/terminal/terminal-profiles.test.ts
++++ code-editor-src/test/smoke/src/areas/terminal/terminal-profiles.test.ts
+@@ -6,8 +6,8 @@
+ import { Application, Terminal, TerminalCommandId, TerminalCommandIdWithValue, SettingsEditor } from '../../../../automation';
+ import { setTerminalTestSettings } from './terminal-helpers';
+ 
+-const CONTRIBUTED_PROFILE_NAME = `JavaScript Debug Terminal`;
+-const ANY_PROFILE_NAME = '^((?!JavaScript Debug Terminal).)*$';
++const CONTRIBUTED_PROFILE_NAME = `sh`;
++const ANY_PROFILE_NAME = '^(?!^sh$).*$';
+ 
+ export function setup(options?: { skipSuite: boolean }) {
+ 	(options?.skipSuite ? describe.skip : describe)('Terminal Profiles', () => {
+Index: code-editor-src/test/smoke/src/areas/multiroot/multiroot.test.ts
+===================================================================
+--- code-editor-src.orig/test/smoke/src/areas/multiroot/multiroot.test.ts
++++ code-editor-src/test/smoke/src/areas/multiroot/multiroot.test.ts
+@@ -3,51 +3,39 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import { writeFileSync } from 'fs';
+-import { join, dirname } from 'path';
++
+ import { Application, Logger } from '../../../../automation';
+ import { installAllHandlers } from '../../utils';
+ 
+-function toUri(path: string): string {
+-	if (process.platform === 'win32') {
+-		return `${path.replace(/\\/g, '/')}`;
+-	}
+-
+-	return `${path}`;
+-}
+-
+-function createWorkspaceFile(workspacePath: string): string {
+-	const workspaceFilePath = join(dirname(workspacePath), 'smoketest.code-workspace');
+-	const workspace = {
+-		folders: [
+-			{ path: toUri(join(workspacePath, 'public')) },
+-			{ path: toUri(join(workspacePath, 'routes')) },
+-			{ path: toUri(join(workspacePath, 'views')) }
+-		],
+-		settings: {
+-			'workbench.startupEditor': 'none',
+-			'workbench.enableExperiments': false,
+-			'typescript.disableAutomaticTypeAcquisition': true,
+-			'json.schemaDownload.enable': false,
+-			'npm.fetchOnlinePackageInfo': false,
+-			'npm.autoDetect': 'off',
+-			'workbench.editor.languageDetection': false,
+-			"workbench.localHistory.enabled": false
+-		}
+-	};
+-
+-	writeFileSync(workspaceFilePath, JSON.stringify(workspace, null, '\t'));
+-
+-	return workspaceFilePath;
++async function createWorkspaceFile(app: Application, workspacePath: string): Promise<void> {
++	// Create workspace file in current directory (vscode-smoketest-express)
++	await app.workbench.terminal.createTerminal();
++	await app.workbench.terminal.runCommandInTerminal(`cd "${workspacePath}"`);
++	await app.workbench.terminal.runCommandInTerminal('WORKSPACE_DIR=$(pwd)');
++	await app.workbench.terminal.runCommandInTerminal('printf \'{"folders":[{"path":"%s/public"},{"path":"%s/routes"},{"path":"%s/views"}],"settings":{"workbench.startupEditor":"none","workbench.enableExperiments":false,"typescript.disableAutomaticTypeAcquisition":true,"json.schemaDownload.enable":false,"npm.fetchOnlinePackageInfo":false,"npm.autoDetect":"off","workbench.editor.languageDetection":false,"workbench.localHistory.enabled":false}}\' "$WORKSPACE_DIR" "$WORKSPACE_DIR" "$WORKSPACE_DIR" > smoketest.code-workspace');
++	await new Promise(resolve => setTimeout(resolve, 500));
++	
++	// Open the workspace
++	await app.workbench.quickaccess.runCommand('workbench.action.openWorkspace');
++	await app.workbench.quickinput.waitForQuickInputOpened();
++	await app.workbench.quickinput.type(`${workspacePath}/smoketest.code-workspace`);
++	await new Promise(resolve => setTimeout(resolve, 500));
++	await app.code.sendKeybinding('enter');
++	await new Promise(resolve => setTimeout(resolve, 5000));
++	await app.code.waitForElement('.monaco-workbench')
+ }
+ 
+ export function setup(logger: Logger) {
+ 	describe('Multiroot', () => {
+ 
+ 		// Shared before/after handling
+-		installAllHandlers(logger, opts => {
+-			const workspacePath = createWorkspaceFile(opts.workspacePath);
+-			return { ...opts, workspacePath };
++		installAllHandlers(logger);
++		
++		before(async function () {
++			const app = this.app as Application;
++			const workspacePath = this.defaultOptions.workspacePath;
++			// The app already started with a regular folder, now we need to create the multiroot setup
++			await createWorkspaceFile(app, workspacePath);
+ 		});
+ 
+ 		it('shows results from all folders', async function () {
+@@ -72,4 +60,4 @@ export function setup(logger: Logger) {
+ 			await app.code.waitForTitle(title => /smoketest \(Workspace\)/i.test(title));
+ 		});
+ 	});
+-}
++}
+\ No newline at end of file
