@@ -70,7 +70,17 @@ calc_script_SHAs() {
 }
 
 check_unsaved_changes() {
-    local patches_path=$(jq -r '.patches.path' "$CONFIG_FILE")
+    local use_test_patches="${1:-}"
+    local patches_path
+    local patch_dir
+    
+    if [[ "$use_test_patches" == "test" ]]; then
+        patches_path=$(jq -r '.testPatches.path' "$CONFIG_FILE")
+        patch_dir="${PRESENT_WORKING_DIR}/patches/test"
+    else
+        patches_path=$(jq -r '.patches.path' "$CONFIG_FILE")
+        patch_dir="${PRESENT_WORKING_DIR}/patches"
+    fi
     
     if [[ "$patches_path" == "null" || -z "$patches_path" ]]; then
         return
@@ -80,7 +90,7 @@ check_unsaved_changes() {
         return
     fi
     
-    export QUILT_PATCHES="${PRESENT_WORKING_DIR}/patches"
+    export QUILT_PATCHES="$patch_dir"
     export QUILT_SERIES="${PRESENT_WORKING_DIR}/$patches_path"
     
     pushd "${PATCHED_SRC_DIR}"
@@ -120,6 +130,22 @@ setup_quilt_environment() {
     echo "Using series file: $QUILT_SERIES"
 }
 
+setup_test_quilt_environment() {
+    local test_patches_path=$(jq -r '.testPatches.path' "$CONFIG_FILE")
+    
+    if [[ "$test_patches_path" == "null" || -z "$test_patches_path" ]]; then
+        echo "No test-patches path configured, skipping test patch rebasing"
+        exit 0
+    fi
+    
+    patch_dir="${PRESENT_WORKING_DIR}/patches/test"
+    echo "Set test patch directory as: $patch_dir"
+
+    export QUILT_PATCHES="${patch_dir}"
+    export QUILT_SERIES="${PRESENT_WORKING_DIR}/$test_patches_path"
+    echo "Using test series file: $QUILT_SERIES"
+}
+
 prepare_patch_directory() {
     echo "Cleaning build src dir"
     rm -rf "${PATCHED_SRC_DIR}"
@@ -150,6 +176,20 @@ rebase_patches() {
     prepare_patch_directory
     rebase
     apply_overrides
+}
+
+rebase_test_patches() {
+    echo "Creating patched source in directory: ${PATCHED_SRC_DIR}"
+    
+    # Check for unsaved test patches first
+    check_unsaved_changes test
+    
+    # First apply regular patches
+    prepare_src
+    rm -rf "${PATCHED_SRC_DIR}/.pc"
+    # Then rebase test patches
+    setup_test_quilt_environment
+    rebase
 }
 
 apply_overrides() {
@@ -224,7 +264,7 @@ rebase() {
                 echo ""
                 echo "Files with conflicts:"
                 for file in "${conflict_files[@]}"; do
-                    echo "- $file"
+                    echo "- $PATCHED_SRC_DIR/$file"
                 done
             fi
             
@@ -294,9 +334,13 @@ case "$COMMAND" in
         echo "Rebase mode enabled"
         rebase_patches
         ;;
+    rebase_test_patches)
+        echo "Test patches rebase mode enabled"
+        rebase_test_patches
+        ;;
     *)
         echo "Unknown command: $COMMAND" >&2
-        echo "Available commands: prepare_src, rebase_patches" >&2
+        echo "Available commands: prepare_src, rebase_patches, rebase_test_patches" >&2
         exit 1
         ;;
 esac
