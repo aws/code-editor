@@ -12,5 +12,8 @@
   "target": "code-editor-sagemaker-server",
   "ignoredErrors": {
     "path": null
+  },
+  "testPatches": {
+    "path": "patches/test/sagemaker-testing.series"
   }
 }

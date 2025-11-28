@@ -151,6 +151,45 @@ jobs:
             git commit -m "Rebase patches for all targets"
             git push origin "$STAGING_BRANCH"
           fi
+          
+      - name: Rebase test patches for all targets
+        run: |
+          echo "Rebasing test patches for all build targets"
+          
+          # Test each target sequentially with rebasing test patches
+          FAILED_TARGETS=()
+          
+          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+            echo ""
+            echo "=== REBASING TEST PATCHES FOR TARGET: $target ==="
+            
+            if ./scripts/prepare-src.sh --command rebase_test_patches "$target"; then
+              echo "Successfully rebased test patches for $target"
+            else
+              echo "Failed to rebase test patches for $target"
+              FAILED_TARGETS+=("$target")
+            fi
+            
+            # Clean up for next target
+            rm -rf code-editor-src
+          
+            echo "=== END TEST PATCHES TARGET: $target ==="
+          done
+          
+          # Report results
+          if [ ${#FAILED_TARGETS[@]} -gt 0 ]; then
+            echo "Failed test patch targets: ${FAILED_TARGETS[*]}"
+            exit 1
+          else
+            echo "All test patch targets rebased successfully"
+          fi
+          
+          # Commit rebased test patches if any changes
+          git add patches/
+          if ! git diff --staged --quiet; then
+            git commit -m "Rebase test patches for all targets"
+            git push origin "$STAGING_BRANCH"
+          fi
 
   build-and-update-package-locks:
     name: Build and Update Package Lock Overrides
