@@ -108,6 +108,14 @@ jobs:
       REPOSITORY: ${{ github.repository }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     steps:
+      - name: Check if protected branch
+        id: check-branch
+        run: |
+          if [[ "$GITHUB_REF_NAME" == "main" ]] || [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "is_protected=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_protected=false" >> $GITHUB_OUTPUT
+          fi
       - name: Use role credentials for metrics
         id: aws-creds
         continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
@@ -117,7 +125,7 @@ jobs:
           role-duration-seconds: 900
           aws-region: us-east-1
       - name: Report failure
-        if: steps.aws-creds.outcome == 'success'
+        if: steps.aws-creds.outcome == 'success' && steps.check-branch.outputs.is_protected == 'true'
         run: |
           aws cloudwatch put-metric-data \
             --namespace "GitHub/Workflows" \
