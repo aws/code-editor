@@ -616,10 +616,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: "build-targets.yaml",
-              ref: context.ref,
-              inputs: {
-                triggered_by: 'workflow'
-              }
+              ref: context.ref
             })
           
   handle-failures:
