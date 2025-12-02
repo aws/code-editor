@@ -405,7 +405,9 @@ jobs:
           - Remote extension host changes
           
           ## Next Steps
-          After this PR is merged, a release can be created by following the guide in [RELEASE.md](RELEASE.md)."
+          After this PR is merged to main:
+          - If this is a patch update (e.g., 1.101.0 -> 1.101.2), the commits need to be cherry-picked from main to the corresponding feature branch (format x.x)
+          - A release can be created by following the guide in [RELEASE.md](RELEASE.md)"
           
           gh pr create \
             --title "$PR_TITLE" \
