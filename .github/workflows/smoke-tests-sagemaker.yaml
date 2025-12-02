@@ -7,7 +7,7 @@ jobs:
   smoke-tests-sagemaker:
     name: Run Smoke Tests for SageMaker
     runs-on: ubuntu-latest
-    environment: smoke-tests-sagemaker-workflow-env
+    environment: sagemaker-e2e-tests-workflow-env
     permissions:
       id-token: write
       contents: read
@@ -19,8 +19,9 @@ jobs:
       AWS_REGION: us-east-2
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-      SAGEMAKER_DOMAIN_NAME: ${{ secrets.SAGEMAKER_DOMAIN_NAME }}
-      SAGEMAKER_EXECUTION_ROLE_ARN: ${{ secrets.SAGEMAKER_EXECUTION_ROLE_ARN }}
+      PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
+      DATAZONE_DOMAIN_ID: ${{ secrets.DATAZONE_DOMAIN_ID }}
+      TEST_SAGEMAKER_ROLE: ${{ secrets.TEST_SAGEMAKER_ROLE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,7 +32,7 @@ jobs:
         run: |
           echo "Installing required dependencies"
           sudo apt-get update
-          sudo apt-get install -y quilt jq
+          sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -58,10 +59,10 @@ jobs:
               fi
           done
 
-      - name: Configure AWS credentials
+      - name: Configure ECR role AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.SAGEMAKER_EXECUTION_ROLE_ARN }}
+          role-to-assume: ${{ secrets.TEST_ECR_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Extract artifacts
@@ -102,26 +103,44 @@ jobs:
           rm -rf $COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build
           echo "Local build artifacts cleaned up"
 
+      - name: Configure SageMaker role AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TEST_SAGEMAKER_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: Create SageMaker code editor image
         run: |
-          # Find SageMaker domain by name
-          DOMAIN_ID=$(aws sagemaker list-domains --query "Domains[?DomainName=='$SAGEMAKER_DOMAIN_NAME'].DomainId" --output text)
+          # Fetch DataZone project ID
+          PROJECT_ID=$(aws datazone list-projects --domain-identifier "$DATAZONE_DOMAIN_ID" --name "$PROJECT_NAME" --query 'items[0].id' --output text)
+          
+          if [ -z "$PROJECT_ID" ] || [ "$PROJECT_ID" = "None" ]; then
+            echo "Error: DataZone project not found"
+            exit 1
+          fi
+          
+          echo "DataZone project found successfully"
+          echo "::add-mask::$PROJECT_ID"
+          
+          # Find SageMaker domain by project ID (domain name contains project ID)
+          DOMAIN_ID=$(aws sagemaker list-domains --query "Domains[?contains(DomainName, '$PROJECT_ID')].DomainId" --output text)
           
           if [ -z "$DOMAIN_ID" ]; then
-            echo "Error: SageMaker domain not found"
+            echo "Error: SageMaker domain not found for project ID"
             exit 1
           fi
           
           echo "SageMaker domain found successfully"
           echo "::add-mask::$DOMAIN_ID"
           echo "SAGEMAKER_DOMAIN_ID=$DOMAIN_ID" >> $GITHUB_ENV
+          echo "PROJECT_ID=$PROJECT_ID" >> $GITHUB_ENV
 
           # Create SageMaker image
           BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_NAME="$BRANCH_NAME-${COMMIT_SHA}"
           aws sagemaker create-image \
             --image-name "$IMAGE_NAME" \
-            --role-arn $SAGEMAKER_EXECUTION_ROLE_ARN
+            --role-arn $TEST_SAGEMAKER_ROLE
           
           # Wait for image to be ready (max 30 retries = 5 minutes)
           echo "Waiting for SageMaker image to be ready..."
@@ -321,18 +340,6 @@ jobs:
             exit 1
           fi
           
-          # Get DataZone domain ID and project information
-          DATAZONE_DOMAIN_ID=$(aws datazone list-domains --query "items[?name=='$DATAZONE_DOMAIN_NAME'].id" --output text)
-          echo "::add-mask::$DATAZONE_DOMAIN_ID"
-          
-          if [ -z "$DATAZONE_DOMAIN_ID" ]; then
-            echo "Error: DataZone domain not found"
-            exit 1
-          fi
-          
-          # Extract project ID from SageMaker domain name
-          PROJECT_ID=$(echo "$SAGEMAKER_DOMAIN_NAME" | cut -d'-' -f2)
-          
           DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-west-2.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
           
           # Apply E2E testing patches
@@ -353,10 +360,10 @@ jobs:
           npx playwright install
           SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run mocha -- --web --headless
 
-      - name: Cleanup resources
+      - name: Clean up SageMaker resources
         if: always()
         run: |
-          echo "Starting cleanup of resources..."
+          echo "Starting SageMaker cleanup..."
           CLEANUP_FAILED=0
           
           # Delete app first
@@ -406,18 +413,28 @@ jobs:
           aws sagemaker delete-image \
             --image-name "$SAGEMAKER_IMAGE_NAME" || CLEANUP_FAILED=1
           
-          # Delete ECR image
-          echo "Deleting ECR image..."
+          if [ $CLEANUP_FAILED -eq 1 ]; then
+            echo "SageMaker cleanup completed with some failures"
+          else
+            echo "SageMaker cleanup completed successfully"
+          fi
+
+      - name: Configure ECR role for cleanup
+        if: always()
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TEST_ECR_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Clean up ECR resources
+        if: always()
+        run: |
+          echo "Starting ECR cleanup..."
           BRANCH_NAME=$(echo "$GH_REF_NAME" | sed 's/[^a-zA-Z0-9-]/-/g')
           IMAGE_TAG="$BRANCH_NAME-$COMMIT_SHA"
           aws ecr batch-delete-image \
             --repository-name "$ECR_REPOSITORY" \
-            --image-ids imageTag="$IMAGE_TAG" || CLEANUP_FAILED=1
+            --image-ids imageTag="$IMAGE_TAG" || echo "ECR cleanup failed"
           
-          if [ $CLEANUP_FAILED -eq 1 ]; then
-            echo "Cleanup completed with some failures"
-            exit 1
-          else
-            echo "Cleanup completed successfully"
-          fi
+          echo "ECR cleanup completed"
             
