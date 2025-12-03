@@ -361,7 +361,7 @@ Index: code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
  import './services/lifecycle/browser/lifecycleService.js';
  import './services/clipboard/browser/clipboardService.js';
 -import './services/localization/browser/localeService.js';
-+import './services/localization/electron-sandbox/localeService.js';
++import './services/localization/electron-browser/localeService.js';
  import './services/path/browser/pathService.js';
  import './services/themes/browser/browserHostColorSchemeService.js';
  import './services/encryption/browser/encryptionService.js';

@@ -1,37 +1,35 @@
-Index: third-party-src/build/gulpfile.extensions.js
+Index: code-editor-src/build/gulpfile.extensions.js
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -61,6 +61,7 @@ const compilations = [
- 	'extensions/simple-browser/tsconfig.json',
+--- code-editor-src.orig/build/gulpfile.extensions.js
++++ code-editor-src/build/gulpfile.extensions.js
+@@ -63,6 +63,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
 +	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
-Index: third-party-src/build/npm/dirs.js
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.js
 ===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -39,6 +39,7 @@ const dirs = [
- 	'extensions/references-view',
+--- code-editor-src.orig/build/npm/dirs.js
++++ code-editor-src/build/npm/dirs.js
+@@ -42,6 +42,7 @@ const dirs = [
  	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-idle-extension',
  	'extensions/sagemaker-terminal-crash-mitigation',
 +	'extensions/sagemaker-open-notebook-extension',
  	'extensions/search-result',
  	'extensions/simple-browser',
  	'extensions/tunnel-forwarding',
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -262,7 +262,12 @@ Registry.as<IConfigurationRegistry>(Conf
- 				type: 'boolean',
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+@@ -265,6 +265,11 @@ Registry.as<IConfigurationRegistry>(Conf
  				description: localize('extensionsInQuickAccess', "When enabled, extensions can be searched for via Quick Access and report issues from there."),
  				default: true
--			},
-+			},
+ 			},
 +			'extensions.openNotebookData': {
 +				type: 'object',
 +				scope: ConfigurationScope.APPLICATION,
@@ -40,11 +38,11 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  			[VerifyExtensionSignatureConfigKey]: {
  				type: 'boolean',
  				description: localize('extensions.verifySignature', "When enabled, extensions are verified to be signed before getting installed."),
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
-@@ -1084,6 +1084,17 @@ export class ExtensionsWorkbenchService
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
+@@ -1085,6 +1085,17 @@ export class ExtensionsWorkbenchService
  		urlService.registerHandler(this);
  
  		this.whenInitialized = this.initialize();
@@ -62,10 +60,10 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsWor
  	}
  
  	private async initialize(): Promise<void> {
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
 @@ -0,0 +1,17 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -75,19 +73,19 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension-br
 +//@ts-check
 +
 +'use strict';
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
 +
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
++export default [withBrowserDefaults({
++    context: import.meta.dirname,
 +    entry: {
 +        extension: './src/extension.ts'
 +    },
-+});
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
++})];
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
 @@ -0,0 +1,20 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -97,22 +95,22 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/extension.we
 +//@ts-check
 +
 +'use strict';
++import {node as withDefaults} from '../shared.webpack.config.mjs';
 +
-+const withDefaults = require('../shared.webpack.config');
 +
-+module.exports = withDefaults({
-+    context: __dirname,
++export default [withDefaults({
++    context: import.meta.dirname,
 +    resolve: {
 +        mainFields: ['module', 'main']
 +    },
 +    entry: {
 +        extension: './src/extension.ts',
 +    }
-+});
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/package.json
++})];
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/package.json
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/package.json
 @@ -0,0 +1,44 @@
 +{
 +  "name": "sagemaker-open-notebook-extension",
@@ -158,10 +156,10 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/package.json
 +  "dependencies": {},
 +  "repository": {}
 +}
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
 @@ -0,0 +1,100 @@
 +
 +import * as vscode from 'vscode';
@@ -263,10 +261,10 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/src/extensio
 +    });
 +}
 +export function deactivate() {}
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -278,10 +276,10 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/tsconfig.jso
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -294,10 +292,10 @@ Index: third-party-src/extensions/sagemaker-open-notebook-extension/.vscodeignor
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-open-notebook-extension/README.md
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-open-notebook-extension/README.md
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/README.md
 @@ -0,0 +1,18 @@
 +# Code Editor Open Notebook Extension
 +
