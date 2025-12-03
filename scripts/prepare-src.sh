@@ -157,7 +157,7 @@ prepare_patch_directory() {
 apply_patches() {
     echo "Applying patches"
     pushd "${PATCHED_SRC_DIR}"
-    quilt push -a
+    quilt push -am
     popd
 }
 
