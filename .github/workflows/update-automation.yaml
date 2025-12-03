@@ -191,9 +191,7 @@ jobs:
     if: needs.update-automation.outputs.staging-branch != ''
     permissions:
       contents: write
-    timeout-minutes: 100
     strategy:
-      fail-fast: false
       matrix:
         target: [code-editor-sagemaker-server]
     steps:
@@ -228,7 +226,7 @@ jobs:
           cd code-editor-src
           npm install
           cd ..
-
+          export DISABLE_MANGLE=true
           ./scripts/build-artifacts.sh "$TARGET"
 
           echo "Built target: $TARGET"
