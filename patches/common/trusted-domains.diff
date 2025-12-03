@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+Index: code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
-+++ third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
++++ code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
 @@ -26,14 +26,14 @@ const TRUSTED_DOMAINS_STAT: IStat = {
  
  const CONFIG_HELP_TEXT_PRE = `// Links matching one or more entries in the list below can be opened without link protection.
@@ -48,10 +48,10 @@ Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSy
  	}
  
  	content += CONFIG_HELP_TEXT_AFTER;
-Index: third-party-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+Index: code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
-+++ third-party-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
++++ code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/editor/vs_code_editor_walkthrough.ts
 @@ -11,7 +11,7 @@ export default function content(accessor
  	const isServerless = platform.isWeb && !accessor.get(IWorkbenchEnvironmentService).remoteAuthority;
  	return `
@@ -88,15 +88,16 @@ Index: third-party-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/edito
  
  
  ## Thanks!
-Index: third-party-src/product.json
+Index: code-editor-src/product.json
 ===================================================================
---- third-party-src.orig/product.json
-+++ third-party-src/product.json
-@@ -82,5 +82,16 @@
- 				"publisherDisplayName": "Microsoft"
- 			}
- 		}
-+	],
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
+@@ -142,5 +142,17 @@
+ 		"completionsAdvancedSetting": "github.copilot.advanced",
+ 		"completionsEnablementSetting": "github.copilot.enable",
+ 		"nextEditSuggestionsSetting": "github.copilot.nextEditSuggestions.enabled"
+-	}
++	},
 +	"linkProtectionTrustedDomains": [
 +		"https://docs.aws.amazon.com",
 +		"https://docs.amazonaws.cn",
@@ -107,5 +108,6 @@ Index: third-party-src/product.json
 +		"https://console.amazonaws.cn",
 +		"https://aws.amazon.com",
 +		"https://*.amazon.com"
- 	]
++	]
++
  }

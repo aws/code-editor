@@ -8,22 +8,22 @@ downloading language packs from a URL configured in the product.json. This patch
 supports language pack extensions and uses files on the remote to set the
 language instead, so it works like the desktop version.
 
-Index: third-party-src/src/vs/server/node/serverServices.ts
+Index: code-editor-src/src/vs/server/node/serverServices.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/serverServices.ts
-+++ third-party-src/src/vs/server/node/serverServices.ts
+--- code-editor-src.orig/src/vs/server/node/serverServices.ts
++++ code-editor-src/src/vs/server/node/serverServices.ts
 @@ -11,7 +11,7 @@ import * as path from '../../base/common
  import { IURITransformer } from '../../base/common/uriIpc.js';
- import { getMachineId, getSqmMachineId, getdevDeviceId } from '../../base/node/id.js';
+ import { getMachineId, getSqmMachineId, getDevDeviceId } from '../../base/node/id.js';
  import { Promises } from '../../base/node/pfs.js';
 -import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
 +import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, ProxyChannel, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
  import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
  import { ConfigurationService } from '../../platform/configuration/common/configurationService.js';
-@@ -241,6 +241,9 @@ export async function setupServerService
- 		const channel = new ExtensionManagementChannel(extensionManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority));
- 		socketServer.registerChannel('extensions', channel);
+@@ -258,6 +258,9 @@ export async function setupServerService
+ 
+ 		socketServer.registerChannel('mcpManagement', new McpManagementChannel(mcpManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority)));
  
 +		const languagePackChannel = ProxyChannel.fromService<RemoteAgentConnectionContext>(accessor.get(ILanguagePackService), disposables);
 +		socketServer.registerChannel('languagePacks', languagePackChannel);
@@ -31,11 +31,11 @@ Index: third-party-src/src/vs/server/node/serverServices.ts
  		// clean up extensions folder
  		remoteExtensionsScanner.whenExtensionsReady().then(() => extensionManagementService.cleanUp());
  
-Index: third-party-src/src/vs/platform/environment/common/environmentService.ts
+Index: code-editor-src/src/vs/platform/environment/common/environmentService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/environment/common/environmentService.ts
-+++ third-party-src/src/vs/platform/environment/common/environmentService.ts
-@@ -101,7 +101,7 @@ export abstract class AbstractNativeEnvi
+--- code-editor-src.orig/src/vs/platform/environment/common/environmentService.ts
++++ code-editor-src/src/vs/platform/environment/common/environmentService.ts
+@@ -98,7 +98,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
  
@@ -44,10 +44,10 @@ Index: third-party-src/src/vs/platform/environment/common/environmentService.ts
  	}
  
  	@memoize
-Index: third-party-src/src/vs/server/node/remoteLanguagePacks.ts
+Index: code-editor-src/src/vs/server/node/remoteLanguagePacks.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/remoteLanguagePacks.ts
-+++ third-party-src/src/vs/server/node/remoteLanguagePacks.ts
+--- code-editor-src.orig/src/vs/server/node/remoteLanguagePacks.ts
++++ code-editor-src/src/vs/server/node/remoteLanguagePacks.ts
 @@ -3,37 +3,111 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -177,10 +177,10 @@ Index: third-party-src/src/vs/server/node/remoteLanguagePacks.ts
 +
 +	return nlsFile;
 +}
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
 @@ -25,6 +25,7 @@ import { URI } from '../../base/common/u
  import { streamToBuffer } from '../../base/common/buffer.js';
  import { IProductConfiguration } from '../../base/common/product.js';
@@ -214,19 +214,19 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  		}
  
  		const values: { [key: string]: string } = {
-Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
+Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
-+++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
-@@ -13,6 +13,7 @@ import { memoize } from '../../base/comm
- import { URI } from '../../base/common/uri.js';
+--- code-editor-src.orig/src/vs/server/node/serverEnvironmentService.ts
++++ code-editor-src/src/vs/server/node/serverEnvironmentService.ts
+@@ -15,6 +15,7 @@ import { joinPath } from '../../base/com
+ import { join } from '../../base/common/path.js';
  
  export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 +	'locale': { type: 'string' },
  
  	/* ----- server setup ----- */
  
-@@ -98,6 +99,7 @@ export const serverOptions: OptionDescri
+@@ -101,6 +102,7 @@ export const serverOptions: OptionDescri
  };
  
  export interface ServerParsedArgs {
@@ -234,10 +234,10 @@ Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
  
  	/* ----- server setup ----- */
  
-Index: third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
+Index: code-editor-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/languagePacks/browser/languagePacks.ts
-+++ third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
+--- code-editor-src.orig/src/vs/platform/languagePacks/browser/languagePacks.ts
++++ code-editor-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 @@ -5,18 +5,24 @@
  
  import { CancellationTokenSource } from '../../../base/common/cancellation.js';
@@ -272,34 +272,10 @@ Index: third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 +		return this.languagePackService.getInstalledLanguages();
  	}
  }
-Index: third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
-+++ third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
-@@ -51,7 +51,8 @@ class NativeLocaleService implements ILo
- 		@IProductService private readonly productService: IProductService
- 	) { }
- 
--	private async validateLocaleFile(): Promise<boolean> {
-+	// Make public just so we do not have to patch all the unused code out.
-+	public async validateLocaleFile(): Promise<boolean> {
- 		try {
- 			const content = await this.textFileService.read(this.environmentService.argvResource, { encoding: 'utf8' });
- 
-@@ -78,9 +79,6 @@ class NativeLocaleService implements ILo
- 	}
- 
- 	private async writeLocaleValue(locale: string | undefined): Promise<boolean> {
--		if (!(await this.validateLocaleFile())) {
--			return false;
--		}
- 		await this.jsonEditingService.write(this.environmentService.argvResource, [{ path: ['locale'], value: locale }], true);
- 		return true;
- 	}
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 @@ -475,9 +475,6 @@ export class InstallAction extends Exten
  		if (this.extension.isBuiltin) {
  			return;
@@ -363,23 +339,24 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsAct
  	}
  
  	override async run(): Promise<any> {
-Index: third-party-src/build/gulpfile.reh.js
+Index: code-editor-src/build/gulpfile.reh.js
 ===================================================================
---- third-party-src.orig/build/gulpfile.reh.js
-+++ third-party-src/build/gulpfile.reh.js
-@@ -59,6 +59,7 @@ const serverResourceIncludes = [
+--- code-editor-src.orig/build/gulpfile.reh.js
++++ code-editor-src/build/gulpfile.reh.js
+@@ -59,7 +59,7 @@ const serverResourceIncludes = [
  
  	// NLS
  	'out-build/nls.messages.json',
+-	'out-build/nls.keys.json',
 +	'out-build/nls.keys.json', // Required to generate translations.
  
  	// Process monitor
  	'out-build/vs/base/node/cpuUsage.sh',
-Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
+Index: code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/workbench.web.main.internal.ts
-+++ third-party-src/src/vs/workbench/workbench.web.main.internal.ts
-@@ -53,7 +53,7 @@ import './services/dialogs/browser/fileD
+--- code-editor-src.orig/src/vs/workbench/workbench.web.main.internal.ts
++++ code-editor-src/src/vs/workbench/workbench.web.main.internal.ts
+@@ -55,7 +55,7 @@ import './services/dialogs/browser/fileD
  import './services/host/browser/browserHostService.js';
  import './services/lifecycle/browser/lifecycleService.js';
  import './services/clipboard/browser/clipboardService.js';
@@ -388,11 +365,11 @@ Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
  import './services/path/browser/pathService.js';
  import './services/themes/browser/browserHostColorSchemeService.js';
  import './services/encryption/browser/encryptionService.js';
-Index: third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+Index: code-editor-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/localization/common/localizationsActions.ts
-+++ third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
-@@ -12,6 +12,7 @@ import { ServicesAccessor } from '../../
+--- code-editor-src.orig/src/vs/workbench/contrib/localization/common/localizationsActions.ts
++++ code-editor-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+@@ -11,6 +11,7 @@ import { ServicesAccessor } from '../../
  import { ILanguagePackItem, ILanguagePackService } from '../../../../platform/languagePacks/common/languagePacks.js';
  import { ILocaleService } from '../../../services/localization/common/locale.js';
  import { IExtensionsWorkbenchService } from '../../extensions/common/extensions.js';
@@ -400,7 +377,7 @@ Index: third-party-src/src/vs/workbench/contrib/localization/common/localization
  
  export class ConfigureDisplayLanguageAction extends Action2 {
  	public static readonly ID = 'workbench.action.configureLocale';
-@@ -37,6 +38,16 @@ export class ConfigureDisplayLanguageAct
+@@ -36,6 +37,16 @@ export class ConfigureDisplayLanguageAct
  
  		const installedLanguages = await languagePackService.getInstalledLanguages();
  

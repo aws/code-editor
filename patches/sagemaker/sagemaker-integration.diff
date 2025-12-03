@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/workbench/browser/client.ts
+Index: code-editor-src/src/vs/workbench/browser/client.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/src/vs/workbench/browser/client.ts
++++ code-editor-src/src/vs/workbench/browser/client.ts
 @@ -0,0 +1,61 @@
 +import { Disposable } from '../../base/common/lifecycle.js';
 +import { CommandsRegistry } from '../../platform/commands/common/commands.js';
@@ -65,11 +65,11 @@ Index: third-party-src/src/vs/workbench/browser/client.ts
 +	}
 +}
 \ No newline at end of file
-Index: third-party-src/src/vs/workbench/browser/web.main.ts
+Index: code-editor-src/src/vs/workbench/browser/web.main.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/web.main.ts
-+++ third-party-src/src/vs/workbench/browser/web.main.ts
-@@ -95,6 +95,7 @@ import { TunnelSource } from 'vs/workbench/services/re
+--- code-editor-src.orig/src/vs/workbench/browser/web.main.ts
++++ code-editor-src/src/vs/workbench/browser/web.main.ts
+@@ -95,6 +95,7 @@ import { ISecretStorageService } from '.
  import { TunnelSource } from '../services/remote/common/tunnelModel.js';
  import { mainWindow } from '../../base/browser/window.js';
  import { INotificationService, Severity } from '../../platform/notification/common/notification.js';
@@ -77,20 +77,20 @@ Index: third-party-src/src/vs/workbench/browser/web.main.ts
  
  export class BrowserMain extends Disposable {
  
-@@ -129,6 +130,9 @@ export class BrowserMain extends Disposable {
- 
+@@ -130,6 +131,9 @@ export class BrowserMain extends Disposa
  		// Startup
  		const instantiationService = workbench.startup();
-+
+ 
 +		// Create instance of SagemakerServerClient
 +		this._register(instantiationService.createInstance(SagemakerServerClient));
- 
++
  		// Window
  		this._register(instantiationService.createInstance(BrowserWindow));
-Index: third-party-src/product.json
+ 
+Index: code-editor-src/product.json
 ===================================================================
---- third-party-src.orig/product.json
-+++ third-party-src/product.json
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
 @@ -9,8 +9,8 @@
  		"nlsBaseUrl": "",
  		"publisherUrl": ""
@@ -102,14 +102,14 @@ Index: third-party-src/product.json
  	"codeEditorVersion": "1.0.0",
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
-Index: third-party-src/src/vs/platform/product/common/product.ts
+Index: code-editor-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/product/common/product.ts
-+++ third-party-src/src/vs/platform/product/common/product.ts
-@@ -69,15 +69,17 @@ else {
+--- code-editor-src.orig/src/vs/platform/product/common/product.ts
++++ code-editor-src/src/vs/platform/product/common/product.ts
+@@ -70,10 +70,12 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
- 			version: '1.95.0-dev',
+ 			version: '1.104.0-dev',
 -			nameShort: 'Code Editor',
 -			nameLong: 'Code Editor',
 +			nameShort: 'SageMaker Code Editor',
@@ -121,8 +121,3 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  			urlProtocol: 'code-oss',
  			reportIssueUrl: 'https://github.com/microsoft/vscode/issues/new',
  			licenseName: 'MIT',
- 			licenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
-			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt'
- 		});
- 	}
- }

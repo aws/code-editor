@@ -33,10 +33,10 @@ Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
  			'restricted': true,
  			'markdownDeprecationMessage': localize('enableTelemetryDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated in favor of the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
  			'scope': ConfigurationScope.APPLICATION,
-Index: third-party-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+Index: third-party-src/src/vs/workbench/electron-browser/desktop.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/electron-sandbox/desktop.contribution.ts
-+++ third-party-src/src/vs/workbench/electron-sandbox/desktop.contribution.ts
+--- third-party-src.orig/src/vs/workbench/electron-browser/desktop.contribution.ts
++++ third-party-src/src/vs/workbench/electron-browser/desktop.contribution.ts
 @@ -322,7 +322,7 @@ import { registerWorkbenchContribution2,
  			'telemetry.enableCrashReporter': {
  				'type': 'boolean',
