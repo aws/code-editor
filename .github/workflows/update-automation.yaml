@@ -113,7 +113,7 @@ jobs:
           # Test each target sequentially with rebasing
           FAILED_TARGETS=()
           
-          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+          for target in code-editor-sagemaker-server; do
             echo ""
             echo "=== REBASING TARGET: $target ==="
             
@@ -152,7 +152,7 @@ jobs:
           # Test each target sequentially with rebasing test patches
           FAILED_TARGETS=()
           
-          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+          for target in code-editor-sagemaker-server; do
             echo ""
             echo "=== REBASING TEST PATCHES FOR TARGET: $target ==="
             
@@ -193,7 +193,7 @@ jobs:
       contents: write
     strategy:
       matrix:
-        target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]
+        target: [code-editor-sagemaker-server]
     steps:
       - name: Setup environment
         run: |
@@ -309,7 +309,7 @@ jobs:
           
       - name: Organize downloaded sources
         run: |
-          for target in code-editor-server code-editor-sagemaker-server code-editor-web-embedded code-editor-web-embedded-with-terminal; do
+          for target in code-editor-sagemaker-server; do
             if [[ -d "$GITHUB_RUN_ID-prepared-source-$target" ]]; then
               mv "$GITHUB_RUN_ID-prepared-source-$target" "code-editor-src-$target"
               echo "Organized prepared source for $target"

@@ -126,7 +126,7 @@ EOF
 
 generate_unified_oss_attribution() {
     local combined_oss_attribution_output_dir="${1:-$ROOT_DIR/overrides}"
-    local targets=("code-editor-server" "code-editor-sagemaker-server" "code-editor-web-embedded" "code-editor-web-embedded-with-terminal")
+    local targets=("code-editor-sagemaker-server")
     local target_dirs=()
     
     if [[ "$PREPARE_SOURCES" == "true" ]]; then
@@ -174,7 +174,7 @@ generate_unified_oss_attribution() {
     source "$ROOT_DIR/.packageversionrc"
     
     npx --yes --package @electrovir/oss-attribution-generator@$oss_attribution_generator_version -- generate-attribution \
-        -b "${target_dirs[0]}" "${target_dirs[1]}" "${target_dirs[2]}" "${target_dirs[3]}" \
+        -b "${target_dirs[0]}" \
         --outputDir "$BUILD_DIR/private/oss-attribution"
     
     # Create final LICENSE-THIRD-PARTY with unified attribution
