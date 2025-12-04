@@ -226,7 +226,7 @@ jobs:
           cd code-editor-src
           npm install
           cd ..
-          
+          export DISABLE_MANGLE=true
           ./scripts/build-artifacts.sh "$TARGET"
 
           echo "Built target: $TARGET"
