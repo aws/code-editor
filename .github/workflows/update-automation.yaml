@@ -33,18 +33,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-      - name: Get latest semver branch
+      - name: Checkout main branch
         run: |
           git fetch origin
-          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
-          # For testing purposes
-          if [ -z "$LATEST_SEMVER" ]; then
-            LATEST_SEMVER="main"
-            echo "No semver branches found, using main"
-          fi
-          echo "LATEST_SEMVER=$LATEST_SEMVER" >> "$GITHUB_ENV"
-          echo "Using branch: $LATEST_SEMVER"
-          git checkout "$LATEST_SEMVER"
+          echo "Using main branch as base for staging"
+          git checkout main
           git submodule update --init --recursive
           
       - name: Check if update needed
@@ -90,8 +83,8 @@ jobs:
               echo "Staging branch $STAGING_BRANCH already exists, checking it out"
               git checkout -b "$STAGING_BRANCH" origin/"$STAGING_BRANCH"
             else
-              echo "Creating new staging branch: $STAGING_BRANCH"
-              git checkout -b "$STAGING_BRANCH"
+              echo "Creating new staging branch: $STAGING_BRANCH from main"
+              git checkout -b "$STAGING_BRANCH" main
             fi
             
             # Update submodule to latest VS Code release
@@ -379,11 +372,10 @@ jobs:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
           fetch-depth: 0
           
-      - name: Determine target branch and create PR
+      - name: Create PR to main
         env:
           GH_TOKEN: ${{ github.token }}
           STAGING_BRANCH: ${{ needs.update-automation.outputs.staging-branch }}
-          EXISTING_CODE_OSS_TAG: ${{ needs.update-automation.outputs.existing-code-oss-tag }}
           LATEST_CODE_OSS_TAG: ${{ needs.update-automation.outputs.latest-code-oss-tag }}
         run: |
           # Check if PR already exists for this staging branch
@@ -392,44 +384,6 @@ jobs:
           if [ -n "$EXISTING_PR" ]; then
             echo "PR already exists for branch $STAGING_BRANCH: #$EXISTING_PR"
             exit 0
-          fi
-          
-          # Parse version numbers
-          EXISTING_CODE_OSS_MAJOR=$(echo "$EXISTING_CODE_OSS_TAG" | cut -d. -f1)
-          EXISTING_CODE_OSS_MINOR=$(echo "$EXISTING_CODE_OSS_TAG" | cut -d. -f2)
-          LATEST_CODE_OSS_MAJOR=$(echo "$LATEST_CODE_OSS_TAG" | cut -d. -f1)
-          LATEST_CODE_OSS_MINOR=$(echo "$LATEST_CODE_OSS_TAG" | cut -d. -f2)
-          
-          git fetch origin
-          LATEST_SEMVER=$(git branch -r | grep -E 'origin/[0-9]+\.[0-9]+$' | sed 's/.*origin\///' | sort -V | tail -1)
-          
-          if [ -n "$LATEST_SEMVER" ]; then
-            LATEST_MAJOR=$(echo "$LATEST_SEMVER" | cut -d. -f1)
-            LATEST_MINOR=$(echo "$LATEST_SEMVER" | cut -d. -f2)
-          else
-            LATEST_MAJOR=0
-            LATEST_MINOR=0
-          fi
-          
-          # Determine if this is a patch or minor/major update
-          if [ "$LATEST_CODE_OSS_MAJOR" = "$EXISTING_CODE_OSS_MAJOR" ] && [ "$LATEST_CODE_OSS_MINOR" = "$EXISTING_CODE_OSS_MINOR" ]; then
-            # Patch update - use existing branch
-            TARGET_BRANCH="$LATEST_SEMVER"
-            echo "Patch update detected: targeting existing branch $TARGET_BRANCH"
-          else
-            # Minor/major update - create new branch
-            LATEST_MAJOR=$(echo "$LATEST_SEMVER" | cut -d. -f1)
-            LATEST_MINOR=$(echo "$LATEST_SEMVER" | cut -d. -f2)
-            NEW_MINOR=$((LATEST_MINOR + 1))
-            TARGET_BRANCH="$LATEST_MAJOR.$NEW_MINOR"
-            echo "Minor/major update detected: targeting new branch $TARGET_BRANCH"
-            
-            # Create new version branch if it doesn't exist
-            if ! git show-ref --verify --quiet refs/remotes/origin/"$TARGET_BRANCH"; then
-              echo "Creating new version branch: $TARGET_BRANCH"
-              git checkout -b "$TARGET_BRANCH" "origin/$LATEST_SEMVER"
-              git push origin "$TARGET_BRANCH"
-            fi
           fi
           
           # Get release body and generate links
@@ -461,15 +415,17 @@ jobs:
           - Remote extension host changes
           
           ## Next Steps
-          After this PR is merged, a release can be created by following the guide in [RELEASE.md](RELEASE.md)."
+          After this PR is merged to main:
+          - If this is a patch update (e.g., 1.101.0 -> 1.101.2), the commits need to be cherry-picked from main to the corresponding feature branch (format x.x)
+          - A release can be created by following the guide in [RELEASE.md](RELEASE.md)"
           
           gh pr create \
             --title "$PR_TITLE" \
             --body "$PR_BODY" \
-            --base "$TARGET_BRANCH" \
+            --base "main" \
             --head "$STAGING_BRANCH"
             
-          echo "Created PR from $STAGING_BRANCH to $TARGET_BRANCH"
+          echo "Created PR from $STAGING_BRANCH to main"
 
   publish-release-lag-metric:
     name: Publish Release Lag Metric
