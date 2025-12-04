@@ -126,7 +126,7 @@ EOF
 
 generate_unified_oss_attribution() {
     local combined_oss_attribution_output_dir="${1:-$ROOT_DIR/overrides}"
-    local targets=("code-editor-server" "code-editor-sagemaker-server" "code-editor-web-embedded" "code-editor-web-embedded-with-terminal")
+    local targets=("code-editor-sagemaker-server")
     local target_dirs=()
     
     if [[ "$PREPARE_SOURCES" == "true" ]]; then

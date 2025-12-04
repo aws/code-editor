@@ -1,17 +1,17 @@
-Index: third-party-src/extensions/post-startup-notifications/.vscode/extensions.json
+Index: code-editor-src/extensions/post-startup-notifications/.vscode/extensions.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/.vscode/extensions.json
++++ code-editor-src/extensions/post-startup-notifications/.vscode/extensions.json
 @@ -0,0 +1,5 @@
 +{
 +  // See http://go.microsoft.com/fwlink/?LinkId=827846
 +  // for the documentation about the extensions.json format
 +  "recommendations": ["dbaeumer.vscode-eslint", "amodio.tsl-problem-matcher", "ms-vscode.extension-test-runner"]
 +}
-Index: third-party-src/extensions/post-startup-notifications/.vscode/launch.json
+Index: code-editor-src/extensions/post-startup-notifications/.vscode/launch.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/.vscode/launch.json
++++ code-editor-src/extensions/post-startup-notifications/.vscode/launch.json
 @@ -0,0 +1,21 @@
 +// A launch configuration that compiles the extension and then opens it inside a new window
 +// Use IntelliSense to learn about possible attributes.
@@ -35,10 +35,10 @@ Index: third-party-src/extensions/post-startup-notifications/.vscode/launch.json
 +    ]
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/.vscode/settings.json
+Index: code-editor-src/extensions/post-startup-notifications/.vscode/settings.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/.vscode/settings.json
++++ code-editor-src/extensions/post-startup-notifications/.vscode/settings.json
 @@ -0,0 +1,13 @@
 +// Place your settings in this file to overwrite default and user settings.
 +{
@@ -54,10 +54,10 @@ Index: third-party-src/extensions/post-startup-notifications/.vscode/settings.js
 +    "typescript.tsc.autoDetect": "off"
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/.vscode/tasks.json
+Index: code-editor-src/extensions/post-startup-notifications/.vscode/tasks.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/.vscode/tasks.json
++++ code-editor-src/extensions/post-startup-notifications/.vscode/tasks.json
 @@ -0,0 +1,40 @@
 +// See https://go.microsoft.com/fwlink/?LinkId=733558
 +// for the documentation about the tasks.json format
@@ -100,10 +100,10 @@ Index: third-party-src/extensions/post-startup-notifications/.vscode/tasks.json
 +    ]
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/.vscodeignore
+Index: code-editor-src/extensions/post-startup-notifications/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/.vscodeignore
++++ code-editor-src/extensions/post-startup-notifications/.vscodeignore
 @@ -0,0 +1,14 @@
 +.vscode/**
 +.vscode-test/**
@@ -119,10 +119,10 @@ Index: third-party-src/extensions/post-startup-notifications/.vscodeignore
 +**/*.map
 +**/*.ts
 +**/.vscode-test.*
-Index: third-party-src/extensions/post-startup-notifications/CHANGELOG.md
+Index: code-editor-src/extensions/post-startup-notifications/CHANGELOG.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/CHANGELOG.md
++++ code-editor-src/extensions/post-startup-notifications/CHANGELOG.md
 @@ -0,0 +1,9 @@
 +# Change Log
 +
@@ -134,19 +134,19 @@ Index: third-party-src/extensions/post-startup-notifications/CHANGELOG.md
 +
 +- Initial release
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/README.md
+Index: code-editor-src/extensions/post-startup-notifications/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/README.md
++++ code-editor-src/extensions/post-startup-notifications/README.md
 @@ -0,0 +1,4 @@
 +# post-startup-notifications README
 +
 +This extension monitors post startup script execution and notifies users on success/failure.
 +
-Index: third-party-src/extensions/post-startup-notifications/eslint.config.mjs
+Index: code-editor-src/extensions/post-startup-notifications/eslint.config.mjs
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/eslint.config.mjs
++++ code-editor-src/extensions/post-startup-notifications/eslint.config.mjs
 @@ -0,0 +1,28 @@
 +import typescriptEslint from "@typescript-eslint/eslint-plugin";
 +import tsParser from "@typescript-eslint/parser";
@@ -177,10 +177,10 @@ Index: third-party-src/extensions/post-startup-notifications/eslint.config.mjs
 +    },
 +}];
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/package.json
+Index: code-editor-src/extensions/post-startup-notifications/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/package.json
++++ code-editor-src/extensions/post-startup-notifications/package.json
 @@ -0,0 +1,57 @@
 +{
 +    "name": "post-startup-notifications",
@@ -240,19 +240,19 @@ Index: third-party-src/extensions/post-startup-notifications/package.json
 +    }
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/src/constant.ts
+Index: code-editor-src/extensions/post-startup-notifications/src/constant.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/src/constant.ts
++++ code-editor-src/extensions/post-startup-notifications/src/constant.ts
 @@ -0,0 +1,3 @@
 +export const POST_START_UP_STATUS_FILE = '/tmp/.post-startup-status.json';
 +export const SERVICE_NAME_ENV_VALUE = 'SageMakerUnifiedStudio';
 +export const SERVICE_NAME_ENV_KEY = 'SERVICE_NAME';
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
+Index: code-editor-src/extensions/post-startup-notifications/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/src/extension.ts
++++ code-editor-src/extensions/post-startup-notifications/src/extension.ts
 @@ -0,0 +1,117 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
@@ -371,10 +371,10 @@ Index: third-party-src/extensions/post-startup-notifications/src/extension.ts
 +        outputChannel.dispose();
 +    }
 +}
-Index: third-party-src/extensions/post-startup-notifications/src/test/extension.test.ts
+Index: code-editor-src/extensions/post-startup-notifications/src/test/extension.test.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/src/test/extension.test.ts
++++ code-editor-src/extensions/post-startup-notifications/src/test/extension.test.ts
 @@ -0,0 +1,267 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
@@ -643,10 +643,10 @@ Index: third-party-src/extensions/post-startup-notifications/src/test/extension.
 +    });
 +});
 +
-Index: third-party-src/extensions/post-startup-notifications/src/types.ts
+Index: code-editor-src/extensions/post-startup-notifications/src/types.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/src/types.ts
++++ code-editor-src/extensions/post-startup-notifications/src/types.ts
 @@ -0,0 +1,6 @@
 +export interface StatusFile {
 +    status: string;
@@ -655,10 +655,10 @@ Index: third-party-src/extensions/post-startup-notifications/src/types.ts
 +    label: string;
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/tsconfig.json
+Index: code-editor-src/extensions/post-startup-notifications/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/tsconfig.json
++++ code-editor-src/extensions/post-startup-notifications/tsconfig.json
 @@ -0,0 +1,17 @@
 +{
 +    "compilerOptions": {
@@ -678,10 +678,10 @@ Index: third-party-src/extensions/post-startup-notifications/tsconfig.json
 +    }
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/post-startup-notifications/webpack.config.js
+Index: code-editor-src/extensions/post-startup-notifications/webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/webpack.config.js
++++ code-editor-src/extensions/post-startup-notifications/webpack.config.js
 @@ -0,0 +1,48 @@
 +//@ts-check
 +
@@ -732,11 +732,11 @@ Index: third-party-src/extensions/post-startup-notifications/webpack.config.js
 +};
 +module.exports = [extensionConfig];
 \ No newline at end of file
-Index: third-party-src/build/npm/dirs.js
+Index: code-editor-src/build/npm/dirs.js
 ===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -42,6 +42,7 @@ const dirs = [
+--- code-editor-src.orig/build/npm/dirs.js
++++ code-editor-src/build/npm/dirs.js
+@@ -44,6 +44,7 @@ const dirs = [
  	'extensions/sagemaker-terminal-crash-mitigation',
  	'extensions/sagemaker-open-notebook-extension',
  	'extensions/sagemaker-ui-dark-theme',
@@ -744,22 +744,22 @@ Index: third-party-src/build/npm/dirs.js
  	'extensions/search-result',
  	'extensions/simple-browser',
  	'extensions/tunnel-forwarding',
-Index: third-party-src/build/gulpfile.extensions.js
+Index: code-editor-src/build/gulpfile.extensions.js
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -64,6 +64,7 @@ const compilations = [
+--- code-editor-src.orig/build/gulpfile.extensions.js
++++ code-editor-src/build/gulpfile.extensions.js
+@@ -65,6 +65,7 @@ const compilations = [
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
 +	'extensions/post-startup-notifications/tsconfig.json',
  	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
-Index: third-party-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: code-editor-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
++++ code-editor-src/extensions/post-startup-notifications/extension-browser.webpack.config.js
 @@ -0,0 +1,17 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -769,19 +769,19 @@ Index: third-party-src/extensions/post-startup-notifications/extension-browser.w
 +//@ts-check
 +
 +'use strict';
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
 +
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
++export default [withBrowserDefaults({
++    context: import.meta.dirname,
 +    entry: {
 +        extension: './src/extension.ts'
 +    },
-+});
-Index: third-party-src/extensions/post-startup-notifications/extension.webpack.config.js
++})];
+Index: code-editor-src/extensions/post-startup-notifications/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/post-startup-notifications/extension.webpack.config.js
++++ code-editor-src/extensions/post-startup-notifications/extension.webpack.config.js
 @@ -0,0 +1,20 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -791,16 +791,15 @@ Index: third-party-src/extensions/post-startup-notifications/extension.webpack.c
 +//@ts-check
 +
 +'use strict';
++import {node as withDefaults} from '../shared.webpack.config.mjs';
 +
-+const withDefaults = require('../shared.webpack.config');
 +
-+module.exports = withDefaults({
-+    context: __dirname,
++export default [withDefaults({
++    context: import.meta.dirname,
 +    resolve: {
 +        mainFields: ['module', 'main']
 +    },
 +    entry: {
 +        extension: './src/extension.ts',
 +    }
-+});
-\ No newline at end of file
++})];

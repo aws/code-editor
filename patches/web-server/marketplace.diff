@@ -7,10 +7,10 @@ parse it as JSON and use as the custom extensions gallery configuration.
 Adjusted ExtensionLatestVersionUri endpoint to be compatible with OpenVSX API
 (see: https://open-vsx.org/swagger-ui/index.html?urls.primaryName=VSCode%20Adapter)
 
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
 @@ -338,14 +338,7 @@ export class WebClientServer {
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			rootEndpoint: base,
@@ -27,10 +27,10 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  		};
  
  		const proposedApi = this._environmentService.args['enable-proposed-api'];
-Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+Index: code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-+++ third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+--- code-editor-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
++++ code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 @@ -163,9 +163,9 @@ export abstract class AbstractExtensionR
  	}
  
@@ -44,11 +44,11 @@ Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionR
  	}
  
  }
-Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
-+++ third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
-@@ -46,7 +46,7 @@ export class ExtensionGalleryManifestSer
+--- code-editor-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
++++ code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+@@ -47,7 +47,7 @@ export class ExtensionGalleryManifestSer
  				type: ExtensionGalleryResourceType.ExtensionQueryService
  			},
  			{
@@ -57,10 +57,10 @@ Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalle
  				type: ExtensionGalleryResourceType.ExtensionLatestVersionUri
  			},
  			{
-Index: sagemaker-code-editor/vscode/src/vs/platform/product/common/product.ts
+Index: code-editor-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/product/common/product.ts
-+++ third-party-src/src/vs/platform/product/common/product.ts
+--- code-editor-src.orig/src/vs/platform/product/common/product.ts
++++ code-editor-src/src/vs/platform/product/common/product.ts
 @@ -49,6 +49,14 @@ else if (globalThis._VSCODE_PRODUCT_JSON
  			version: pkg.version
  		});
@@ -76,36 +76,36 @@ Index: sagemaker-code-editor/vscode/src/vs/platform/product/common/product.ts
  }
  
  // Web environment or unknown
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-@@ -70,6 +70,8 @@ import { ILocalizedString } from '../../../../pla
- import { IExtensionGalleryManifest, IExtensionGalleryManifestService } from '../../../../platform/extensionManagement/common/extensionGalleryManifest.js';
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
+@@ -69,6 +69,8 @@ import { Codicon } from '../../../../bas
+ import { IExtensionGalleryManifest, IExtensionGalleryManifestService, ExtensionGalleryManifestStatus } from '../../../../platform/extensionManagement/common/extensionGalleryManifest.js';
  import { URI } from '../../../../base/common/uri.js';
- import { IMcpGalleryService } from '../../../../platform/mcp/common/mcpManagement.js';
+ import { DEFAULT_ACCOUNT_SIGN_IN_COMMAND } from '../../../services/accounts/common/defaultAccount.js';
 +import { IProductService } from '../../../../platform/product/common/productService.js';
 +import { memoize } from '../../../../base/common/decorators.js';
  
  export const ExtensionsSortByContext = new RawContextKey<string>('extensionsSortByValue', '');
  export const SearchMarketplaceExtensionsContext = new RawContextKey<boolean>('searchMarketplaceExtensions', false);
-@@ -93,7 +93,6 @@ const SortByUpdateDateContext = new RawC
- const REMOTE_CATEGORY: ILocalizedString = localize2({ key: 'remote', comment: ['Remote as in remote machine'] }, "Remote");
+@@ -96,7 +98,6 @@ interface IExtensionsViewletState {
+ }
  
  export class ExtensionsViewletViewsContribution extends Disposable implements IWorkbenchContribution {
 -
  	private readonly container: ViewContainer;
  
  	constructor(
-@@ -528,6 +528,7 @@ export class ExtensionsViewPaneContainer
+@@ -560,6 +561,7 @@ export class ExtensionsViewPaneContainer
  		@IExtensionService extensionService: IExtensionService,
  		@IViewDescriptorService viewDescriptorService: IViewDescriptorService,
  		@IPreferencesService private readonly preferencesService: IPreferencesService,
 +		@IProductService private readonly productService: IProductService,
  		@ICommandService private readonly commandService: ICommandService,
- 		@IMcpGalleryService private readonly mcpGalleryService: IMcpGalleryService,
  		@ILogService logService: ILogService,
-@@ -569,6 +571,15 @@ export class ExtensionsViewPaneContainer
+ 	) {
+@@ -600,6 +602,15 @@ export class ExtensionsViewPaneContainer
  			});
  	}
  
@@ -121,10 +121,10 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
  	get searchValue(): string | undefined {
  		return this.searchBox?.getValue();
  	}
-@@ -583,8 +594,7 @@ export class ExtensionsViewPaneContainer
-		hide(overlay);
-
-		this.header = append(this.root, $('.header'));
+@@ -614,8 +625,7 @@ export class ExtensionsViewPaneContainer
+ 		hide(overlay);
+ 
+ 		this.header = append(this.root, $('.header'));
 -		const placeholder = localize('searchExtensions', "Search Extensions in Marketplace");
 -
 +		const placeholder = localize('searchExtensions', 'Search extensions in {0}', this.extensionsGalleryHostname);
