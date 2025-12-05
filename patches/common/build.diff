@@ -1,7 +1,7 @@
-Index: third-party-src/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- third-party-src.orig/package.json
-+++ third-party-src/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -99,7 +99,6 @@
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
@@ -61,10 +61,10 @@ Index: third-party-src/package.json
    },
    "repository": {
      "type": "git",
-Index: third-party-src/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- third-party-src.orig/remote/package.json
-+++ third-party-src/remote/package.json
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
 @@ -29,7 +29,6 @@
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
@@ -73,3 +73,29 @@ Index: third-party-src/remote/package.json
      "minimist": "^1.2.6",
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta33",
+Index: code-editor-src/build/lib/mangle/index.js
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.js
++++ code-editor-src/build/lib/mangle/index.js
+@@ -354,7 +354,7 @@ class Mangler {
+         this.log = log;
+         this.config = config;
+         this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
+-            maxWorkers: 4,
++            maxWorkers: 3,
+             minWorkers: 'max'
+         });
+     }
+Index: code-editor-src/build/lib/mangle/index.ts
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.ts
++++ code-editor-src/build/lib/mangle/index.ts
+@@ -407,7 +407,7 @@ export class Mangler {
+ 	) {
+ 
+ 		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+-			maxWorkers: 4,
++			maxWorkers: 3,
+ 			minWorkers: 'max'
+ 		});
+ 	}
