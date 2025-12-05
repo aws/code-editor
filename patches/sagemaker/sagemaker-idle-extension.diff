@@ -225,18 +225,19 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts
 +++ code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -3,8 +3,9 @@
+@@ -3,8 +3,10 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
 -import { createReadStream, promises } from 'fs';
-+import { createReadStream, promises, existsSync, readdirSync, statSync, writeFileSync } from 'fs';
++import { createReadStream, promises, existsSync, writeFileSync } from 'fs';
++import * as fs from 'fs';
  import * as http from 'http';
 +import * as path from 'path';
  import * as url from 'url';
  import * as cookie from 'cookie';
  import * as crypto from 'crypto';
-@@ -91,11 +92,45 @@ export async function serveFile(filePath
+@@ -91,11 +93,45 @@ export async function serveFile(filePath
  	}
  }
  
@@ -262,18 +263,18 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 + */
 +function checkTerminalActivity(idleFilePath: string) {
 +	try {
-+		const files: string[] = readdirSync('/dev/pts');
++		const files: string[] = fs.readdirSync('/dev/pts');
 +		const now = new Date();
 +
 +		const activityDetected = files.some((file: string) => {
 +			const filePath = path.join('/dev/pts', file);
-+			const stats = statSync(filePath);
++			const stats = fs.statSync(filePath);
 +			const mtime = new Date(stats.mtime).getTime();
 +			return now.getTime() - mtime < CHECK_INTERVAL;
 +		});
 +
 +		if (activityDetected) {
-+			writeFileSync(idleFilePath, now.toISOString());
++			fs.writeFileSync(idleFilePath, now.toISOString());
 +		}
 +	} catch (err) {
 +		console.error('Error checking terminal activity:', err);
@@ -282,7 +283,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  
  export class WebClientServer {
  
-@@ -133,6 +168,9 @@ export class WebClientServer {
+@@ -133,6 +169,9 @@ export class WebClientServer {
  				// callback support
  				return this._handleCallback(res);
  			}
@@ -292,7 +293,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -505,6 +543,33 @@ export class WebClientServer {
+@@ -505,6 +544,33 @@ export class WebClientServer {
  		});
  		return void res.end(data);
  	}
