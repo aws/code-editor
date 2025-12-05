@@ -59,3 +59,29 @@ Index: code-editor-src/remote/package.json
      "native-watchdog": "^1.4.1",
      "node-pty": "1.1.0-beta35",
      "tas-client-umd": "0.2.0",
+Index: code-editor-src/build/lib/mangle/index.js
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.js
++++ code-editor-src/build/lib/mangle/index.js
+@@ -352,7 +352,7 @@ class Mangler {
+         this.log = log;
+         this.config = config;
+         this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
+-            maxWorkers: 4,
++            maxWorkers: 3,
+             minWorkers: 'max'
+         });
+     }
+Index: code-editor-src/build/lib/mangle/index.ts
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.ts
++++ code-editor-src/build/lib/mangle/index.ts
+@@ -411,7 +411,7 @@ export class Mangler {
+ 	) {
+ 
+ 		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+-			maxWorkers: 4,
++			maxWorkers: 3,
+ 			minWorkers: 'max'
+ 		});
+ 	}
