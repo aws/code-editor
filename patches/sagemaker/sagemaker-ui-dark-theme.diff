@@ -1,7 +1,7 @@
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -14,16 +14,16 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/README.md
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/README.md
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/README.md
 @@ -0,0 +1 @@
 +# SageMaker UI Dark Theme
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
 @@ -0,0 +1,17 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -42,10 +42,10 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension-browser.webp
 +        extension: './src/extension.ts'
 +    },
 +});
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
 @@ -0,0 +1,20 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -67,10 +67,10 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/extension.webpack.conf
 +        extension: './src/extension.ts',
 +    }
 +});
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
 @@ -0,0 +1,51 @@
 +import * as vscode from 'vscode';
 +
@@ -123,10 +123,10 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
 +        outputChannel.dispose();
 +    }
 +}
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -138,11 +138,11 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/build/gulpfile.extensions.js
+Index: code-editor-src/build/gulpfile.extensions.js
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -63,6 +63,7 @@ const compilations = [
+--- code-editor-src.orig/build/gulpfile.extensions.js
++++ code-editor-src/build/gulpfile.extensions.js
+@@ -64,6 +64,7 @@ const compilations = [
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
@@ -150,11 +150,11 @@ Index: third-party-src/build/gulpfile.extensions.js
  	'extensions/tunnel-forwarding/tsconfig.json',
  	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
-Index: third-party-src/build/npm/dirs.js
+Index: code-editor-src/build/npm/dirs.js
 ===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -41,6 +41,7 @@ const dirs = [
+--- code-editor-src.orig/build/npm/dirs.js
++++ code-editor-src/build/npm/dirs.js
+@@ -42,6 +42,7 @@ const dirs = [
  	'extensions/sagemaker-idle-extension',
  	'extensions/sagemaker-terminal-crash-mitigation',
  	'extensions/sagemaker-open-notebook-extension',
@@ -162,10 +162,10 @@ Index: third-party-src/build/npm/dirs.js
  	'extensions/search-result',
  	'extensions/simple-browser',
  	'extensions/tunnel-forwarding',
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/package.json
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/package.json
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/package.json
 @@ -0,0 +1,46 @@
 +{
 +  "name": "sagemaker-ui-dark-theme",
@@ -213,10 +213,10 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/package.json
 +  "repository": {
 +  }
 +}
-Index: third-party-src/.vscode-test.js
+Index: code-editor-src/.vscode-test.js
 ===================================================================
---- third-party-src.orig/.vscode-test.js
-+++ third-party-src/.vscode-test.js
+--- code-editor-src.orig/.vscode-test.js
++++ code-editor-src/.vscode-test.js
 @@ -63,6 +63,11 @@ const extensions = [
  		mocha: { timeout: 60_000 }
  	},
@@ -229,11 +229,10 @@ Index: third-party-src/.vscode-test.js
  		label: 'microsoft-authentication',
  		mocha: { timeout: 60_000 }
  	},
-
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/src/test/extension.test.ts
 @@ -0,0 +1,123 @@
 +import * as assert from 'assert';
 +import * as vscode from 'vscode';
@@ -358,10 +357,10 @@ Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/extension.tes
 +        assert.strictEqual(theme?.globalValue, undefined, 'Global theme should not be set');
 +    });
 +});
-Index: third-party-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
 @@ -0,0 +1,33 @@
 +import * as path from 'path';
 +import * as testRunner from '../../../../test/integration/electron/testrunner';

@@ -1,7 +1,7 @@
-Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
---- third-party-src.orig/extensions/sagemaker-extension/src/constant.ts
-+++ third-party-src/extensions/sagemaker-extension/src/constant.ts
+--- code-editor-src.orig/extensions/sagemaker-extension/src/constant.ts
++++ code-editor-src/extensions/sagemaker-extension/src/constant.ts
 @@ -27,6 +27,10 @@ export const FIVE_MINUTES_INTERVAL_MILLI
  
  export const SAGEMAKER_METADATA_PATH = '/opt/ml/metadata/resource-metadata.json';
@@ -63,10 +63,10 @@ Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
 +
 +	return `https://${DataZoneDomainId}.sagemaker.${DataZoneDomainRegion}.on.aws/projects/${DataZoneProjectId}/overview`;
 +}
-Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
---- third-party-src.orig/extensions/sagemaker-extension/src/extension.ts
-+++ third-party-src/extensions/sagemaker-extension/src/extension.ts
+--- code-editor-src.orig/extensions/sagemaker-extension/src/extension.ts
++++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
 @@ -11,7 +11,8 @@ import {
      WARNING_BUTTON_SAVE_AND_RENEW_SESSION,
      SagemakerCookie,

@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
 @@ -635,7 +635,7 @@ function readCookie(name: string): strin
  			const localhostMatch = extractLocalHostUriMetaDataForPortMapping(resolvedUri)
  			if (localhostMatch && resolvedUri.authority !== location.host) {
