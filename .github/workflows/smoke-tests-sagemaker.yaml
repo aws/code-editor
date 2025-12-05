@@ -16,7 +16,7 @@ jobs:
       GH_REF_NAME: ${{ github.ref_name }}
       SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
       GH_TOKEN: ${{ github.token }}
-      AWS_REGION: us-east-2
+      AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
       PROJECT_NAME: ${{ secrets.PROJECT_NAME }}
@@ -48,7 +48,7 @@ jobs:
           ls -la
 
           FILES=(
-              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+              "$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           )
           
           # Check build artifact exists
@@ -67,7 +67,7 @@ jobs:
 
       - name: Extract artifacts
         run: |
-          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
+          tar -xzf "$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
 
       - name: Build and push Docker image
         run: | 
@@ -100,7 +100,6 @@ jobs:
           docker rmi $ECR_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
           echo "Local Docker images cleaned up"
           rm -rf vscode-reh-web-linux-x64
-          rm -rf $COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build
           echo "Local build artifacts cleaned up"
 
       - name: Configure SageMaker role AWS credentials
@@ -290,7 +289,7 @@ jobs:
           ls -la
 
           FILES=(
-              "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
+              "$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           )
           
           # Check build artifact exists
@@ -301,8 +300,7 @@ jobs:
               fi
           done
 
-          tar -xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
-          rm -rf $COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src
+          tar -xzf "$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
 
 
       - name: E2E testing
@@ -340,7 +338,7 @@ jobs:
             exit 1
           fi
           
-          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-west-2.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
+          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-east-1.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
           
           # Apply E2E testing patches
 
