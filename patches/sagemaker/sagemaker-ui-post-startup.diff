@@ -1,17 +1,8 @@
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
-@@ -5,6 +5,8 @@
- 
- import { createReadStream, promises, existsSync, writeFileSync } from 'fs';
- import * as http from 'http';
-+import { spawn } from 'child_process';
-+import * as fs from 'fs';
- import * as url from 'url';
- import * as cookie from 'cookie';
- import * as crypto from 'crypto';
-@@ -38,6 +40,10 @@ const textMimeType: { [ext: string]: str
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
+@@ -39,6 +39,10 @@ const textMimeType: { [ext: string]: str
  	'.svg': 'image/svg+xml',
  };
  
@@ -22,15 +13,15 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  /**
   * Return an error to the client.
   */
-@@ -97,6 +103,7 @@ const STATIC_PATH = `/static`;
+@@ -99,6 +103,7 @@ const STATIC_PATH = `/static`;
  const CALLBACK_PATH = `/callback`;
  const WEB_EXTENSION_PATH = `/web-extension-resource`;
  const IDLE_EXTENSION_PATH = `/api/idle`;
 +const POST_STARTUP_SCRIPT_PATH = `/api/poststartup`;
  
- export class WebClientServer {
- 
-@@ -137,6 +144,9 @@ export class WebClientServer {
+ /**
+  * Checks for terminal activity by reading the /dev/pts directory and comparing modification times of the files.
+@@ -171,6 +176,9 @@ export class WebClientServer {
  			if (pathname === IDLE_EXTENSION_PATH) {
  				return this._handleIdle(req, res);
  			}
@@ -40,7 +31,7 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -534,6 +544,41 @@ export class WebClientServer {
+@@ -570,6 +578,41 @@ export class WebClientServer {
  			serveError(req, res, 500, error.message)
  		}
  	}
@@ -80,3 +71,5 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 +		}
 +	}
  }
+ 
+ 

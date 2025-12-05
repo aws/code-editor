@@ -1,7 +1,7 @@
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -14,10 +14,10 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeign
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
 @@ -0,0 +1,17 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -36,10 +36,10 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension-
 +        extension: './src/extension.ts'
 +    },
 +});
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
 @@ -0,0 +1,20 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -61,18 +61,18 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/extension.
 +        extension: './src/extension.ts',
 +    }
 +});
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/README.md
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/README.md
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/README.md
 @@ -0,0 +1,2 @@
 +# Terminal Crash Mitigation
 +This extension addresses a critical issue where terminals fail to open. As of August 9, 2024, the root cause remains unidentified. The extension works by monitoring the creation of new terminals and detects if a terminal closes within 1 second of being opened. When this condition is met, it assumes the issue has occurred and attempts to mitigate it by terminating any background terminal processes. However, it will not terminate any terminal processes if there is an active terminal in the UI.
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/package.json
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/package.json
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/package.json
 @@ -0,0 +1,43 @@
 +{
 +  "name": "sagemaker-terminal-crash-mitigation",
@@ -117,10 +117,10 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/package.js
 +  "dependencies": {},
 +  "repository": {}
 +}
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/src/extension.ts
 @@ -0,0 +1,103 @@
 +import * as vscode from 'vscode';
 +import { exec } from 'child_process';
@@ -225,10 +225,10 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/src/extens
 +}
 +
 +export function deactivate() {}
-Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -240,10 +240,10 @@ Index: third-party-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.j
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/build/gulpfile.extensions.js
+Index: code-editor-src/build/gulpfile.extensions.js
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
+--- code-editor-src.orig/build/gulpfile.extensions.js
++++ code-editor-src/build/gulpfile.extensions.js
 @@ -62,6 +62,7 @@ const compilations = [
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',
@@ -252,10 +252,10 @@ Index: third-party-src/build/gulpfile.extensions.js
  	'extensions/tunnel-forwarding/tsconfig.json',
  	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
-Index: third-party-src/build/npm/dirs.js
+Index: code-editor-src/build/npm/dirs.js
 ===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
+--- code-editor-src.orig/build/npm/dirs.js
++++ code-editor-src/build/npm/dirs.js
 @@ -40,6 +40,7 @@ const dirs = [
  	'extensions/references-view',
  	'extensions/sagemaker-extension',
