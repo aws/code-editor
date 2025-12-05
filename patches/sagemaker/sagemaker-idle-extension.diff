@@ -137,7 +137,7 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,58 @@
 +import * as vscode from "vscode";
 +import * as fs from "fs";
 +import * as path from "path";
@@ -147,7 +147,6 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
 +export function activate(context: vscode.ExtensionContext) {
 +	initializeIdleFilePath();
 +	registerEventListeners(context);
-+	startMonitoringTerminalActivity();
 +}
 +
 +export function deactivate() {}
