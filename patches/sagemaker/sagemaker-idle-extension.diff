@@ -1,16 +1,16 @@
-Index: third-party-src/extensions/sagemaker-idle-extension/README.md
+Index: code-editor-src/extensions/sagemaker-idle-extension/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/README.md
++++ code-editor-src/extensions/sagemaker-idle-extension/README.md
 @@ -0,0 +1,3 @@
 +# Code Editor Idle Extension
 +
 +The Code Editor Idle Extension tracks user activity and logs the last active timestamp (in UTC) to a local file. User activities monitored include file changes, text editor selection changes, and terminal interactions. Additionally, it provides an API endpoint `/api/idle` that returns the lastActiveTimestamp.
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
 @@ -0,0 +1,17 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -29,10 +29,10 @@ Index: third-party-src/extensions/sagemaker-idle-extension/extension-browser.web
 +        extension: './src/extension.ts'
 +    },
 +});
-Index: third-party-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
 @@ -0,0 +1,20 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -54,10 +54,10 @@ Index: third-party-src/extensions/sagemaker-idle-extension/extension.webpack.con
 +        extension: './src/extension.ts',
 +    }
 +});
-Index: third-party-src/extensions/sagemaker-idle-extension/package.json
+Index: code-editor-src/extensions/sagemaker-idle-extension/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/package.json
++++ code-editor-src/extensions/sagemaker-idle-extension/package.json
 @@ -0,0 +1,43 @@
 +{
 +  "name": "sagemaker-idle-extension",
@@ -102,10 +102,10 @@ Index: third-party-src/extensions/sagemaker-idle-extension/package.json
 +  "dependencies": {},
 +  "repository": {}
 +}
-Index: third-party-src/extensions/sagemaker-idle-extension/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -117,10 +117,10 @@ Index: third-party-src/extensions/sagemaker-idle-extension/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/extensions/sagemaker-idle-extension/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-idle-extension/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/.vscodeignore
++++ code-editor-src/extensions/sagemaker-idle-extension/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -133,19 +133,16 @@ Index: third-party-src/extensions/sagemaker-idle-extension/.vscodeignore
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
-@@ -0,0 +1,112 @@
++++ code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
+@@ -0,0 +1,59 @@
 +import * as vscode from "vscode";
 +import * as fs from "fs";
 +import * as path from "path";
 +
-+let idleFilePath: string
-+let terminalActivityInterval: NodeJS.Timeout | undefined
-+const LOG_PREFIX = "[sagemaker-idle-extension]"
-+const CHECK_INTERVAL = 60000; // 60 seconds interval
++let idleFilePath: string;
 +
 +export function activate(context: vscode.ExtensionContext) {
 +	initializeIdleFilePath();
@@ -153,22 +150,18 @@ Index: third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
 +	startMonitoringTerminalActivity();
 +}
 +
-+export function deactivate() {
-+	if(terminalActivityInterval) {
-+		clearInterval(terminalActivityInterval)
-+	}
-+}
++export function deactivate() {}
 +
 +/**
 + * Initializes the file path where the idle timestamp will be stored.
 + * It sets the path to a hidden file in the /tmp/ directory.
 + */
 +function initializeIdleFilePath() {
-+	const tmpDirectory = "/tmp/"; 
++	const tmpDirectory = "/tmp/";
 +	idleFilePath = path.join(tmpDirectory, ".sagemaker-last-active-timestamp");
 +
 +	// Set initial lastActivetimestamp
-+	updateLastActivityTimestamp()
++	updateLastActivityTimestamp();
 +}
 +
 +/**
@@ -197,12 +190,64 @@ Index: third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
 +}
 +
 +/**
-+ * Starts monitoring terminal activity by setting an interval to check for activity in the /dev/pts directory.
++ * Updates the last activity timestamp by recording the current timestamp in the idle file and
++ * refreshing the status bar. The timestamp should be in ISO 8601 format and set to the UTC timezone.
 + */
-+const startMonitoringTerminalActivity = () => {
-+	terminalActivityInterval = setInterval(checkTerminalActivity, CHECK_INTERVAL);
-+};
-+
++function updateLastActivityTimestamp() {
++	const timestamp = new Date().toISOString();
++	fs.writeFileSync(idleFilePath, timestamp);
++}
+\ No newline at end of file
+Index: code-editor-src/build/gulpfile.extensions.js
+===================================================================
+--- code-editor-src.orig/build/gulpfile.extensions.js
++++ code-editor-src/build/gulpfile.extensions.js
+@@ -61,6 +61,7 @@ const compilations = [
+ 	'extensions/search-result/tsconfig.json',
+ 	'extensions/simple-browser/tsconfig.json',
+ 	'extensions/sagemaker-extension/tsconfig.json',
++	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.js
+===================================================================
+--- code-editor-src.orig/build/npm/dirs.js
++++ code-editor-src/build/npm/dirs.js
+@@ -39,6 +39,7 @@ const dirs = [
+ 	'extensions/php-language-features',
+ 	'extensions/references-view',
+ 	'extensions/sagemaker-extension',
++	'extensions/sagemaker-idle-extension',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
+@@ -3,8 +3,9 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import { createReadStream, promises } from 'fs';
++import { createReadStream, promises, existsSync, readdirSync, statSync, writeFileSync } from 'fs';
+ import * as http from 'http';
++import * as path from 'path';
+ import * as url from 'url';
+ import * as cookie from 'cookie';
+ import * as crypto from 'crypto';
+@@ -91,11 +92,45 @@ export async function serveFile(filePath
+ 	}
+ }
+ 
++const CHECK_INTERVAL = 60000; // 60 seconds interval
+ const APP_ROOT = dirname(FileAccess.asFileUri('').fsPath);
+ 
+ const STATIC_PATH = `/static`;
+ const CALLBACK_PATH = `/callback`;
+ const WEB_EXTENSION_PATH = `/web-extension-resource`;
++const IDLE_EXTENSION_PATH = `/api/idle`;
 +
 +/**
 + * Checks for terminal activity by reading the /dev/pts directory and comparing modification times of the files.
@@ -216,87 +261,29 @@ Index: third-party-src/extensions/sagemaker-idle-extension/src/extension.ts
 + * If activity is detected (i.e., if any PTY device file was modified within the CHECK_INTERVAL), this function
 + * updates the last activity timestamp.
 + */
-+const checkTerminalActivity = () => {
-+	fs.readdir("/dev/pts", (err, files) => {
-+		if (err) {
-+			console.error(`${LOG_PREFIX} Error reading /dev/pts directory:`, err);
-+			return;
-+		}
++function checkTerminalActivity(idleFilePath: string) {
++	try {
++		const files: string[] = readdirSync('/dev/pts');
++		const now = new Date();
 +
-+		const now = Date.now();
-+		const activityDetected = files.some((file) => {
-+			const filePath = path.join("/dev/pts", file);
-+			try {
-+				const stats = fs.statSync(filePath);
-+				const mtime = new Date(stats.mtime).getTime();
-+				return now - mtime < CHECK_INTERVAL;
-+			} catch (error) {
-+				console.error(`${LOG_PREFIX} Error reading file stats:`, error);
-+				return false;
-+			}
++		const activityDetected = files.some((file: string) => {
++			const filePath = path.join('/dev/pts', file);
++			const stats = statSync(filePath);
++			const mtime = new Date(stats.mtime).getTime();
++			return now.getTime() - mtime < CHECK_INTERVAL;
 +		});
 +
 +		if (activityDetected) {
-+			updateLastActivityTimestamp();
++			writeFileSync(idleFilePath, now.toISOString());
 +		}
-+	});
-+};
-+
-+/**
-+ * Updates the last activity timestamp by recording the current timestamp in the idle file and
-+ * refreshing the status bar. The timestamp should be in ISO 8601 format and set to the UTC timezone.
-+ */
-+function updateLastActivityTimestamp() {
-+	const timestamp = new Date().toISOString();
-+	fs.writeFileSync(idleFilePath, timestamp);
++	} catch (err) {
++		console.error('Error checking terminal activity:', err);
++	}
 +}
-\ No newline at end of file
-Index: third-party-src/build/gulpfile.extensions.js
-===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -61,6 +61,7 @@ const compilations = [
- 	'extensions/search-result/tsconfig.json',
- 	'extensions/simple-browser/tsconfig.json',
- 	'extensions/sagemaker-extension/tsconfig.json',
-+	'extensions/sagemaker-idle-extension/tsconfig.json',
- 	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
- 	'extensions/typescript-language-features/web/tsconfig.json',
-Index: third-party-src/build/npm/dirs.js
-===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -39,6 +39,7 @@ const dirs = [
- 	'extensions/php-language-features',
- 	'extensions/references-view',
- 	'extensions/sagemaker-extension',
-+	'extensions/sagemaker-idle-extension',
- 	'extensions/search-result',
- 	'extensions/simple-browser',
- 	'extensions/tunnel-forwarding',
-Index: third-party-src/src/vs/server/node/webClientServer.ts
-===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
-@@ -3,7 +3,7 @@
-  *  Licensed under the MIT License. See License.txt in the project root for license information.
-  *--------------------------------------------------------------------------------------------*/
- 
--import { createReadStream, promises } from 'fs';
-+import { createReadStream, promises, existsSync, writeFileSync } from 'fs';
- import * as http from 'http';
- import * as url from 'url';
- import * as cookie from 'cookie';
-@@ -96,6 +96,7 @@ const APP_ROOT = dirname(FileAccess.asFi
- const STATIC_PATH = `/static`;
- const CALLBACK_PATH = `/callback`;
- const WEB_EXTENSION_PATH = `/web-extension-resource`;
-+const IDLE_EXTENSION_PATH = `/api/idle`;
  
  export class WebClientServer {
  
-@@ -133,6 +134,9 @@ export class WebClientServer {
+@@ -133,6 +168,9 @@ export class WebClientServer {
  				// callback support
  				return this._handleCallback(res);
  			}
@@ -306,7 +293,7 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -505,6 +509,31 @@ export class WebClientServer {
+@@ -505,6 +543,33 @@ export class WebClientServer {
  		});
  		return void res.end(data);
  	}
@@ -318,16 +305,18 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 +		try {
 +			const tmpDirectory = '/tmp/'
 +			const idleFilePath = join(tmpDirectory, '.sagemaker-last-active-timestamp');
-+	
++
 +			// If idle shutdown file does not exist, this indicates the app UI may never been opened
 +			// Create the initial metadata file
 +			if (!existsSync(idleFilePath)) {
 +				const timestamp = new Date().toISOString();
 +				writeFileSync(idleFilePath, timestamp);
 +			}
-+	
++
++			checkTerminalActivity(idleFilePath);
++
 +			const data = await promises.readFile(idleFilePath, 'utf8');
-+	
++
 +			res.statusCode = 200;
 +			res.setHeader('Content-Type', 'application/json');
 +			res.end(JSON.stringify({ lastActiveTimestamp: data }));
@@ -336,3 +325,5 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 +		}
 +	}
  }
+ 
+ 
