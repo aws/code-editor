@@ -41,7 +41,7 @@ jobs:
 
       - name: Download sagemaker build artifact
         run: |
-          gh run download --name "code-editor-sagemaker-server-build"
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-build"
 
       - name: Check build artifacts exist
         run: |
@@ -286,7 +286,7 @@ jobs:
       
       - name: Fetch source artifact
         run: |
-          gh run download --name "code-editor-sagemaker-server-src"
+          gh run download --name "$COMMIT_SHA-code-editor-sagemaker-server-src"
           ls -la
 
           FILES=(
@@ -340,7 +340,7 @@ jobs:
             exit 1
           fi
           
-          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-east-1.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
+          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.${AWS_REGION}.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
           
           # Apply E2E testing patches
 
@@ -367,7 +367,7 @@ jobs:
           fi
           
           echo "All smoke tests passed successfully"
-
+          
       - name: Clean up SageMaker resources
         if: always()
         run: |
