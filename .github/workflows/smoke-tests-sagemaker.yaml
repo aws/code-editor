@@ -340,7 +340,7 @@ jobs:
             exit 1
           fi
           
-          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.us-east-1.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
+          DATAZONE_URL="https://${DATAZONE_DOMAIN_ID}.sagemaker.${AWS_REGION}.on.aws/projects/${PROJECT_ID}/compute?type=spaces"
           
           # Apply E2E testing patches
 
@@ -358,8 +358,16 @@ jobs:
           cd smoke
           npm run compile
           npx playwright install
-          SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run mocha -- --web --headless
-
+          
+          SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run mocha -- --web --headless 2>&1 | tee test_output.log
+          
+          if grep -q "failing" test_output.log; then
+            echo "Smoke tests failed - detected failing tests in output"
+            exit 1
+          fi
+          
+          echo "All smoke tests passed successfully"
+          
       - name: Clean up SageMaker resources
         if: always()
         run: |
