@@ -361,7 +361,6 @@ jobs:
   
           # Run smoke tests with DataZone authentication
           npm install
-          npm run compile
           npx playwright install
           SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run smoketest -- --web --headless
 
