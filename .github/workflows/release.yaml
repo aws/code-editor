@@ -22,8 +22,8 @@ jobs:
 
       - name: Validate tag
         run: |
-          if ! echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "Tag $VERSION_NUM does not follow semantic version pattern (x.y.z). Skipping release."
+          if ! echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$'; then
+            echo "Tag $VERSION_NUM does not follow semantic version pattern (x.y.z or x.y.z-rc.N). Skipping release."
             exit 78  # neutral exit code
           fi
           echo "Tag $VERSION_NUM follows valid semantic version pattern"
