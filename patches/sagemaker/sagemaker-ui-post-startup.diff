@@ -2,7 +2,15 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts
 +++ code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -40,6 +40,10 @@ const textMimeType: { [ext: string]: str
+@@ -10,6 +10,7 @@ import * as path from 'path';
+ import * as url from 'url';
+ import * as cookie from 'cookie';
+ import * as crypto from 'crypto';
++import { spawn } from 'child_process';
+ import { isEqualOrParent } from '../../base/common/extpath.js';
+ import { getMediaMime } from '../../base/common/mime.js';
+ import { isLinux } from '../../base/common/platform.js';
+@@ -40,6 +41,10 @@ const textMimeType: { [ext: string]: str
  	'.svg': 'image/svg+xml',
  };
  
@@ -13,7 +21,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  /**
   * Return an error to the client.
   */
-@@ -100,6 +104,7 @@ const STATIC_PATH = `/static`;
+@@ -100,6 +105,7 @@ const STATIC_PATH = `/static`;
  const CALLBACK_PATH = `/callback`;
  const WEB_EXTENSION_PATH = `/web-extension-resource`;
  const IDLE_EXTENSION_PATH = `/api/idle`;
@@ -21,7 +29,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  
  /**
   * Checks for terminal activity by reading the /dev/pts directory and comparing modification times of the files.
-@@ -172,6 +177,9 @@ export class WebClientServer {
+@@ -172,6 +178,9 @@ export class WebClientServer {
  			if (pathname === IDLE_EXTENSION_PATH) {
  				return this._handleIdle(req, res);
  			}
@@ -31,7 +39,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -571,6 +579,41 @@ export class WebClientServer {
+@@ -571,6 +580,41 @@ export class WebClientServer {
  			serveError(req, res, 500, error.message)
  		}
  	}
