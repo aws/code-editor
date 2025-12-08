@@ -2,6 +2,11 @@ name: Smoke Tests for SageMaker
 
 on: 
   workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to use for artifacts'
+        required: false
+        type: string
 
 jobs:
   smoke-tests-sagemaker:
@@ -12,7 +17,7 @@ jobs:
       id-token: write
       contents: read
     env:
-      COMMIT_SHA: ${{ github.sha }}
+      COMMIT_SHA: ${{ inputs.commit_sha || github.sha }}
       GH_REF_NAME: ${{ github.ref_name }}
       SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
       GH_TOKEN: ${{ github.token }}
