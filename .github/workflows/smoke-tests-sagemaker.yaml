@@ -357,7 +357,6 @@ jobs:
           npm install mocha
           cd smoke
           npm run compile
-          npm install
           npx playwright install
           
           SSO_USERNAME="$SSO_USERNAME" SSO_PASSWORD="$SSO_PASSWORD" DATAZONE_URL="$DATAZONE_URL" SPACE_NAME="$SAGEMAKER_SPACE_NAME" VSCODE_REMOTE_SERVER_PATH="sagemaker" npm run mocha -- --web --headless 2>&1 | tee test_output.log
