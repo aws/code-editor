@@ -1,8 +1,15 @@
 name: Create release
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      code_editor_version:
+        description: 'Code Editor version'
+        required: true
+        type: string
+      sagemaker_version:
+        description: 'SageMaker Code Editor version'
+        required: true
+        type: string
 
 jobs:
   release:
@@ -10,8 +17,8 @@ jobs:
     permissions:
       contents: write  # Required for creating releases
     env:
-      COMMIT_SHA: ${{ github.sha }}
-      VERSION_NUM: ${{ github.event.inputs.version || github.ref_name }}
+      CODE_EDITOR_VERSION: ${{ github.event.inputs.code_editor_version }}
+      SAGEMAKER_VERSION: ${{ github.event.inputs.sagemaker_version }}
       SAGEMAKER_ARTIFACT_PREFIX: "code-editor-sagemaker-server"
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -20,22 +27,36 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate tag
+      - name: Validate versions and create tag
         run: |
-          if ! echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$'; then
-            echo "Tag $VERSION_NUM does not follow semantic version pattern (x.y.z or x.y.z-rc.N). Skipping release."
-            exit 78  # neutral exit code
+          if ! echo "$CODE_EDITOR_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$'; then
+            echo "Code Editor version $CODE_EDITOR_VERSION does not follow semantic version pattern (x.y.z) or x.y.z-rc.N. Skipping release."
+            exit 1
           fi
-          echo "Tag $VERSION_NUM follows valid semantic version pattern"
-
-          # Verify release tag is made on the correct major.minor version branch.
-          MAJOR_MINOR=$(echo "$VERSION_NUM" | cut -d'.' -f1,2)
-          BRANCH_CONTAINS_OUTPUT=$(git branch --remote --contains "$COMMIT_SHA" "origin/$MAJOR_MINOR")
-          if [ -z "$BRANCH_CONTAINS_OUTPUT" ]; then
-              echo "Tag $VERSION_NUM is not on the correct branch. Skipping release."
-              exit 78
+          echo "Code Editor version $CODE_EDITOR_VERSION is valid"
+          echo "SageMaker Code Editor version $SAGEMAKER_VERSION will be mapped"
+          
+          # Check if tag already exists
+          if git rev-parse "$CODE_EDITOR_VERSION" >/dev/null 2>&1; then
+            echo "Tag $CODE_EDITOR_VERSION already exists"
+          else
+            echo "Creating tag $CODE_EDITOR_VERSION on current commit"
+            git tag "$CODE_EDITOR_VERSION"
+            git push origin "$CODE_EDITOR_VERSION"
           fi
-          echo "Tag is from a valid branch."
+          
+          # Get commit SHA from tag and export it
+          TAG_COMMIT_SHA=$(git rev-parse "$CODE_EDITOR_VERSION")
+          echo "COMMIT_SHA=$TAG_COMMIT_SHA" >> $GITHUB_ENV
+          echo "Tag $CODE_EDITOR_VERSION points to commit $TAG_COMMIT_SHA"
+          
+          # Verify tag is on correct branch
+          MAJOR_MINOR=$(echo "$CODE_EDITOR_VERSION" | cut -d'.' -f1,2)
+          if ! git branch --remote --contains "$CODE_EDITOR_VERSION" | grep -q "origin/$MAJOR_MINOR"; then
+            echo "Error: Tag $CODE_EDITOR_VERSION is not on branch $MAJOR_MINOR. Skipping release."
+            exit 1
+          fi
+          echo "Tag validation passed"
 
       - name: Download sagemaker artifacts by commit ID
         run: |
@@ -58,21 +79,21 @@ jobs:
             fi
           done
 
-      - name: Update Code Editor version
+      - name: Update versions in artifacts
         run: |
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-src/$SAGEMAKER_ARTIFACT_PREFIX-src.tar.gz"
           cd code-editor-src
-          CURRENT_VERSION=$(jq -r '.codeEditorVersion' product.json)
-          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
+          CURRENT_CE_VERSION=$(jq -r '.codeEditorVersion' product.json)
+          jq ".codeEditorVersion = \"$CODE_EDITOR_VERSION\" | .sagemakerCodeEditorVersion = \"$SAGEMAKER_VERSION\"" product.json > temp.json && mv temp.json product.json
           cd ..
-          tar -czf "code-editor-sagemaker-src-$VERSION_NUM.tar.gz" code-editor-src/
+          tar -czf "code-editor-sagemaker-src-$CODE_EDITOR_VERSION.tar.gz" code-editor-src/
           rm -rf code-editor-src
           
           tar xzf "$COMMIT_SHA-$SAGEMAKER_ARTIFACT_PREFIX-build/$SAGEMAKER_ARTIFACT_PREFIX-build.tar.gz"
           cd vscode-reh-web-linux-x64
 
-          # Update Code Editor Version in all files
-          jq ".codeEditorVersion = \"$VERSION_NUM\"" product.json > temp.json && mv temp.json product.json
+          CURRENT_SM_VERSION=$(jq -r '.sagemakerCodeEditorVersion' product.json)
+          jq ".codeEditorVersion = \"$CODE_EDITOR_VERSION\" | .sagemakerCodeEditorVersion = \"$SAGEMAKER_VERSION\"" product.json > temp.json && mv temp.json product.json
           
           FILES_TO_UPDATE=(
             "out/server-main.js"
@@ -81,31 +102,34 @@ jobs:
             "out/vs/workbench/api/node/extensionHostProcess.js"
           )
           for file in "${FILES_TO_UPDATE[@]}"; do
-            sed -i "s/codeEditorVersion:\s*\"$CURRENT_VERSION\"/codeEditorVersion:\"$VERSION_NUM\"/g" "$file"
+            sed -i "s/codeEditorVersion:\s*\"$CURRENT_CE_VERSION\"/codeEditorVersion:\"$CODE_EDITOR_VERSION\"/g" "$file"
+            sed -i "s/sagemakerCodeEditorVersion:\s*\"$CURRENT_SM_VERSION\"/sagemakerCodeEditorVersion:\"$SAGEMAKER_VERSION\"/g" "$file"
           done
 
           cd ..
-          tar -czf "code-editor-sagemaker-server-$VERSION_NUM.tar.gz" vscode-reh-web-linux-x64/
+          tar -czf "code-editor-sagemaker-server-$CODE_EDITOR_VERSION.tar.gz" vscode-reh-web-linux-x64/
           rm -rf vscode-reh-web-linux-x64
       
       - name: Create GitHub release
         run: |
           # Check if this is a release candidate
           PRERELEASE_FLAG=""
-          if echo "$VERSION_NUM" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+          if echo "$CODE_EDITOR_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
             PRERELEASE_FLAG="--prerelease"
             echo "Detected release candidate version, will mark as prerelease"
           fi
           
           # Check if release already exists. Needed when release created via new release in guthub ui
-          if gh release view "$VERSION_NUM" > /dev/null 2>&1; then
-            echo "Release for tag $VERSION_NUM already exists, uploading additional assets..."
-            gh release upload "$VERSION_NUM" ./*.tar.gz --clobber
+          if gh release view "$CODE_EDITOR_VERSION" > /dev/null 2>&1; then
+            echo "Release for tag $CODE_EDITOR_VERSION already exists, uploading additional assets..."
+            gh release upload "$CODE_EDITOR_VERSION" ./*.tar.gz --clobber
           else
-            echo "Creating new release for tag $VERSION_NUM..."
-            gh release create "$VERSION_NUM" ./*.tar.gz \
-              --title "Release $VERSION_NUM" \
-              --notes "Release $VERSION_NUM" \
+            echo "Creating new release for tag $CODE_EDITOR_VERSION..."
+            gh release create "$CODE_EDITOR_VERSION" ./*.tar.gz \
+              --title "Release $CODE_EDITOR_VERSION" \
+              --notes "Release $CODE_EDITOR_VERSION
+
+              SageMaker Code Editor Version: $SAGEMAKER_VERSION" \
               $PRERELEASE_FLAG
           fi
   handle-failures:

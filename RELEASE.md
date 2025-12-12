@@ -15,18 +15,25 @@ We use major.minor branches (e.g., `1.0`, `1.1`, `2.1`) for releases.
 
 ### Release Process
 
-1. **Determine version**: Choose tag name based on the commit's branch
-   - Tag format: `major.minor.patch` matching the branch the commit belongs to
-   - Example: Commit on `1.0` branch → tag `1.0.0`, `1.0.1`, etc.
+1. **Determine versions**:
+   - **Code Editor version**: Choose tag name based on the commit's branch
+     - Tag format: `major.minor.patch` matching the branch the commit belongs to
+     - Example: Commit on `1.0` branch → tag `1.0.0`, `1.0.1`, etc.
+   - **SageMaker Code Editor version**: Determine the corresponding SageMaker version
+     - Example: Code Editor `1.0.1` → SageMaker Code Editor `1.8.0b7`
 
-2. **Create tag**: Choose one of these methods:
-   - **Command line**: Push tag to trigger release workflow
-     ```bash
-     git tag 1.0.0
-     git push origin 1.0.0
-     ```
-   - **GitHub Actions**: Manually run "Create release" workflow from Actions tab
-   - **GitHub UI**: Go to Releases → Create a new release
+2. **Create release**:
+   - Go to **Actions** → **Create release** → **Run workflow**
+   - Select the branch you want to release from (e.g., `1.0`)
+   - Enter:
+     - **Code Editor version**: `1.0.1` (semantic version x.y.z or x.y.z-rc.N.)
+     - **SageMaker Code Editor version**: `1.8.0b7` (any format)
+   - Click **Run workflow**
+   - The workflow will:
+     - Create tag on the current commit
+     - Fetch build artifacts for that commit
+     - Inject both versions into product.json
+     - Create GitHub release with both tarballs
 
-3. **Release notes**: Include code-oss version information in the release description
+3. **Release notes**: Include code-oss version and Sagemaker Code Editor Version information in the release description
 

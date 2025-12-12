@@ -1,0 +1,39 @@
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+@@ -79,8 +79,8 @@ export class BrowserDialogHandler extend
+ 	async about(): Promise<void> {
+ 		const detailString = (useAgo: boolean): string => {
+ 			return localize('aboutDetail',
+-				"Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
+-				this.productService.codeEditorVersion || 'Unknown',
++				"SageMaker Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
++				this.productService.sagemakerCodeEditorVersion || 'Unknown',
+ 				this.productService.version || 'Unknown',
+ 				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
+ 				navigator.userAgent
+Index: code-editor-src/src/vs/base/common/product.ts
+===================================================================
+--- code-editor-src.orig/src/vs/base/common/product.ts
++++ code-editor-src/src/vs/base/common/product.ts
+@@ -62,6 +62,7 @@ export interface IProductConfiguration {
+ 	readonly quality?: string;
+ 	readonly commit?: string;
+ 	readonly codeEditorVersion?: string;
++	readonly sagemakerCodeEditorVersion?: string;
+ 
+ 	readonly nameShort: string;
+ 	readonly nameLong: string;
+Index: code-editor-src/product.json
+===================================================================
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
+@@ -12,6 +12,7 @@
+ 	"nameShort": "SageMaker Code Editor",
+ 	"nameLong": "SageMaker Code Editor",
+ 	"codeEditorVersion": "1.0.0",
++	"sagemakerCodeEditorVersion":"1.0.0",
+ 	"applicationName": "code",
+ 	"dataFolderName": ".vscode-editor",
+ 	"win32MutexName": "vscodeoss",
