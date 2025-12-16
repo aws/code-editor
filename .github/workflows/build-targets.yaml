@@ -96,6 +96,22 @@ jobs:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
           path: ${{ matrix.build-target }}-build.tar.gz
           retention-days: 90
+  smoke-tests:
+    name: Trigger Smoke Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: success()
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger SageMaker smoke tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run smoke-tests-sagemaker.yaml \
+            --repo ${{ github.repository }} \
+            --ref ${{ github.ref }}
+
   handle-failures:
     name: Handle Failures
     runs-on: ubuntu-latest
