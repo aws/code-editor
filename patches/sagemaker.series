@@ -39,3 +39,4 @@ sagemaker/sagemaker-extension-smus-support.diff
 sagemaker/post-startup-notifications.diff
 sagemaker/sagemaker-extensions-sync.diff
 sagemaker/fix-port-forwarding.diff
+sagemaker/validate-http-request-referer.diff
