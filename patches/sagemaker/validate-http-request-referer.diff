@@ -8,7 +8,6 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			// These resources could be files shipped with extensions or even workspace files.
 +			
 +			if (req.headers.referer && req.headers.host) {
-+				this._logService.info('Inside if check');
 +				const parsedRefererUrl = url.parse(req.headers.referer, true);
 +				if (parsedRefererUrl.host !== req.headers.host) {
 +					return serveError(req, res, 403, `Forbidden.`);
