@@ -3,14 +3,14 @@ Index: third-party-src/package.json
 --- third-party-src.orig/package.json
 +++ third-party-src/package.json
 @@ -96,6 +96,7 @@
-     "@xterm/addon-webgl": "^0.19.0-beta.107",
-     "@xterm/headless": "^5.6.0-beta.107",
-     "@xterm/xterm": "^5.6.0-beta.107",
+     "@xterm/addon-webgl": "^0.19.0-beta.112",
+     "@xterm/headless": "^5.6.0-beta.112",
+     "@xterm/xterm": "^5.6.0-beta.112",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
-@@ -121,6 +122,7 @@
+@@ -120,6 +121,7 @@
      "@types/debug": "^4.1.5",
      "@types/eslint": "^9.6.1",
      "@types/gulp-svgmin": "^1.2.1",
@@ -23,8 +23,8 @@ Index: third-party-src/remote/package.json
 --- third-party-src.orig/remote/package.json
 +++ third-party-src/remote/package.json
 @@ -26,6 +26,7 @@
-     "@xterm/headless": "^5.6.0-beta.107",
-     "@xterm/xterm": "^5.6.0-beta.107",
+     "@xterm/headless": "^5.6.0-beta.112",
+     "@xterm/xterm": "^5.6.0-beta.112",
      "cookie": "^0.7.0",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",

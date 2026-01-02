@@ -80,32 +80,24 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
 +++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-@@ -70,6 +70,8 @@ import { ILocalizedString } from '../../../../pla
- import { IExtensionGalleryManifest, IExtensionGalleryManifestService } from '../../../../platform/extensionManagement/common/extensionGalleryManifest.js';
- import { URI } from '../../../../base/common/uri.js';
- import { IMcpGalleryService } from '../../../../platform/mcp/common/mcpManagement.js';
+@@ -70,6 +70,8 @@ import { registerNavigableContainer } fr
+ import { MenuWorkbenchToolBar } from '../../../../platform/actions/browser/toolbar.js';
+ import { createActionViewItem } from '../../../../platform/actions/browser/menuEntryActionViewItem.js';
+ import { SeverityIcon } from '../../../../base/browser/ui/severityIcon/severityIcon.js';
 +import { IProductService } from '../../../../platform/product/common/productService.js';
 +import { memoize } from '../../../../base/common/decorators.js';
- 
- export const ExtensionsSortByContext = new RawContextKey<string>('extensionsSortByValue', '');
- export const SearchMarketplaceExtensionsContext = new RawContextKey<boolean>('searchMarketplaceExtensions', false);
-@@ -93,7 +93,6 @@ const SortByUpdateDateContext = new RawC
- const REMOTE_CATEGORY: ILocalizedString = localize2({ key: 'remote', comment: ['Remote as in remote machine'] }, "Remote");
- 
- export class ExtensionsViewletViewsContribution extends Disposable implements IWorkbenchContribution {
--
- 	private readonly container: ViewContainer;
- 
- 	constructor(
-@@ -528,6 +528,7 @@ export class ExtensionsViewPaneContainer
+ import { StandardKeyboardEvent } from '../../../../base/browser/keyboardEvent.js';
+ import { KeyCode } from '../../../../base/common/keyCodes.js';
+ import { ThemeIcon } from '../../../../base/common/themables.js';
+@@ -527,6 +529,7 @@ export class ExtensionsViewPaneContainer
  		@IExtensionService extensionService: IExtensionService,
  		@IViewDescriptorService viewDescriptorService: IViewDescriptorService,
  		@IPreferencesService private readonly preferencesService: IPreferencesService,
 +		@IProductService private readonly productService: IProductService,
  		@ICommandService private readonly commandService: ICommandService,
- 		@IMcpGalleryService private readonly mcpGalleryService: IMcpGalleryService,
  		@ILogService logService: ILogService,
-@@ -569,6 +571,15 @@ export class ExtensionsViewPaneContainer
+ 	) {
+@@ -568,6 +571,15 @@ export class ExtensionsViewPaneContainer
  			});
  	}
  
@@ -121,13 +113,12 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
  	get searchValue(): string | undefined {
  		return this.searchBox?.getValue();
  	}
-@@ -583,8 +594,7 @@ export class ExtensionsViewPaneContainer
-		hide(overlay);
-
-		this.header = append(this.root, $('.header'));
+@@ -582,7 +594,7 @@ export class ExtensionsViewPaneContainer
+ 		hide(overlay);
+ 
+ 		this.header = append(this.root, $('.header'));
 -		const placeholder = localize('searchExtensions', "Search Extensions in Marketplace");
--
 +		const placeholder = localize('searchExtensions', 'Search extensions in {0}', this.extensionsGalleryHostname);
+ 
  		const searchValue = this.searchViewletState['query.value'] ? this.searchViewletState['query.value'] : '';
  
- 		const searchContainer = append(this.header, $('.extensions-search-container'));

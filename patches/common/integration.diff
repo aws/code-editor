@@ -78,7 +78,7 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
 @@ -61,8 +61,8 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
- 			version: '1.95.0-dev',
+ 			version: '1.102.0-dev',
 -			nameShort: 'Code - OSS Dev',
 -			nameLong: 'Code - OSS Dev',
 +			nameShort: 'Code Editor',

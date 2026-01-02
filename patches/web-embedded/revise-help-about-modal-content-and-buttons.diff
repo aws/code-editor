@@ -6,10 +6,10 @@ Revise Help->About Modal content and buttons
  .../parts/dialogs/dialog.contribution.ts      |  2 +-
  3 files changed, 8 insertions(+), 22 deletions(-)
 
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 @@ -34,12 +34,11 @@ export class DialogHandlerContribution e
  		@IKeybindingService keybindingService: IKeybindingService,
  		@IInstantiationService instantiationService: IInstantiationService,
@@ -24,10 +24,10 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contrib
  
  		this.model = (this.dialogService as DialogService).model;
  
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 @@ -12,8 +12,6 @@ import { Dialog, IDialogResult } from '.
  import { DisposableStore } from '../../../../base/common/lifecycle.js';
  import { IKeybindingService } from '../../../../platform/keybinding/common/keybinding.js';
@@ -84,11 +84,11 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
  	}
  
  	private async doShow(type: Severity | DialogType | undefined, message: string, buttons?: string[], detail?: string, cancelId?: number, checkbox?: ICheckbox, inputs?: IInputElement[], customOptions?: ICustomDialogOptions): Promise<IDialogResult> {
-Index: third-party-src/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/electron-browser/parts/dialogs/dialog.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
-+++ third-party-src/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
-@@ -45,7 +45,7 @@ export class DialogHandlerContribution e
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/electron-browser/parts/dialogs/dialog.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/electron-browser/parts/dialogs/dialog.contribution.ts
+@@ -46,7 +46,7 @@ export class DialogHandlerContribution e
  	) {
  		super();
  

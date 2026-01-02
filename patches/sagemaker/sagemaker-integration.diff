@@ -106,10 +106,10 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/product/common/product.ts
 +++ third-party-src/src/vs/platform/product/common/product.ts
-@@ -69,15 +69,17 @@ else {
+@@ -69,12 +69,14 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
- 			version: '1.95.0-dev',
+ 			version: '1.102.0-dev',
 -			nameShort: 'Code Editor',
 -			nameLong: 'Code Editor',
 +			nameShort: 'SageMaker Code Editor',

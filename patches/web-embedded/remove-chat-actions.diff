@@ -1,10 +1,10 @@
-Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -714,22 +714,6 @@ registerWorkbenchContribution2(ChatTrans
- registerWorkbenchContribution2(ChatContextContributions.ID, ChatContextContributions, WorkbenchPhase.AfterRestored);
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -708,22 +708,6 @@ registerWorkbenchContribution2(ChatConte
  registerWorkbenchContribution2(ChatResponseResourceFileSystemProvider.ID, ChatResponseResourceFileSystemProvider, WorkbenchPhase.AfterRestored);
+ registerWorkbenchContribution2(PromptUrlHandler.ID, PromptUrlHandler, WorkbenchPhase.BlockRestore);
  
 -registerChatActions();
 -registerChatCopyActions();
@@ -21,7 +21,7 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 -registerChatDeveloperActions();
 -registerChatEditorActions();
 -registerChatToolActions();
--
- registerEditorFeature(ChatPasteProvidersFeature);
+-registerLanguageModelActions();
  
+ registerEditorFeature(ChatPasteProvidersFeature);
  

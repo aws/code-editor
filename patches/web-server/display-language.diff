@@ -272,10 +272,10 @@ Index: third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 +		return this.languagePackService.getInstalledLanguages();
  	}
  }
-Index: third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+Index: third-party-src/src/vs/workbench/services/localization/electron-browser/localeService.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
-+++ third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+--- third-party-src.orig/src/vs/workbench/services/localization/electron-browser/localeService.ts
++++ third-party-src/src/vs/workbench/services/localization/electron-browser/localeService.ts
 @@ -51,7 +51,8 @@ class NativeLocaleService implements ILo
  		@IProductService private readonly productService: IProductService
  	) { }
@@ -363,18 +363,6 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsAct
  	}
  
  	override async run(): Promise<any> {
-Index: third-party-src/build/gulpfile.reh.js
-===================================================================
---- third-party-src.orig/build/gulpfile.reh.js
-+++ third-party-src/build/gulpfile.reh.js
-@@ -59,6 +59,7 @@ const serverResourceIncludes = [
- 
- 	// NLS
- 	'out-build/nls.messages.json',
-+	'out-build/nls.keys.json', // Required to generate translations.
- 
- 	// Process monitor
- 	'out-build/vs/base/node/cpuUsage.sh',
 Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/workbench.web.main.internal.ts
@@ -384,7 +372,7 @@ Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
  import './services/lifecycle/browser/lifecycleService.js';
  import './services/clipboard/browser/clipboardService.js';
 -import './services/localization/browser/localeService.js';
-+import './services/localization/electron-sandbox/localeService.js';
++import './services/localization/electron-browser/localeService.js';
  import './services/path/browser/pathService.js';
  import './services/themes/browser/browserHostColorSchemeService.js';
  import './services/encryption/browser/encryptionService.js';

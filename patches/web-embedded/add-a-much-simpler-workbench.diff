@@ -7,15 +7,16 @@ workbench HTML file at compile time.
  src/vs/code/browser/workbench/workbench.ts | 634 ++-------------------
  1 file changed, 52 insertions(+), 582 deletions(-)
 
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -3,594 +3,14 @@
+--- AWSCodeOSS.orig/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
++++ AWSCodeOSS/build/private/code-editor-src/src/vs/code/browser/workbench/workbench.ts
+@@ -3,593 +3,14 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
 -import { isStandalone } from '../../../base/browser/browser.js';
+-import { addDisposableListener } from '../../../base/browser/dom.js';
  import { mainWindow } from '../../../base/browser/window.js';
 -import { VSBuffer, decodeBase64, encodeBase64 } from '../../../base/common/buffer.js';
 -import { Emitter } from '../../../base/common/event.js';
@@ -354,9 +355,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 -			return;
 -		}
 -
--		const fn = () => this.onDidChangeLocalStorage();
--		mainWindow.addEventListener('storage', fn);
--		this.onDidChangeLocalStorageDisposable = { dispose: () => mainWindow.removeEventListener('storage', fn) };
+-		this.onDidChangeLocalStorageDisposable = addDisposableListener(mainWindow, 'storage', () => this.onDidChangeLocalStorage());
 -	}
 -
 -	private stopListening(): void {
@@ -607,8 +606,8 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  
  (async function () {
  	const start = Date.now();
-@@ -600,14 +20,21 @@ function readCookie(name: string): strin
- 	const vsCodeCdn = urlSearch.get('vsCodeCdn');
+@@ -599,14 +20,21 @@ function readCookie(name: string): strin
+ 	const vsCodeCdn = urlSearch.get('vsCodeCdn') ?? mainWindow.location.origin;
  	const isDevo = urlSearch.get('isDevo') === 'true';
  	// Find config by checking for DOM
 +	let config: IWorkbenchConstructionOptions & {
@@ -634,7 +633,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  	}
  
  	if(!isDevo) {
-@@ -618,21 +45,43 @@ function readCookie(name: string): strin
+@@ -617,21 +45,43 @@ function readCookie(name: string): strin
  		};
  	}
  
