@@ -14,6 +14,15 @@ The repository structure is the following:
 
 See [RELEASE](RELEASE.md) for more information.
 
+## Version Information
+
+The following table provides the mapping between Code Editor releases and their corresponding [Code-OSS](https://github.com/microsoft/vscode/) base versions:
+
+| Code Editor Version | Code-OSS Base Version |
+|---------------------|-----------------------|
+| 1.0.x               | 1.101.2               |
+
+
 ## Troubleshooting and Feedback
 
 See [CONTRIBUTING](CONTRIBUTING.md#reporting-bugsfeature-requests) for more information.
