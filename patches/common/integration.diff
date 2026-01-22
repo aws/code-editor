@@ -86,3 +86,16 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  			applicationName: 'code-oss',
  			dataFolderName: '.vscode-oss',
  			urlProtocol: 'code-oss',
+Index: third-party-src/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
+===================================================================
+--- third-party-src.orig/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
++++ third-party-src/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
+@@ -134,7 +134,7 @@ export interface IUtilityProcessCrashEve
+ 	/**
+ 	 * The reason of the utility process crash.
+ 	 */
+-	readonly reason: 'clean-exit' | 'abnormal-exit' | 'killed' | 'crashed' | 'oom' | 'launch-failed' | 'integrity-failure';
++	readonly reason: 'clean-exit' | 'abnormal-exit' | 'killed' | 'crashed' | 'oom' | 'launch-failed' | 'integrity-failure' | 'memory-eviction';
+ }
+ 
+ export interface IUtilityProcessInfo {

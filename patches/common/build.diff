@@ -33,13 +33,15 @@ Index: code-editor-src/package.json
      "debounce": "^1.0.0",
      "deemon": "^1.13.4",
 -    "electron": "35.5.1",
-+    "electron": "38.7.1",
++    "electron": "40.0.0",
      "eslint": "^9.11.1",
      "eslint-formatter-compact": "^8.40.0",
      "eslint-plugin-header": "3.1.1",
-@@ -221,9 +220,20 @@
+@@ -220,10 +219,22 @@
+     "yaserver": "^0.4.0"
    },
    "overrides": {
++    "tar": "7.5.3",
      "node-gyp-build": "4.8.1",
 -    "kerberos@2.1.1": {
 -      "node-addon-api": "7.1.0"
