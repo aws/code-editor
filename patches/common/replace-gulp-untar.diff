@@ -24,7 +24,7 @@ Index: third-party-src/build/gulpfile.cli.js
  	gulp.src('*.tgz', { cwd: dir })
  		.pipe(gunzip())
 -		.pipe(untar())
-+		.pipe(until.untar())
++		.pipe(util.untar())
  		.pipe(gulp.dest(`${root}/openssl`))
  		.on('error', callback)
  		.on('end', () => {
