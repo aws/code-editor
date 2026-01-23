@@ -16,6 +16,7 @@ common/service-worker-fix.diff
 common/proposed-api.diff
 common/build.diff
 common/integration.diff
+common/replace-gulp-untar.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
