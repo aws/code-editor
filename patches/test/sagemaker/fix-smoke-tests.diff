@@ -29,7 +29,7 @@ Index: code-editor-src/test/automation/src/terminal.ts
 ===================================================================
 --- code-editor-src.orig/test/automation/src/terminal.ts
 +++ code-editor-src/test/automation/src/terminal.ts
-@@ -216,7 +216,7 @@ export class Terminal {
+@@ -219,7 +219,7 @@ export class Terminal {
  			const description: IElement | undefined = await this.code.waitForElement(`${Selector.Tabs}[data-index="${i}"] ${Selector.TabsEntry} ${Selector.Description}`, () => true);
  
  			const label: TerminalLabel = {
@@ -51,7 +51,7 @@ Index: code-editor-src/test/automation/src/settings.ts
 +		await new Promise(resolve => setTimeout(resolve, 500));
 +		
  		await this.quickaccess.runCommand('editor.action.selectAll');
- 		await this.code.sendKeybinding('Delete', async () => {
+ 		await this.code.dispatchKeybinding('Delete', async () => {
  			await this.editor.waitForEditorContents('settings.json', contents => contents === '');
  		});
  		await this.editor.waitForTypeInEditor('settings.json', `{`); // will auto close }
@@ -119,7 +119,7 @@ Index: code-editor-src/test/smoke/src/areas/multiroot/multiroot.test.ts
 -			'npm.fetchOnlinePackageInfo': false,
 -			'npm.autoDetect': 'off',
 -			'workbench.editor.languageDetection': false,
--			"workbench.localHistory.enabled": false
+-			'workbench.localHistory.enabled': false
 -		}
 -	};
 -
@@ -161,10 +161,3 @@ Index: code-editor-src/test/smoke/src/areas/multiroot/multiroot.test.ts
  		});
  
  		it('shows results from all folders', async function () {
-@@ -72,4 +60,4 @@ export function setup(logger: Logger) {
- 			await app.code.waitForTitle(title => /smoketest \(Workspace\)/i.test(title));
- 		});
- 	});
--}
-+}
-\ No newline at end of file
