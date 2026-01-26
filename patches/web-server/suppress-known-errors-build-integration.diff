@@ -1,16 +1,3 @@
-Index: third-party-src/build/gulpfile.reh.js
-===================================================================
---- third-party-src.orig/build/gulpfile.reh.js
-+++ third-party-src/build/gulpfile.reh.js
-@@ -78,6 +78,8 @@ const serverResourceIncludes = [
- 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
- 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',
- 
-+	// Error handler
-+	'out-build/vs/editor/common/errors/suppressedErrors.js'
- ];
- 
- const serverResourceExcludes = [
 Index: third-party-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.html
@@ -85,3 +72,16 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
  		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
+Index: third-party-src/build/gulpfile.reh.ts
+===================================================================
+--- third-party-src.orig/build/gulpfile.reh.ts
++++ third-party-src/build/gulpfile.reh.ts
+@@ -81,6 +81,8 @@ const serverResourceIncludes = [
+ 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
+ 	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',
+ 
++	// Error handler
++	'out-build/vs/editor/common/errors/suppressedErrors.js'
+ ];
+ 
+ const serverResourceExcludes = [
