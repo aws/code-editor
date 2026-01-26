@@ -17,6 +17,7 @@ common/proposed-api.diff
 common/build.diff
 common/integration.diff
 common/replace-gulp-untar.diff
+common/fix-ts-rootdir-webpack.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff

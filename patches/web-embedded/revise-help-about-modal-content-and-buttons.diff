@@ -15,7 +15,7 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contrib
  				} else {
  					const aboutDialogDetails = createBrowserAboutDialogDetails(this.productService);
 -					await this.impl.value.about(aboutDialogDetails.title, aboutDialogDetails.details, aboutDialogDetails.detailsToCopy);
-+					await this.impl.value.about(aboutDialogDetails.title, aboutDialogDetails.details);
++					await this.impl.value.about(aboutDialogDetails.title, aboutDialogDetails.details, aboutDialogDetails.details);
  				}
  			} catch (error) {
  				result = error;
@@ -28,7 +28,7 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
  	}
  
 -	async about(title: string, details: string, detailsToCopy: string): Promise<void> {
-+	async about(title: string, details: string): Promise<void> {
++	async about(title: string, details: string, _detailsToCopy: string): Promise<void> {
  
 -		const { button } = await this.doShow(
 +		await this.doShow(
@@ -61,7 +61,7 @@ Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
  import { localize } from '../../../nls.js';
  import { IKeybindingService } from '../../keybinding/common/keybinding.js';
  import { ResultKind } from '../../keybinding/common/keybindingResolver.js';
-@@ -43,24 +42,13 @@ export function createWorkbenchDialogOpt
+@@ -43,24 +42,14 @@ export function createWorkbenchDialogOpt
  	};
  }
  
@@ -90,4 +90,4 @@ Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
 +		details: details
  	};
  }
--
+ 
