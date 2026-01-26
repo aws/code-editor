@@ -1,19 +1,19 @@
-Index: third-party-src/build/gulpfile.vscode.web.js
+Index: third-party-src/build/gulpfile.vscode.web.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.vscode.web.js
-+++ third-party-src/build/gulpfile.vscode.web.js
-@@ -188,6 +188,10 @@ function packageTask(sourceFolderName, d
+--- third-party-src.orig/build/gulpfile.vscode.web.ts
++++ third-party-src/build/gulpfile.vscode.web.ts
+@@ -182,6 +182,10 @@ function packageTask(sourceFolderName: s
  			gulp.src('resources/server/code-192.png', { base: 'resources/server' }),
  			gulp.src('resources/server/code-512.png', { base: 'resources/server' })
  		);
 +		const indexHtml = gulp.src('resources/server/index.html', { base: 'resources/server' });
 +
 +		const productJsonStream = gulp.src(['product.json'], { base: '.' })
-+			.pipe(json({ commit, date: readISODate('out-build'), version }));
++			.pipe(jsonEditor({ commit, date: readISODate('out-build'), version }));
  
  		const all = es.merge(
  			packageJsonStream,
-@@ -196,7 +200,9 @@ function packageTask(sourceFolderName, d
+@@ -190,7 +194,9 @@ function packageTask(sourceFolderName: s
  			deps,
  			favicon,
  			manifest,

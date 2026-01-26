@@ -8,12 +8,12 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-gEAyFzmkyqMoTTnN+3KReFUYoHsK4RAJEb+6eiul+UY=' 'self'; frame-src 'self';">
-+		content="default-src 'none'; script-src 'sha256-tUqLu+qwk/T12Lnj5zY5MJEBU4bPYFxPWddp8PCLxqA=' 'self'; frame-src 'self'; connect-src 'self';">
+-		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self';">
++		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self'; style-src 'unsafe-inline'; connect-src 'self';">
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"
-@@ -343,11 +343,22 @@
+@@ -361,12 +361,23 @@
  			}
  
  			async signalReady() {
@@ -29,6 +29,7 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 +				}
 +
  				const start = (/** @type {string} */ parentOrigin) => {
+ 					perfMark('signalingReady');
  					window.parent.postMessage({ target: ID, channel: 'webview-ready', data: {} }, parentOrigin, [this.channel.port2]);
  				};
  
@@ -37,7 +38,7 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  
  				const hostname = location.hostname;
  
-@@ -356,6 +367,12 @@
+@@ -375,6 +386,12 @@
  					throw new Error(`'crypto.subtle' is not available so webviews will not work. This is likely because the editor is not running in a secure context (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).`);
  				}
  
@@ -50,7 +51,7 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  				// Here the `parentOriginHash()` function from `src/vs/workbench/common/webview.ts` is inlined
  				// compute a sha-256 composed of `parentOrigin` and `salt` converted to base 32
  				let parentOriginHash;
-@@ -377,7 +394,7 @@
+@@ -396,7 +413,7 @@
  					return start(parentOrigin);
  				}
  

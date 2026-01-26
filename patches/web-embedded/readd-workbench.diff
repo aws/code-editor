@@ -1,12 +1,12 @@
-Index: third-party-src/build/gulpfile.vscode.web.js
+Index: third-party-src/build/gulpfile.vscode.web.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.vscode.web.js
-+++ third-party-src/build/gulpfile.vscode.web.js
-@@ -85,6 +85,7 @@ const vscodeWebEntryPoints = [
+--- third-party-src.orig/build/gulpfile.vscode.web.ts
++++ third-party-src/build/gulpfile.vscode.web.ts
+@@ -82,6 +82,7 @@ const vscodeWebEntryPoints = [
  	buildfile.workerBackgroundTokenization,
  	buildfile.keyboardMaps,
  	buildfile.workbenchWeb,
-+	buildfile.entrypoint('vs/code/browser/workbench/workbench', ['../../../workbench/workbench.web.main.internal.js']),
-	buildfile.entrypoint('vs/workbench/workbench.web.main.internal') // TODO@esm remove line when we stop supporting web-amd-esm-bridge
++	buildfile.codeWeb,
+ 	buildfile.entrypoint('vs/workbench/workbench.web.main.internal') // TODO@esm remove line when we stop supporting web-amd-esm-bridge
  ].flat();
-
+ 

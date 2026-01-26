@@ -408,13 +408,13 @@ Index: third-party-src/extensions/references-view/package.json
 -        "command": "references-view.showOutgoingCalls",
 -        "title": "%cmd.references-view.showOutgoingCalls%",
 -        "category": "Calls",
--        "icon": "$(call-outgoing)"
+-        "icon": "$(call-incoming)"
 -      },
 -      {
 -        "command": "references-view.showIncomingCalls",
 -        "title": "%cmd.references-view.showIncomingCalls%",
 -        "category": "Calls",
--        "icon": "$(call-incoming)"
+-        "icon": "$(call-outgoing)"
 -      },
 -      {
          "command": "references-view.removeCallItem",
@@ -556,7 +556,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
 @@ -7,7 +7,7 @@ import { localize, localize2 } from '../
  import { IWindowOpenable } from '../../../platform/window/common/window.js';
  import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
- import { MenuRegistry, MenuId, Action2, registerAction2, IAction2Options } from '../../../platform/actions/common/actions.js';
+ import { MenuRegistry, MenuId, Action2, registerAction2 } from '../../../platform/actions/common/actions.js';
 -import { KeyChord, KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
 +import { KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
  import { IsMainWindowFullscreenContext } from '../../common/contextkeys.js';
@@ -571,7 +571,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
  import { ContextKeyExpr } from '../../../platform/contextkey/common/contextkey.js';
  import { inQuickPickContext, getQuickNavigateHandler } from '../quickaccess.js';
  import { IHostService } from '../../services/host/browser/host.js';
-@@ -363,36 +363,6 @@ class ShowAboutDialogAction extends Acti
+@@ -411,36 +411,6 @@ class ShowAboutDialogAction extends Acti
  	}
  }
  
@@ -608,7 +608,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
  class BlurAction extends Action2 {
  
  	constructor() {
-@@ -412,7 +382,6 @@ class BlurAction extends Action2 {
+@@ -460,7 +430,6 @@ class BlurAction extends Action2 {
  
  // --- Actions Registration
  
@@ -616,7 +616,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
  registerAction2(ToggleFullScreenAction);
  registerAction2(QuickPickRecentAction);
  registerAction2(OpenRecentAction);
-@@ -463,10 +432,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -511,10 +480,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	order: 1,
  	when: IsWebContext
  });
@@ -631,17 +631,17 @@ Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentic
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
-@@ -16,7 +16,6 @@ import { SignOutOfAccountAction } from '
- import { IAuthenticationService } from '../../../services/authentication/common/authentication.js';
+@@ -14,7 +14,6 @@ import { IWorkbenchContribution, Workben
+ import { SignOutOfAccountAction } from './actions/signOutOfAccountAction.js';
  import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
  import { Extensions, IExtensionFeatureTableRenderer, IExtensionFeaturesRegistry, IRenderedData, IRowData, ITableData } from '../../../services/extensionManagement/common/extensionFeatures.js';
 -import { ManageTrustedExtensionsForAccountAction } from './actions/manageTrustedExtensionsForAccountAction.js';
  import { ManageAccountPreferencesForExtensionAction } from './actions/manageAccountPreferencesForExtensionAction.js';
  import { IAuthenticationUsageService } from '../../../services/authentication/browser/authenticationUsageService.js';
  import { ManageAccountPreferencesForMcpServerAction } from './actions/manageAccountPreferencesForMcpServerAction.js';
-@@ -120,7 +119,6 @@ class AuthenticationContribution extends
- 
+@@ -90,7 +89,6 @@ class AuthenticationContribution extends
  	private _registerActions(): void {
+ 		this._register(registerAction2(ManageAccountsAction));
  		this._register(registerAction2(SignOutOfAccountAction));
 -		this._register(registerAction2(ManageTrustedExtensionsForAccountAction));
  		this._register(registerAction2(ManageAccountPreferencesForExtensionAction));
@@ -734,7 +734,7 @@ Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/com
  import { IEditorService } from '../../../../services/editor/common/editorService.js';
  import { transaction } from '../../../../../base/common/observable.js';
  import { ModifiedBaseRangeStateKind } from '../model/modifiedBaseRange.js';
-@@ -567,20 +566,6 @@ export class ResetToBaseAndAutoMergeComm
+@@ -568,20 +567,6 @@ export class ResetToBaseAndAutoMergeComm
  	}
  }
  
