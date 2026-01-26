@@ -216,6 +216,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup swap
+        run: |
+          # Remove existing swap if present
+          sudo swapoff -a || true
+          sudo rm -f /swapfile /mnt/swapfile || true
+          # Create new swap
+          sudo fallocate -l 12G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
       
       - name: Build target
         env:
