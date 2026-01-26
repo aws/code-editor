@@ -69,24 +69,24 @@ Index: third-party-src/src/vs/workbench/browser/web.main.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/web.main.ts
 +++ third-party-src/src/vs/workbench/browser/web.main.ts
-@@ -95,6 +95,7 @@ import { TunnelSource } from 'vs/workbench/services/re
- import { TunnelSource } from '../services/remote/common/tunnelModel.js';
- import { mainWindow } from '../../base/browser/window.js';
- import { INotificationService, Severity } from '../../platform/notification/common/notification.js';
+@@ -98,6 +98,7 @@ import { INotificationService, Severity
+ import { IDefaultAccountService } from '../../platform/defaultAccount/common/defaultAccount.js';
+ import { DefaultAccountService } from '../services/accounts/common/defaultAccount.js';
+ import { AccountPolicyService } from '../services/policies/common/accountPolicyService.js';
 +import { SagemakerServerClient } from '../../workbench/browser/client.js';
  
  export class BrowserMain extends Disposable {
  
-@@ -129,6 +130,9 @@ export class BrowserMain extends Disposable {
- 
+@@ -133,6 +134,9 @@ export class BrowserMain extends Disposa
  		// Startup
  		const instantiationService = workbench.startup();
-+
+ 
 +		// Create instance of SagemakerServerClient
 +		this._register(instantiationService.createInstance(SagemakerServerClient));
- 
++
  		// Window
  		this._register(instantiationService.createInstance(BrowserWindow));
+ 
 Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
@@ -106,10 +106,10 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/product/common/product.ts
 +++ third-party-src/src/vs/platform/product/common/product.ts
-@@ -69,15 +69,17 @@ else {
+@@ -70,10 +70,12 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
- 			version: '1.95.0-dev',
+ 			version: '1.104.0-dev',
 -			nameShort: 'Code Editor',
 -			nameLong: 'Code Editor',
 +			nameShort: 'SageMaker Code Editor',
@@ -121,8 +121,3 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  			urlProtocol: 'code-oss',
  			reportIssueUrl: 'https://github.com/microsoft/vscode/issues/new',
  			licenseName: 'MIT',
- 			licenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt',
-			serverLicenseUrl: 'https://github.com/microsoft/vscode/blob/main/LICENSE.txt'
- 		});
- 	}
- }

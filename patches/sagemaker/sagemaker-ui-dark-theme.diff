@@ -138,30 +138,6 @@ Index: code-editor-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: code-editor-src/build/gulpfile.extensions.js
-===================================================================
---- code-editor-src.orig/build/gulpfile.extensions.js
-+++ code-editor-src/build/gulpfile.extensions.js
-@@ -64,6 +64,7 @@ const compilations = [
- 	'extensions/sagemaker-idle-extension/tsconfig.json',
- 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
- 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
-+	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
- 	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
- 	'extensions/typescript-language-features/web/tsconfig.json',
-Index: code-editor-src/build/npm/dirs.js
-===================================================================
---- code-editor-src.orig/build/npm/dirs.js
-+++ code-editor-src/build/npm/dirs.js
-@@ -42,6 +42,7 @@ const dirs = [
- 	'extensions/sagemaker-idle-extension',
- 	'extensions/sagemaker-terminal-crash-mitigation',
- 	'extensions/sagemaker-open-notebook-extension',
-+	'extensions/sagemaker-ui-dark-theme',
- 	'extensions/search-result',
- 	'extensions/simple-browser',
- 	'extensions/tunnel-forwarding',
 Index: code-editor-src/extensions/sagemaker-ui-dark-theme/package.json
 ===================================================================
 --- /dev/null
@@ -395,3 +371,27 @@ Index: code-editor-src/extensions/sagemaker-ui-dark-theme/src/test/index.ts
 +testRunner.configure(options);
 +
 +export = testRunner;
+Index: code-editor-src/build/gulpfile.extensions.ts
+===================================================================
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
+@@ -68,6 +68,7 @@ const compilations = [
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
++	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.ts
+===================================================================
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
+@@ -46,6 +46,7 @@ export const dirs = [
+ 	'extensions/sagemaker-idle-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
+ 	'extensions/sagemaker-open-notebook-extension',
++	'extensions/sagemaker-ui-dark-theme',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',
