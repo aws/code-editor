@@ -11,19 +11,6 @@ Index: third-party-src/src/tsconfig.base.json
  		"noUncheckedSideEffectImports": true,
  		"allowUnreachableCode": false,
  		"strict": true,
-Index: third-party-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
-+++ third-party-src/src/vs/workbench/contrib/preferences/browser/preferencesSearch.ts
-@@ -30,7 +30,7 @@ export interface IEndpointDetails {
- export class PreferencesSearchService extends Disposable implements IPreferencesSearchService {
- 	declare readonly _serviceBrand: undefined;
- 
--	// @ts-expect-error disable remote search for now, ref https://github.com/microsoft/vscode/issues/172411
-+	// @ts-ignore disable remote search for now, ref https://github.com/microsoft/vscode/issues/172411
- 	private _installedExtensions: Promise<ILocalExtension[]>;
- 	private _remoteSearchProvider: IRemoteSearchProvider | undefined;
- 	private _aiSearchProvider: IAiSearchProvider | undefined;
 Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/remote/browser/tunnelView.ts

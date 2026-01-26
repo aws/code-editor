@@ -2,13 +2,13 @@ Index: third-party-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/workbench.common.main.ts
 +++ third-party-src/src/vs/workbench/workbench.common.main.ts
-@@ -368,9 +368,6 @@ import './contrib/userDataSync/browser/u
+@@ -379,9 +379,6 @@ import './contrib/userDataSync/browser/u
  // User Data Profiles
  import './contrib/userDataProfile/browser/userDataProfile.contribution.js';
  
 -// Continue Edit Session
 -import './contrib/editSessions/browser/editSessions.contribution.js';
 -
- // Code Actions
- import './contrib/codeActions/browser/codeActions.contribution.js';
+ // Remote Coding Agents
+ import './contrib/remoteCodingAgents/browser/remoteCodingAgents.contribution.js';
  
