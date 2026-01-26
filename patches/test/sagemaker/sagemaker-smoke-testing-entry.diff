@@ -20,16 +20,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
  	const { serverProcess, endpoint } = await launchServer(options);
  
  	// Launch browser
-@@ -100,7 +109,7 @@ async function launchBrowser(options: La
- 	browser.on('disconnected', () => logger.log(`Playwright: browser disconnected`));
- 
- 	const context = await measureAndLog(() => browser.newContext(), 'browser.newContext', logger);
--
-+	
- 	if (tracing) {
- 		try {
- 			await measureAndLog(() => context.tracing.start({ screenshots: true, snapshots }), 'context.tracing.start()', logger);
-@@ -149,6 +158,144 @@ async function launchBrowser(options: La
+@@ -165,6 +174,144 @@ async function launchBrowser(options: La
  	return { browser, context, page, pageLoadedPromise };
  }
  
@@ -48,7 +39,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +	browser.on('disconnected', () => logger.log(`Playwright: browser disconnected`));
 +
 +	const context = await measureAndLog(() => browser.newContext(), 'browser.newContext', logger);
-+	
++
 +	if (tracing) {
 +		try {
 +			await measureAndLog(() => context.tracing.start({ screenshots: true, snapshots }), 'context.tracing.start()', logger);
@@ -56,14 +47,14 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +			logger.log(`Playwright (Browser): Failed to start playwright tracing (${error})`);
 +		}
 +	}
-+	
++
 +	let page = await measureAndLog(() => context.newPage(), 'context.newPage()', logger);
 +	await measureAndLog(() => page.setViewportSize({ width: 1200, height: 800 }), 'page.setViewportSize', logger);
-+	
++
 +	if (options.verbose) {
 +		context.on('page', () => logger.log(`Playwright (Browser): context.on('page')`));
 +		context.on('requestfailed', e => logger.log(`Playwright (Browser): context.on('requestfailed') [${e.failure()?.errorText} for ${e.url()}]`));
-+		
++
 +		page.on('console', e => logger.log(`Playwright (Browser): window.on('console') [${e.text()}]`));
 +		page.on('dialog', () => logger.log(`Playwright (Browser): page.on('dialog')`));
 +		page.on('domcontentloaded', () => logger.log(`Playwright (Browser): page.on('domcontentloaded')`));
@@ -72,7 +63,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +		page.on('framenavigated', () => logger.log(`Playwright (Browser): page.on('framenavigated')`));
 +		page.on('requestfailed', e => logger.log(`Playwright (Browser): page.on('requestfailed') [${e.failure()?.errorText} for ${e.url()}]`));
 +	}
-+	
++
 +	page.on('pageerror', async (error) => logger.log(`Playwright (Browser) ERROR: page error: ${error}`));
 +	page.on('crash', () => logger.log('Playwright (Browser) ERROR: page crash'));
 +	page.on('close', () => logger.log('Playwright (Browser): page close'));
@@ -89,23 +80,23 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +	// Handle SSO login if credentials are provided
 +	if (process.env.SSO_USERNAME && process.env.SSO_PASSWORD) {
 +		logger.log('Performing SSO login...');
-+		
++
 +		// Click SSO button
 +		await page.click('button:has-text("Sign in with SSO"), button:has-text("SSO"), a:has-text("Sign in with SSO")');
 +		await page.waitForLoadState('networkidle', { timeout: 30000 });
-+		
++
 +		// Fill username
 +		await page.waitForSelector('#awsui-input-0', { timeout: 30000 });
 +		await page.fill('#awsui-input-0', process.env.SSO_USERNAME);
-+		
++
 +		// Click Next
 +		await page.click('button:has-text("Next"), button[type="submit"]');
 +		await page.waitForLoadState('networkidle', { timeout: 30000 });
-+		
++
 +		// Fill password
 +		await page.waitForSelector('input[name="password"], input[type="password"], #password', { timeout: 30000 });
 +		await page.fill('input[name="password"], input[type="password"], #password', process.env.SSO_PASSWORD);
-+		
++
 +		// Click login
 +		await page.click('button[type="submit"], input[type="submit"], button:has-text("Sign in"), button:has-text("Login")');
 +		await page.waitForLoadState('networkidle', { timeout: 60000 });
@@ -114,20 +105,20 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +	// Wait for Compute heading and click space
 +	await page.waitForSelector('h2:has-text("Compute")', { timeout: 60000 });
 +	logger.log(`Opening space: ${spaceName}`);
-+	
++
 +	// Wait for new page to open when clicking the space button
 +	const [newPage] = await Promise.all([
 +		context.waitForEvent('page'),
 +		page.click(`[data-id="${spaceName}"] button[data-testid="space-open-button"]`)
 +	]);
-+	
++
 +	// Switch to the new Code Editor page
 +	await newPage.waitForLoadState('networkidle', { timeout: 60000 });
 +	logger.log(`Switched to Code Editor page: ${newPage.url()}`);
-+	
++
 +	// Switch page reference to the new Code Editor window
 +	page = newPage;
-+	
++
 +	// Wait for Code Editor to fully load
 +	await page.waitForTimeout(10000);
 +	const currentUrl1 = page.url();
@@ -135,22 +126,22 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +	const baseUrl1 = currentUrl1.split('?')[0];
 +	const finalUrl1 = `${baseUrl1}?folder=${URI.file(workspacePath1).path}`;
 +	await page.goto(finalUrl1, { waitUntil: 'networkidle' });
-+	
++
 +	// Set up test workspace in SageMaker by cloning the test repo
 +	logger.log('Setting up test workspace in SageMaker...');
-+	
++
 +	// Open integrated terminal
 +	await page.waitForTimeout(10000);
 +	await page.keyboard.press('Control+Shift+`');
 +	await page.waitForSelector('.terminal', { timeout: 30000 });
-+	
++
 +	// Clone the test repository to home directory (if not exists)
 +	await page.keyboard.type('cd /home/sagemaker-user && [ ! -d "vscode-smoketest-express" ] && git clone https://github.com/microsoft/vscode-smoketest-express.git || echo "Directory exists"');
 +	await page.keyboard.press('Enter');
-+	
++
 +	// Wait for clone to complete
 +	await page.waitForTimeout(10000);
-+	
++
 +	// Navigate to workspace with payload parameters (like launchBrowser)
 +	const payloadParam = `[${[
 +		'["enableProposedApi",""]',
@@ -158,13 +149,13 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 +		'["skipReleaseNotes", "true"]',
 +		`["logLevel","${options.verbose ? 'trace' : 'info'}"]`
 +	].join(',')}]`;
-+	
++
 +	const currentUrl = page.url();
 +	const workspacePath = '/home/sagemaker-user/vscode-smoketest-express';
 +	const baseUrl = currentUrl.split('?')[0];
 +	const finalUrl = `${baseUrl}?folder=${URI.file(workspacePath).path}&payload=${payloadParam}`;
 +	await page.goto(finalUrl, { waitUntil: 'networkidle' });
-+	
++
 +	logger.log(`Successfully opened SageMaker Code Editor space: ${spaceName}`);
 +
 +	const pageLoadedPromise = page.waitForLoadState('load');
@@ -178,25 +169,23 @@ Index: code-editor-src/test/smoke/src/main.ts
 ===================================================================
 --- code-editor-src.orig/test/smoke/src/main.ts
 +++ code-editor-src/test/smoke/src/main.ts
-@@ -5,16 +5,9 @@
+@@ -5,14 +5,9 @@
  
  import * as fs from 'fs';
  import { gracefulify } from 'graceful-fs';
 -import * as cp from 'child_process';
  import * as path from 'path';
 -import * as os from 'os';
- import * as minimist from 'minimist';
--import * as rimraf from 'rimraf';
+ import minimist from 'minimist';
 -import * as vscodetest from '@vscode/test-electron';
 -import fetch from 'node-fetch';
--import { Quality, MultiLogger, Logger, ConsoleLogger, FileLogger, measureAndLog, getDevElectronPath, getBuildElectronPath, getBuildVersion } from '../../automation';
--import { retry, timeout } from './utils';
--
-+import { Quality, MultiLogger, Logger, ConsoleLogger, FileLogger, getDevElectronPath, getBuildElectronPath, getBuildVersion } from '../../automation';
+-import { Quality, MultiLogger, Logger, ConsoleLogger, FileLogger, measureAndLog, getDevElectronPath, getBuildElectronPath, getBuildVersion, ApplicationOptions } from '../../automation';
+-import { retry } from './utils';
++import { Quality, MultiLogger, Logger, ConsoleLogger, FileLogger, getDevElectronPath, getBuildElectronPath, getBuildVersion, ApplicationOptions } from '../../automation';
+ 
  import { setup as setupDataLossTests } from './areas/workbench/data-loss.test';
  import { setup as setupPreferencesTests } from './areas/preferences/preferences.test';
- import { setup as setupSearchTests } from './areas/search/search.test';
-@@ -22,7 +15,6 @@ import { setup as setupNotebookTests } f
+@@ -21,7 +16,6 @@ import { setup as setupNotebookTests } f
  import { setup as setupLanguagesTests } from './areas/languages/languages.test';
  import { setup as setupStatusbarTests } from './areas/statusbar/statusbar.test';
  import { setup as setupExtensionTests } from './areas/extensions/extensions.test';
@@ -204,32 +193,43 @@ Index: code-editor-src/test/smoke/src/main.ts
  import { setup as setupLocalizationTests } from './areas/workbench/localization.test';
  import { setup as setupLaunchTests } from './areas/workbench/launch.test';
  import { setup as setupTerminalTests } from './areas/terminal/terminal.test';
-@@ -118,23 +110,10 @@ try {
+@@ -118,33 +112,10 @@ try {
  	logger.log(`Error enabling graceful-fs: ${error}`);
  }
  
--const testDataPath = path.join(os.tmpdir(), 'vscsmoke');
+-function getTestTypeSuffix(): string {
+-	if (opts.web) {
+-		return 'browser';
+-	} else if (opts.remote) {
+-		return 'remote';
+-	} else {
+-		return 'electron';
+-	}
+-}
++const testDataPath = '/home/sagemaker-user';
+ 
+-const testDataPath = path.join(os.tmpdir(), `vscsmoke-${getTestTypeSuffix()}`);
 -if (fs.existsSync(testDataPath)) {
--	rimraf.sync(testDataPath);
+-	fs.rmSync(testDataPath, { recursive: true, force: true, maxRetries: 10, retryDelay: 1000 });
 -}
 -fs.mkdirSync(testDataPath, { recursive: true });
 -process.once('exit', () => {
 -	try {
--		rimraf.sync(testDataPath);
+-		fs.rmSync(testDataPath, { recursive: true, force: true, maxRetries: 10, retryDelay: 1000 });
 -	} catch {
 -		// noop
 -	}
 -});
-+const testDataPath = '/home/sagemaker-user';
- 
+-
 -const testRepoUrl = 'https://github.com/microsoft/vscode-smoketest-express';
- const workspacePath = path.join(testDataPath, 'vscode-smoketest-express');
+-const workspacePath = path.join(testDataPath, `vscode-smoketest-express`);
++const workspacePath = path.join(testDataPath, 'vscode-smoketest-express');
  const extensionsPath = path.join(testDataPath, 'extensions-dir');
 -fs.mkdirSync(extensionsPath, { recursive: true });
  
  function fail(errorMessage): void {
  	logger.log(errorMessage);
-@@ -211,7 +190,10 @@ else {
+@@ -221,7 +192,10 @@ else {
  	const testCodeServerPath = opts.build || process.env.VSCODE_REMOTE_SERVER_PATH;
  
  	if (typeof testCodeServerPath === 'string') {
@@ -241,14 +241,14 @@ Index: code-editor-src/test/smoke/src/main.ts
  			fail(`Cannot find Code server at ${testCodeServerPath}.`);
  		} else {
  			logger.log(`Running web smoke tests against ${testCodeServerPath}`);
-@@ -233,121 +215,6 @@ logger.log(`VS Code product quality: ${q
+@@ -243,115 +217,6 @@ logger.log(`VS Code product quality: ${q
  
  const userDataDir = path.join(testDataPath, 'd');
  
 -async function setupRepository(): Promise<void> {
 -	if (opts['test-repo']) {
 -		logger.log('Copying test project repository:', opts['test-repo']);
--		rimraf.sync(workspacePath);
+-		fs.rmSync(workspacePath, { recursive: true, force: true, maxRetries: 10, retryDelay: 1000 });
 -		// not platform friendly
 -		if (process.platform === 'win32') {
 -			cp.execSync(`xcopy /E "${opts['test-repo']}" "${workspacePath}"\\*`);
@@ -317,15 +317,9 @@ Index: code-editor-src/test/smoke/src/main.ts
 -				},
 -				error: error => logger.log(`download stable code error: ${error}`)
 -			}
--		}), 'download stable code', logger), 1000, 3, () => new Promise<void>((resolve, reject) => {
--			rimraf(stableCodeDestination, { maxBusyTries: 10 }, error => {
--				if (error) {
--					reject(error);
--				} else {
--					resolve();
--				}
--			});
--		}));
+-		}), 'download stable code', logger), 1000, 3, async () => {
+-			fs.rmSync(stableCodeDestination, { recursive: true, force: true, maxRetries: 10, retryDelay: 1000 });
+-		});
 -
 -		if (process.platform === 'darwin') {
 -			// Visual Studio Code.app/Contents/MacOS/Electron
@@ -363,51 +357,39 @@ Index: code-editor-src/test/smoke/src/main.ts
  // Before all tests run setup
  before(async function () {
  	this.timeout(5 * 60 * 1000); // increase since we download VSCode
-@@ -371,31 +238,6 @@ before(async function () {
+@@ -376,19 +241,6 @@ before(async function () {
  		extraArgs: (opts.electronArgs || '').split(' ').map(arg => arg.trim()).filter(arg => !!arg)
  	};
- 
+ 	this.defaultOptions = options;
+-
 -	await setup();
 -});
 -
 -// After main suite (after all tests)
 -after(async function () {
 -	try {
--		let deleted = false;
--		await measureAndLog(() => Promise.race([
--			new Promise<void>((resolve, reject) => rimraf(testDataPath, { maxBusyTries: 10 }, error => {
--				if (error) {
--					reject(error);
--				} else {
--					deleted = true;
--					resolve();
--				}
--			})),
--			timeout(30000).then(() => {
--				if (!deleted) {
--					throw new Error('giving up after 30s');
--				}
--			})
--		]), 'rimraf(testDataPath)', logger);
+-		await measureAndLog(async () => {
+-			fs.rmSync(testDataPath, { recursive: true, force: true, maxRetries: 10, retryDelay: 1000 });
+-		}, 'rimraf(testDataPath)', logger);
 -	} catch (error) {
 -		logger.log(`Unable to delete smoke test workspace: ${error}. This indicates some process is locking the workspace folder.`);
 -	}
  });
  
  describe(`VSCode Smoke Tests (${opts.web ? 'Web' : 'Electron'})`, () => {
-@@ -408,7 +250,6 @@ describe(`VSCode Smoke Tests (${opts.web
+@@ -401,7 +253,6 @@ describe(`VSCode Smoke Tests (${opts.web
  	setupTaskTests(logger);
  	setupStatusbarTests(logger);
  	if (quality !== Quality.Dev && quality !== Quality.OSS) { setupExtensionTests(logger); }
 -	setupMultirootTests(logger);
  	if (!opts.web && !opts.remote && quality !== Quality.Dev && quality !== Quality.OSS) { setupLocalizationTests(logger); }
  	if (!opts.web && !opts.remote) { setupLaunchTests(logger); }
- });
+ 	if (!opts.web) { setupChatTests(logger); }
 Index: code-editor-src/test/automation/src/code.ts
 ===================================================================
 --- code-editor-src.orig/test/automation/src/code.ts
 +++ code-editor-src/test/automation/src/code.ts
-@@ -88,7 +88,9 @@ export async function launch(options: La
+@@ -93,7 +93,9 @@ export async function launch(options: La
  	// Browser smoke tests
  	if (options.web) {
  		const { serverProcess, driver } = await measureAndLog(() => launchPlaywrightBrowser(options), 'launch playwright (browser)', options.logger);
@@ -418,7 +400,7 @@ Index: code-editor-src/test/automation/src/code.ts
  
  		return new Code(driver, options.logger, serverProcess, undefined, options.quality, options.version);
  	}
-@@ -109,7 +111,7 @@ export class Code {
+@@ -114,7 +116,7 @@ export class Code {
  	constructor(
  		driver: PlaywrightDriver,
  		readonly logger: Logger,
@@ -427,7 +409,7 @@ Index: code-editor-src/test/automation/src/code.ts
  		private readonly safeToKill: Promise<void> | undefined,
  		readonly quality: Quality,
  		readonly version: { major: number; minor: number; patch: number }
-@@ -155,6 +157,13 @@ export class Code {
+@@ -174,6 +176,13 @@ export class Code {
  
  	async exit(): Promise<void> {
  		return measureAndLog(() => new Promise<void>(resolve => {
