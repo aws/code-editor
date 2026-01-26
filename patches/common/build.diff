@@ -2,6 +2,15 @@ Index: third-party-src/package.json
 ===================================================================
 --- third-party-src.orig/package.json
 +++ third-party-src/package.json
+@@ -79,7 +79,7 @@
+     "@vscode/proxy-agent": "^0.32.0",
+     "@vscode/ripgrep": "^1.15.11",
+     "@vscode/spdlog": "^0.15.2",
+-    "@vscode/sqlite3": "5.1.8-vscode",
++    "@vscode/sqlite3": "5.1.12-vscode",
+     "@vscode/sudo-prompt": "9.3.1",
+     "@vscode/tree-sitter-wasm": "^0.1.4",
+     "@vscode/vscode-languagedetection": "1.0.21",
 @@ -99,7 +99,6 @@
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
