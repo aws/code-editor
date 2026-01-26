@@ -86,6 +86,15 @@ Index: code-editor-src/remote/package.json
 ===================================================================
 --- code-editor-src.orig/remote/package.json
 +++ code-editor-src/remote/package.json
+@@ -8,7 +8,7 @@
+     "@parcel/watcher": "2.5.1",
+     "@vscode/deviceid": "^0.1.1",
+     "@vscode/iconv-lite-umd": "0.7.0",
+-    "@vscode/proxy-agent": "^0.32.0",
++    "@vscode/proxy-agent": "^0.37.0",
+     "@vscode/ripgrep": "^1.15.11",
+     "@vscode/spdlog": "^0.15.2",
+     "@vscode/tree-sitter-wasm": "^0.1.4",
 @@ -29,7 +29,6 @@
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
