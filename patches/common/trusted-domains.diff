@@ -92,11 +92,12 @@ Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json
 +++ third-party-src/product.json
-@@ -82,5 +82,16 @@
- 				"publisherDisplayName": "Microsoft"
- 			}
- 		}
-+	],
+@@ -150,5 +150,16 @@
+ 		"github-enterprise": [
+ 			"GitHub.copilot-chat"
+ 		]
+-	}
++	},
 +	"linkProtectionTrustedDomains": [
 +		"https://docs.aws.amazon.com",
 +		"https://docs.amazonaws.cn",
@@ -107,5 +108,5 @@ Index: third-party-src/product.json
 +		"https://console.amazonaws.cn",
 +		"https://aws.amazon.com",
 +		"https://*.amazon.com"
- 	]
++	]
  }

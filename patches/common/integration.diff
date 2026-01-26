@@ -47,7 +47,7 @@ Index: third-party-src/src/vs/base/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/base/common/product.ts
 +++ third-party-src/src/vs/base/common/product.ts
-@@ -60,6 +60,7 @@ export interface IProductConfiguration {
+@@ -69,6 +69,7 @@ export interface IProductConfiguration {
  	readonly date?: string;
  	readonly quality?: string;
  	readonly commit?: string;
@@ -55,30 +55,14 @@ Index: third-party-src/src/vs/base/common/product.ts
  
  	readonly nameShort: string;
  	readonly nameLong: string;
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-@@ -79,9 +79,9 @@ export class BrowserDialogHandler extend
- 	async about(): Promise<void> {
- 		const detailString = (useAgo: boolean): string => {
- 			return localize('aboutDetail',
--				"Version: {0}\nCommit: {1}\nDate: {2}\nBrowser: {3}",
-+				"Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
-+				this.productService.codeEditorVersion || 'Unknown',
- 				this.productService.version || 'Unknown',
--				this.productService.commit || 'Unknown',
- 				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
- 				navigator.userAgent
- 			);
 Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/product/common/product.ts
 +++ third-party-src/src/vs/platform/product/common/product.ts
-@@ -61,8 +61,8 @@ else {
+@@ -62,8 +62,8 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
- 			version: '1.95.0-dev',
+ 			version: '1.104.0-dev',
 -			nameShort: 'Code - OSS Dev',
 -			nameLong: 'Code - OSS Dev',
 +			nameShort: 'Code Editor',
@@ -86,16 +70,19 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  			applicationName: 'code-oss',
  			dataFolderName: '.vscode-oss',
  			urlProtocol: 'code-oss',
-Index: third-party-src/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
+Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
-+++ third-party-src/src/vs/platform/utilityProcess/electron-main/utilityProcess.ts
-@@ -134,7 +134,7 @@ export interface IUtilityProcessCrashEve
- 	/**
- 	 * The reason of the utility process crash.
- 	 */
--	readonly reason: 'clean-exit' | 'abnormal-exit' | 'killed' | 'crashed' | 'oom' | 'launch-failed' | 'integrity-failure';
-+	readonly reason: 'clean-exit' | 'abnormal-exit' | 'killed' | 'crashed' | 'oom' | 'launch-failed' | 'integrity-failure' | 'memory-eviction';
- }
- 
- export interface IUtilityProcessInfo {
+--- third-party-src.orig/src/vs/platform/dialogs/browser/dialog.ts
++++ third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+@@ -46,9 +46,9 @@ export function createWorkbenchDialogOpt
+ export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string; detailsToCopy: string } {
+ 	const detailString = (useAgo: boolean): string => {
+ 		return localize('aboutDetail',
+-			"Version: {0}\nCommit: {1}\nDate: {2}\nBrowser: {3}",
++			"Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
++			productService.codeEditorVersion || 'Unknown',
+ 			productService.version || 'Unknown',
+-			productService.commit || 'Unknown',
+ 			productService.date ? `${productService.date}${useAgo ? ' (' + fromNow(new Date(productService.date), true) + ')' : ''}` : 'Unknown',
+ 			navigator.userAgent
+ 		);
