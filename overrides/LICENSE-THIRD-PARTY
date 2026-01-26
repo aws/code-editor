@@ -3907,7 +3907,7 @@ SOFTWARE.
 ******************************
 
 @vscode/proxy-agent
-0.32.0 <https://github.com/microsoft/vscode-proxy-agent>
+0.37.0 <https://github.com/microsoft/vscode-proxy-agent>
 MIT License
 
 Copyright (c) 2014 Nathan Rajlich &lt;nathan@tootallnate.net&gt;
