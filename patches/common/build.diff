@@ -10,7 +10,15 @@ Index: third-party-src/package.json
      "minimist": "^1.2.6",
      "native-is-elevated": "0.7.0",
      "native-keymap": "^3.3.5",
-@@ -115,7 +114,7 @@
+@@ -107,6 +106,7 @@
+     "node-pty": "^1.1.0-beta33",
+     "open": "^8.4.2",
+     "tas-client-umd": "0.2.0",
++    "undici": "^7.18.2",
+     "v8-inspect-profiler": "^0.1.1",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+@@ -115,7 +115,7 @@
      "yazl": "^2.4.3"
    },
    "devDependencies": {
@@ -19,7 +27,7 @@ Index: third-party-src/package.json
      "@stylistic/eslint-plugin-ts": "^2.8.0",
      "@types/cookie": "^0.3.3",
      "@types/debug": "^4.1.5",
-@@ -142,7 +141,7 @@
+@@ -142,7 +142,7 @@
      "@vscode/telemetry-extractor": "^1.10.2",
      "@vscode/test-cli": "^0.0.6",
      "@vscode/test-electron": "^2.4.0",
@@ -28,7 +36,7 @@ Index: third-party-src/package.json
      "@vscode/v8-heap-parser": "^0.1.0",
      "@vscode/vscode-perf": "^0.0.19",
      "@webgpu/types": "^0.1.44",
-@@ -154,7 +153,7 @@
+@@ -154,7 +154,7 @@
      "css-loader": "^6.9.1",
      "debounce": "^1.0.0",
      "deemon": "^1.13.4",
@@ -37,8 +45,7 @@ Index: third-party-src/package.json
      "eslint": "^9.11.1",
      "eslint-formatter-compact": "^8.40.0",
      "eslint-plugin-header": "3.1.1",
-@@ -221,9 +220,20 @@
-     "yaserver": "^0.4.0"
+@@ -221,9 +221,20 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
