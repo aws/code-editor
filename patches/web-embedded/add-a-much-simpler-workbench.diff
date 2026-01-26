@@ -640,10 +640,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  	}
  
  	if(!isDevo) {
-@@ -624,21 +45,43 @@ function readCookie(name: string): strin
+@@ -623,21 +44,43 @@ function readCookie(name: string): strin
+ 			webviewEndpoint: vsCodeCdn + '/out/vs/workbench/contrib/webview/browser/pre/',
  		};
  	}
- 
 -	const secretStorageKeyPath = readCookie('vscode-secret-key-path');
 -	const secretStorageCrypto = secretStorageKeyPath && ServerKeyedAESCrypto.supported()
 -		? new ServerKeyedAESCrypto(secretStorageKeyPath) : new TransparentCrypto();
