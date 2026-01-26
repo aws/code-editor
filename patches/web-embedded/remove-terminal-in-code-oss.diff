@@ -9,25 +9,19 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-@@ -5,9 +5,7 @@
+@@ -4,49 +4,30 @@
+  *--------------------------------------------------------------------------------------------*/
  
  import { getFontSnippets } from '../../../../base/browser/fonts.js';
- import { KeyCode, KeyMod } from '../../../../base/common/keyCodes.js';
+-import { KeyCode, KeyMod } from '../../../../base/common/keyCodes.js';
 -import { Schemas } from '../../../../base/common/network.js';
- import { isIOS, isWindows } from '../../../../base/common/platform.js';
 -import { URI } from '../../../../base/common/uri.js';
- import './media/terminal.css';
- import './media/terminalVoice.css';
- import './media/widgets.css';
-@@ -15,40 +13,26 @@ import './media/xterm.css';
- import * as nls from '../../../../nls.js';
- import { CONTEXT_ACCESSIBILITY_MODE_ENABLED } from '../../../../platform/accessibility/common/accessibility.js';
- import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
+-import * as nls from '../../../../nls.js';
 -import { Extensions as DragAndDropExtensions, IDragAndDropContributionRegistry, IDraggedResourceEditorInput } from '../../../../platform/dnd/browser/dnd.js';
 -import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
  import { InstantiationType, registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
- import { Registry } from '../../../../platform/registry/common/platform.js';
- import { GeneralShellType, ITerminalLogService, WindowsShellType } from '../../../../platform/terminal/common/terminal.js';
+-import { Registry } from '../../../../platform/registry/common/platform.js';
+ import { ITerminalLogService } from '../../../../platform/terminal/common/terminal.js';
  import { TerminalLogService } from '../../../../platform/terminal/common/terminalLogService.js';
  import { registerTerminalPlatformConfiguration } from '../../../../platform/terminal/common/terminalPlatformConfiguration.js';
 -import { EditorPaneDescriptor, IEditorPaneRegistry } from '../../../browser/editor.js';
@@ -35,9 +29,19 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
  import { WorkbenchPhase, registerWorkbenchContribution2 } from '../../../common/contributions.js';
 -import { EditorExtensions, IEditorFactoryRegistry } from '../../../common/editor.js';
 -import { IViewContainersRegistry, IViewsRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation } from '../../../common/views.js';
+-import { ITerminalProfileService, TERMINAL_VIEW_ID, TerminalCommandId } from '../common/terminal.js';
++import { ITerminalProfileService } from '../common/terminal.js';
+ import { TerminalEditingService } from './terminalEditingService.js';
+ import { registerColors } from '../common/terminalColorRegistry.js';
+ import { registerTerminalConfiguration } from '../common/terminalConfiguration.js';
+-import { terminalStrings } from '../common/terminalStrings.js';
+ import './media/terminal.css';
+ import './media/terminalVoice.css';
+ import './media/widgets.css';
+ import './media/xterm.css';
  import { RemoteTerminalBackendContribution } from './remoteTerminalBackend.js';
--import { ITerminalConfigurationService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService, TerminalDataTransfers, terminalEditorId } from './terminal.js';
-+import { ITerminalConfigurationService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService } from './terminal.js';
+-import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService, TerminalDataTransfers, terminalEditorId } from './terminal.js';
++import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService } from './terminal.js';
  import { registerTerminalActions } from './terminalActions.js';
 -import { setupTerminalCommands } from './terminalCommands.js';
  import { TerminalConfigurationService } from './terminalConfigurationService.js';
@@ -52,17 +56,12 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -import { setupTerminalMenus } from './terminalMenus.js';
  import { TerminalProfileService } from './terminalProfileService.js';
  import { TerminalService } from './terminalService.js';
--import { TerminalViewPane } from './terminalView.js';
--import { ITerminalProfileService, TERMINAL_VIEW_ID, TerminalCommandId } from '../common/terminal.js';
-+import { ITerminalProfileService, TerminalCommandId } from '../common/terminal.js';
- import { registerColors } from '../common/terminalColorRegistry.js';
- import { registerTerminalConfiguration } from '../common/terminalConfiguration.js';
- import { TerminalContextKeyStrings, TerminalContextKeys } from '../common/terminalContextKey.js';
--import { terminalStrings } from '../common/terminalStrings.js';
- import { registerSendSequenceKeybinding } from './terminalKeybindings.js';
  import { TerminalTelemetryContribution } from './terminalTelemetry.js';
+-import { TerminalViewPane } from './terminalView.js';
  
-@@ -71,68 +55,6 @@ registerWorkbenchContribution2(TerminalT
+ // Register services
+ registerSingleton(ITerminalLogService, TerminalLogService, InstantiationType.Delayed);
+@@ -68,72 +49,7 @@ registerWorkbenchContribution2(TerminalT
  registerTerminalPlatformConfiguration();
  registerTerminalConfiguration(getFontSnippets);
  
@@ -128,12 +127,8 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -	}
 -}], VIEW_CONTAINER);
 -
- // Register actions
++// Register actions
  registerTerminalActions();
- 
-@@ -247,8 +169,4 @@ registerSendSequenceKeybinding('\u001f',
- 	mac: { primary: KeyMod.WinCtrl | KeyCode.Slash }
- });
  
 -setupTerminalCommands();
 -

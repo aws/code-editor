@@ -33,7 +33,7 @@ Index: third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
 +++ third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
-@@ -319,8 +319,8 @@ export class BackLayerWebView<T extends
+@@ -320,8 +320,8 @@ export class BackLayerWebView<T extends
  				${enableCsp ?
  				`<meta http-equiv="Content-Security-Policy" content="
  					default-src 'none';
@@ -52,8 +52,8 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-gEAyFzmkyqMoTTnN+3KReFUYoHsK4RAJEb+6eiul+UY=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
-+		content="default-src 'none'; script-src 'sha256-gEAyFzmkyqMoTTnN+3KReFUYoHsK4RAJEb+6eiul+UY=' 'self'; frame-src 'self';">
+-		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self';">
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"

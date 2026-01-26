@@ -2,25 +2,21 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -15,7 +15,7 @@ import { IExtensionIgnoredRecommendation
- import { IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions, IWorkbenchContribution, registerWorkbenchContribution2, WorkbenchPhase } from '../../../common/contributions.js';
- import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
- import { VIEWLET_ID, IExtensionsWorkbenchService, IExtensionsViewPaneContainer, TOGGLE_IGNORE_EXTENSION_ACTION_ID, INSTALL_EXTENSION_FROM_VSIX_COMMAND_ID, WORKSPACE_RECOMMENDATIONS_VIEW_ID, IWorkspaceRecommendedExtensionsView, AutoUpdateConfigurationKey, HasOutdatedExtensionsContext, SELECT_INSTALL_VSIX_EXTENSION_COMMAND_ID, LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID, ExtensionEditorTab, THEME_ACTIONS_GROUP, INSTALL_ACTIONS_GROUP, OUTDATED_EXTENSIONS_VIEW_ID, CONTEXT_HAS_GALLERY, extensionsSearchActionsMenu, UPDATE_ACTIONS_GROUP, IExtensionArg, ExtensionRuntimeActionType, EXTENSIONS_CATEGORY, AutoRestartConfigurationKey, extensionsFilterSubMenu, DefaultViewsContext } from '../common/extensions.js';
--import { InstallSpecificVersionOfExtensionAction, ConfigureWorkspaceRecommendedExtensionsAction, ConfigureWorkspaceFolderRecommendedExtensionsAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ClearLanguageAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction, InstallAnotherVersionAction, InstallAction } from './extensionsActions.js';
-+import { InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ClearLanguageAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction, InstallAnotherVersionAction, InstallAction } from './extensionsActions.js';
- import { ExtensionsInput } from '../common/extensionsInput.js';
- import { ExtensionEditor } from './extensionEditor.js';
- import { StatusUpdater, MaliciousExtensionChecker, ExtensionsViewletViewsContribution, ExtensionsViewPaneContainer, BuiltInExtensionsContext, SearchMarketplaceExtensionsContext, RecommendedExtensionsContext, ExtensionsSortByContext, SearchHasTextContext, ExtensionsSearchValueContext } from './extensionsViewlet.js';
-@@ -58,7 +58,7 @@ import { IWorkspaceExtensionsConfigServi
- import { Schemas } from '../../../../base/common/network.js';
- import { ShowRuntimeExtensionsAction } from './abstractRuntimeExtensionsEditor.js';
+@@ -76,11 +76,11 @@ import { ExtensionEditor } from './exten
  import { ExtensionEnablementWorkspaceTrustTransitionParticipant } from './extensionEnablementWorkspaceTrustTransitionParticipant.js';
+ import { ExtensionRecommendationNotificationService } from './extensionRecommendationNotificationService.js';
+ import { ExtensionRecommendationsService } from './extensionRecommendationsService.js';
+-import { ClearLanguageAction, ConfigureWorkspaceFolderRecommendedExtensionsAction, ConfigureWorkspaceRecommendedExtensionsAction, InstallAction, InstallAnotherVersionAction, InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction } from './extensionsActions.js';
++import { ClearLanguageAction, InstallAction, InstallAnotherVersionAction, InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction } from './extensionsActions.js';
+ import { ExtensionActivationProgress } from './extensionsActivationProgress.js';
+ import { ExtensionsCompletionItemsProvider } from './extensionsCompletionItemsProvider.js';
+ import { ExtensionDependencyChecker } from './extensionsDependencyChecker.js';
 -import { clearSearchResultsIcon, configureRecommendedIcon, extensionsViewIcon, filterIcon, installWorkspaceRecommendedIcon, refreshIcon } from './extensionsIcons.js';
 +import { clearSearchResultsIcon, extensionsViewIcon, filterIcon, installWorkspaceRecommendedIcon, refreshIcon } from './extensionsIcons.js';
- import { EXTENSION_CATEGORIES, ExtensionType } from '../../../../platform/extensions/common/extensions.js';
- import { Disposable, DisposableStore, IDisposable, isDisposable } from '../../../../base/common/lifecycle.js';
- import { IDialogService, IFileDialogService } from '../../../../platform/dialogs/common/dialogs.js';
-@@ -1265,22 +1265,6 @@ class ExtensionsContributions extends Di
+ import { InstallExtensionQuickAccessProvider, ManageExtensionsQuickAccessProvider } from './extensionsQuickAccess.js';
+ import { BuiltInExtensionsContext, ExtensionMarketplaceStatusUpdater, ExtensionsSearchValueContext, ExtensionsSortByContext, ExtensionsViewletViewsContribution, ExtensionsViewPaneContainer, MaliciousExtensionChecker, RecommendedExtensionsContext, SearchHasTextContext, SearchMarketplaceExtensionsContext, StatusUpdater } from './extensionsViewlet.js';
+ import { ExtensionsWorkbenchService } from './extensionsWorkbenchService.js';
+@@ -1282,22 +1282,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({
@@ -43,7 +39,7 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  			id: InstallSpecificVersionOfExtensionAction.ID,
  			title: { value: InstallSpecificVersionOfExtensionAction.LABEL, original: 'Install Specific Version of Extension...' },
  			category: ExtensionsLocalizedLabel,
-@@ -1870,17 +1854,6 @@ class ExtensionsContributions extends Di
+@@ -1887,17 +1871,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({
