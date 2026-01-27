@@ -5,7 +5,7 @@ on:
 jobs:
   build:
     name: Build Code Editor Targets
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]

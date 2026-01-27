@@ -39,7 +39,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -571,6 +580,41 @@ export class WebClientServer {
+@@ -571,6 +580,48 @@ export class WebClientServer {
  			serveError(req, res, 500, error.message)
  		}
  	}
@@ -60,8 +60,15 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 +			//If exists, it will start the execution and add the execution logs in logFile.
 +			try {
 +				if (fs.existsSync(postStartupScriptPath)) {
-+					// Adding 0o755 to make script file executable
-+					fs.chmodSync(postStartupScriptPath, 0o755);
++					const stats = fs.statSync(postStartupScriptPath);
++					// Check if file has execute permission for owner, group, or others
++					// parseInt('111', 8) = 73 (octal 111 = --x--x--x execute bits)
++					// Bitwise AND checks if any execute bits are set
++					const isExecutable = (stats.mode & parseInt('111', 8)) !== 0;
++					if (!isExecutable) {
++						// Adding 0o755 to make script file executable
++						fs.chmodSync(postStartupScriptPath, 0o755);
++					}
 +
 +					const subprocess = spawn('bash', [`${postStartupScriptPath}`], { cwd: '/' });
 +					subprocess.stdout.pipe(logStream);
