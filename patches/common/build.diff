@@ -67,7 +67,8 @@ Index: code-editor-src/remote/package.json
      "minimist": "^1.2.8",
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta43",
-@@ -42,9 +41,6 @@
++    "undici": "^7.18.2",
+@@ -42,9 +42,6 @@
      "yazl": "^2.4.3"
    },
    "overrides": {
@@ -77,7 +78,20 @@ Index: code-editor-src/remote/package.json
 -    }
 +    "node-gyp-build": "4.8.1"
    }
- }
+}
+Index: code-editor-src/build/lib/mangle/index.js
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.js
++++ code-editor-src/build/lib/mangle/index.js
+@@ -354,7 +354,7 @@ class Mangler {
+         this.log = log;
+         this.config = config;
+         this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
+-            maxWorkers: 4,
++            maxWorkers: 3,
+             minWorkers: 'max'
+         });
+     }
 Index: code-editor-src/build/lib/mangle/index.ts
 ===================================================================
 --- code-editor-src.orig/build/lib/mangle/index.ts
