@@ -95,7 +95,7 @@ Index: third-party-src/remote/package.json
      "@vscode/ripgrep": "^1.15.11",
      "@vscode/spdlog": "^0.15.2",
      "@vscode/tree-sitter-wasm": "^0.1.4",
-@@ -29,7 +29,6 @@
+@@ -29,11 +29,11 @@
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
@@ -103,3 +103,8 @@ Index: third-party-src/remote/package.json
      "minimist": "^1.2.6",
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta33",
+     "tas-client-umd": "0.2.0",
++    "undici": "^7.18.2",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "9.2.0",
