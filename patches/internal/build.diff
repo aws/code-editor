@@ -147,7 +147,7 @@ Index: third-party-src/package.json
      "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
      "precommit": "node build/hygiene.js",
 -    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
-+    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
++    "gulp": "DISABLE_MANGLE=true NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
      "electron": "node build/lib/electron",
      "7z": "7z",
      "update-grammars": "node build/npm/update-all-grammars.mjs",
