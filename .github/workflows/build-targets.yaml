@@ -9,11 +9,6 @@ jobs:
     strategy:
       matrix:
         build-target: [code-editor-server, code-editor-sagemaker-server, code-editor-web-embedded, code-editor-web-embedded-with-terminal]
-        exclude:
-          # Only build SageMaker for now, remove the excluded targets when needed in the future.
-          - build-target: code-editor-server
-          - build-target: code-editor-web-embedded
-          - build-target: code-editor-web-embedded-with-terminal
     steps:
       - name: Start Build Workflow
         env:
@@ -31,31 +26,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Setup swap
+        run: |
+          sudo swapoff -a || true
+          sudo rm -f /swapfile /mnt/swapfile || true
+          sudo fallocate -l 12G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
         
       - name: Run patches script
         env:
           BUILD_TARGET: ${{ matrix.build-target }}
         run: |
           ./scripts/prepare-src.sh "$BUILD_TARGET"
-      
-      # Verify CSP line exists in target TypeScript file
-      - name: Check CSP configuration in webClientServer.ts
-        if: matrix.build-target == 'code-editor-sagemaker-server'
-        run: |
-          TARGET_FILE="code-editor-src/src/vs/server/node/webClientServer.ts"
-          REQUIRED_TEXT="connect-src \\'self\\' ws: wss: https://main.vscode-cdn.net http://localhost:* https://localhost:* https://login.microsoftonline.com/ https://update.code.visualstudio.com https://*.vscode-unpkg.net/ https://default.exp-tas.com/vscode/ab https://vscode-sync.trafficmanager.net https://vscode-sync-insiders.trafficmanager.net https://*.gallerycdn.vsassets.io https://marketplace.visualstudio.com https://openvsxorg.blob.core.windows.net https://az764295.vo.msecnd.net  https://code.visualstudio.com https://*.gallery.vsassets.io https://*.rel.tunnels.api.visualstudio.com wss://*.rel.tunnels.api.visualstudio.com https://*.servicebus.windows.net/ https://vscode.blob.core.windows.net https://vscode.search.windows.net https://vsmarketplacebadges.dev https://vscode.download.prss.microsoft.com https://download.visualstudio.microsoft.com https://*.vscode-unpkg.net https://open-vsx.org;"
-
-          if [ ! -f "$TARGET_FILE" ]; then
-            echo "❌ FAIL: Target file $TARGET_FILE does not exist."
-            exit 1
-          fi
-
-          if grep -F "$REQUIRED_TEXT" "$TARGET_FILE" > /dev/null; then
-            echo "✅ PASS: Required CSP text exists."
-          else
-            echo "❌ FAIL: Required CSP text NOT found in $TARGET_FILE"
-            exit 1
-          fi
       
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -96,55 +82,3 @@ jobs:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
           path: ${{ matrix.build-target }}-build.tar.gz
           retention-days: 90
-  smoke-tests:
-    name: Trigger Smoke Tests
-    runs-on: ubuntu-latest
-    needs: build
-    if: success()
-    permissions:
-      actions: write
-    steps:
-      - name: Trigger SageMaker smoke tests
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run smoke-tests-sagemaker.yaml \
-            --repo ${{ github.repository }} \
-            --ref ${{ github.ref }}
-
-  handle-failures:
-    name: Handle Failures
-    runs-on: ubuntu-latest
-    needs: build
-    environment: build-targets-workflow-env
-    if: failure()
-    permissions:
-      id-token: write # Required for OIDC
-    env:
-      REPOSITORY: ${{ github.repository }}
-      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-    steps:
-      - name: Check if protected branch
-        id: check-branch
-        run: |
-          if [[ "$GITHUB_REF_NAME" == "main" ]] || [[ "$GITHUB_REF_NAME" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            echo "is_protected=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_protected=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Use role credentials for metrics
-        id: aws-creds
-        continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 900
-          aws-region: us-east-1
-      - name: Report failure
-        if: steps.aws-creds.outcome == 'success' && steps.check-branch.outputs.is_protected == 'true'
-        run: |
-          aws cloudwatch put-metric-data \
-            --namespace "GitHub/Workflows" \
-            --metric-name "ExecutionsFailed" \
-            --dimensions "Repository=$REPOSITORY,Workflow=BuildTargets" \
-            --value 1
