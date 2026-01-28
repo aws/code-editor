@@ -1,0 +1,23 @@
+Fix SCM progress location error
+
+Since the SCM view container is removed by remove-source-control.diff,
+the ProgressLocation.Scm location no longer exists. This causes the error
+"Bad progress location: workbench.scm" when quickDiffModel tries to show
+progress. Change to ProgressLocation.Window which doesn't require a view.
+---
+ .../workbench/contrib/scm/browser/quickDiffModel.ts     | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: third-party-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
++++ third-party-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
+@@ -241,7 +241,7 @@ export class QuickDiffModel extends Disp
+ 	}
+ 
+ 	private diff(): Promise<{ allChanges: QuickDiffChange[]; changes: QuickDiffChange[]; mapChanges: Map<string, number[]> } | null> {
+-		return this.progressService.withProgress({ location: ProgressLocation.Scm, delay: 250 }, async () => {
++		return this.progressService.withProgress({ location: ProgressLocation.Window, delay: 250 }, async () => {
+ 			const originalURIs = await this.getQuickDiffsPromise();
+ 			if (this._disposed || this._model.isDisposed() || (originalURIs.length === 0)) {
+ 				// Disposed

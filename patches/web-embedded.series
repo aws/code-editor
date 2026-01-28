@@ -30,6 +30,7 @@ web-embedded/add-a-much-simpler-workbench.diff
 web-embedded/remove-terminal-in-code-oss.diff
 web-embedded/remove-ssh-remote-host-in-code-oss.diff
 web-embedded/remove-source-control.diff
+web-embedded/fix-scm-progress-location.diff
 web-embedded/only-have-debug-view-container.diff
 web-embedded/disable-user-tasks-and-fix-build-warnings.diff
 web-embedded/disable-file-actions-calls-accounts-merge-conflit.diff
