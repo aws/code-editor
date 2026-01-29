@@ -206,3 +206,76 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  	async createNewProfile(copyFrom?: URI | IUserDataProfile): Promise<void> {
  		await this.model?.createNewProfile(copyFrom);
  	}
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+@@ -977,28 +977,7 @@ export class UserDataProfilesEditorModel
+ 			() => this.userDataProfileManagementService.switchProfile(profileElement.profile)
+ 		));
+ 
+-		const copyFromProfileAction = disposables.add(new Action(
+-			'userDataProfile.copyFromProfile',
+-			localize('copyFromProfile', "Duplicate..."),
+-			ThemeIcon.asClassName(Codicon.copy),
+-			true, () => this.createNewProfile(profileElement.profile)
+-		));
+-
+-		const exportAction = disposables.add(new Action(
+-			'userDataProfile.export',
+-			localize('export', "Export..."),
+-			ThemeIcon.asClassName(Codicon.export),
+-			true,
+-			() => this.userDataProfileImportExportService.exportProfile(profile)
+-		));
+ 
+-		const deleteAction = disposables.add(new Action(
+-			'userDataProfile.delete',
+-			localize('delete', "Delete"),
+-			ThemeIcon.asClassName(Codicon.trash),
+-			true,
+-			() => this.removeProfile(profileElement.profile)
+-		));
+ 
+ 		const newWindowAction = disposables.add(new Action(
+ 			'userDataProfile.newWindow',
+@@ -1012,12 +991,6 @@ export class UserDataProfilesEditorModel
+ 		primaryActions.push(activateAction);
+ 		primaryActions.push(newWindowAction);
+ 		const secondaryActions: IAction[] = [];
+-		secondaryActions.push(copyFromProfileAction);
+-		secondaryActions.push(exportAction);
+-		if (!profile.isDefault) {
+-			secondaryActions.push(new Separator());
+-			secondaryActions.push(deleteAction);
+-		}
+ 
+ 		const profileElement = disposables.add(this.instantiationService.createInstance(UserDataProfileElement,
+ 			profile,
+@@ -1094,17 +1067,10 @@ export class UserDataProfilesEditorModel
+ 				() => this.previewNewProfile(cancellationTokenSource.token)
+ 			));
+ 			secondaryActions.push(previewProfileAction);
+-			const exportAction = disposables.add(new Action(
+-				'userDataProfile.export',
+-				localize('export', "Export..."),
+-				ThemeIcon.asClassName(Codicon.export),
+-				isUserDataProfile(copyFrom),
+-				() => this.exportNewProfile(cancellationTokenSource.token)
+-			));
+ 			this.newProfileElement = disposables.add(this.instantiationService.createInstance(NewProfileElement,
+ 				copyFrom,
+ 				[primaryActions, secondaryActions],
+-				[[cancelAction], [exportAction]],
++				[[cancelAction], []],
+ 			));
+ 			const updateCreateActionLabel = () => {
+ 				if (createAction.enabled) {
+@@ -1123,7 +1089,6 @@ export class UserDataProfilesEditorModel
+ 				}
+ 				if (e.name || e.copyFrom) {
+ 					updateCreateActionLabel();
+-					exportAction.enabled = isUserDataProfile(this.newProfileElement?.copyFrom);
+ 				}
+ 			}));
+ 			disposables.add(this.userDataProfilesService.onDidChangeProfiles((e) => {

@@ -13,7 +13,8 @@ This patch disables or modifies various features and functionalities related to 
  .../mergeEditor/browser/commands/commands.ts  |  30 +-
  .../browser/commands/devCommands.ts           |   2 +-
  .../browser/mergeEditor.contribution.ts       |   4 +-
- 11 files changed, 391 insertions(+), 500 deletions(-)
+ .../browser/userDataProfileActions.ts         |  21 -
+ 12 files changed, 391 insertions(+), 521 deletions(-)
 
 Index: third-party-src/extensions/merge-conflict/package.json
 ===================================================================
@@ -631,22 +632,31 @@ Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentic
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
-@@ -14,7 +14,6 @@ import { IWorkbenchContribution, Workben
- import { SignOutOfAccountAction } from './actions/signOutOfAccountAction.js';
+@@ -11,16 +11,10 @@ import { IExtensionManifest } from '../.
+ import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
+ import { Registry } from '../../../../platform/registry/common/platform.js';
+ import { IWorkbenchContribution, WorkbenchPhase, registerWorkbenchContribution2 } from '../../../common/contributions.js';
+-import { SignOutOfAccountAction } from './actions/signOutOfAccountAction.js';
  import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
  import { Extensions, IExtensionFeatureTableRenderer, IExtensionFeaturesRegistry, IRenderedData, IRowData, ITableData } from '../../../services/extensionManagement/common/extensionFeatures.js';
 -import { ManageTrustedExtensionsForAccountAction } from './actions/manageTrustedExtensionsForAccountAction.js';
- import { ManageAccountPreferencesForExtensionAction } from './actions/manageAccountPreferencesForExtensionAction.js';
+-import { ManageAccountPreferencesForExtensionAction } from './actions/manageAccountPreferencesForExtensionAction.js';
  import { IAuthenticationUsageService } from '../../../services/authentication/browser/authenticationUsageService.js';
- import { ManageAccountPreferencesForMcpServerAction } from './actions/manageAccountPreferencesForMcpServerAction.js';
-@@ -90,7 +89,6 @@ class AuthenticationContribution extends
+-import { ManageAccountPreferencesForMcpServerAction } from './actions/manageAccountPreferencesForMcpServerAction.js';
+-import { ManageTrustedMcpServersForAccountAction } from './actions/manageTrustedMcpServersForAccountAction.js';
+ import { RemoveDynamicAuthenticationProvidersAction } from './actions/manageDynamicAuthenticationProvidersAction.js';
+-import { ManageAccountsAction } from './actions/manageAccountsAction.js';
+ 
+ const codeExchangeProxyCommand = CommandsRegistry.registerCommand('workbench.getCodeExchangeProxyEndpoints', function (accessor, _) {
+ 	const environmentService = accessor.get(IBrowserWorkbenchEnvironmentService);
+@@ -88,6 +82,7 @@ class AuthenticationContribution extends
+ 	}
+ 
  	private _registerActions(): void {
- 		this._register(registerAction2(ManageAccountsAction));
- 		this._register(registerAction2(SignOutOfAccountAction));
--		this._register(registerAction2(ManageTrustedExtensionsForAccountAction));
- 		this._register(registerAction2(ManageAccountPreferencesForExtensionAction));
- 		this._register(registerAction2(ManageTrustedMcpServersForAccountAction));
- 		this._register(registerAction2(ManageAccountPreferencesForMcpServerAction));
++		this._register(registerAction2(RemoveDynamicAuthenticationProvidersAction));
+ 	}
+ }
+ 
 Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
@@ -886,3 +896,35 @@ Index: third-party-src/src/vs/workbench/browser/parts/editor/editor.contribution
  
  MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
  	group: '4_layouts',
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
+@@ -8,27 +8,6 @@ import { Categories } from '../../../../
+ import { Action2, registerAction2 } from '../../../../platform/actions/common/actions.js';
+ import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
+ import { IUserDataProfilesService } from '../../../../platform/userDataProfile/common/userDataProfile.js';
+-import { IHostService } from '../../../services/host/browser/host.js';
+-import { PROFILES_CATEGORY } from '../../../services/userDataProfile/common/userDataProfile.js';
+-
+-class CreateTransientProfileAction extends Action2 {
+-	static readonly ID = 'workbench.profiles.actions.createTemporaryProfile';
+-	static readonly TITLE = localize2('create temporary profile', "New Window with Temporary Profile");
+-	constructor() {
+-		super({
+-			id: CreateTransientProfileAction.ID,
+-			title: CreateTransientProfileAction.TITLE,
+-			category: PROFILES_CATEGORY,
+-			f1: true,
+-		});
+-	}
+-
+-	async run(accessor: ServicesAccessor) {
+-		accessor.get(IHostService).openWindow({ forceTempProfile: true });
+-	}
+-}
+-
+-registerAction2(CreateTransientProfileAction);
+ 
+ // Developer Actions
+ 
