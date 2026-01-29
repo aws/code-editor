@@ -20,3 +20,21 @@ Index: third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
  	}
  
  	private set accountsVisibilityPreference(value: boolean) {
+Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+@@ -88,13 +88,6 @@ class AuthenticationContribution extends
+ 	}
+ 
+ 	private _registerActions(): void {
+-		this._register(registerAction2(ManageAccountsAction));
+-		this._register(registerAction2(SignOutOfAccountAction));
+-		this._register(registerAction2(ManageTrustedExtensionsForAccountAction));
+-		this._register(registerAction2(ManageAccountPreferencesForExtensionAction));
+-		this._register(registerAction2(ManageTrustedMcpServersForAccountAction));
+-		this._register(registerAction2(ManageAccountPreferencesForMcpServerAction));
+-		this._register(registerAction2(RemoveDynamicAuthenticationProvidersAction));
+ 	}
+ }
+ 

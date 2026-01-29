@@ -388,7 +388,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  import { Disposable } from '../../../../base/common/lifecycle.js';
  import { IWorkbenchContribution } from '../../../common/contributions.js';
  import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
-@@ -14,88 +22,93 @@ import { IRemoteExplorerService } from '
+@@ -14,88 +22,95 @@ import { IRemoteExplorerService } from '
  import { ILogService } from '../../../../platform/log/common/log.js';
  import { IContextKeyService } from '../../../../platform/contextkey/common/contextkey.js';
  import { forwardedPortsFeaturesEnabled } from '../../../services/remote/common/tunnelModel.js';
@@ -399,6 +399,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  
  	static readonly ID = 'workbench.contrib.tunnelFactory';
 +	private _tunnelService: ITunnelService;
++	private _logService: ILogService;
  
  	constructor(
  		@ITunnelService tunnelService: ITunnelService,
@@ -431,6 +432,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 -				];
 -			}
 +		this._tunnelService = tunnelService;
++		this._logService = logService;
 +		// At this point we clearly want the ports view/features since we have a tunnel factory
 +		contextKeyService.createKey(forwardedPortsFeaturesEnabled.key, true);
 +		let privacyOptions = environmentService.options?.tunnelProvider?.features?.privacyOptions ?? [];
@@ -545,7 +547,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  	}
  
  	private async resolveExternalUri(uri: string): Promise<string> {
-@@ -105,4 +118,72 @@ export class TunnelFactoryContribution e
+@@ -105,4 +120,80 @@ export class TunnelFactoryContribution e
  			return uri;
  		}
  	}
@@ -587,34 +589,42 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 +		if (connection) {
 +			const channel = connection.getChannel('proxy');
 +
-+			const portAddedEvent = channel.listen('onPortAdded');
-+			portAddedEvent(async (port: any) => {
-+				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+				if (!tunnel) {
-+					await this._tunnelService.openTunnel(undefined, 'localhost', port);
++			this._register(channel.listen('onPortAdded')(async (port: any) => {
++				try {
++					const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++					if (!tunnel) {
++						await this._tunnelService.openTunnel(undefined, 'localhost', port);
++					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port added event', e);
 +				}
-+			});
++			}));
 +
-+			const portRemovedEvent = channel.listen('onPortRemoved');
-+			portRemovedEvent(async (port: any) => {
-+				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+				if (tunnel) {
-+					await this._tunnelService.closeTunnel('localhost', port);
++			this._register(channel.listen('onPortRemoved')(async (port: any) => {
++				try {
++					const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++					if (tunnel) {
++						await this._tunnelService.closeTunnel('localhost', port);
++					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port removed event', e);
 +				}
-+			});
++			}));
 +
-+			const portSyncedEvent = channel.listen('onPortSynced');
-+			portSyncedEvent(async (ports: any) => {
-+				if (Array.isArray(ports)) {
-+					for (const port of ports) {
-+						const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+						if (!tunnel) {
-+							await this._tunnelService.openTunnel(undefined, 'localhost', port);
++			this._register(channel.listen('onPortSynced')(async (ports: any) => {
++				try {
++					if (Array.isArray(ports)) {
++						for (const port of ports) {
++							const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++							if (!tunnel) {
++								await this._tunnelService.openTunnel(undefined, 'localhost', port);
++							}
 +						}
 +					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port synced event', e);
 +				}
-+			});
-+
++			}));
 +		}
 +	}
  }

@@ -2,7 +2,7 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- third-party-src.orig/src/vs/server/node/webClientServer.ts
 +++ third-party-src/src/vs/server/node/webClientServer.ts
-@@ -375,7 +375,7 @@ export class WebClientServer {
+@@ -438,7 +438,7 @@ export class WebClientServer {
  			`frame-src 'self' https://*.vscode-cdn.net data:;`,
  			'worker-src \'self\' data: blob:;',
  			'style-src \'self\' \'unsafe-inline\';',
