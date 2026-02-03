@@ -23,7 +23,7 @@ Index: code-editor-src/package.json
      "minimist": "^1.2.8",
      "native-is-elevated": "0.8.0",
      "native-keymap": "^3.3.5",
-@@ -225,9 +224,20 @@
+@@ -225,9 +224,19 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
@@ -43,7 +43,6 @@ Index: code-editor-src/package.json
 +    },
 +    "postcss": "^8.4.31",
 +    "playwright": "^1.55.1"
-+
    },
    "repository": {
      "type": "git",
