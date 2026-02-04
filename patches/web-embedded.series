@@ -18,6 +18,7 @@ common/build.diff
 common/integration.diff
 common/replace-gulp-untar.diff
 common/fix-ts-rootdir-webpack.diff
+common/remove-ask-vscode.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
