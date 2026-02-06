@@ -219,7 +219,7 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -800,8 +800,9 @@ configurationRegistry.registerConfigurat
+@@ -800,8 +800,8 @@ configurationRegistry.registerConfigurat
  		'chat.disableAIFeatures': {
  			type: 'boolean',
  			description: nls.localize('chat.disableAIFeatures', "Disable and hide built-in AI features provided by GitHub Copilot, including chat and inline suggestions."),
@@ -227,11 +227,10 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 -			scope: ConfigurationScope.WINDOW
 +			default: true,
 +			scope: ConfigurationScope.WINDOW,
-+			included: false
  		},
  		'chat.allowAnonymousAccess': { // TODO@bpasero remove me eventually
  			type: 'boolean',
-@@ -834,7 +835,8 @@ configurationRegistry.registerConfigurat
+@@ -837,7 +837,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -291,3 +290,19 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chatSetup/chatSetup
  					precondition: ContextKeyExpr.or(
  						ChatContextKeys.Setup.hidden,
  						ChatContextKeys.Setup.disabled,
+Index: third-party-src/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
++++ third-party-src/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
+@@ -259,11 +259,6 @@ export const tocData: ITOCEntry<string>
+ 					settings: ['mergeEditor.*']
+ 				},
+ 				{
+-					id: 'features/chat',
+-					label: localize('chat', 'Chat'),
+-					settings: ['chat.*', 'inlineChat.*', 'mcp']
+-				},
+-				{
+ 					id: 'features/issueReporter',
+ 					label: localize('issueReporter', 'Issue Reporter'),
+ 					settings: ['issueReporter.*'],
