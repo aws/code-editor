@@ -231,6 +231,16 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.allowAnonymousAccess': { // TODO@bpasero remove me eventually
  			type: 'boolean',
+@@ -834,7 +835,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.SubagentToolCustomAgents]: {
+ 			type: 'boolean',
 Index: third-party-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
