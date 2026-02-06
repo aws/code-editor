@@ -215,3 +215,69 @@ Index: third-party-src/src/vs/workbench/services/assignment/common/assignmentFil
  	}
  
  	private updateCopilotEntitlementInfo() {
+Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -800,8 +800,9 @@ configurationRegistry.registerConfigurat
+ 		'chat.disableAIFeatures': {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.disableAIFeatures', "Disable and hide built-in AI features provided by GitHub Copilot, including chat and inline suggestions."),
+-			default: false,
+-			scope: ConfigurationScope.WINDOW
++			default: true,
++			scope: ConfigurationScope.WINDOW,
++			included: false
+ 		},
+ 		'chat.allowAnonymousAccess': { // TODO@bpasero remove me eventually
+ 			type: 'boolean',
+Index: third-party-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
++++ third-party-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
+@@ -1199,14 +1199,11 @@ export class ChatEntitlementContext exte
+ 	}
+ 
+ 	private withConfiguration(state: IChatEntitlementContextState): IChatEntitlementContextState {
+-		if (this.configurationService.getValue(ChatEntitlementContext.CHAT_DISABLED_CONFIGURATION_KEY) === true) {
+-			return {
+-				...state,
+-				hidden: true // Setting always wins: if AI is disabled, set `hidden: true`
+-			};
+-		}
+-
+-		return state;
++		// Always hide AI features in this build
++		return {
++			...state,
++			hidden: true
++		};
+ 	}
+ 
+ 	update(context: { installed: boolean; disabled: boolean; untrusted: boolean }): Promise<void>;
+Index: third-party-src/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
++++ third-party-src/src/vs/workbench/contrib/chat/browser/actions/chatActions.ts
+@@ -713,7 +713,7 @@ export function registerChatActions() {
+ 			super({
+ 				id: 'workbench.action.chat.showExtensionsUsingCopilot',
+ 				title: localize2('showCopilotUsageExtensions', "Show Extensions using Copilot"),
+-				f1: true,
++				f1: false,
+ 				category: EXTENSIONS_CATEGORY,
+ 				precondition: ChatContextKeys.enabled
+ 			});
+Index: third-party-src/src/vs/workbench/contrib/chat/browser/chatSetup/chatSetupContributions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chatSetup/chatSetupContributions.ts
++++ third-party-src/src/vs/workbench/contrib/chat/browser/chatSetup/chatSetupContributions.ts
+@@ -184,7 +184,7 @@ export class ChatSetupContribution exten
+ 					id: CHAT_SETUP_ACTION_ID,
+ 					title: ChatSetupTriggerAction.CHAT_SETUP_ACTION_LABEL,
+ 					category: CHAT_CATEGORY,
+-					f1: true,
++					f1: false,
+ 					precondition: ContextKeyExpr.or(
+ 						ChatContextKeys.Setup.hidden,
+ 						ChatContextKeys.Setup.disabled,
