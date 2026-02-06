@@ -219,7 +219,475 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -800,8 +800,8 @@ configurationRegistry.registerConfigurat
+@@ -148,43 +148,51 @@ configurationRegistry.registerConfigurat
+ 			description: nls.localize('chat.fontSize', "Controls the font size in pixels in chat messages."),
+ 			default: 13,
+ 			minimum: 6,
+-			maximum: 100
++			maximum: 100,
++			included: false
+ 		},
+ 		'chat.fontFamily': {
+ 			type: 'string',
+ 			description: nls.localize('chat.fontFamily', "Controls the font family in chat messages."),
+-			default: 'default'
++			default: 'default',
++			included: false
+ 		},
+ 		'chat.editor.fontSize': {
+ 			type: 'number',
+ 			description: nls.localize('interactiveSession.editor.fontSize', "Controls the font size in pixels in chat codeblocks."),
+ 			default: isMacintosh ? 12 : 14,
++			included: false
+ 		},
+ 		'chat.editor.fontFamily': {
+ 			type: 'string',
+ 			description: nls.localize('interactiveSession.editor.fontFamily', "Controls the font family in chat codeblocks."),
+-			default: 'default'
++			default: 'default',
++			included: false
+ 		},
+ 		'chat.editor.fontWeight': {
+ 			type: 'string',
+ 			description: nls.localize('interactiveSession.editor.fontWeight', "Controls the font weight in chat codeblocks."),
+-			default: 'default'
++			default: 'default',
++			included: false
+ 		},
+ 		'chat.editor.wordWrap': {
+ 			type: 'string',
+ 			description: nls.localize('interactiveSession.editor.wordWrap', "Controls whether lines should wrap in chat codeblocks."),
+ 			default: 'off',
+-			enum: ['on', 'off']
++			enum: ['on', 'off'],
++			included: false
+ 		},
+ 		'chat.editor.lineHeight': {
+ 			type: 'number',
+ 			description: nls.localize('interactiveSession.editor.lineHeight', "Controls the line height in pixels in chat codeblocks. Use 0 to compute the line height from the font size."),
+-			default: 0
++			default: 0,
++			included: false
+ 		},
+ 		'chat.commandCenter.enabled': {
+ 			type: 'boolean',
+ 			markdownDescription: nls.localize('chat.commandCenter.enabled', "Controls whether the command center shows a menu for actions to control chat (requires {0}).", '`#window.commandCenter#`'),
+-			default: true
++			default: true,
++			included: false
+ 		},
+ 		'chat.implicitContext.enabled': {
+ 			type: 'object',
+@@ -201,52 +209,61 @@ configurationRegistry.registerConfigurat
+ 			},
+ 			default: {
+ 				'panel': 'always',
+-			}
++			},
++			included: false
+ 		},
+ 		'chat.implicitContext.suggestedContext': {
+ 			type: 'boolean',
+ 			markdownDescription: nls.localize('chat.implicitContext.suggestedContext', "Controls whether the new implicit context flow is shown. In Ask and Edit modes, the context will automatically be included. When using an agent, context will be suggested as an attachment. Selections are always included as context."),
+ 			default: true,
++			included: false
+ 		},
+ 		'chat.editing.autoAcceptDelay': {
+ 			type: 'number',
+ 			markdownDescription: nls.localize('chat.editing.autoAcceptDelay', "Delay after which changes made by chat are automatically accepted. Values are in seconds, `0` means disabled and `100` seconds is the maximum."),
+ 			default: 0,
+ 			minimum: 0,
+-			maximum: 100
++			maximum: 100,
++			included: false
+ 		},
+ 		'chat.editing.confirmEditRequestRemoval': {
+ 			type: 'boolean',
+ 			scope: ConfigurationScope.APPLICATION,
+ 			markdownDescription: nls.localize('chat.editing.confirmEditRequestRemoval', "Whether to show a confirmation before removing a request and its associated edits."),
+ 			default: true,
++			included: false
+ 		},
+ 		'chat.editing.confirmEditRequestRetry': {
+ 			type: 'boolean',
+ 			scope: ConfigurationScope.APPLICATION,
+ 			markdownDescription: nls.localize('chat.editing.confirmEditRequestRetry', "Whether to show a confirmation before retrying a request and its associated edits."),
+ 			default: true,
++			included: false
+ 		},
+ 		'chat.experimental.detectParticipant.enabled': {
+ 			type: 'boolean',
+ 			deprecationMessage: nls.localize('chat.experimental.detectParticipant.enabled.deprecated', "This setting is deprecated. Please use `chat.detectParticipant.enabled` instead."),
+ 			description: nls.localize('chat.experimental.detectParticipant.enabled', "Enables chat participant autodetection for panel chat."),
+-			default: null
++			default: null,
++			included: false
+ 		},
+ 		'chat.detectParticipant.enabled': {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.detectParticipant.enabled', "Enables chat participant autodetection for panel chat."),
+-			default: true
++			default: true,
++			included: false
+ 		},
+ 		'chat.renderRelatedFiles': {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.renderRelatedFiles', "Controls whether related files should be rendered in the chat input."),
+-			default: false
++			default: false,
++			included: false
+ 		},
+ 		'chat.notifyWindowOnConfirmation': {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.notifyWindowOnConfirmation', "Controls whether a chat session should present the user with an OS notification when a confirmation is needed while the window is not in focus. This includes a window badge as well as notification toast."),
+ 			default: true,
++			included: false
+ 		},
+ 		[ChatConfiguration.GlobalAutoApprove]: {
+ 			default: false,
+@@ -254,6 +271,7 @@ configurationRegistry.registerConfigurat
+ 			type: 'boolean',
+ 			scope: ConfigurationScope.APPLICATION_MACHINE,
+ 			tags: ['experimental'],
++			included: false,
+ 			policy: {
+ 				name: 'ChatToolsAutoApprove',
+ 				category: PolicyCategory.InteractiveSession,
+@@ -279,7 +297,8 @@ configurationRegistry.registerConfigurat
+ 			type: 'object',
+ 			additionalProperties: {
+ 				type: 'boolean',
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.AutoApprovedUrls]: {
+ 			default: {},
+@@ -296,7 +315,8 @@ configurationRegistry.registerConfigurat
+ 						}
+ 					}
+ 				]
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.EligibleForAutoApproval]: {
+ 			default: {},
+@@ -326,52 +346,61 @@ configurationRegistry.registerConfigurat
+ 						value: nls.localize('chat.tools.eligibleForAutoApproval', 'Controls which tools are eligible for automatic approval. Tools set to \'false\' will always present a confirmation and will never offer the option to auto-approve. The default behavior (or setting a tool to \'true\') may result in the tool offering auto-approval options.')
+ 					}
+ 				},
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.SuspendThrottling]: { // TODO@deepak1556 remove this once https://github.com/microsoft/vscode/issues/263554 is resolved.
+ 			type: 'boolean',
+ 			description: nls.localize('chat.suspendThrottling', "Controls whether background throttling is suspended when a chat request is in progress, allowing the chat session to continue even when the window is not in focus."),
+ 			default: true,
+-			tags: ['preview']
++			tags: ['preview'],
++			included: false,
+ 		},
+ 		'chat.sendElementsToChat.enabled': {
+ 			default: true,
+ 			description: nls.localize('chat.sendElementsToChat.enabled', "Controls whether elements can be sent to chat from the Simple Browser."),
+ 			type: 'boolean',
+-			tags: ['preview']
++			tags: ['preview'],
++			included: false,
+ 		},
+ 		'chat.sendElementsToChat.attachCSS': {
+ 			default: true,
+ 			markdownDescription: nls.localize('chat.sendElementsToChat.attachCSS', "Controls whether CSS of the selected element will be added to the chat. {0} must be enabled.", '`#chat.sendElementsToChat.enabled#`'),
+ 			type: 'boolean',
+-			tags: ['preview']
++			tags: ['preview'],
++			included: false,
+ 		},
+ 		'chat.sendElementsToChat.attachImages': {
+ 			default: true,
+ 			markdownDescription: nls.localize('chat.sendElementsToChat.attachImages', "Controls whether a screenshot of the selected element will be added to the chat. {0} must be enabled.", '`#chat.sendElementsToChat.enabled#`'),
+ 			type: 'boolean',
+-			tags: ['experimental']
++			tags: ['experimental'],
++			included: false,
+ 		},
+ 		'chat.undoRequests.restoreInput': {
+ 			default: true,
+ 			markdownDescription: nls.localize('chat.undoRequests.restoreInput', "Controls whether the input of the chat should be restored when an undo request is made. The input will be filled with the text of the request that was restored."),
+ 			type: 'boolean',
++			included: false,
+ 		},
+ 		'chat.editRequests': {
+ 			markdownDescription: nls.localize('chat.editRequests', "Enables editing of requests in the chat. This allows you to change the request content and resubmit it to the model."),
+ 			type: 'string',
+ 			enum: ['inline', 'hover', 'input', 'none'],
+ 			default: 'inline',
++			included: false,
+ 		},
+ 		[ChatConfiguration.ChatViewWelcomeEnabled]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.welcome.enabled', "Show welcome banner when chat is empty."),
++			included: false,
+ 		},
+ 		[ChatConfiguration.ChatViewSessionsEnabled]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.viewSessions.enabled', "Show chat agent sessions when chat is empty or to the side when chat view is wide enough."),
++			included: false,
+ 		},
+ 		[ChatConfiguration.ChatViewSessionsOrientation]: {
+ 			type: 'string',
+@@ -382,26 +411,31 @@ configurationRegistry.registerConfigurat
+ 			],
+ 			default: 'sideBySide',
+ 			description: nls.localize('chat.viewSessions.orientation', "Controls the orientation of the chat agent sessions view when it is shown alongside the chat."),
++			included: false,
+ 		},
+ 		[ChatConfiguration.ChatViewTitleEnabled]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.viewTitle.enabled', "Show the title of the chat above the chat in the chat view."),
++			included: false,
+ 		},
+ 		[ChatConfiguration.NotifyWindowOnResponseReceived]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.notifyWindowOnResponseReceived', "Controls whether a chat session should present the user with an OS notification when a response is received while the window is not in focus. This includes a window badge as well as notification toast."),
++			included: false,
+ 		},
+ 		'chat.checkpoints.enabled': {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.checkpoints.enabled', "Enables checkpoints in chat. Checkpoints allow you to restore the chat to a previous state."),
++			included: false,
+ 		},
+ 		'chat.checkpoints.showFileChanges': {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.checkpoints.showFileChanges', "Controls whether to show chat checkpoint file changes."),
+-			default: false
++			default: false,
++			included: false,
+ 		},
+ 		[mcpAccessConfig]: {
+ 			type: 'string',
+@@ -447,7 +481,8 @@ configurationRegistry.registerConfigurat
+ 						}
+ 					]
+ 				},
+-			}
++			},
++			included: false,
+ 		},
+ 		[mcpAutoStartConfig]: {
+ 			type: 'string',
+@@ -464,6 +499,7 @@ configurationRegistry.registerConfigurat
+ 				nls.localize('chat.mcp.autostart.newAndOutdated', "Automatically start new and outdated MCP servers that are not yet running.")
+ 			],
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[mcpServerSamplingSection]: {
+ 			type: 'object',
+@@ -491,6 +527,7 @@ configurationRegistry.registerConfigurat
+ 					}
+ 				}
+ 			},
++			included: false,
+ 		},
+ 		[AssistedTypes[AddConfigurationType.NuGetPackage].enabledConfigKey]: {
+ 			type: 'boolean',
+@@ -499,12 +536,14 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'startup'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.Edits2Enabled]: {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.edits2Enabled', "Enable the new Edits mode that is based on tool-calling. When this is enabled, models that don't support tool-calling are unavailable for Edits mode."),
+ 			default: false,
++			included: false,
+ 		},
+ 		[ChatConfiguration.ExtensionToolsEnabled]: {
+ 			type: 'boolean',
+@@ -520,7 +559,8 @@ configurationRegistry.registerConfigurat
+ 						value: nls.localize('chat.extensionToolsEnabled', "Enable using tools contributed by third-party extensions.")
+ 					}
+ 				},
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.AgentEnabled]: {
+ 			type: 'boolean',
+@@ -537,19 +577,22 @@ configurationRegistry.registerConfigurat
+ 						value: nls.localize('chat.agent.enabled.description', "When enabled, agent mode can be activated from chat and tools in agentic contexts with side effects can be used."),
+ 					}
+ 				}
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.EnableMath]: {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.mathEnabled.description', "Enable math rendering in chat responses using KaTeX."),
+ 			default: true,
+ 			tags: ['preview'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.ShowCodeBlockProgressAnimation]: {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.codeBlock.showProgressAnimation.description', "When applying edits, show a progress animation in the code block pill. If disabled, shows the progress percentage instead."),
+ 			default: true,
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		['chat.statusWidget.sku']: {
+ 			type: 'string',
+@@ -563,7 +606,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental', 'advanced'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[mcpDiscoverySection]: {
+ 			type: 'object',
+@@ -571,13 +615,14 @@ configurationRegistry.registerConfigurat
+ 			additionalProperties: false,
+ 			default: Object.fromEntries(allDiscoverySources.map(k => [k, false])),
+ 			markdownDescription: nls.localize('mcp.discovery.enabled', "Configures discovery of Model Context Protocol servers from configuration from various other applications."),
++			included: false,
+ 		},
+ 		[mcpGalleryServiceEnablementConfig]: {
+ 			type: 'boolean',
+ 			default: false,
+ 			tags: ['preview'],
+ 			description: nls.localize('chat.mcp.gallery.enabled', "Enables the default Marketplace for Model Context Protocol (MCP) servers."),
+-			included: product.quality === 'stable'
++			included: false,
+ 		},
+ 		[mcpGalleryServiceUrlConfig]: {
+ 			type: 'string',
+@@ -626,6 +671,7 @@ configurationRegistry.registerConfigurat
+ 					'/Users/vscode/repos/instructions': true,
+ 				},
+ 			],
++			included: false,
+ 		},
+ 		[PromptsConfig.PROMPT_LOCATIONS_KEY]: {
+ 			type: 'object',
+@@ -655,6 +701,7 @@ configurationRegistry.registerConfigurat
+ 					'/Users/vscode/repos/prompts': true,
+ 				},
+ 			],
++			included: false,
+ 		},
+ 		[PromptsConfig.MODE_LOCATION_KEY]: {
+ 			type: 'object',
+@@ -685,6 +732,7 @@ configurationRegistry.registerConfigurat
+ 					'/Users/vscode/repos/chatmodes': true,
+ 				},
+ 			],
++			included: false,
+ 		},
+ 		[PromptsConfig.USE_AGENT_MD]: {
+ 			type: 'boolean',
+@@ -693,7 +741,8 @@ configurationRegistry.registerConfigurat
+ 			default: true,
+ 			restricted: true,
+ 			disallowConfigurationDefault: true,
+-			tags: ['prompts', 'reusable prompts', 'prompt snippets', 'instructions']
++			tags: ['prompts', 'reusable prompts', 'prompt snippets', 'instructions'],
++			included: false,
+ 		},
+ 		[PromptsConfig.USE_NESTED_AGENT_MD]: {
+ 			type: 'boolean',
+@@ -702,7 +751,8 @@ configurationRegistry.registerConfigurat
+ 			default: false,
+ 			restricted: true,
+ 			disallowConfigurationDefault: true,
+-			tags: ['experimental', 'prompts', 'reusable prompts', 'prompt snippets', 'instructions']
++			tags: ['experimental', 'prompts', 'reusable prompts', 'prompt snippets', 'instructions'],
++			included: false,
+ 		},
+ 		[PromptsConfig.USE_AGENT_SKILLS]: {
+ 			type: 'boolean',
+@@ -711,7 +761,8 @@ configurationRegistry.registerConfigurat
+ 			default: false,
+ 			restricted: true,
+ 			disallowConfigurationDefault: true,
+-			tags: ['experimental', 'prompts', 'reusable prompts', 'prompt snippets', 'instructions']
++			tags: ['experimental', 'prompts', 'reusable prompts', 'prompt snippets', 'instructions'],
++			included: false,
+ 		},
+ 		[PromptsConfig.PROMPT_FILES_SUGGEST_KEY]: {
+ 			type: 'object',
+@@ -739,6 +790,7 @@ configurationRegistry.registerConfigurat
+ 					'document': 'resourceLangId == markdown'
+ 				}
+ 			],
++			included: false,
+ 		},
+ 		[ChatConfiguration.TodosShowWidget]: {
+ 			type: 'boolean',
+@@ -747,7 +799,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		'chat.todoListTool.writeOnly': {
+ 			type: 'boolean',
+@@ -756,7 +809,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		'chat.todoListTool.descriptionField': {
+ 			type: 'boolean',
+@@ -765,7 +819,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.ThinkingStyle]: {
+ 			type: 'string',
+@@ -778,12 +833,14 @@ configurationRegistry.registerConfigurat
+ 			],
+ 			description: nls.localize('chat.agent.thinkingStyle', "Controls how thinking is rendered."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.ThinkingGenerateTitles]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			description: nls.localize('chat.agent.thinking.generateTitles', "Controls whether to use an LLM to generate summary titles for thinking sections."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		'chat.agent.thinking.collapsedTools': {
+ 			type: 'string',
+@@ -796,12 +853,14 @@ configurationRegistry.registerConfigurat
+ 			],
+ 			markdownDescription: nls.localize('chat.agent.thinking.collapsedTools', "Controls how tool calls are displayed in relation to thinking sections."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
  		'chat.disableAIFeatures': {
  			type: 'boolean',
  			description: nls.localize('chat.disableAIFeatures', "Disable and hide built-in AI features provided by GitHub Copilot, including chat and inline suggestions."),
@@ -227,10 +695,38 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 -			scope: ConfigurationScope.WINDOW
 +			default: true,
 +			scope: ConfigurationScope.WINDOW,
++			included: false,
  		},
  		'chat.allowAnonymousAccess': { // TODO@bpasero remove me eventually
  			type: 'boolean',
-@@ -837,7 +837,8 @@ configurationRegistry.registerConfigurat
+@@ -810,7 +869,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.RestoreLastPanelSession]: { // TODO@bpasero review this setting later
+ 			type: 'boolean',
+@@ -819,13 +879,15 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.ExitAfterDelegation]: {
+ 			type: 'boolean',
+ 			description: nls.localize('chat.exitAfterDelegation', "Controls whether the chat panel automatically exits after delegating a request to another session."),
+ 			default: true,
+ 			tags: ['preview'],
++			included: false,
+ 		},
+ 		'chat.extensionUnification.enabled': {
+ 			type: 'boolean',
+@@ -834,13 +896,15 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -240,6 +736,13 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.SubagentToolCustomAgents]: {
  			type: 'boolean',
+ 			description: nls.localize('chat.subagentTool.customAgents', "Whether the runSubagent tool is able to use custom agents. When enabled, the tool can take the name of a custom agent, but it must be given the exact name of the agent."),
+ 			default: false,
+ 			tags: ['experimental'],
++			included: false,
+ 		}
+ 	}
+ });
 Index: third-party-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
