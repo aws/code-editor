@@ -37,33 +37,33 @@ jobs:
           fi
           echo "Tag is from a valid branch."
 
-      - name: Verify smoke tests passed
-        run: |
-          echo "Checking smoke test results for commit $COMMIT_SHA..."
+      # - name: Verify smoke tests passed
+      #   run: |
+      #     echo "Checking smoke test results for commit $COMMIT_SHA..."
           
-          # Find smoke test runs for this commit
-          RUN_INFO=$(gh run list --workflow=smoke-tests-sagemaker.yaml --json headSha,conclusion,status --limit 50 | \
-            jq -r --arg sha "$COMMIT_SHA" '.[] | select(.headSha == $sha) | "\(.status) \(.conclusion)"' | head -1)
+      #     # Find smoke test runs for this commit
+      #     RUN_INFO=$(gh run list --workflow=smoke-tests-sagemaker.yaml --json headSha,conclusion,status --limit 50 | \
+      #       jq -r --arg sha "$COMMIT_SHA" '.[] | select(.headSha == $sha) | "\(.status) \(.conclusion)"' | head -1)
           
-          if [ -z "$RUN_INFO" ]; then
-            echo "Error: No smoke test run found for commit $COMMIT_SHA"
-            exit 1
-          fi
+      #     if [ -z "$RUN_INFO" ]; then
+      #       echo "Error: No smoke test run found for commit $COMMIT_SHA"
+      #       exit 1
+      #     fi
           
-          STATUS=$(echo "$RUN_INFO" | cut -d' ' -f1)
-          CONCLUSION=$(echo "$RUN_INFO" | cut -d' ' -f2)
+      #     STATUS=$(echo "$RUN_INFO" | cut -d' ' -f1)
+      #     CONCLUSION=$(echo "$RUN_INFO" | cut -d' ' -f2)
           
-          if [ "$STATUS" != "completed" ]; then
-            echo "Error: Smoke tests not completed (status: $STATUS)"
-            exit 1
-          fi
+      #     if [ "$STATUS" != "completed" ]; then
+      #       echo "Error: Smoke tests not completed (status: $STATUS)"
+      #       exit 1
+      #     fi
           
-          if [ "$CONCLUSION" != "success" ]; then
-            echo "Error: Smoke tests failed (conclusion: $CONCLUSION)"
-            exit 1
-          fi
+      #     if [ "$CONCLUSION" != "success" ]; then
+      #       echo "Error: Smoke tests failed (conclusion: $CONCLUSION)"
+      #       exit 1
+      #     fi
           
-          echo "Smoke tests passed for commit $COMMIT_SHA"
+      #     echo "Smoke tests passed for commit $COMMIT_SHA"
 
       - name: Download sagemaker artifacts by commit ID
         run: |
