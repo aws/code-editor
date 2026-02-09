@@ -743,6 +743,14 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		}
  	}
  });
+@@ -964,6 +1028,7 @@ class ChatAgentSettingContribution exten
+ 							type: 'number',
+ 							markdownDescription: nls.localize('chat.agent.maxRequests', "The maximum number of requests to allow per-turn when using an agent. When the limit is reached, will ask to confirm to continue."),
+ 							default: defaultValue,
++							included: false,
+ 						},
+ 					}
+ 				};
 Index: third-party-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
@@ -809,3 +817,322 @@ Index: third-party-src/src/vs/workbench/contrib/preferences/browser/settingsLayo
  					id: 'features/issueReporter',
  					label: localize('issueReporter', 'Issue Reporter'),
  					settings: ['issueReporter.*'],
+Index: third-party-src/src/vs/workbench/contrib/inlineChat/common/inlineChat.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/inlineChat/common/inlineChat.ts
++++ third-party-src/src/vs/workbench/contrib/inlineChat/common/inlineChat.ts
+@@ -28,12 +28,14 @@ Registry.as<IConfigurationRegistry>(Exte
+ 		[InlineChatConfigKeys.FinishOnType]: {
+ 			description: localize('finishOnType', "Whether to finish an inline chat session when typing outside of changed regions."),
+ 			default: false,
+-			type: 'boolean'
++			type: 'boolean',
++			included: false
+ 		},
+ 		[InlineChatConfigKeys.HoldToSpeech]: {
+ 			description: localize('holdToSpeech', "Whether holding the inline chat keybinding will automatically enable speech recognition."),
+ 			default: true,
+-			type: 'boolean'
++			type: 'boolean',
++			included: false
+ 		},
+ 		[InlineChatConfigKeys.EnableV2]: {
+ 			description: localize('enableV2', "Whether to use the next version of inline chat."),
+@@ -42,7 +44,8 @@ Registry.as<IConfigurationRegistry>(Exte
+ 			tags: ['preview'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false
+ 		},
+ 		[InlineChatConfigKeys.notebookAgent]: {
+ 			markdownDescription: localize('notebookAgent', "Enable agent-like behavior for inline chat widget in notebooks."),
+@@ -51,7 +54,8 @@ Registry.as<IConfigurationRegistry>(Exte
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'startup'
+-			}
++			},
++			included: false
+ 		}
+ 	}
+ });
+Index: third-party-src/src/vs/workbench/contrib/accessibility/browser/accessibilityConfiguration.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/accessibility/browser/accessibilityConfiguration.ts
++++ third-party-src/src/vs/workbench/contrib/accessibility/browser/accessibilityConfiguration.ts
+@@ -136,15 +136,18 @@ const configuration: IConfigurationNode
+ 		},
+ 		[AccessibilityVerbositySettingId.Chat]: {
+ 			description: localize('verbosity.chat.description', 'Provide information about how to access the chat help menu when the chat input is focused.'),
+-			...baseVerbosityProperty
++			...baseVerbosityProperty,
++			included: false
+ 		},
+ 		[AccessibilityVerbositySettingId.InlineChat]: {
+ 			description: localize('verbosity.interactiveEditor.description', 'Provide information about how to access the inline editor chat accessibility help menu and alert with hints that describe how to use the feature when the input is focused.'),
+-			...baseVerbosityProperty
++			...baseVerbosityProperty,
++			included: false
+ 		},
+ 		[AccessibilityVerbositySettingId.TerminalChatOutput]: {
+ 			description: localize('verbosity.terminalChatOutput.description', 'Provide information about how to open the chat terminal output in the Accessible View.'),
+-			...baseVerbosityProperty
++			...baseVerbosityProperty,
++			included: false
+ 		},
+ 		[AccessibilityVerbositySettingId.InlineCompletions]: {
+ 			description: localize('verbosity.inlineCompletions.description', 'Provide information about how to access the inline completions hover and Accessible View.'),
+@@ -535,7 +538,8 @@ const configuration: IConfigurationNode
+ 					'description': localize('accessibility.signals.chatEditModifiedFile.sound', "Plays a sound when revealing a file with changes from chat edits"),
+ 					...soundFeatureBase
+ 				}
+-			}
++			},
++			included: false
+ 		},
+ 		'accessibility.signals.notebookCellCompleted': {
+ 			...signalFeatureBase,
+@@ -595,7 +599,8 @@ const configuration: IConfigurationNode
+ 					'description': localize('accessibility.signals.chatRequestSent.announcement', "Announces when a chat request is made."),
+ 					...announcementFeatureBase
+ 				},
+-			}
++			},
++			included: false
+ 		},
+ 		'accessibility.signals.chatResponseReceived': {
+ 			...defaultNoAnnouncement,
+@@ -605,7 +610,8 @@ const configuration: IConfigurationNode
+ 					'description': localize('accessibility.signals.chatResponseReceived.sound', "Plays a sound on when the response has been received."),
+ 					...soundFeatureBase
+ 				},
+-			}
++			},
++			included: false
+ 		},
+ 		'accessibility.signals.codeActionTriggered': {
+ 			...defaultNoAnnouncement,
+@@ -784,7 +790,8 @@ const configuration: IConfigurationNode
+ 				'sound': 'auto',
+ 				'announcement': 'auto'
+ 			},
+-			tags: ['accessibility']
++			tags: ['accessibility'],
++			included: false
+ 		},
+ 		'accessibility.underlineLinks': {
+ 			'type': 'boolean',
+@@ -815,12 +822,14 @@ const configuration: IConfigurationNode
+ 		'accessibility.openChatEditedFiles': {
+ 			'type': 'boolean',
+ 			'default': false,
+-			'markdownDescription': localize('accessibility.openChatEditedFiles', "Controls whether files should be opened when the chat agent has applied edits to them.")
++			'markdownDescription': localize('accessibility.openChatEditedFiles', "Controls whether files should be opened when the chat agent has applied edits to them."),
++			included: false
+ 		},
+ 		'accessibility.verboseChatProgressUpdates': {
+ 			'type': 'boolean',
+ 			'default': true,
+-			'markdownDescription': localize('accessibility.verboseChatProgressUpdates', "Controls whether verbose progress announcements should be made when a chat request is in progress, including information like searched text for <search term> with X results, created file <file_name>, or read file <file path>.")
++			'markdownDescription': localize('accessibility.verboseChatProgressUpdates', "Controls whether verbose progress announcements should be made when a chat request is in progress, including information like searched text for <search term> with X results, created file <file_name>, or read file <file path>."),
++			included: false
+ 		}
+ 	}
+ };
+@@ -857,7 +866,8 @@ export function registerAccessibilityCon
+ 			[AccessibilityWorkbenchSettingId.VerboseChatProgressUpdates]: {
+ 				'type': 'boolean',
+ 				'default': true,
+-				'markdownDescription': localize('accessibility.verboseChatProgressUpdates', "Controls whether verbose progress announcements should be made when a chat request is in progress, including information like searched text for <search term> with X results, created file <file_name>, or read file <file path>.")
++				'markdownDescription': localize('accessibility.verboseChatProgressUpdates', "Controls whether verbose progress announcements should be made when a chat request is in progress, including information like searched text for <search term> with X results, created file <file_name>, or read file <file path>."),
++				included: false
+ 			}
+ 		}
+ 	});
+Index: third-party-src/src/vs/workbench/contrib/terminalContrib/chatAgentTools/common/terminalChatAgentToolsConfiguration.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/terminalContrib/chatAgentTools/common/terminalChatAgentToolsConfiguration.ts
++++ third-party-src/src/vs/workbench/contrib/terminalContrib/chatAgentTools/common/terminalChatAgentToolsConfiguration.ts
+@@ -70,6 +70,7 @@ export const terminalChatAgentToolsConfi
+ 		description: localize('autoApproveMode.description', "Controls whether to allow auto approval in the run in terminal tool."),
+ 		type: 'boolean',
+ 		default: true,
++		included: false,
+ 		policy: {
+ 			name: 'ChatToolsTerminalEnableAutoApprove',
+ 			category: PolicyCategory.IntegratedTerminal,
+@@ -83,6 +84,7 @@ export const terminalChatAgentToolsConfi
+ 		}
+ 	},
+ 	[TerminalChatAgentToolsSettingId.AutoApprove]: {
++		included: false,
+ 		markdownDescription: [
+ 			localize('autoApprove.description.intro', "A list of commands or regular expressions that control whether the run in terminal tool commands require explicit approval. These will be matched against the start of a command. A regular expression can be provided by wrapping the string in {0} characters followed by optional flags such as {1} for case-insensitivity.", '`/`', '`i`'),
+ 			localize('autoApprove.description.values', "Set to {0} to automatically approve commands, {1} to always require explicit approval or {2} to unset the value.", '`true`', '`false`', '`null`'),
+@@ -359,6 +361,7 @@ export const terminalChatAgentToolsConfi
+ 		default: false,
+ 		tags: ['experimental'],
+ 		markdownDescription: localize('ignoreDefaultAutoApproveRules.description', "Whether to ignore the built-in default auto-approve rules used by the run in terminal tool as defined in {0}. When this setting is enabled, the run in terminal tool will ignore any rule that comes from the default set but still follow rules defined in the user, remote and workspace settings. Use this setting at your own risk; the default auto-approve rules are designed to protect you against running dangerous commands.", `\`#${TerminalChatAgentToolsSettingId.AutoApprove}#\``),
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.AutoApproveWorkspaceNpmScripts]: {
+ 		restricted: true,
+@@ -368,6 +371,7 @@ export const terminalChatAgentToolsConfi
+ 		default: true,
+ 		tags: ['experimental'],
+ 		markdownDescription: localize('autoApproveWorkspaceNpmScripts.description', "Whether to automatically approve npm, yarn, and pnpm run commands when the script is defined in a workspace package.json file. Since the workspace is trusted, scripts defined in package.json are considered safe to run without explicit approval."),
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.BlockDetectedFileWrites]: {
+ 		type: 'string',
+@@ -380,6 +384,7 @@ export const terminalChatAgentToolsConfi
+ 		default: 'outsideWorkspace',
+ 		tags: ['experimental'],
+ 		markdownDescription: localize('blockFileWrites.description', "Controls whether detected file write operations are blocked in the run in terminal tool. When detected, this will require explicit approval regardless of whether the command would normally be auto approved. Note that this cannot detect all possible methods of writing files, this is what is currently detected:\n\n- File redirection (detected via the bash or PowerShell tree sitter grammar)"),
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.ShellIntegrationTimeout]: {
+ 		markdownDescription: localize('shellIntegrationTimeout.description', "Configures the duration in milliseconds to wait for shell integration to be detected when the run in terminal tool launches a new terminal. Set to `0` to wait the minimum time, the default value `-1` means the wait time is variable based on the value of {0} and whether it's a remote window. A large value can be useful if your shell starts very slowly and a low value if you're intentionally not using shell integration.", `\`#${TerminalSettingId.ShellIntegrationEnabled}#\``),
+@@ -404,7 +409,8 @@ export const terminalChatAgentToolsConfi
+ 					path: '${1}'
+ 				}
+ 			}
+-		]
++		],
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.TerminalProfileMacOs]: {
+ 		restricted: true,
+@@ -421,7 +427,8 @@ export const terminalChatAgentToolsConfi
+ 					path: '${1}'
+ 				}
+ 			}
+-		]
++		],
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.TerminalProfileWindows]: {
+ 		restricted: true,
+@@ -438,13 +445,15 @@ export const terminalChatAgentToolsConfi
+ 					path: '${1}'
+ 				}
+ 			}
+-		]
++		],
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.AutoReplyToPrompts]: {
+ 		type: 'boolean',
+ 		default: false,
+ 		tags: ['experimental'],
+ 		markdownDescription: localize('autoReplyToPrompts.key', "Whether to automatically respond to prompts in the terminal such as `Confirm? y/n`. This is an experimental feature and may not work in all scenarios."),
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.OutputLocation]: {
+ 		markdownDescription: localize('outputLocation.description', "Where to show the output from the run in terminal tool session."),
+@@ -458,7 +467,8 @@ export const terminalChatAgentToolsConfi
+ 		tags: ['experimental'],
+ 		experiment: {
+ 			mode: 'auto'
+-		}
++		},
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.PreventShellHistory]: {
+ 		type: 'boolean',
+@@ -470,6 +480,7 @@ export const terminalChatAgentToolsConfi
+ 			`- \`fish\`: ${localize('preventShellHistory.description.fish', "Sets `fish_private_mode` to prevent any command from entering history")}`,
+ 			`- \`pwsh\`: ${localize('preventShellHistory.description.pwsh', "Sets a custom history handler via PSReadLine's `AddToHistoryHandler` to prevent any command from entering history")}`,
+ 		].join('\n'),
++		included: false,
+ 	}
+ };
+ 
+Index: third-party-src/src/vs/platform/configuration/common/configurationRegistry.ts
+===================================================================
+--- third-party-src.orig/src/vs/platform/configuration/common/configurationRegistry.ts
++++ third-party-src/src/vs/platform/configuration/common/configurationRegistry.ts
+@@ -508,8 +508,7 @@ class ConfigurationRegistry extends Disp
+ 			source,
+ 			defaultValueSource: source
+ 		};
+-		this.configurationProperties[key] = property;
+-		this.defaultLanguageConfigurationOverridesNode.properties![key] = property;
++		this.excludedConfigurationProperties[key] = property;
+ 	}
+ 
+ 	private mergeDefaultConfigurationsForOverrideIdentifier(overrideIdentifier: string, configurationValueObject: IStringDictionary<unknown>, valueSource: IExtensionInfo | undefined, existingDefaultOverride: IConfigurationDefaultOverrideValue | undefined): IConfigurationDefaultOverrideValue | undefined {
+Index: third-party-src/src/vs/workbench/browser/workbench.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/browser/workbench.contribution.ts
++++ third-party-src/src/vs/workbench/browser/workbench.contribution.ts
+@@ -495,13 +495,15 @@ const registry = Registry.as<IConfigurat
+ 				enumDescriptions: [
+ 					localize('askChatLocation.chatView', "Ask chat questions in the Chat view."),
+ 					localize('askChatLocation.quickChat', "Ask chat questions in Quick Chat.")
+-				]
++				],
++				included: false
+ 			},
+ 			'workbench.commandPalette.showAskInChat': {
+ 				'type': 'boolean',
+ 				tags: ['experimental'],
+ 				'description': localize('showAskInChat', "Controls whether the command palette shows 'Ask in Chat' option at the bottom."),
+-				'default': true
++				'default': true,
++				included: false
+ 			},
+ 			'workbench.commandPalette.experimental.enableNaturalLanguageSearch': {
+ 				'type': 'boolean',
+@@ -658,6 +660,7 @@ const registry = Registry.as<IConfigurat
+ 				'type': 'boolean',
+ 				'default': true,
+ 				'description': localize('settings.showAISearchToggle', "Controls whether the AI search results toggle is shown in the search bar in the Settings editor after doing a search and once AI search results are available."),
++				included: false
+ 			},
+ 			'workbench.hover.delay': {
+ 				'type': 'number',
+Index: third-party-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetry.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/editTelemetry/browser/editTelemetry.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetry.contribution.ts
+@@ -37,7 +37,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false
+ 		},
+ 		[EDIT_TELEMETRY_DETAILS_SETTING_ID]: {
+ 			markdownDescription: localize('telemetry.editStats.detailed.enabled', "Controls whether to enable telemetry for detailed edit statistics (only sends statistics if general telemetry is enabled)."),
+Index: third-party-src/src/vs/workbench/contrib/notebook/browser/notebook.contribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/notebook/browser/notebook.contribution.ts
++++ third-party-src/src/vs/workbench/contrib/notebook/browser/notebook.contribution.ts
+@@ -1271,7 +1271,8 @@ configurationRegistry.registerConfigurat
+ 		[NotebookSetting.cellGenerate]: {
+ 			markdownDescription: nls.localize('notebook.cellGenerate', "Enable experimental generate action to create code cell with inline chat enabled."),
+ 			type: 'boolean',
+-			default: true
++			default: true,
++			included: false
+ 		},
+ 		[NotebookSetting.notebookVariablesView]: {
+ 			markdownDescription: nls.localize('notebook.VariablesView.description', "Enable the experimental notebook variables view within the debug panel."),
+Index: third-party-src/extensions/mermaid-chat-features/package.json
+===================================================================
+--- third-party-src.orig/extensions/mermaid-chat-features/package.json
++++ third-party-src/extensions/mermaid-chat-features/package.json
+@@ -36,7 +36,8 @@
+           "scope": "application",
+           "tags": [
+             "experimental"
+-          ]
++          ],
++          "included": false
+         }
+       }
+     },
