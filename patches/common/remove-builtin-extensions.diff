@@ -1136,3 +1136,16 @@ Index: third-party-src/extensions/mermaid-chat-features/package.json
          }
        }
      },
+Index: third-party-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
++++ third-party-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
+@@ -35,7 +35,7 @@ export class EditTelemetryContribution e
+ 			r.store.add(this._instantiationService.createInstance(EditTrackingFeature, workspace.read(r), annotatedDocuments.read(r)));
+ 		}));
+ 
+-		const aiStatsEnabled = observableConfigValue(AI_STATS_SETTING_ID, true, this._configurationService);
++		const aiStatsEnabled = observableConfigValue(AI_STATS_SETTING_ID, false, this._configurationService);
+ 		this._register(autorun(r => {
+ 			const enabled = aiStatsEnabled.read(r);
+ 			if (!enabled) {
