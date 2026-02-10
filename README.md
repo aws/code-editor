@@ -18,9 +18,10 @@ See [RELEASE](RELEASE.md) for more information.
 
 The following table provides the mapping between Code Editor releases and their corresponding [Code-OSS](https://github.com/microsoft/vscode/) base versions:
 
-| Code Editor Version | Code-OSS Base Version |
-|---------------------|-----------------------|
-| 1.0.x               | 1.101.2               |
+| Code Editor Version | Code-OSS Base Version | Support Status |
+|---------------------|----------------------|----------------|
+| 1.0.x               | 1.101.2              | ✅ Actively Supported |
+| 1.1.x               | 1.108.2              | ✅ Actively Supported |
 
 
 ## Troubleshooting and Feedback
