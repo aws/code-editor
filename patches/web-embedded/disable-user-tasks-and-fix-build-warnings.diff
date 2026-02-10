@@ -10,7 +10,7 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.ts
-@@ -50,16 +50,6 @@ import { ITerminalInstance, ITerminalSer
+@@ -48,16 +48,6 @@ import { ITerminalInstance, ITerminalSer
  const workbenchRegistry = Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench);
  workbenchRegistry.registerWorkbenchContribution(RunAutomaticTasks, LifecyclePhase.Eventually);
  
@@ -27,7 +27,7 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
  export class TaskStatusBarContributions extends Disposable implements IWorkbenchContribution {
  	private _runningTasksStatusItem: IStatusbarEntryAccessor | undefined;
  	private _activeTasksCount: number = 0;
-@@ -240,138 +230,9 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -238,146 +228,10 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  });
  
  
@@ -75,6 +75,14 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
 -	command: {
 -		id: 'workbench.action.tasks.restartTask',
 -		title: nls.localize2('RestartTaskAction.label', "Restart Running Task"),
+-		category: TASKS_CATEGORY
+-	},
+-	when: TaskExecutionSupportedContext
+-});
+-MenuRegistry.appendMenuItem(MenuId.CommandPalette, {
+-	command: {
+-		id: RerunAllRunningTasksCommandId,
+-		title: nls.localize2('RerunAllRunningTasksAction.label', "Rerun All Running Tasks"),
 -		category: TASKS_CATEGORY
 -	},
 -	when: TaskExecutionSupportedContext
@@ -134,7 +142,7 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
 -	},
 -	when: TaskExecutionSupportedContext
 -});
--
+ 
  class UserTasksGlobalActionContribution extends Disposable implements IWorkbenchContribution {
 -
  	constructor() {
@@ -166,7 +174,7 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
  	}
  }
  workbenchRegistry.registerWorkbenchContribution(UserTasksGlobalActionContribution, LifecyclePhase.Restored);
-@@ -379,12 +240,6 @@ workbenchRegistry.registerWorkbenchContr
+@@ -385,12 +239,6 @@ workbenchRegistry.registerWorkbenchContr
  // MenuRegistry.addCommand( { id: 'workbench.action.tasks.rebuild', title: nls.localize('RebuildAction.label', 'Run Rebuild Task'), category: tasksCategory });
  // MenuRegistry.addCommand( { id: 'workbench.action.tasks.clean', title: nls.localize('CleanAction.label', 'Run Clean Task'), category: tasksCategory });
  
@@ -179,7 +187,7 @@ Index: third-party-src/src/vs/workbench/contrib/tasks/browser/task.contribution.
  
  // Tasks Output channel. Register it before using it in Task Service.
  const outputChannelRegistry = Registry.as<IOutputChannelRegistry>(OutputExt.OutputChannels);
-@@ -392,16 +247,7 @@ outputChannelRegistry.registerChannel({
+@@ -398,16 +246,7 @@ outputChannelRegistry.registerChannel({
  
  
  // Register Quick Access

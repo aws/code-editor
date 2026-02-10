@@ -2,15 +2,17 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 +++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -714,22 +714,6 @@ registerWorkbenchContribution2(ChatTrans
- registerWorkbenchContribution2(ChatContextContributions.ID, ChatContextContributions, WorkbenchPhase.AfterRestored);
- registerWorkbenchContribution2(ChatResponseResourceFileSystemProvider.ID, ChatResponseResourceFileSystemProvider, WorkbenchPhase.AfterRestored);
+@@ -1198,26 +1198,6 @@ registerWorkbenchContribution2(UserToolS
+ registerWorkbenchContribution2(PromptLanguageFeaturesProvider.ID, PromptLanguageFeaturesProvider, WorkbenchPhase.Eventually);
+ registerWorkbenchContribution2(ChatWindowNotifier.ID, ChatWindowNotifier, WorkbenchPhase.AfterRestored);
  
 -registerChatActions();
+-registerChatAccessibilityActions();
 -registerChatCopyActions();
 -registerChatCodeBlockActions();
 -registerChatCodeCompareBlockActions();
 -registerChatFileTreeActions();
+-registerChatPromptNavigationActions();
 -registerChatTitleActions();
 -registerChatExecuteActions();
 -registerQuickChatActions();
@@ -20,8 +22,10 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 -registerChatContextActions();
 -registerChatDeveloperActions();
 -registerChatEditorActions();
+-registerChatElicitationActions();
 -registerChatToolActions();
--
+-registerLanguageModelActions();
+-registerAction2(ConfigureToolSets);
  registerEditorFeature(ChatPasteProvidersFeature);
  
  

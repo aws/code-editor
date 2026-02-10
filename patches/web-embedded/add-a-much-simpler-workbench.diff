@@ -11,11 +11,12 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -3,594 +3,14 @@
+@@ -3,599 +3,14 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
 -import { isStandalone } from '../../../base/browser/browser.js';
+-import { addDisposableListener } from '../../../base/browser/dom.js';
  import { mainWindow } from '../../../base/browser/window.js';
 -import { VSBuffer, decodeBase64, encodeBase64 } from '../../../base/common/buffer.js';
 -import { Emitter } from '../../../base/common/event.js';
@@ -144,7 +145,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 -		const keyData = new Uint8Array(AESConstants.KEY_LENGTH / 8);
 -
 -		for (let i = 0; i < keyData.byteLength; i++) {
--			keyData[i] = clientKey[i]! ^ serverKey[i]!;
+-			keyData[i] = clientKey[i] ^ serverKey[i];
 -		}
 -
 -		return mainWindow.crypto.subtle.importKey(
@@ -236,6 +237,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 -
 -	private loadAuthSessionFromElement(): Record<string, string> {
 -		let authSessionInfo: (AuthenticationSessionInfo & { scopes: string[][] }) | undefined;
+-		// eslint-disable-next-line no-restricted-syntax
 -		const authSessionElement = mainWindow.document.getElementById('vscode-workbench-auth-session');
 -		const authSessionElementAttribute = authSessionElement ? authSessionElement.getAttribute('data-settings') : undefined;
 -		if (authSessionElementAttribute) {
@@ -287,6 +289,11 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 -		delete secrets[key];
 -		this.secretsPromise = Promise.resolve(secrets);
 -		this.save();
+-	}
+-
+-	async keys(): Promise<string[]> {
+-		const secrets = await this.secretsPromise;
+-		return Object.keys(secrets) || [];
 -	}
 -
 -	private async save(): Promise<void> {
@@ -354,9 +361,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 -			return;
 -		}
 -
--		const fn = () => this.onDidChangeLocalStorage();
--		mainWindow.addEventListener('storage', fn);
--		this.onDidChangeLocalStorageDisposable = { dispose: () => mainWindow.removeEventListener('storage', fn) };
+-		this.onDidChangeLocalStorageDisposable = addDisposableListener(mainWindow, 'storage', () => this.onDidChangeLocalStorage());
 -	}
 -
 -	private stopListening(): void {
@@ -607,10 +612,11 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  
  (async function () {
  	const start = Date.now();
-@@ -600,14 +20,21 @@ function readCookie(name: string): strin
- 	const vsCodeCdn = urlSearch.get('vsCodeCdn');
+@@ -605,15 +20,21 @@ function readCookie(name: string): strin
+ 	const vsCodeCdn = urlSearch.get('vsCodeCdn') ?? mainWindow.location.origin;
  	const isDevo = urlSearch.get('isDevo') === 'true';
  	// Find config by checking for DOM
+-	// eslint-disable-next-line no-restricted-syntax
 +	let config: IWorkbenchConstructionOptions & {
 +		folderUri?: UriComponents;
 +		workspaceUri?: UriComponents;
@@ -634,10 +640,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  	}
  
  	if(!isDevo) {
-@@ -618,21 +45,43 @@ function readCookie(name: string): strin
+@@ -623,21 +44,43 @@ function readCookie(name: string): strin
+ 			webviewEndpoint: vsCodeCdn + '/out/vs/workbench/contrib/webview/browser/pre/',
  		};
  	}
- 
 -	const secretStorageKeyPath = readCookie('vscode-secret-key-path');
 -	const secretStorageCrypto = secretStorageKeyPath && ServerKeyedAESCrypto.supported()
 -		? new ServerKeyedAESCrypto(secretStorageKeyPath) : new TransparentCrypto();

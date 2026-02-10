@@ -1,99 +1,93 @@
 Revise Help->About Modal content and buttons
 
 ---
- .../parts/dialogs/dialog.web.contribution.ts  |  2 +-
- .../browser/parts/dialogs/dialogHandler.ts    | 26 +++++--------------
- .../parts/dialogs/dialog.contribution.ts      |  2 +-
- 3 files changed, 8 insertions(+), 22 deletions(-)
+ src/vs/platform/dialogs/browser/dialog.ts                         | 18 ++++--------------
+ src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts |  2 +-
+ src/vs/workbench/browser/parts/dialogs/dialogHandler.ts           | 13 +++----------
+ 3 files changed, 9 insertions(+), 24 deletions(-)
 
 Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 +++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
-@@ -34,12 +34,11 @@ export class DialogHandlerContribution e
- 		@IKeybindingService keybindingService: IKeybindingService,
- 		@IInstantiationService instantiationService: IInstantiationService,
- 		@IProductService productService: IProductService,
--		@IClipboardService clipboardService: IClipboardService,
- 		@IOpenerService openerService: IOpenerService
- 	) {
- 		super();
- 
--		this.impl = new Lazy(() => new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService, openerService));
-+		this.impl = new Lazy(() => new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, openerService));
- 
- 		this.model = (this.dialogService as DialogService).model;
- 
+@@ -71,7 +71,7 @@ export class DialogHandlerContribution e
+ 					result = await this.impl.value.prompt(args.prompt);
+ 				} else {
+ 					const aboutDialogDetails = createBrowserAboutDialogDetails(this.productService);
+-					await this.impl.value.about(aboutDialogDetails.title, aboutDialogDetails.details, aboutDialogDetails.detailsToCopy);
++					await this.impl.value.about(aboutDialogDetails.title, aboutDialogDetails.details, aboutDialogDetails.details);
+ 				}
+ 			} catch (error) {
+ 				result = error;
 Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 +++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-@@ -12,8 +12,6 @@ import { Dialog, IDialogResult } from '.
- import { DisposableStore } from '../../../../base/common/lifecycle.js';
- import { IKeybindingService } from '../../../../platform/keybinding/common/keybinding.js';
- import { IProductService } from '../../../../platform/product/common/productService.js';
--import { IClipboardService } from '../../../../platform/clipboard/common/clipboardService.js';
--import { fromNow } from '../../../../base/common/date.js';
- import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
- import { MarkdownRenderer, openLinkFromMarkdown } from '../../../../editor/browser/widget/markdownRenderer/browser/markdownRenderer.js';
- import { IOpenerService } from '../../../../platform/opener/common/opener.js';
-@@ -38,7 +36,6 @@ export class BrowserDialogHandler extend
- 		@IKeybindingService private readonly keybindingService: IKeybindingService,
- 		@IInstantiationService instantiationService: IInstantiationService,
- 		@IProductService private readonly productService: IProductService,
--		@IClipboardService private readonly clipboardService: IClipboardService,
- 		@IOpenerService private readonly openerService: IOpenerService
- 	) {
- 		super();
-@@ -77,33 +74,23 @@ export class BrowserDialogHandler extend
+@@ -70,22 +70,17 @@ export class BrowserDialogHandler extend
+ 		return { confirmed: button === 0, checkboxChecked, values };
  	}
  
- 	async about(): Promise<void> {
--		const detailString = (useAgo: boolean): string => {
-+		const detailString = (): string => {
- 			return localize('aboutDetail',
--				"Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
--				this.productService.codeEditorVersion || 'Unknown',
--				this.productService.version || 'Unknown',
--				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
--				navigator.userAgent
-+				"Note: The Lambda Code Editor doesn't include all of the features available in the desktop application. To use features like the terminal and debugger, download your code and use the desktop version.",
- 			);
- 		};
- 
--		const detail = detailString(true);
--		const detailToCopy = detailString(false);
-+		const detail = detailString();
+-	async about(title: string, details: string, detailsToCopy: string): Promise<void> {
++	async about(title: string, details: string, _detailsToCopy: string): Promise<void> {
  
 -		const { button } = await this.doShow(
 +		await this.doShow(
  			Severity.Info,
- 			this.productService.nameLong,
+ 			title,
  			[
 -				localize({ key: 'copy', comment: ['&& denotes a mnemonic'] }, "&&Copy"),
  				localize('ok', "OK")
  			],
- 			detail,
+ 			details,
 -			1
 +			0
  		);
 -
 -		if (button === 0) {
--			this.clipboardService.writeText(detailToCopy);
+-			this.clipboardService.writeText(detailsToCopy);
 -		}
  	}
  
  	private async doShow(type: Severity | DialogType | undefined, message: string, buttons?: string[], detail?: string, cancelId?: number, checkbox?: ICheckbox, inputs?: IInputElement[], customOptions?: ICustomDialogOptions): Promise<IDialogResult> {
-Index: third-party-src/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
+Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
-+++ third-party-src/src/vs/workbench/electron-sandbox/parts/dialogs/dialog.contribution.ts
-@@ -45,7 +45,7 @@ export class DialogHandlerContribution e
- 	) {
- 		super();
+--- third-party-src.orig/src/vs/platform/dialogs/browser/dialog.ts
++++ third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+@@ -6,7 +6,6 @@
+ import { EventHelper } from '../../../base/browser/dom.js';
+ import { StandardKeyboardEvent } from '../../../base/browser/keyboardEvent.js';
+ import { IDialogOptions } from '../../../base/browser/ui/dialog/dialog.js';
+-import { fromNow } from '../../../base/common/date.js';
+ import { localize } from '../../../nls.js';
+ import { IKeybindingService } from '../../keybinding/common/keybinding.js';
+ import { ResultKind } from '../../keybinding/common/keybindingResolver.js';
+@@ -43,24 +42,14 @@ export function createWorkbenchDialogOpt
+ 	};
+ }
  
--		this.browserImpl = new Lazy(() => new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService, openerService));
-+		this.browserImpl = new Lazy(() => new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, openerService));
- 		this.nativeImpl = new Lazy(() => new NativeDialogHandler(logService, nativeHostService, productService, clipboardService));
+-export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string; detailsToCopy: string } {
+-	const detailString = (useAgo: boolean): string => {
+-		return localize('aboutDetail',
+-			"Code Editor Version: {0}\nCode - OSS Version: {1}\nDate: {2}\nBrowser: {3}",
+-			productService.codeEditorVersion || 'Unknown',
+-			productService.version || 'Unknown',
+-			productService.date ? `${productService.date}${useAgo ? ' (' + fromNow(new Date(productService.date), true) + ')' : ''}` : 'Unknown',
+-			navigator.userAgent
+-		);
+-	};
+-
+-	const details = detailString(true);
+-	const detailsToCopy = detailString(false);
++export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string } {
++	const details = localize('aboutDetail',
++		"Note: The Lambda Code Editor doesn't include all of the features available in the desktop application. To use features like the terminal and debugger, download your code and use the desktop version.",
++	);
  
- 		this.model = (this.dialogService as DialogService).model;
+ 	return {
+ 		title: productService.nameLong,
+-		details: details,
+-		detailsToCopy: detailsToCopy
++		details: details
+ 	};
+ }
+ 

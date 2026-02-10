@@ -14,16 +14,16 @@ Index: third-party-src/src/vs/server/node/serverServices.ts
 +++ third-party-src/src/vs/server/node/serverServices.ts
 @@ -11,7 +11,7 @@ import * as path from '../../base/common
  import { IURITransformer } from '../../base/common/uriIpc.js';
- import { getMachineId, getSqmMachineId, getdevDeviceId } from '../../base/node/id.js';
+ import { getMachineId, getSqmMachineId, getDevDeviceId } from '../../base/node/id.js';
  import { Promises } from '../../base/node/pfs.js';
 -import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
 +import { ClientConnectionEvent, IMessagePassingProtocol, IPCServer, ProxyChannel, StaticRouter } from '../../base/parts/ipc/common/ipc.js';
  import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
  import { ConfigurationService } from '../../platform/configuration/common/configurationService.js';
-@@ -241,6 +241,9 @@ export async function setupServerService
- 		const channel = new ExtensionManagementChannel(extensionManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority));
- 		socketServer.registerChannel('extensions', channel);
+@@ -258,6 +258,9 @@ export async function setupServerService
+ 
+ 		socketServer.registerChannel('mcpManagement', new McpManagementChannel(mcpManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority)));
  
 +		const languagePackChannel = ProxyChannel.fromService<RemoteAgentConnectionContext>(accessor.get(ILanguagePackService), disposables);
 +		socketServer.registerChannel('languagePacks', languagePackChannel);
@@ -35,7 +35,7 @@ Index: third-party-src/src/vs/platform/environment/common/environmentService.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/environment/common/environmentService.ts
 +++ third-party-src/src/vs/platform/environment/common/environmentService.ts
-@@ -101,7 +101,7 @@ export abstract class AbstractNativeEnvi
+@@ -98,7 +98,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
  
@@ -218,15 +218,15 @@ Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
 --- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
 +++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
-@@ -13,6 +13,7 @@ import { memoize } from '../../base/comm
- import { URI } from '../../base/common/uri.js';
+@@ -16,6 +16,7 @@ import { join } from '../../base/common/
+ import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
  
  export const serverOptions: OptionDescriptions<Required<ServerParsedArgs>> = {
 +	'locale': { type: 'string' },
  
  	/* ----- server setup ----- */
  
-@@ -98,6 +99,7 @@ export const serverOptions: OptionDescri
+@@ -104,6 +105,7 @@ export const serverOptions: OptionDescri
  };
  
  export interface ServerParsedArgs {
@@ -272,10 +272,119 @@ Index: third-party-src/src/vs/platform/languagePacks/browser/languagePacks.ts
 +		return this.languagePackService.getInstalledLanguages();
  	}
  }
-Index: third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
-+++ third-party-src/src/vs/workbench/services/localization/electron-sandbox/localeService.ts
+--- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
++++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
+@@ -474,9 +474,6 @@ export class InstallAction extends Exten
+ 		if (this.extension.isBuiltin) {
+ 			return;
+ 		}
+-		if (this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
+-			return;
+-		}
+ 		if (this.extension.state !== ExtensionState.Uninstalled) {
+ 			return;
+ 		}
+@@ -781,7 +778,7 @@ export abstract class InstallInOtherServ
+ 		}
+ 
+ 		if (isLanguagePackExtension(this.extension.local.manifest)) {
+-			return true;
++			return false;
+ 		}
+ 
+ 		// Prefers to run on UI
+@@ -2072,17 +2069,6 @@ export class SetLanguageAction extends E
+ 	update(): void {
+ 		this.enabled = false;
+ 		this.class = SetLanguageAction.DisabledClass;
+-		if (!this.extension) {
+-			return;
+-		}
+-		if (!this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
+-			return;
+-		}
+-		if (this.extension.gallery && language === getLocale(this.extension.gallery)) {
+-			return;
+-		}
+-		this.enabled = true;
+-		this.class = SetLanguageAction.EnabledClass;
+ 	}
+ 
+ 	override async run(): Promise<any> {
+@@ -2099,7 +2085,6 @@ export class ClearLanguageAction extends
+ 	private static readonly DisabledClass = `${this.EnabledClass} disabled`;
+ 
+ 	constructor(
+-		@IExtensionsWorkbenchService private readonly extensionsWorkbenchService: IExtensionsWorkbenchService,
+ 		@ILocaleService private readonly localeService: ILocaleService,
+ 	) {
+ 		super(ClearLanguageAction.ID, ClearLanguageAction.TITLE.value, ClearLanguageAction.DisabledClass, false);
+@@ -2109,17 +2094,6 @@ export class ClearLanguageAction extends
+ 	update(): void {
+ 		this.enabled = false;
+ 		this.class = ClearLanguageAction.DisabledClass;
+-		if (!this.extension) {
+-			return;
+-		}
+-		if (!this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
+-			return;
+-		}
+-		if (this.extension.gallery && language !== getLocale(this.extension.gallery)) {
+-			return;
+-		}
+-		this.enabled = true;
+-		this.class = ClearLanguageAction.EnabledClass;
+ 	}
+ 
+ 	override async run(): Promise<any> {
+Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/workbench.web.main.internal.ts
++++ third-party-src/src/vs/workbench/workbench.web.main.internal.ts
+@@ -54,7 +54,7 @@ import './services/dialogs/browser/fileD
+ import './services/host/browser/browserHostService.js';
+ import './services/lifecycle/browser/lifecycleService.js';
+ import './services/clipboard/browser/clipboardService.js';
+-import './services/localization/browser/localeService.js';
++import './services/localization/electron-browser/localeService.js';
+ import './services/path/browser/pathService.js';
+ import './services/themes/browser/browserHostColorSchemeService.js';
+ import './services/encryption/browser/encryptionService.js';
+Index: third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/localization/common/localizationsActions.ts
++++ third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
+@@ -11,6 +11,7 @@ import { ServicesAccessor } from '../../
+ import { ILanguagePackItem, ILanguagePackService } from '../../../../platform/languagePacks/common/languagePacks.js';
+ import { ILocaleService } from '../../../services/localization/common/locale.js';
+ import { IExtensionsWorkbenchService } from '../../extensions/common/extensions.js';
++import { language } from '../../../../base/common/platform.js';
+ 
+ export class ConfigureDisplayLanguageAction extends Action2 {
+ 	public static readonly ID = 'workbench.action.configureLocale';
+@@ -36,6 +37,16 @@ export class ConfigureDisplayLanguageAct
+ 
+ 		const installedLanguages = await languagePackService.getInstalledLanguages();
+ 
++		// Clean any existing (Current) text and add it back only to the correct locale
++		installedLanguages?.forEach(lang => {
++			if (lang.description) {
++				lang.description = lang.description.replace(/ \(Current\)$/, '');
++			}
++			if (lang.id?.toLowerCase() === language.toLowerCase()) {
++				lang.description = (lang.description || '') + localize('currentDisplayLanguage', " (Current)");
++			}
++		});
++
+ 		const disposables = new DisposableStore();
+ 		const qp = disposables.add(quickInputService.createQuickPick<ILanguagePackItem>({ useSeparators: true }));
+ 		qp.matchOnDescription = true;
+Index: third-party-src/src/vs/workbench/services/localization/electron-browser/localeService.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/services/localization/electron-browser/localeService.ts
++++ third-party-src/src/vs/workbench/services/localization/electron-browser/localeService.ts
 @@ -51,7 +51,8 @@ class NativeLocaleService implements ILo
  		@IProductService private readonly productService: IProductService
  	) { }
@@ -296,124 +405,3 @@ Index: third-party-src/src/vs/workbench/services/localization/electron-sandbox/l
  		await this.jsonEditingService.write(this.environmentService.argvResource, [{ path: ['locale'], value: locale }], true);
  		return true;
  	}
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsActions.ts
-@@ -475,9 +475,6 @@ export class InstallAction extends Exten
- 		if (this.extension.isBuiltin) {
- 			return;
- 		}
--		if (this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
--			return;
--		}
- 		if (this.extension.state !== ExtensionState.Uninstalled) {
- 			return;
- 		}
-@@ -782,7 +779,7 @@ export abstract class InstallInOtherServ
- 		}
- 
- 		if (isLanguagePackExtension(this.extension.local.manifest)) {
--			return true;
-+			return false;
- 		}
- 
- 		// Prefers to run on UI
-@@ -2073,17 +2070,6 @@ export class SetLanguageAction extends E
- 	update(): void {
- 		this.enabled = false;
- 		this.class = SetLanguageAction.DisabledClass;
--		if (!this.extension) {
--			return;
--		}
--		if (!this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
--			return;
--		}
--		if (this.extension.gallery && language === getLocale(this.extension.gallery)) {
--			return;
--		}
--		this.enabled = true;
--		this.class = SetLanguageAction.EnabledClass;
- 	}
- 
- 	override async run(): Promise<any> {
-@@ -2100,7 +2086,6 @@ export class ClearLanguageAction extends
- 	private static readonly DisabledClass = `${this.EnabledClass} disabled`;
- 
- 	constructor(
--		@IExtensionsWorkbenchService private readonly extensionsWorkbenchService: IExtensionsWorkbenchService,
- 		@ILocaleService private readonly localeService: ILocaleService,
- 	) {
- 		super(ClearLanguageAction.ID, ClearLanguageAction.TITLE.value, ClearLanguageAction.DisabledClass, false);
-@@ -2110,17 +2095,6 @@ export class ClearLanguageAction extends
- 	update(): void {
- 		this.enabled = false;
- 		this.class = ClearLanguageAction.DisabledClass;
--		if (!this.extension) {
--			return;
--		}
--		if (!this.extensionsWorkbenchService.canSetLanguage(this.extension)) {
--			return;
--		}
--		if (this.extension.gallery && language !== getLocale(this.extension.gallery)) {
--			return;
--		}
--		this.enabled = true;
--		this.class = ClearLanguageAction.EnabledClass;
- 	}
- 
- 	override async run(): Promise<any> {
-Index: third-party-src/build/gulpfile.reh.js
-===================================================================
---- third-party-src.orig/build/gulpfile.reh.js
-+++ third-party-src/build/gulpfile.reh.js
-@@ -59,6 +59,7 @@ const serverResourceIncludes = [
- 
- 	// NLS
- 	'out-build/nls.messages.json',
-+	'out-build/nls.keys.json', // Required to generate translations.
- 
- 	// Process monitor
- 	'out-build/vs/base/node/cpuUsage.sh',
-Index: third-party-src/src/vs/workbench/workbench.web.main.internal.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/workbench.web.main.internal.ts
-+++ third-party-src/src/vs/workbench/workbench.web.main.internal.ts
-@@ -53,7 +53,7 @@ import './services/dialogs/browser/fileD
- import './services/host/browser/browserHostService.js';
- import './services/lifecycle/browser/lifecycleService.js';
- import './services/clipboard/browser/clipboardService.js';
--import './services/localization/browser/localeService.js';
-+import './services/localization/electron-sandbox/localeService.js';
- import './services/path/browser/pathService.js';
- import './services/themes/browser/browserHostColorSchemeService.js';
- import './services/encryption/browser/encryptionService.js';
-Index: third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
-===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/localization/common/localizationsActions.ts
-+++ third-party-src/src/vs/workbench/contrib/localization/common/localizationsActions.ts
-@@ -12,6 +12,7 @@ import { ServicesAccessor } from '../../
- import { ILanguagePackItem, ILanguagePackService } from '../../../../platform/languagePacks/common/languagePacks.js';
- import { ILocaleService } from '../../../services/localization/common/locale.js';
- import { IExtensionsWorkbenchService } from '../../extensions/common/extensions.js';
-+import { language } from '../../../../base/common/platform.js';
- 
- export class ConfigureDisplayLanguageAction extends Action2 {
- 	public static readonly ID = 'workbench.action.configureLocale';
-@@ -37,6 +38,16 @@ export class ConfigureDisplayLanguageAct
- 
- 		const installedLanguages = await languagePackService.getInstalledLanguages();
- 
-+		// Clean any existing (Current) text and add it back only to the correct locale
-+		installedLanguages?.forEach(lang => {
-+			if (lang.description) {
-+				lang.description = lang.description.replace(/ \(Current\)$/, '');
-+			}
-+			if (lang.id?.toLowerCase() === language.toLowerCase()) {
-+				lang.description = (lang.description || '') + localize('currentDisplayLanguage', " (Current)");
-+			}
-+		});
-+
- 		const disposables = new DisposableStore();
- 		const qp = disposables.add(quickInputService.createQuickPick<ILanguagePackItem>({ useSeparators: true }));
- 		qp.matchOnDescription = true;

@@ -17,7 +17,8 @@ common/proposed-api.diff
 common/build.diff
 common/integration.diff
 common/replace-gulp-untar.diff
-common/adopt-new-proxy-agent.diff
+common/fix-ts-rootdir-webpack.diff
+common/remove-ask-vscode.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
@@ -30,6 +31,7 @@ web-embedded/add-a-much-simpler-workbench.diff
 web-embedded/remove-terminal-in-code-oss.diff
 web-embedded/remove-ssh-remote-host-in-code-oss.diff
 web-embedded/remove-source-control.diff
+web-embedded/fix-scm-progress-location.diff
 web-embedded/only-have-debug-view-container.diff
 web-embedded/disable-user-tasks-and-fix-build-warnings.diff
 web-embedded/disable-file-actions-calls-accounts-merge-conflit.diff

@@ -298,18 +298,6 @@ Index: third-party-src/extensions/sagemaker-extension/package.json
 +  "repository": {
 +  }
 +}
-Index: third-party-src/build/gulpfile.extensions.js
-===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -60,6 +60,7 @@ const compilations = [
-	'extensions/references-view/tsconfig.json',
-	'extensions/search-result/tsconfig.json',
-	'extensions/simple-browser/tsconfig.json',
-+	'extensions/sagemaker-extension/tsconfig.json',
-	'extensions/tunnel-forwarding/tsconfig.json',
-	'extensions/typescript-language-features/test-workspace/tsconfig.json',
-	'extensions/typescript-language-features/web/tsconfig.json',
 Index: third-party-src/extensions/sagemaker-extension/README.md
 ===================================================================
 --- /dev/null
@@ -336,64 +324,44 @@ Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/build/npm/dirs.js
-===================================================================
---- third-party-src.orig/build/npm/dirs.js
-+++ third-party-src/build/npm/dirs.js
-@@ -38,6 +38,7 @@ const dirs = [
- 	'extensions/npm',
- 	'extensions/php-language-features',
- 	'extensions/references-view',
-+	'extensions/sagemaker-extension',
- 	'extensions/search-result',
- 	'extensions/simple-browser',
- 	'extensions/tunnel-forwarding',
 Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
-+
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
-+    entry: {
-+        extension: './src/extension.ts'
-+    },
++export default withBrowserDefaults({
++	context: import.meta.dirname,
++	entry: {
++		extension: './src/extension.ts'
++	},
 +});
 Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
 +++ third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import withDefaults from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withDefaults = require('../shared.webpack.config');
-+
-+module.exports = withDefaults({
-+    context: __dirname,
-+    resolve: {
-+        mainFields: ['module', 'main']
-+    },
-+    entry: {
-+        extension: './src/extension.ts',
-+    }
++export default withDefaults({
++	context: import.meta.dirname,
++	resolve: {
++		mainFields: ['module', 'main']
++	},
++	entry: {
++		extension: './src/extension.ts',
++	}
 +});
 Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
@@ -473,3 +441,27 @@ Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
 +	}
 +}
 \ No newline at end of file
+Index: third-party-src/build/gulpfile.extensions.ts
+===================================================================
+--- third-party-src.orig/build/gulpfile.extensions.ts
++++ third-party-src/build/gulpfile.extensions.ts
+@@ -64,6 +64,7 @@ const compilations = [
+ 	'extensions/references-view/tsconfig.json',
+ 	'extensions/search-result/tsconfig.json',
+ 	'extensions/simple-browser/tsconfig.json',
++	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: third-party-src/build/npm/dirs.ts
+===================================================================
+--- third-party-src.orig/build/npm/dirs.ts
++++ third-party-src/build/npm/dirs.ts
+@@ -42,6 +42,7 @@ export const dirs = [
+ 	'extensions/npm',
+ 	'extensions/php-language-features',
+ 	'extensions/references-view',
++	'extensions/sagemaker-extension',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',

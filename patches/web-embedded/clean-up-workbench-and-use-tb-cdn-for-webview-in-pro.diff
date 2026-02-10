@@ -8,7 +8,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -592,15 +592,32 @@ function readCookie(name: string): strin
+@@ -597,16 +597,32 @@ function readCookie(name: string): strin
  	return undefined;
  }
  
@@ -21,6 +21,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 +	const vsCodeCdn = urlSearch.get('vsCodeCdn') ?? mainWindow.location.origin;
 +	const isDevo = urlSearch.get('isDevo') === 'true';
  	// Find config by checking for DOM
+ 	// eslint-disable-next-line no-restricted-syntax
  	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');
  	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
 +	let config: IWorkbenchConstructionOptions & { folderUri?: UriComponents; workspaceUri?: UriComponents; callbackRoute: string }
@@ -30,8 +31,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 +     	config = await result.json();
 +	} else {
 +		config = JSON.parse(configElementAttribute);
- 	}
--	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents; workspaceUri?: UriComponents; callbackRoute: string } = JSON.parse(configElementAttribute);
++	}
 +
 +	if(!isDevo) {
 +		// We can remove the isDevo check if our local Code Editor server supports https
@@ -39,12 +39,12 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 +			...config,
 +			webviewEndpoint: vsCodeCdn + '/out/vs/workbench/contrib/webview/browser/pre/',
 +		};
-+	}
-+
+ 	}
+-	const config: IWorkbenchConstructionOptions & { folderUri?: UriComponents; workspaceUri?: UriComponents; callbackRoute: string } = JSON.parse(configElementAttribute);
  	const secretStorageKeyPath = readCookie('vscode-secret-key-path');
  	const secretStorageCrypto = secretStorageKeyPath && ServerKeyedAESCrypto.supported()
  		? new ServerKeyedAESCrypto(secretStorageKeyPath) : new TransparentCrypto();
-@@ -617,7 +634,6 @@ function readCookie(name: string): strin
+@@ -623,7 +639,6 @@ function readCookie(name: string): strin
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
  	});
  	const totalLoadTime = Date.now() - start;

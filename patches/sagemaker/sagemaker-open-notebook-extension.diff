@@ -1,32 +1,8 @@
-Index: code-editor-src/build/gulpfile.extensions.js
-===================================================================
---- code-editor-src.orig/build/gulpfile.extensions.js
-+++ code-editor-src/build/gulpfile.extensions.js
-@@ -63,6 +63,7 @@ const compilations = [
- 	'extensions/sagemaker-extension/tsconfig.json',
- 	'extensions/sagemaker-idle-extension/tsconfig.json',
- 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
-+	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
- 	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
- 	'extensions/typescript-language-features/web/tsconfig.json',
-Index: code-editor-src/build/npm/dirs.js
-===================================================================
---- code-editor-src.orig/build/npm/dirs.js
-+++ code-editor-src/build/npm/dirs.js
-@@ -41,6 +41,7 @@ const dirs = [
- 	'extensions/sagemaker-extension',
- 	'extensions/sagemaker-idle-extension',
- 	'extensions/sagemaker-terminal-crash-mitigation',
-+	'extensions/sagemaker-open-notebook-extension',
- 	'extensions/search-result',
- 	'extensions/simple-browser',
- 	'extensions/tunnel-forwarding',
 Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -263,6 +263,11 @@ Registry.as<IConfigurationRegistry>(Conf
+@@ -265,6 +265,11 @@ Registry.as<IConfigurationRegistry>(Conf
  				description: localize('extensionsInQuickAccess', "When enabled, extensions can be searched for via Quick Access and report issues from there."),
  				default: true
  			},
@@ -42,7 +18,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWor
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
-@@ -1084,6 +1084,17 @@ export class ExtensionsWorkbenchService
+@@ -1085,6 +1085,17 @@ export class ExtensionsWorkbenchService
  		urlService.registerHandler(this);
  
  		this.whenInitialized = this.initialize();
@@ -64,48 +40,40 @@ Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension-br
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
-+
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
-+    entry: {
-+        extension: './src/extension.ts'
-+    },
++export default withBrowserDefaults({
++	context: import.meta.dirname,
++	entry: {
++		extension: './src/extension.ts'
++	},
 +});
 Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import withDefaults from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withDefaults = require('../shared.webpack.config');
-+
-+module.exports = withDefaults({
-+    context: __dirname,
-+    resolve: {
-+        mainFields: ['module', 'main']
-+    },
-+    entry: {
-+        extension: './src/extension.ts',
-+    }
++export default withDefaults({
++	context: import.meta.dirname,
++	resolve: {
++		mainFields: ['module', 'main']
++	},
++	entry: {
++		extension: './src/extension.ts',
++	}
 +});
 Index: code-editor-src/extensions/sagemaker-open-notebook-extension/package.json
 ===================================================================
@@ -315,3 +283,27 @@ Index: code-editor-src/extensions/sagemaker-open-notebook-extension/README.md
 +- Cluster ID: The ID of the SageMaker cluster
 +- Region: The AWS region where the S3 bucket is located
 +
+Index: code-editor-src/build/gulpfile.extensions.ts
+===================================================================
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
+@@ -67,6 +67,7 @@ const compilations = [
+ 	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
++	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+ 	'extensions/tunnel-forwarding/tsconfig.json',
+ 	'extensions/typescript-language-features/web/tsconfig.json',
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.ts
+===================================================================
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
+@@ -45,6 +45,7 @@ export const dirs = [
+ 	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-idle-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
++	'extensions/sagemaker-open-notebook-extension',
+ 	'extensions/search-result',
+ 	'extensions/simple-browser',
+ 	'extensions/tunnel-forwarding',

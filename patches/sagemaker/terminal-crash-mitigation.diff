@@ -18,48 +18,40 @@ Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension-
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension-browser.webpack.config.js
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
-+
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
-+    entry: {
-+        extension: './src/extension.ts'
-+    },
++export default withBrowserDefaults({
++	context: import.meta.dirname,
++	entry: {
++		extension: './src/extension.ts'
++	},
 +});
 Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/extension.webpack.config.js
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import withDefaults from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withDefaults = require('../shared.webpack.config');
-+
-+module.exports = withDefaults({
-+    context: __dirname,
-+    resolve: {
-+        mainFields: ['module', 'main']
-+    },
-+    entry: {
-+        extension: './src/extension.ts',
-+    }
++export default withDefaults({
++	context: import.meta.dirname,
++	resolve: {
++		mainFields: ['module', 'main']
++	},
++	entry: {
++		extension: './src/extension.ts',
++	}
 +});
 Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/README.md
 ===================================================================
@@ -240,23 +232,23 @@ Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.j
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: code-editor-src/build/gulpfile.extensions.js
+Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
---- code-editor-src.orig/build/gulpfile.extensions.js
-+++ code-editor-src/build/gulpfile.extensions.js
-@@ -62,6 +62,7 @@ const compilations = [
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
+@@ -66,6 +66,7 @@ const compilations = [
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',
  	'extensions/sagemaker-idle-extension/tsconfig.json',
 +	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/tunnel-forwarding/tsconfig.json',
- 	'extensions/typescript-language-features/test-workspace/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
-Index: code-editor-src/build/npm/dirs.js
+ 	'extensions/typescript-language-features/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
---- code-editor-src.orig/build/npm/dirs.js
-+++ code-editor-src/build/npm/dirs.js
-@@ -40,6 +40,7 @@ const dirs = [
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
+@@ -44,6 +44,7 @@ export const dirs = [
  	'extensions/references-view',
  	'extensions/sagemaker-extension',
  	'extensions/sagemaker-idle-extension',

@@ -1,27 +1,3 @@
-Index: code-editor-src/build/gulpfile.extensions.js
-===================================================================
---- code-editor-src.orig/build/gulpfile.extensions.js
-+++ code-editor-src/build/gulpfile.extensions.js
-@@ -63,6 +63,7 @@ const compilations = [
- 	'extensions/sagemaker-extension/tsconfig.json',
- 	'extensions/sagemaker-idle-extension/tsconfig.json',
- 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
-+	'extensions/sagemaker-extensions-sync/tsconfig.json',
- 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
- 	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
- 	'extensions/post-startup-notifications/tsconfig.json',
-Index: code-editor-src/build/npm/dirs.js
-===================================================================
---- code-editor-src.orig/build/npm/dirs.js
-+++ code-editor-src/build/npm/dirs.js
-@@ -41,6 +41,7 @@ const dirs = [
- 	'extensions/sagemaker-extension',
- 	'extensions/sagemaker-idle-extension',
- 	'extensions/sagemaker-terminal-crash-mitigation',
-+	'extensions/sagemaker-extensions-sync',
- 	'extensions/sagemaker-open-notebook-extension',
- 	'extensions/sagemaker-ui-dark-theme',
- 	'extensions/post-startup-notifications',
 Index: code-editor-src/extensions/sagemaker-extensions-sync/.vscodeignore
 ===================================================================
 --- /dev/null
@@ -51,48 +27,40 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/extension-browser.we
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extensions-sync/extension-browser.webpack.config.js
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withBrowserDefaults = require('../shared.webpack.config').browser;
-+
-+module.exports = withBrowserDefaults({
-+    context: __dirname,
-+    entry: {
-+        extension: './src/extension.ts'
-+    },
++export default withBrowserDefaults({
++	context: import.meta.dirname,
++	entry: {
++		extension: './src/extension.ts'
++	},
 +});
 Index: code-editor-src/extensions/sagemaker-extensions-sync/extension.webpack.config.js
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extensions-sync/extension.webpack.config.js
-@@ -0,0 +1,20 @@
+@@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
 + *  Licensed under the MIT License. See License.txt in the project root for license information.
 + *--------------------------------------------------------------------------------------------*/
++// @ts-check
++import withDefaults from '../shared.webpack.config.mjs';
 +
-+//@ts-check
-+
-+'use strict';
-+
-+const withDefaults = require('../shared.webpack.config');
-+
-+module.exports = withDefaults({
-+    context: __dirname,
-+    resolve: {
-+        mainFields: ['module', 'main']
-+    },
-+    entry: {
-+        extension: './src/extension.ts',
-+    }
++export default withDefaults({
++	context: import.meta.dirname,
++	resolve: {
++		mainFields: ['module', 'main']
++	},
++	entry: {
++		extension: './src/extension.ts',
++	}
 +});
 Index: code-editor-src/extensions/sagemaker-extensions-sync/package.json
 ===================================================================
@@ -464,3 +432,27 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/utils.ts
 +	}
 +}
 \ No newline at end of file
+Index: code-editor-src/build/gulpfile.extensions.ts
+===================================================================
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
+@@ -67,6 +67,7 @@ const compilations = [
+ 	'extensions/sagemaker-extension/tsconfig.json',
+ 	'extensions/sagemaker-idle-extension/tsconfig.json',
+ 	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
++	'extensions/sagemaker-extensions-sync/tsconfig.json',
+ 	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
+ 	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
+ 	'extensions/post-startup-notifications/tsconfig.json',
+Index: code-editor-src/build/npm/dirs.ts
+===================================================================
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
+@@ -45,6 +45,7 @@ export const dirs = [
+ 	'extensions/sagemaker-extension',
+ 	'extensions/sagemaker-idle-extension',
+ 	'extensions/sagemaker-terminal-crash-mitigation',
++	'extensions/sagemaker-extensions-sync',
+ 	'extensions/sagemaker-open-notebook-extension',
+ 	'extensions/sagemaker-ui-dark-theme',
+ 	'extensions/post-startup-notifications',

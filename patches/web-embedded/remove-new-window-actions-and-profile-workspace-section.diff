@@ -10,19 +10,147 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 +++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -126,7 +126,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -35,7 +35,6 @@ import { IBrowserWorkbenchEnvironmentSer
+ import { Extensions as DndExtensions, IDragAndDropContributionRegistry, IResourceDropHandler } from '../../../../platform/dnd/browser/dnd.js';
+ import { IUriIdentityService } from '../../../../platform/uriIdentity/common/uriIdentity.js';
+ 
+-export const OpenProfileMenu = new MenuId('OpenProfile');
+ const ProfilesMenu = new MenuId('Profiles');
+ 
+ export class UserDataProfilesWorkbenchContribution extends Disposable implements IWorkbenchContribution {
+@@ -147,8 +146,6 @@ export class UserDataProfilesWorkbenchCo
+ 		this._register(this.registerManageProfilesAction());
  		this._register(this.registerSwitchProfileAction());
  
- 		this.registerOpenProfileSubMenu();
+-		this.registerOpenProfileSubMenu();
 -		this.registerNewWindowWithProfileAction();
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
+ 
+@@ -183,22 +180,12 @@ export class UserDataProfilesWorkbenchCo
+ 		});
+ 	}
+ 
+-	private registerOpenProfileSubMenu(): void {
+-		MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
+-			title: localize('New Profile Window', "New Window with Profile"),
+-			submenu: OpenProfileMenu,
+-			group: '1_new',
+-			order: 4,
+-		});
+-	}
+-
+ 	private readonly profilesDisposable = this._register(new MutableDisposable<DisposableStore>());
+ 	private registerProfilesActions(): void {
+ 		this.profilesDisposable.value = new DisposableStore();
+ 		for (const profile of this.userDataProfilesService.profiles) {
+ 			if (!profile.isTransient) {
+ 				this.profilesDisposable.value.add(this.registerProfileEntryAction(profile));
+-				this.profilesDisposable.value.add(this.registerNewWindowAction(profile));
+ 			}
+ 		}
+ 	}
+@@ -230,79 +217,6 @@ export class UserDataProfilesWorkbenchCo
+ 		});
+ 	}
+ 
+-	private registerNewWindowWithProfileAction(): IDisposable {
+-		return registerAction2(class NewWindowWithProfileAction extends Action2 {
+-			constructor() {
+-				super({
+-					id: `workbench.profiles.actions.newWindowWithProfile`,
+-					title: localize2('newWindowWithProfile', "New Window with Profile..."),
+-					category: PROFILES_CATEGORY,
+-					precondition: HAS_PROFILES_CONTEXT,
+-					f1: true,
+-				});
+-			}
+-			async run(accessor: ServicesAccessor) {
+-				const quickInputService = accessor.get(IQuickInputService);
+-				const userDataProfilesService = accessor.get(IUserDataProfilesService);
+-				const hostService = accessor.get(IHostService);
+-
+-				const pick = await quickInputService.pick(
+-					userDataProfilesService.profiles.map(profile => ({
+-						label: profile.name,
+-						profile
+-					})),
+-					{
+-						title: localize('new window with profile', "New Window with Profile"),
+-						placeHolder: localize('pick profile', "Select Profile"),
+-						canPickMany: false
+-					});
+-				if (pick) {
+-					return hostService.openWindow({ remoteAuthority: null, forceProfile: pick.profile.name });
+-				}
+-			}
+-		});
+-	}
+-
+-	private registerNewWindowAction(profile: IUserDataProfile): IDisposable {
+-		const disposables = new DisposableStore();
+-
+-		const id = `workbench.action.openProfile.${profile.name.replace('/\s+/', '_')}`;
+-
+-		disposables.add(registerAction2(class NewWindowAction extends Action2 {
+-
+-			constructor() {
+-				super({
+-					id,
+-					title: localize2('openShort', "{0}", profile.name),
+-					metadata: {
+-						description: localize2('open profile', "Open New Window with {0} Profile", profile.name),
+-					},
+-					menu: {
+-						id: OpenProfileMenu,
+-						group: '0_profiles',
+-						when: HAS_PROFILES_CONTEXT
+-					}
+-				});
+-			}
+-
+-			override run(accessor: ServicesAccessor): Promise<void> {
+-				const hostService = accessor.get(IHostService);
+-				return hostService.openWindow({ remoteAuthority: null, forceProfile: profile.name });
+-			}
+-		}));
+-
+-		disposables.add(MenuRegistry.appendMenuItem(MenuId.CommandPalette, {
+-			command: {
+-				id,
+-				category: PROFILES_CATEGORY,
+-				title: localize2('open', "Open {0} Profile", profile.name),
+-				precondition: HAS_PROFILES_CONTEXT
+-			},
+-		}));
+-
+-		return disposables;
+-	}
+-
+ 	private registerSwitchProfileAction(): IDisposable {
+ 		const that = this;
+ 		return registerAction2(class SwitchProfileAction extends Action2 {
+@@ -412,14 +326,7 @@ export class UserDataProfilesWorkbenchCo
+ 					id: 'workbench.profiles.actions.createProfile',
+ 					title: localize2('create profile', "New Profile..."),
+ 					category: PROFILES_CATEGORY,
+-					f1: true,
+-					menu: [
+-						{
+-							id: OpenProfileMenu,
+-							group: '1_manage_profiles',
+-							order: 1
+-						}
+-					]
++					f1: true
+ 				});
+ 			}
  
 Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 +++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-@@ -758,9 +758,7 @@ class ProfileTreeDataSource implements I
+@@ -711,9 +711,7 @@ class ProfileTreeDataSource implements I
  					children.push({ element: 'name', root: element });
  					children.push({ element: 'icon', root: element });
  				}
@@ -36,7 +164,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 +++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-@@ -983,17 +983,8 @@ export class UserDataProfilesEditorModel
+@@ -1000,17 +1000,8 @@ export class UserDataProfilesEditorModel
  			() => this.removeProfile(profileElement.profile)
  		));
  

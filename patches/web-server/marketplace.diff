@@ -48,7 +48,7 @@ Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalle
 ===================================================================
 --- third-party-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
 +++ third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
-@@ -46,7 +46,7 @@ export class ExtensionGalleryManifestSer
+@@ -47,7 +47,7 @@ export class ExtensionGalleryManifestSer
  				type: ExtensionGalleryResourceType.ExtensionQueryService
  			},
  			{
@@ -57,7 +57,7 @@ Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalle
  				type: ExtensionGalleryResourceType.ExtensionLatestVersionUri
  			},
  			{
-Index: sagemaker-code-editor/vscode/src/vs/platform/product/common/product.ts
+Index: third-party-src/src/vs/platform/product/common/product.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/product/common/product.ts
 +++ third-party-src/src/vs/platform/product/common/product.ts
@@ -80,32 +80,32 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
 +++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-@@ -70,6 +70,8 @@ import { ILocalizedString } from '../../../../pla
- import { IExtensionGalleryManifest, IExtensionGalleryManifestService } from '../../../../platform/extensionManagement/common/extensionGalleryManifest.js';
+@@ -70,6 +70,8 @@ import { IExtensionGalleryManifest, IExt
  import { URI } from '../../../../base/common/uri.js';
- import { IMcpGalleryService } from '../../../../platform/mcp/common/mcpManagement.js';
+ import { DEFAULT_ACCOUNT_SIGN_IN_COMMAND } from '../../../services/accounts/common/defaultAccount.js';
+ import { IHoverService } from '../../../../platform/hover/browser/hover.js';
 +import { IProductService } from '../../../../platform/product/common/productService.js';
 +import { memoize } from '../../../../base/common/decorators.js';
  
  export const ExtensionsSortByContext = new RawContextKey<string>('extensionsSortByValue', '');
  export const SearchMarketplaceExtensionsContext = new RawContextKey<boolean>('searchMarketplaceExtensions', false);
-@@ -93,7 +93,6 @@ const SortByUpdateDateContext = new RawC
- const REMOTE_CATEGORY: ILocalizedString = localize2({ key: 'remote', comment: ['Remote as in remote machine'] }, "Remote");
+@@ -97,7 +99,6 @@ interface IExtensionsViewletState {
+ }
  
  export class ExtensionsViewletViewsContribution extends Disposable implements IWorkbenchContribution {
 -
  	private readonly container: ViewContainer;
  
  	constructor(
-@@ -528,6 +528,7 @@ export class ExtensionsViewPaneContainer
+@@ -561,6 +562,7 @@ export class ExtensionsViewPaneContainer
  		@IExtensionService extensionService: IExtensionService,
  		@IViewDescriptorService viewDescriptorService: IViewDescriptorService,
  		@IPreferencesService private readonly preferencesService: IPreferencesService,
 +		@IProductService private readonly productService: IProductService,
  		@ICommandService private readonly commandService: ICommandService,
- 		@IMcpGalleryService private readonly mcpGalleryService: IMcpGalleryService,
  		@ILogService logService: ILogService,
-@@ -569,6 +571,15 @@ export class ExtensionsViewPaneContainer
+ 		@IHoverService private readonly hoverService: IHoverService,
+@@ -602,6 +604,15 @@ export class ExtensionsViewPaneContainer
  			});
  	}
  
@@ -121,10 +121,10 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
  	get searchValue(): string | undefined {
  		return this.searchBox?.getValue();
  	}
-@@ -583,8 +594,7 @@ export class ExtensionsViewPaneContainer
-		hide(overlay);
-
-		this.header = append(this.root, $('.header'));
+@@ -616,8 +627,7 @@ export class ExtensionsViewPaneContainer
+ 		hide(overlay);
+ 
+ 		this.header = append(this.root, $('.header'));
 -		const placeholder = localize('searchExtensions', "Search Extensions in Marketplace");
 -
 +		const placeholder = localize('searchExtensions', 'Search extensions in {0}', this.extensionsGalleryHostname);

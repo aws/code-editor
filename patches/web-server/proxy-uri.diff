@@ -2,15 +2,15 @@ Index: third-party-src/package.json
 ===================================================================
 --- third-party-src.orig/package.json
 +++ third-party-src/package.json
-@@ -96,6 +96,7 @@
-     "@xterm/addon-webgl": "^0.19.0-beta.107",
-     "@xterm/headless": "^5.6.0-beta.107",
-     "@xterm/xterm": "^5.6.0-beta.107",
+@@ -99,6 +99,7 @@
+     "@xterm/addon-webgl": "^0.20.0-beta.101",
+     "@xterm/headless": "^6.1.0-beta.91",
+     "@xterm/xterm": "^6.1.0-beta.91",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
-@@ -121,6 +122,7 @@
+@@ -125,6 +126,7 @@
      "@types/debug": "^4.1.5",
      "@types/eslint": "^9.6.1",
      "@types/gulp-svgmin": "^1.2.1",
@@ -23,8 +23,8 @@ Index: third-party-src/remote/package.json
 --- third-party-src.orig/remote/package.json
 +++ third-party-src/remote/package.json
 @@ -26,6 +26,7 @@
-     "@xterm/headless": "^5.6.0-beta.107",
-     "@xterm/xterm": "^5.6.0-beta.107",
+     "@xterm/headless": "^6.1.0-beta.91",
+     "@xterm/xterm": "^6.1.0-beta.91",
      "cookie": "^0.7.0",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
@@ -34,7 +34,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -21,6 +21,7 @@ import type { IWorkbenchConstructionOpti
+@@ -22,6 +22,7 @@ import type { IWorkbenchConstructionOpti
  import { AuthenticationSessionInfo } from '../../../workbench/services/authentication/browser/authenticationService.js';
  import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
  import { create } from '../../../workbench/workbench.web.main.internal.js';
@@ -42,7 +42,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  
  interface ISecretStorageCrypto {
  	seal(data: string): Promise<string>;
-@@ -629,6 +630,20 @@ function readCookie(name: string): strin
+@@ -635,6 +636,20 @@ function readCookie(name: string): strin
  		settingsSyncOptions: config.settingsSyncOptions ? { enabled: config.settingsSyncOptions.enabled, } : undefined,
  		workspaceProvider: WorkspaceProvider.create(config),
  		urlCallbackProvider: new LocalStorageURLCallbackProvider(config.callbackRoute),
@@ -264,18 +264,18 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  
 +import { ProxyServer } from './proxyServer.js';
 +
- import * as crypto from 'crypto';
  import * as fs from 'fs';
- import * as http from 'http';
-@@ -64,6 +66,7 @@ class RemoteExtensionHostAgentServer ext
+ import type * as http from 'http';
+ import * as net from 'net';
+@@ -63,6 +65,7 @@ class RemoteExtensionHostAgentServer ext
  	private readonly _managementConnections: { [reconnectionToken: string]: ManagementConnection };
  	private readonly _allReconnectionTokens: Set<string>;
  	private readonly _webClientServer: WebClientServer | null;
 +	private readonly _proxyServer: ProxyServer | null;
  	private readonly _webEndpointOriginChecker: WebEndpointOriginChecker;
+ 	private readonly _reconnectionGraceTime: number;
  
- 	private readonly _serverBasePath: string | undefined;
-@@ -99,12 +102,24 @@ class RemoteExtensionHostAgentServer ext
+@@ -99,6 +102,11 @@ class RemoteExtensionHostAgentServer ext
  				? this._instantiationService.createInstance(WebClientServer, this._connectionToken, serverBasePath ?? '/', this._serverProductPath)
  				: null
  		);
@@ -285,8 +285,9 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +				: null
 +		);
  		this._logService.info(`Extension host agent started.`);
+ 		this._reconnectionGraceTime = this._environmentService.reconnectionGraceTime;
  
- 		this._waitThenShutdown(true);
+@@ -106,6 +114,13 @@ class RemoteExtensionHostAgentServer ext
  	}
  
  	public async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -300,7 +301,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  		// Only serve GET requests
  		if (req.method !== 'GET') {
  			return serveError(req, res, 405, `Unsupported method ${req.method}`);
-@@ -133,7 +148,6 @@ class RemoteExtensionHostAgentServer ext
+@@ -134,7 +149,6 @@ class RemoteExtensionHostAgentServer ext
  		// Custom health check endpoint
  		if (pathname === '/healthz') {
  			res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -308,7 +309,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			return void res.end(JSON.stringify({ hasActiveConnections }));
  		}
  
-@@ -198,12 +212,17 @@ class RemoteExtensionHostAgentServer ext
+@@ -199,12 +213,17 @@ class RemoteExtensionHostAgentServer ext
  		return void res.end('Not found');
  	}
  
@@ -327,7 +328,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			const query = url.parse(req.url, true).query;
  			if (typeof query.reconnectionToken === 'string') {
  				reconnectionToken = query.reconnectionToken;
-@@ -541,6 +560,8 @@ class RemoteExtensionHostAgentServer ext
+@@ -500,6 +519,8 @@ class RemoteExtensionHostAgentServer ext
  			return this._rejectWebSocketConnection(logPrefix, protocol, `Unknown initial data received`);
  
  		}
@@ -336,7 +337,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  	}
  
  	private async _createTunnel(protocol: PersistentProtocol, tunnelStartParams: ITunnelConnectionStartParams): Promise<void> {
-@@ -673,7 +694,7 @@ export interface IServerAPI {
+@@ -632,7 +653,7 @@ export interface IServerAPI {
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */
@@ -349,7 +350,7 @@ Index: third-party-src/src/server-main.ts
 ===================================================================
 --- third-party-src.orig/src/server-main.ts
 +++ third-party-src/src/server-main.ts
-@@ -96,14 +96,14 @@ if (shouldSpawnCli) {
+@@ -93,14 +93,14 @@ if (shouldSpawnCli) {
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
  		return remoteExtensionHostAgentServer.handleRequest(req, res);
  	});
@@ -360,7 +361,7 @@ Index: third-party-src/src/server-main.ts
  			perf.mark('code/server/firstWebSocket');
  		}
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
- 		// @ts-ignore
+ 		// @ts-expect-error
 -		return remoteExtensionHostAgentServer.handleUpgrade(req, socket);
 +		return remoteExtensionHostAgentServer.handleUpgrade(req, socket, head);
  	});
@@ -387,7 +388,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  import { Disposable } from '../../../../base/common/lifecycle.js';
  import { IWorkbenchContribution } from '../../../common/contributions.js';
  import { IBrowserWorkbenchEnvironmentService } from '../../../services/environment/browser/environmentService.js';
-@@ -14,88 +22,93 @@ import { IRemoteExplorerService } from '
+@@ -14,88 +22,95 @@ import { IRemoteExplorerService } from '
  import { ILogService } from '../../../../platform/log/common/log.js';
  import { IContextKeyService } from '../../../../platform/contextkey/common/contextkey.js';
  import { forwardedPortsFeaturesEnabled } from '../../../services/remote/common/tunnelModel.js';
@@ -398,6 +399,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  
  	static readonly ID = 'workbench.contrib.tunnelFactory';
 +	private _tunnelService: ITunnelService;
++	private _logService: ILogService;
  
  	constructor(
  		@ITunnelService tunnelService: ITunnelService,
@@ -430,6 +432,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 -				];
 -			}
 +		this._tunnelService = tunnelService;
++		this._logService = logService;
 +		// At this point we clearly want the ports view/features since we have a tunnel factory
 +		contextKeyService.createKey(forwardedPortsFeaturesEnabled.key, true);
 +		let privacyOptions = environmentService.options?.tunnelProvider?.features?.privacyOptions ?? [];
@@ -544,7 +547,7 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
  	}
  
  	private async resolveExternalUri(uri: string): Promise<string> {
-@@ -105,4 +118,72 @@ export class TunnelFactoryContribution e
+@@ -105,4 +120,80 @@ export class TunnelFactoryContribution e
  			return uri;
  		}
  	}
@@ -586,34 +589,42 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 +		if (connection) {
 +			const channel = connection.getChannel('proxy');
 +
-+			const portAddedEvent = channel.listen('onPortAdded');
-+			portAddedEvent(async (port: any) => {
-+				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+				if (!tunnel) {
-+					await this._tunnelService.openTunnel(undefined, 'localhost', port);
++			this._register(channel.listen('onPortAdded')(async (port: any) => {
++				try {
++					const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++					if (!tunnel) {
++						await this._tunnelService.openTunnel(undefined, 'localhost', port);
++					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port added event', e);
 +				}
-+			});
++			}));
 +
-+			const portRemovedEvent = channel.listen('onPortRemoved');
-+			portRemovedEvent(async (port: any) => {
-+				const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+				if (tunnel) {
-+					await this._tunnelService.closeTunnel('localhost', port);
++			this._register(channel.listen('onPortRemoved')(async (port: any) => {
++				try {
++					const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++					if (tunnel) {
++						await this._tunnelService.closeTunnel('localhost', port);
++					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port removed event', e);
 +				}
-+			});
++			}));
 +
-+			const portSyncedEvent = channel.listen('onPortSynced');
-+			portSyncedEvent(async (ports: any) => {
-+				if (Array.isArray(ports)) {
-+					for (const port of ports) {
-+						const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
-+						if (!tunnel) {
-+							await this._tunnelService.openTunnel(undefined, 'localhost', port);
++			this._register(channel.listen('onPortSynced')(async (ports: any) => {
++				try {
++					if (Array.isArray(ports)) {
++						for (const port of ports) {
++							const tunnel = await this._tunnelService.getExistingTunnel('localhost', port);
++							if (!tunnel) {
++								await this._tunnelService.openTunnel(undefined, 'localhost', port);
++							}
 +						}
 +					}
++				} catch (e) {
++					this._logService.trace('tunnelFactory: error handling port synced event', e);
 +				}
-+			});
-+
++			}));
 +		}
 +	}
  }
@@ -621,7 +632,7 @@ Index: third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/remote/common/tunnelModel.ts
 +++ third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
-@@ -558,13 +558,7 @@ export class TunnelModel extends Disposa
+@@ -557,13 +557,7 @@ export class TunnelModel extends Disposa
  	}
  
  	private async addStorageKeyPostfix(prefix: string): Promise<string | undefined> {

@@ -2,7 +2,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-@@ -172,6 +172,13 @@ class RemoteExtensionHostAgentServer ext
+@@ -173,6 +173,13 @@ class RemoteExtensionHostAgentServer ext
  		if (pathname === '/vscode-remote-resource') {
  			// Handle HTTP requests for resources rendered in the rich client (images, fonts, etc.)
  			// These resources could be files shipped with extensions or even workspace files.

@@ -32,7 +32,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/actions/windowActions.ts
 +++ third-party-src/src/vs/workbench/browser/actions/windowActions.ts
-@@ -410,6 +410,20 @@ class BlurAction extends Action2 {
+@@ -458,6 +458,20 @@ class BlurAction extends Action2 {
  	}
  }
  
@@ -53,7 +53,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
  // --- Actions Registration
  
  registerAction2(NewWindowAction);
-@@ -419,6 +433,7 @@ registerAction2(OpenRecentAction);
+@@ -467,6 +481,7 @@ registerAction2(OpenRecentAction);
  registerAction2(ReloadWindowAction);
  registerAction2(ShowAboutDialogAction);
  registerAction2(BlurAction);
@@ -61,7 +61,7 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
  
  // --- Commands/Keybindings Registration
  
-@@ -470,3 +485,8 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -518,3 +533,8 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	group: '2_open',
  	order: 4
  });
@@ -74,7 +74,7 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -487,6 +487,24 @@ class WorkspaceProvider implements IWork
+@@ -492,6 +492,24 @@ class WorkspaceProvider implements IWork
  
  		const targetHref = this.createTargetUrl(workspace, options);
  		if (targetHref) {
@@ -103,11 +103,11 @@ Index: third-party-src/src/vs/workbench/browser/workbench.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/workbench.ts
 +++ third-party-src/src/vs/workbench/browser/workbench.ts
-@@ -169,6 +169,8 @@ export class Workbench extends Layout {
+@@ -180,6 +180,8 @@ export class Workbench extends Layout {
  		} catch (error) {
  			onUnexpectedError(error);
  
-+			window.top?.postMessage({source: 'code-editor', action: 'clientStartupError', error}, '*');
++			window.top?.postMessage({source: 'code-editor', action: 'clientStartupError', error: toErrorMessage(error, true)}, '*');
 +
  			throw error; // rethrow because this is a critical issue we cannot handle properly here
  		}

@@ -93,7 +93,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 +++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -130,8 +130,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -152,8 +152,6 @@ export class UserDataProfilesWorkbenchCo
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
@@ -102,7 +102,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		this.registerCreateFromCurrentProfileAction();
  		this.registerNewProfileAction();
  		this.registerDeleteProfileAction();
-@@ -364,34 +362,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -386,34 +384,6 @@ export class UserDataProfilesWorkbenchCo
  		return disposables;
  	}
  
@@ -137,3 +137,145 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  
  	private registerCreateFromCurrentProfileAction(): void {
  		const that = this;
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+@@ -223,13 +223,7 @@ export class UserDataProfilesEditor exte
+ 					const actions: IAction[] = [];
+ 					if (this.templates.length) {
+ 						actions.push(new SubmenuAction('from.template', localize('from template', "From Template"), this.getCreateFromTemplateActions()));
+-						actions.push(new Separator());
+ 					}
+-					actions.push(toAction({
+-						id: 'importProfile',
+-						label: localize('importProfile', "Import Profile..."),
+-						run: () => this.importProfile()
+-					}));
+ 					return actions;
+ 				}
+ 			},
+@@ -294,50 +288,9 @@ export class UserDataProfilesEditor exte
+ 		if (templateActions.length) {
+ 			actions.push(new SubmenuAction('from.template', localize('new from template', "New Profile From Template"), templateActions));
+ 		}
+-		actions.push(new Separator());
+-		actions.push(toAction({
+-			id: 'importProfile',
+-			label: localize('importProfile', "Import Profile..."),
+-			run: () => this.importProfile()
+-		}));
+ 		return actions;
+ 	}
+ 
+-	private async importProfile(): Promise<void> {
+-		const disposables = new DisposableStore();
+-		const quickPick = disposables.add(this.quickInputService.createQuickPick());
+-
+-		const updateQuickPickItems = (value?: string) => {
+-			const quickPickItems: IQuickPickItem[] = [];
+-			if (value) {
+-				quickPickItems.push({ label: quickPick.value, description: localize('import from url', "Import from URL") });
+-			}
+-			quickPickItems.push({ label: localize('import from file', "Select File...") });
+-			quickPick.items = quickPickItems;
+-		};
+-
+-		quickPick.title = localize('import profile quick pick title', "Import from Profile Template...");
+-		quickPick.placeholder = localize('import profile placeholder', "Provide Profile Template URL");
+-		quickPick.ignoreFocusOut = true;
+-		disposables.add(quickPick.onDidChangeValue(updateQuickPickItems));
+-		updateQuickPickItems();
+-		quickPick.matchOnLabel = false;
+-		quickPick.matchOnDescription = false;
+-		disposables.add(quickPick.onDidAccept(async () => {
+-			quickPick.hide();
+-			const selectedItem = quickPick.selectedItems[0];
+-			if (!selectedItem) {
+-				return;
+-			}
+-			const url = selectedItem.label === quickPick.value ? URI.parse(quickPick.value) : await this.getProfileUriFromFileSystem();
+-			if (url) {
+-				this.createNewProfile(url);
+-			}
+-		}));
+-		disposables.add(quickPick.onDidHide(() => disposables.dispose()));
+-		quickPick.show();
+-	}
+-
+ 	async createNewProfile(copyFrom?: URI | IUserDataProfile): Promise<void> {
+ 		await this.model?.createNewProfile(copyFrom);
+ 	}
+Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+===================================================================
+--- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
++++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+@@ -977,28 +977,7 @@ export class UserDataProfilesEditorModel
+ 			() => this.userDataProfileManagementService.switchProfile(profileElement.profile)
+ 		));
+ 
+-		const copyFromProfileAction = disposables.add(new Action(
+-			'userDataProfile.copyFromProfile',
+-			localize('copyFromProfile', "Duplicate..."),
+-			ThemeIcon.asClassName(Codicon.copy),
+-			true, () => this.createNewProfile(profileElement.profile)
+-		));
+-
+-		const exportAction = disposables.add(new Action(
+-			'userDataProfile.export',
+-			localize('export', "Export..."),
+-			ThemeIcon.asClassName(Codicon.export),
+-			true,
+-			() => this.userDataProfileImportExportService.exportProfile(profile)
+-		));
+ 
+-		const deleteAction = disposables.add(new Action(
+-			'userDataProfile.delete',
+-			localize('delete', "Delete"),
+-			ThemeIcon.asClassName(Codicon.trash),
+-			true,
+-			() => this.removeProfile(profileElement.profile)
+-		));
+ 
+ 		const newWindowAction = disposables.add(new Action(
+ 			'userDataProfile.newWindow',
+@@ -1012,12 +991,6 @@ export class UserDataProfilesEditorModel
+ 		primaryActions.push(activateAction);
+ 		primaryActions.push(newWindowAction);
+ 		const secondaryActions: IAction[] = [];
+-		secondaryActions.push(copyFromProfileAction);
+-		secondaryActions.push(exportAction);
+-		if (!profile.isDefault) {
+-			secondaryActions.push(new Separator());
+-			secondaryActions.push(deleteAction);
+-		}
+ 
+ 		const profileElement = disposables.add(this.instantiationService.createInstance(UserDataProfileElement,
+ 			profile,
+@@ -1094,17 +1067,10 @@ export class UserDataProfilesEditorModel
+ 				() => this.previewNewProfile(cancellationTokenSource.token)
+ 			));
+ 			secondaryActions.push(previewProfileAction);
+-			const exportAction = disposables.add(new Action(
+-				'userDataProfile.export',
+-				localize('export', "Export..."),
+-				ThemeIcon.asClassName(Codicon.export),
+-				isUserDataProfile(copyFrom),
+-				() => this.exportNewProfile(cancellationTokenSource.token)
+-			));
+ 			this.newProfileElement = disposables.add(this.instantiationService.createInstance(NewProfileElement,
+ 				copyFrom,
+ 				[primaryActions, secondaryActions],
+-				[[cancelAction], [exportAction]],
++				[[cancelAction], []],
+ 			));
+ 			const updateCreateActionLabel = () => {
+ 				if (createAction.enabled) {
+@@ -1123,7 +1089,6 @@ export class UserDataProfilesEditorModel
+ 				}
+ 				if (e.name || e.copyFrom) {
+ 					updateCreateActionLabel();
+-					exportAction.enabled = isUserDataProfile(this.newProfileElement?.copyFrom);
+ 				}
+ 			}));
+ 			disposables.add(this.userDataProfilesService.onDidChangeProfiles((e) => {

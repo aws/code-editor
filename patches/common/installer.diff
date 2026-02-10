@@ -1,16 +1,27 @@
-Index: third-party-src/build/gulpfile.reh.js
+Index: third-party-src/build/lib/getVersion.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.reh.js
-+++ third-party-src/build/gulpfile.reh.js
-@@ -32,6 +32,7 @@ const { vscodeWebResourceIncludes, creat
- const cp = require('child_process');
- const log = require('fancy-log');
- const buildfile = require('./buildfile');
-+const through = require("through2");
+--- third-party-src.orig/build/lib/getVersion.ts
++++ third-party-src/build/lib/getVersion.ts
+@@ -12,5 +12,5 @@ export function getVersion(root: string)
+ 		version = git.getVersion(root);
+ 	}
  
- const REPO_ROOT = path.dirname(__dirname);
- const commit = getVersion(REPO_ROOT);
-@@ -194,6 +195,15 @@ function nodejs(platform, arch) {
+-	return version;
++	return version || "unknown";
+ }
+Index: third-party-src/build/gulpfile.reh.ts
+===================================================================
+--- third-party-src.orig/build/gulpfile.reh.ts
++++ third-party-src/build/gulpfile.reh.ts
+@@ -33,6 +33,7 @@ import log from 'fancy-log';
+ import buildfile from './buildfile.ts';
+ import { fetchUrls, fetchGithub } from './lib/fetch.ts';
+ import jsonEditor from 'gulp-json-editor';
++import through from 'through2';
+ 
+ 
+ const REPO_ROOT = path.dirname(import.meta.dirname);
+@@ -197,6 +198,15 @@ function nodejs(platform: string, arch:
  		arch = 'x64';
  	}
  
@@ -26,16 +37,16 @@ Index: third-party-src/build/gulpfile.reh.js
  	log(`Downloading node.js ${nodeVersion} ${platform} ${arch} from ${product.nodejsRepository}...`);
  
  	const glibcPrefix = process.env['VSCODE_NODE_GLIBC'] ?? '';
-@@ -248,7 +258,7 @@ function nodejs(platform, arch) {
+@@ -251,7 +261,7 @@ function nodejs(platform: string, arch:
  	}
  }
  
--function packageTask(type, platform, arch, sourceFolderName, destinationFolderName) {
-+function packageTask(type, platform, arch, sourceFolderName, destinationFolderName, isSlim=false) {
+-function packageTask(type: string, platform: string, arch: string, sourceFolderName: string, destinationFolderName: string) {
++function packageTask(type: string, platform: string, arch: string, sourceFolderName: string, destinationFolderName: string, isSlim = false) {
  	const destination = path.join(BUILD_ROOT, destinationFolderName);
  
  	return () => {
-@@ -326,6 +336,7 @@ function packageTask(type, platform, arc
+@@ -328,6 +338,7 @@ function packageTask(type: string, platf
  			}));
  
  		const license = gulp.src(['remote/LICENSE'], { base: 'remote', allowEmpty: true });
@@ -43,7 +54,7 @@ Index: third-party-src/build/gulpfile.reh.js
  
  		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
  
-@@ -341,7 +352,10 @@ function packageTask(type, platform, arc
+@@ -343,7 +354,10 @@ function packageTask(type: string, platf
  			.pipe(jsFilter.restore);
  
  		const nodePath = `.build/node/v${nodeVersion}/${platform}-${arch}`;
@@ -53,9 +64,9 @@ Index: third-party-src/build/gulpfile.reh.js
 +		emptyTask.end();
 +		const node = isSlim ? emptyTask : gulp.src(`${nodePath}/**`, { base: nodePath, dot: true });
  
- 		let web = [];
+ 		let web: NodeJS.ReadWriteStream[] = [];
  		if (type === 'reh-web') {
-@@ -357,6 +371,7 @@ function packageTask(type, platform, arc
+@@ -359,6 +373,7 @@ function packageTask(type: string, platf
  			packageJsonStream,
  			productJsonStream,
  			license,
@@ -63,32 +74,32 @@ Index: third-party-src/build/gulpfile.reh.js
  			sources,
  			deps,
  			node,
-@@ -383,20 +398,24 @@ function packageTask(type, platform, arc
+@@ -385,20 +400,24 @@ function packageTask(type: string, platf
  					.pipe(rename(`bin/${product.serverApplicationName}.cmd`)),
  			);
  		} else if (platform === 'linux' || platform === 'alpine' || platform === 'darwin') {
-+			const nodePath = isSlim ? 'node' : "$ROOT/node";
++			const nodePathStr = isSlim ? 'node' : '"$ROOT/node"';
  			result = es.merge(result,
  				gulp.src(`resources/server/bin/remote-cli/${platform === 'darwin' ? 'code-darwin.sh' : 'code-linux.sh'}`, { base: '.' })
  					.pipe(replace('@@VERSION@@', version))
- 					.pipe(replace('@@COMMIT@@', commit))
+ 					.pipe(replace('@@COMMIT@@', commit || ''))
  					.pipe(replace('@@APPNAME@@', product.applicationName))
-+					.pipe(replace('"$ROOT/node"', nodePath))
++					.pipe(replace('"$ROOT/node"', nodePathStr))
  					.pipe(rename(`bin/remote-cli/${product.applicationName}`))
  					.pipe(util.setExecutableBit()),
  				gulp.src(`resources/server/bin/helpers/${platform === 'darwin' ? 'browser-darwin.sh' : 'browser-linux.sh'}`, { base: '.' })
  					.pipe(replace('@@VERSION@@', version))
- 					.pipe(replace('@@COMMIT@@', commit))
+ 					.pipe(replace('@@COMMIT@@', commit || ''))
  					.pipe(replace('@@APPNAME@@', product.applicationName))
-+					.pipe(replace('"$ROOT/node"', nodePath))
++					.pipe(replace('"$ROOT/node"', nodePathStr))
  					.pipe(rename(`bin/helpers/browser.sh`))
  					.pipe(util.setExecutableBit()),
  				gulp.src(`resources/server/bin/${platform === 'darwin' ? 'code-server-darwin.sh' : 'code-server-linux.sh'}`, { base: '.' })
-+					.pipe(replace('"$ROOT/node"', nodePath))
++					.pipe(replace('"$ROOT/node"', nodePathStr))
  					.pipe(rename(`bin/${product.serverApplicationName}`))
  					.pipe(util.setExecutableBit())
  			);
-@@ -463,6 +482,13 @@ function tweakProductForServerWeb(produc
+@@ -465,6 +484,13 @@ function tweakProductForServerWeb(produc
  		['', 'min'].forEach(minified => {
  			const sourceFolderName = `out-vscode-${type}${dashed(minified)}`;
  			const destinationFolderName = `vscode-${type}${dashed(platform)}${dashed(arch)}`;
@@ -102,108 +113,3 @@ Index: third-party-src/build/gulpfile.reh.js
  
  			const serverTaskCI = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci`, task.series(
  				compileNativeExtensionsBuildTask,
-Index: third-party-src/build/npm/postinstall.js
-===================================================================
---- third-party-src.orig/build/npm/postinstall.js
-+++ third-party-src/build/npm/postinstall.js
-@@ -170,5 +170,3 @@ for (let dir of dirs) {
- 	npmInstall(dir, opts);
- }
- 
--cp.execSync('git config pull.rebase merges');
--cp.execSync('git config blame.ignoreRevsFile .git-blame-ignore-revs');
-Index: third-party-src/build/lib/compilation.js
-===================================================================
---- third-party-src.orig/build/lib/compilation.js
-+++ third-party-src/build/lib/compilation.js
-@@ -149,7 +149,7 @@ function compileTask(src, out, build, op
-         }
-         // mangle: TypeScript to TypeScript
-         let mangleStream = event_stream_1.default.through();
--        if (build && !options.disableMangle) {
-+        if (build && !options.disableMangle && !process.env.DISABLE_MANGLE) {
-             let ts2tsMangler = new index_1.Mangler(compile.projectPath, (...data) => (0, fancy_log_1.default)(ansi_colors_1.default.blue('[mangler]'), ...data), { mangleExports: true, manglePrivateFields: true });
-             const newContentsByFileName = ts2tsMangler.computeNewFileContents(new Set(['saveState']));
-             mangleStream = event_stream_1.default.through(async function write(data) {
-Index: third-party-src/build/lib/dependencies.js
-===================================================================
---- third-party-src.orig/build/lib/dependencies.js
-+++ third-party-src/build/lib/dependencies.js
-@@ -24,13 +24,14 @@ function getNpmProductionDependencies(fo
-             if (/ELSPROBLEMS/.test(match[0])) {
-                 continue;
-             }
--            else if (/invalid: xterm/.test(match[0])) {
-+            else if (/(invalid|extraneous|missing):/.test(match[0])) {
-                 continue;
-             }
-             else if (/A complete log of this run/.test(match[0])) {
--                continue;
-+                break;
-             }
-             else {
-+                console.log(match[0]);
-                 throw err;
-             }
-         }
-Index: third-party-src/build/gulpfile.extensions.js
-===================================================================
---- third-party-src.orig/build/gulpfile.extensions.js
-+++ third-party-src/build/gulpfile.extensions.js
-@@ -102,7 +102,7 @@ const tasks = compilations.map(function
- 		headerOut = relativeDirname.substr(index + 1) + '/out';
- 	}
- 
--	function createPipeline(build, emitError, transpileOnly) {
-+	function createPipeline(build, emitError, transpileOnly = true) { // transpile to avoid spurious type errors
- 		const tsb = require('./lib/tsb');
- 		const sourcemaps = require('gulp-sourcemaps');
- 
-Index: third-party-src/build/lib/optimize.js
-===================================================================
---- third-party-src.orig/build/lib/optimize.js
-+++ third-party-src/build/lib/optimize.js
-@@ -144,6 +144,7 @@ function bundleESMTask(opts) {
-                 outdir: path_1.default.join(REPO_ROOT_PATH, opts.src),
-                 write: false, // enables res.outputFiles
-                 metafile: true, // enables res.metafile
-+                treeShaking: true,
-                 // minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
-             }).then(res => {
-                 for (const file of res.outputFiles) {
-Index: third-party-src/build/lib/optimize.ts
-===================================================================
---- third-party-src.orig/build/lib/optimize.ts
-+++ third-party-src/build/lib/optimize.ts
-@@ -145,6 +145,7 @@ function bundleESMTask(opts: IBundleESMT
- 				outdir: path.join(REPO_ROOT_PATH, opts.src),
- 				write: false, // enables res.outputFiles
- 				metafile: true, // enables res.metafile
-+				treeShaking: true,
- 				// minify: NOT enabled because we have a separate minify task that takes care of the TSLib banner as well
- 			}).then(res => {
- 				for (const file of res.outputFiles) {
-Index: third-party-src/build/lib/getVersion.js
-===================================================================
---- third-party-src.orig/build/lib/getVersion.js
-+++ third-party-src/build/lib/getVersion.js
-@@ -44,6 +44,6 @@ function getVersion(root) {
-     if (!version || !/^[0-9a-f]{40}$/i.test(version.trim())) {
-         version = git.getVersion(root);
-     }
--    return version;
-+    return version || "unknown";
- }
- //# sourceMappingURL=getVersion.js.map
-\ No newline at end of file
-Index: third-party-src/build/lib/getVersion.ts
-===================================================================
---- third-party-src.orig/build/lib/getVersion.ts
-+++ third-party-src/build/lib/getVersion.ts
-@@ -12,5 +12,5 @@ export function getVersion(root: string)
- 		version = git.getVersion(root);
- 	}
- 
--	return version;
-+	return version || "unknown";
- }
