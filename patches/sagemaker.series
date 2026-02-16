@@ -38,6 +38,7 @@ sagemaker/sagemaker-open-notebook-extension.diff
 sagemaker/sagemaker-ui-dark-theme.diff
 sagemaker/sagemaker-ui-post-startup.diff
 sagemaker/sagemaker-extension-smus-support.diff
+sagemaker/sagemaker-extension-cb-notification.diff
 sagemaker/post-startup-notifications.diff
 sagemaker/sagemaker-extensions-sync.diff
 sagemaker/fix-port-forwarding.diff
