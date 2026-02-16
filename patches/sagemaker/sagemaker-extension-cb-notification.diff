@@ -1,0 +1,426 @@
+Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-extension/src/constant.ts
++++ code-editor-src/extensions/sagemaker-extension/src/constant.ts
+@@ -110,3 +110,28 @@ export const getSmusVscodePortalUrl = (m
+ 
+ 	return `https://${DataZoneDomainId}.sagemaker.${DataZoneDomainRegion}.on.aws/projects/${DataZoneProjectId}/overview`;
+ }
++
++// Capacity Block notification constants
++export const THIRTY_MINUTES_INTERVAL_MILLIS = 30 * 60 * 1000;
++export const TEN_MINUTES_INTERVAL_MILLIS = 10 * 60 * 1000;
++export const TWO_MINUTES_INTERVAL_MILLIS = 2 * 60 * 1000;
++export const EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS = 30 * 60 * 1000;
++export const CB_EXTENSION_TOLERANCE_MILLIS = 1 * 60 * 1000; // 1 minute tolerance for CB extension detection
++
++export const SAGEMAKER_INTERNAL_METADATA_PATH = '/opt/.sagemakerinternal/internal-metadata.json';
++
++export const CB_WARNING_30MIN_HEADER = 'Capacity Block Expiring Soon';
++export const CB_WARNING_10MIN_HEADER = 'Capacity Block Expiring Soon';
++export const CB_WARNING_2MIN_HEADER = 'Critical: Capacity Block Expiring';
++export const CB_WARNING_MESSAGE_TEMPLATE = 'Your capacity block will expire in {minutes} minutes. Save your work now.';
++export const CB_SAVE_BUTTON = 'Save All';
++export const CB_DISMISS_BUTTON = 'Dismiss';
++
++export interface CapacityBlockMetadata {
++  CapacityBlockEndTime?: number;
++  CapacityBlockId?: string;
++}
++
++export interface SagemakerResourceInternalMetadata {
++  CapacityBlock?: CapacityBlockMetadata;
++}
+Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-extension/src/extension.ts
++++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
+@@ -5,15 +5,27 @@ import {
+     FIFTEEN_MINUTES_INTERVAL_MILLIS,
+     FIVE_MINUTES_INTERVAL_MILLIS,
+     SAGEMAKER_METADATA_PATH,
++    SAGEMAKER_INTERNAL_METADATA_PATH,
+     SIGN_IN_BUTTON,
+     WARNING_BUTTON_REMIND_ME_IN_5_MINS,
+     WARNING_BUTTON_SAVE,
+     WARNING_BUTTON_SAVE_AND_RENEW_SESSION,
+     SagemakerCookie,
+     SagemakerResourceMetadata,
++    SagemakerResourceInternalMetadata,
+     getExpiryTime,
+-    getSmusVscodePortalUrl
++    getSmusVscodePortalUrl,
++    THIRTY_MINUTES_INTERVAL_MILLIS,
++    TEN_MINUTES_INTERVAL_MILLIS,
++    TWO_MINUTES_INTERVAL_MILLIS,
++    EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS,
++    CB_EXTENSION_TOLERANCE_MILLIS
+ } from "./constant";
++import {
++    getCapacityBlockEndTime,
++    showToastNotification,
++    showModalNotification
++} from './capacityBlockWarning';
+ import * as console from "console";
+ 
+ 
+@@ -23,6 +35,18 @@ const ENABLE_AUTO_UPDATE_COMMAND = 'work
+ // Global redirect URL for SMUS environment
+ let smusRedirectUrl: string | null = null;
+ 
++// Capacity Block notification timeouts
++let cbTimeout30: NodeJS.Timeout | null = null;
++let cbTimeout10: NodeJS.Timeout | null = null;
++let cbTimeout2: NodeJS.Timeout | null = null;
++let cbOriginalEndTime: number | null = null;
++let cbReschedulerInterval: NodeJS.Timeout | null = null;
++
++// Maximum safe setTimeout delay (~24.8 days)
++const MAX_TIMEOUT_MS = 2147483647;
++// Check every 7 days if we need to schedule notifications
++const CB_RECHECK_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
++
+ function fetchMetadata(): SagemakerResourceMetadata | null {
+     try {
+         const data = fs.readFileSync(SAGEMAKER_METADATA_PATH, 'utf-8');
+@@ -38,6 +62,35 @@ function initializeSmusRedirectUrl() {
+     smusRedirectUrl = getSmusVscodePortalUrl(fetchMetadata());
+ }
+ 
++function fetchInternalMetadata(): SagemakerResourceInternalMetadata | null {
++    try {
++        const data = fs.readFileSync(SAGEMAKER_INTERNAL_METADATA_PATH, 'utf-8');
++        return JSON.parse(data) as SagemakerResourceInternalMetadata;
++    } catch (error) {
++        // fail silently not to block users
++        console.error('Error reading internal metadata file:', error);
++        return null;
++    }
++}
++
++// Test helper to inject metadata for testing
++let _testInternalMetadata: SagemakerResourceInternalMetadata | null | undefined = undefined;
++
++export function _testSetInternalMetadata(metadata: SagemakerResourceInternalMetadata | null): void {
++    _testInternalMetadata = metadata;
++}
++
++export function _testClearInternalMetadata(): void {
++    _testInternalMetadata = undefined;
++}
++
++function getInternalMetadataForTesting(): SagemakerResourceInternalMetadata | null {
++    if (_testInternalMetadata !== undefined) {
++        return _testInternalMetadata;
++    }
++    return fetchInternalMetadata();
++}
++
+ function showWarningDialog() {
+     vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(response => {
+ 
+@@ -162,6 +215,175 @@ function renderExtensionAutoUpgradeDisab
+     }
+ }
+ 
++/**
++ * Initializes capacity block monitoring system
++ * Called during extension activation
++ */
++function initializeCapacityBlockMonitoring(): void {
++    const internalMetadata = getInternalMetadataForTesting();
++    const endTime = getCapacityBlockEndTime(internalMetadata);
++
++    if (!endTime) {
++        console.log('[CB] No valid CB end time found, skipping CB monitoring');
++        return;
++    }
++
++    const timeUntilExpiry = endTime - Date.now();
++    console.log(`[CB] Initializing CB monitoring with end time: ${new Date(endTime).toISOString()} (${Math.floor(timeUntilExpiry / 60000)} minutes from now)`);
++    
++    cbOriginalEndTime = endTime;
++    scheduleCapacityBlockNotifications(cbOriginalEndTime);
++}
++
++/**
++ * Schedules all three capacity block notifications, handling setTimeout limits
++ * For end times beyond 24 days, uses 7-day periodic checks to reschedule
++ * @param endTime Capacity block end time as Unix timestamp (ms)
++ */
++function scheduleCapacityBlockNotifications(endTime: number): void {
++    const now = Date.now();
++
++    const delay30 = endTime - now - EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS - THIRTY_MINUTES_INTERVAL_MILLIS;
++    const delay10 = endTime - now - EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS - TEN_MINUTES_INTERVAL_MILLIS;
++    const delay2 = endTime - now - EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS - TWO_MINUTES_INTERVAL_MILLIS;
++
++    // If the 30-minute notification is beyond setTimeout limit, schedule a 7-day recheck
++    if (delay30 > MAX_TIMEOUT_MS) {
++        const daysUntil30Min = Math.floor(delay30 / 86400000);
++        console.log(`[CB] End time ${daysUntil30Min} days away (beyond setTimeout limit). Scheduling 7-day recheck`);
++        
++        cbReschedulerInterval = setTimeout(() => {
++            console.log('[CB] 7-day recheck triggered, re-reading metadata and rescheduling');
++            const internalMetadata = getInternalMetadataForTesting();
++            const currentEndTime = getCapacityBlockEndTime(internalMetadata);
++            
++            if (!currentEndTime) {
++                console.warn('[CB] No valid end time found during recheck, stopping CB monitoring');
++                return;
++            }
++            
++            // Recursively reschedule with fresh metadata
++            cbOriginalEndTime = currentEndTime;
++            scheduleCapacityBlockNotifications(currentEndTime);
++        }, CB_RECHECK_INTERVAL_MS);
++        return;
++    }
++
++    // All notifications are within setTimeout range, schedule them
++    console.log('[CB] Within scheduling window, setting up all notifications');
++    
++    if (delay30 > 0) {
++        cbTimeout30 = setTimeout(() => {
++            console.log('[CB] Triggering 30-minute notification');
++            validateAndNotify(endTime, 30, 'toast');
++        }, delay30);
++        console.log(`[CB] Scheduled 30-minute notification in ${Math.floor(delay30 / 60000)} minutes`);
++    }
++
++    if (delay10 > 0) {
++        cbTimeout10 = setTimeout(() => {
++            console.log('[CB] Triggering 10-minute notification');
++            validateAndNotify(endTime, 10, 'toast');
++        }, delay10);
++        console.log(`[CB] Scheduled 10-minute notification in ${Math.floor(delay10 / 60000)} minutes`);
++    }
++
++    if (delay2 > 0) {
++        cbTimeout2 = setTimeout(() => {
++            console.log('[CB] Triggering 2-minute notification');
++            validateAndNotify(endTime, 2, 'modal');
++        }, delay2);
++        console.log(`[CB] Scheduled 2-minute notification in ${Math.floor(delay2 / 60000)} minutes`);
++    }
++}
++
++/**
++ * Validates current end time and shows notification or reschedules if CB was extended
++ * @param originalEndTime Original end time when notification was scheduled
++ * @param targetMinutes Target minutes for this notification (30, 10, or 2)
++ * @param notificationType Type of notification to show
++ */
++async function validateAndNotify(
++    originalEndTime: number,
++    targetMinutes: number,
++    notificationType: 'toast' | 'modal'
++): Promise<void> {
++    const internalMetadata = getInternalMetadataForTesting();
++    const currentEndTime = getCapacityBlockEndTime(internalMetadata);
++
++    if (!currentEndTime) {
++        console.warn('[CB] Could not read current end time, showing notification with original time');
++        // Show notification with original time
++        if (notificationType === 'toast') {
++            await showToastNotification(targetMinutes * 60 * 1000);
++        } else {
++            await showModalNotification();
++        }
++        return;
++    }
++
++    const timeDiff = Math.abs(currentEndTime - originalEndTime);
++
++    if (timeDiff > CB_EXTENSION_TOLERANCE_MILLIS) {
++        // CB was extended - reschedule all notifications
++        console.log(`[CB] CB extended detected (${Math.floor(timeDiff / 60000)} minute difference), rescheduling notifications`);
++        cancelAllCBNotifications();
++        cbOriginalEndTime = currentEndTime;
++        scheduleCapacityBlockNotifications(currentEndTime);
++        return;
++    }
++
++    // Within tolerance - show notification
++    console.log(`[CB] Showing ${targetMinutes}-minute ${notificationType} notification`);
++    if (notificationType === 'toast') {
++        await showToastNotification(targetMinutes * 60 * 1000);
++    } else {
++        await showModalNotification();
++    }
++}
++
++/**
++ * Cancels all scheduled capacity block notifications and recheck intervals
++ */
++function cancelAllCBNotifications(): void {
++    console.log('[CB] Cancelling all CB notifications and recheck intervals');
++    if (cbTimeout30) {
++        clearTimeout(cbTimeout30);
++        cbTimeout30 = null;
++    }
++    if (cbTimeout10) {
++        clearTimeout(cbTimeout10);
++        cbTimeout10 = null;
++    }
++    if (cbTimeout2) {
++        clearTimeout(cbTimeout2);
++        cbTimeout2 = null;
++    }
++    if (cbReschedulerInterval) {
++        clearTimeout(cbReschedulerInterval);
++        cbReschedulerInterval = null;
++    }
++}
++
++// Export for testing
++export function _testGetCBTimers() {
++    return {
++        cbTimeout30,
++        cbTimeout10,
++        cbTimeout2,
++        cbReschedulerInterval,
++        cbOriginalEndTime
++    };
++}
++
++export function _testInitializeCapacityBlockMonitoring() {
++    return initializeCapacityBlockMonitoring();
++}
++
++export function _testCancelAllCBNotifications() {
++    return cancelAllCBNotifications();
++}
++
+ export function activate(context: vscode.ExtensionContext) {
+ 
+     // TODO: log activation of extension
+@@ -179,6 +401,9 @@ export function activate(context: vscode
+         updateStatusItemWithMetadata(context);
+     });
+ 
++    // Initialize capacity block monitoring
++    initializeCapacityBlockMonitoring();
++
+     // render warning message regarding auto upgrade disabled
+     renderExtensionAutoUpgradeDisabledNotification();
+ }
+@@ -190,3 +415,11 @@ export function activate(context: vscode
+ function getRedirectUrl(sagemakerCookie: SagemakerCookie): string {
+     return smusRedirectUrl || sagemakerCookie.redirectURL;
+ }
++
++/**
++ * Called when extension is deactivated
++ */
++export function deactivate(): void {
++    console.log('[CB] Deactivating Sagemaker Extension, cleaning up CB notifications');
++    cancelAllCBNotifications();
++}
+
+Index: code-editor-src/extensions/sagemaker-extension/src/capacityBlockWarning.ts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-extension/src/capacityBlockWarning.ts
+@@ -0,0 +1,101 @@
++import * as vscode from 'vscode';
++import {
++  CB_WARNING_MESSAGE_TEMPLATE,
++  CB_SAVE_BUTTON,
++  CB_DISMISS_BUTTON,
++  CB_WARNING_30MIN_HEADER,
++  CB_WARNING_10MIN_HEADER,
++  CB_WARNING_2MIN_HEADER,
++  CapacityBlockMetadata,
++  SagemakerResourceInternalMetadata
++} from './constant';
++
++/**
++ * Reads capacity block metadata from internal metadata object
++ * @param internalMetadata The internal metadata object
++ * @returns CapacityBlockMetadata or null if not found
++ */
++export function readCapacityBlockMetadata(internalMetadata: SagemakerResourceInternalMetadata | null): CapacityBlockMetadata | null {
++  if (!internalMetadata) {
++    console.error('[CB] Internal metadata is null');
++    return null;
++  }
++  return internalMetadata.CapacityBlock || null;
++}
++
++/**
++ * Extracts and validates capacity block end time
++ * @param internalMetadata The internal metadata object
++ * @returns End time as Unix timestamp (ms) or null if invalid
++ */
++export function getCapacityBlockEndTime(internalMetadata: SagemakerResourceInternalMetadata | null): number | null {
++  const metadata = readCapacityBlockMetadata(internalMetadata);
++  if (!metadata?.CapacityBlockEndTime) {
++    return null;
++  }
++
++  // Convert Unix timestamp from seconds to milliseconds
++  const endTime = metadata.CapacityBlockEndTime * 1000;
++
++  if (isNaN(endTime) || endTime <= Date.now()) {
++    console.error('[CB] Invalid or past end time:', metadata.CapacityBlockEndTime);
++    return null;
++  }
++
++  return endTime;
++}
++
++/**
++ * Shows a toast notification for capacity block expiration
++ * @param timeRemaining Time remaining in milliseconds
++ */
++export async function showToastNotification(timeRemaining: number): Promise<void> {
++  try {
++    const minutes = Math.floor(timeRemaining / 60000);
++    const message = CB_WARNING_MESSAGE_TEMPLATE.replace('{minutes}', minutes.toString());
++    
++    // Select appropriate header based on time remaining
++    const header = minutes >= 20 ? CB_WARNING_30MIN_HEADER : CB_WARNING_10MIN_HEADER;
++    
++    console.log(`[CB] Showing toast notification: ${minutes} minutes remaining`);
++    
++    const action = await vscode.window.showWarningMessage(
++      `${header}: ${message}`,
++      CB_DISMISS_BUTTON,
++      CB_SAVE_BUTTON
++    );
++
++    if (action === CB_SAVE_BUTTON) {
++      console.log('[CB] User selected Save All');
++      await vscode.workspace.saveAll();
++    } else if (action === CB_DISMISS_BUTTON) {
++      console.log('[CB] User dismissed notification');
++    }
++  } catch (error) {
++    console.error('[CB] Failed to show toast notification:', error);
++  }
++}
++
++/**
++ * Shows a modal dialog for critical capacity block expiration (2 minutes)
++ */
++export async function showModalNotification(): Promise<void> {
++  try {
++    const message = CB_WARNING_MESSAGE_TEMPLATE.replace('{minutes}', '2');
++    
++    console.log('[CB] Showing critical modal notification: 2 minutes remaining');
++    
++    const action = await vscode.window.showWarningMessage(
++      `${CB_WARNING_2MIN_HEADER}: ${message}`,
++      { modal: true },
++      CB_SAVE_BUTTON
++    );
++
++    if (action === CB_SAVE_BUTTON) {
++      console.log('[CB] User selected Save All from modal');
++      await vscode.workspace.saveAll();
++    }
++  } catch (error) {
++    console.error('[CB] Failed to show modal notification:', error);
++  }
++}
