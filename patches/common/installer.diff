@@ -28,7 +28,7 @@ Index: third-party-src/build/gulpfile.reh.ts
 +	if (process.env['CUSTOM_NODE_PATH']) {
 +		log(`Bundling custom Node from '${process.env['CUSTOM_NODE_PATH']}'...`);
 +		return gulp.src(process.env['CUSTOM_NODE_PATH'])
-+			.pipe(flatmap(stream => stream.pipe(gunzip()).pipe(untar())))
++			.pipe(flatmap(stream => stream.pipe(gunzip()).pipe(util.untar())))
 +			.pipe(filter('**/node'))
 +			.pipe(util.setExecutableBit('**'))
 +			.pipe(rename('node'));
