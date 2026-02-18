@@ -17,6 +17,15 @@ Index: third-party-src/extensions/css-language-features/package.json
 ===================================================================
 --- third-party-src.orig/extensions/css-language-features/package.json
 +++ third-party-src/extensions/css-language-features/package.json
+@@ -994,7 +994,7 @@
+     ]
+   },
+   "dependencies": {
+-    "vscode-languageclient": "^10.0.0-next.18",
++    "vscode-languageclient": "10.0.0-next.9",
+     "vscode-uri": "^3.1.0"
+   },
+   "devDependencies": {
 @@ -1003,5 +1003,13 @@
    "repository": {
      "type": "git",
