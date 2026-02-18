@@ -1,18 +1,5 @@
 Package overrides that is needed for producing internal builds.
 
-Index: third-party-src/package.json
-===================================================================
---- third-party-src.orig/package.json
-+++ third-party-src/package.json
-@@ -102,7 +102,7 @@
-     "minimist": "^1.2.6",
-     "native-is-elevated": "0.7.0",
-     "native-watchdog": "^1.4.1",
--    "node-pty": "^1.1.0-beta33",
-+    "node-pty": "1.1.0-beta33",
-     "open": "^8.4.2",
-     "tas-client-umd": "0.2.0",
-     "v8-inspect-profiler": "^0.1.1",
 Index: third-party-src/extensions/emmet/package.json
 ===================================================================
 --- third-party-src.orig/extensions/emmet/package.json
@@ -34,7 +21,7 @@ Index: third-party-src/extensions/css-language-features/package.json
      ]
    },
    "dependencies": {
--    "vscode-languageclient": "^10.0.0-next.15",
+-    "vscode-languageclient": "^10.0.0-next.18",
 +    "vscode-languageclient": "10.0.0-next.9",
      "vscode-uri": "^3.1.0"
    },
@@ -57,16 +44,16 @@ Index: third-party-src/extensions/html-language-features/package.json
 ===================================================================
 --- third-party-src.orig/extensions/html-language-features/package.json
 +++ third-party-src/extensions/html-language-features/package.json
-@@ -259,7 +259,7 @@
+@@ -265,7 +265,7 @@
    },
    "dependencies": {
      "@vscode/extension-telemetry": "^0.9.8",
--    "vscode-languageclient": "^10.0.0-next.15",
+-    "vscode-languageclient": "^10.0.0-next.18",
 +    "vscode-languageclient": "10.0.0-next.9",
      "vscode-uri": "^3.1.0"
    },
    "devDependencies": {
-@@ -268,5 +268,13 @@
+@@ -274,5 +274,13 @@
    "repository": {
      "type": "git",
      "url": "https://github.com/microsoft/vscode.git"
@@ -84,16 +71,16 @@ Index: third-party-src/extensions/json-language-features/package.json
 ===================================================================
 --- third-party-src.orig/extensions/json-language-features/package.json
 +++ third-party-src/extensions/json-language-features/package.json
-@@ -170,7 +170,7 @@
+@@ -171,7 +171,7 @@
    "dependencies": {
      "@vscode/extension-telemetry": "^0.9.8",
      "request-light": "^0.8.0",
--    "vscode-languageclient": "^10.0.0-next.15"
+-    "vscode-languageclient": "^10.0.0-next.18"
 +    "vscode-languageclient": "10.0.0-next.9"
    },
    "devDependencies": {
      "@types/node": "22.x"
-@@ -178,5 +178,13 @@
+@@ -179,5 +179,13 @@
    "repository": {
      "type": "git",
      "url": "https://github.com/microsoft/vscode.git"
@@ -114,8 +101,8 @@ Index: third-party-src/extensions/css-language-features/server/package.json
 @@ -12,7 +12,7 @@
    "dependencies": {
      "@vscode/l10n": "^0.0.18",
-     "vscode-css-languageservice": "^6.3.6",
--    "vscode-languageserver": "^10.0.0-next.13",
+     "vscode-css-languageservice": "^6.3.9",
+-    "vscode-languageserver": "^10.0.0-next.15",
 +    "vscode-languageserver": "10.0.0-next.7",
      "vscode-uri": "^3.1.0"
    },
@@ -140,9 +127,9 @@ Index: third-party-src/extensions/html-language-features/server/package.json
 +++ third-party-src/extensions/html-language-features/server/package.json
 @@ -12,8 +12,8 @@
      "@vscode/l10n": "^0.0.18",
-     "vscode-css-languageservice": "^6.3.6",
-     "vscode-html-languageservice": "^5.5.0",
--    "vscode-languageserver": "^10.0.0-next.13",
+     "vscode-css-languageservice": "^6.3.9",
+     "vscode-html-languageservice": "^5.6.1",
+-    "vscode-languageserver": "^10.0.0-next.15",
 -    "vscode-languageserver-textdocument": "^1.0.12",
 +    "vscode-languageserver": "10.0.0-next.7",
 +    "vscode-languageserver-textdocument": "1.0.12",
@@ -170,8 +157,8 @@ Index: third-party-src/extensions/json-language-features/server/package.json
 @@ -16,7 +16,7 @@
      "jsonc-parser": "^3.3.1",
      "request-light": "^0.8.0",
-     "vscode-json-languageservice": "^5.6.0",
--    "vscode-languageserver": "^10.0.0-next.13",
+     "vscode-json-languageservice": "^5.6.4",
+-    "vscode-languageserver": "^10.0.0-next.15",
 +    "vscode-languageserver": "10.0.0-next.7",
      "vscode-uri": "^3.1.0"
    },
@@ -194,7 +181,7 @@ Index: third-party-src/extensions/css-language-features/server/package-lock.json
 ===================================================================
 --- third-party-src.orig/extensions/css-language-features/server/package-lock.json
 +++ third-party-src/extensions/css-language-features/server/package-lock.json
-@@ -93,12 +93,6 @@
+@@ -94,12 +94,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
      },
@@ -211,7 +198,7 @@ Index: third-party-src/extensions/html-language-features/server/package-lock.jso
 ===================================================================
 --- third-party-src.orig/extensions/html-language-features/server/package-lock.json
 +++ third-party-src/extensions/html-language-features/server/package-lock.json
-@@ -107,12 +107,6 @@
+@@ -108,12 +108,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
      },
@@ -228,7 +215,7 @@ Index: third-party-src/extensions/json-language-features/server/package-lock.jso
 ===================================================================
 --- third-party-src.orig/extensions/json-language-features/server/package-lock.json
 +++ third-party-src/extensions/json-language-features/server/package-lock.json
-@@ -109,12 +109,6 @@
+@@ -110,12 +110,6 @@
          "vscode-languageserver-types": "3.17.6-next.6"
        }
      },
@@ -279,7 +266,7 @@ Index: third-party-src/extensions/html-language-features/server/src/htmlServer.t
  } from './modes/languageModes';
  
  import { format } from './modes/formatting';
-@@ -215,9 +214,6 @@ export function startServer(connection:
+@@ -216,9 +215,6 @@ export function startServer(connection:
  				interFileDependencies: false,
  				workspaceDiagnostics: false
  			},
@@ -289,7 +276,7 @@ Index: third-party-src/extensions/html-language-features/server/src/htmlServer.t
  		};
  		return { capabilities };
  	});
-@@ -588,18 +584,6 @@ export function startServer(connection:
+@@ -590,18 +586,6 @@ export function startServer(connection:
  		});
  	});
  
