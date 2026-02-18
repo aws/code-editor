@@ -20,6 +20,18 @@ jobs:
           BUILD_TARGET: ${{ matrix.build-target }}
         run: |
           echo "Starting Build Workflow for target: $BUILD_TARGET"
+
+      - name: Setup swap
+        run: |
+          # Remove existing swap if present
+          sudo swapoff -a || true
+          sudo rm -f /swapfile /mnt/swapfile || true
+          # Create new swap
+          sudo fallocate -l 12G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
         
       - name: Set up build environment
         run: |
