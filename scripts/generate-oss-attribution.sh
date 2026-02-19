@@ -6,6 +6,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_SRC_DIR="$ROOT_DIR/code-editor-src"
 THIRD_PARTY_SRC_DIR="$ROOT_DIR/third-party-src"
 BUILD_DIR="$ROOT_DIR/build"
+OSS_ATTRIBUTION_DIR="$ROOT_DIR/build-tools/oss-attribution"
+OSS_ATTRIBUTION_PKG_DIR="$OSS_ATTRIBUTION_DIR/oss-attribution-generator"
 
 check_excluded_package_licenses() {
     local target="$1"
@@ -14,18 +16,18 @@ check_excluded_package_licenses() {
     echo "Checking excluded packages for license changes in $target..."
     
     # Check if excluded packages file exists
-    if [[ ! -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json" ]]; then
+    if [[ ! -f "$OSS_ATTRIBUTION_DIR/excluded-packages.json" ]]; then
         echo "No excluded packages JSON file found, skipping license change check"
         return 0
     fi
     
     # Read excluded packages with their approved licenses from JSON
     local packages
-    packages=$(jq -r 'keys[]' "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
+    packages=$(jq -r 'keys[]' "$OSS_ATTRIBUTION_DIR/excluded-packages.json")
     
     while IFS= read -r package_name; do
         local approved_license
-        approved_license=$(jq -r ".\"$package_name\"" "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
+        approved_license=$(jq -r ".\"$package_name\"" "$OSS_ATTRIBUTION_DIR/excluded-packages.json")
         
         echo "Checking $package_name for license changes (approved: $approved_license)..."
         
@@ -51,8 +53,8 @@ check_unapproved_licenses() {
     
     # Build excluded packages list from JSON file
     local excluded_packages=""
-    if [[ -f "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json" ]]; then
-        excluded_packages=$(jq -r 'keys | join(";")' "$ROOT_DIR/build-tools/oss-attribution/excluded-packages.json")
+    if [[ -f "$OSS_ATTRIBUTION_DIR/excluded-packages.json" ]]; then
+        excluded_packages=$(jq -r 'keys | join(";")' "$OSS_ATTRIBUTION_DIR/excluded-packages.json")
     fi
     
     local output
@@ -80,7 +82,7 @@ generate_oss_attribution() {
     local code_oss_version=$(jq -r ".version" "$THIRD_PARTY_SRC_DIR/package.json")
     local code_oss_license=$(cat "$THIRD_PARTY_SRC_DIR/LICENSE.txt")
     local code_oss_third_party_licenses=$(cat "$THIRD_PARTY_SRC_DIR/ThirdPartyNotices.txt")
-    additional_third_party_licenses=$(cat "$ROOT_DIR/build-tools/oss-attribution/additional-third-party-licenses.txt")
+    additional_third_party_licenses=$(cat "$OSS_ATTRIBUTION_DIR/additional-third-party-licenses.txt")
 
     # Prepare source for target if specified
     if [ -n "$target" ]; then
@@ -92,10 +94,8 @@ generate_oss_attribution() {
         check_unapproved_licenses "$target" "$BUILD_SRC_DIR"
     fi
 
-    # Read OSS attribution generator version from packageversionrc
-    source "$ROOT_DIR/.packageversionrc"
-    
-    npx --yes --package @electrovir/oss-attribution-generator@$oss_attribution_generator_version -- generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
+    npm ci --prefix "$OSS_ATTRIBUTION_PKG_DIR"
+    npx --prefix "$OSS_ATTRIBUTION_PKG_DIR" generate-attribution --baseDir "$BUILD_SRC_DIR" --outputDir "$oss_attribution_dir"
     attribution_licenses=$(cat "$oss_attribution_dir/attribution.txt")
 
     read_status=0
@@ -170,10 +170,8 @@ generate_unified_oss_attribution() {
     echo "Generating unified OSS attribution for all targets"
     mkdir -p "$BUILD_DIR/private/oss-attribution"
     
-    # Read OSS attribution generator version from packageversionrc
-    source "$ROOT_DIR/.packageversionrc"
-    
-    npx --yes --package @electrovir/oss-attribution-generator@$oss_attribution_generator_version -- generate-attribution \
+    npm ci --prefix "$OSS_ATTRIBUTION_PKG_DIR"
+    npx --prefix "$OSS_ATTRIBUTION_PKG_DIR" generate-attribution \
         -b "${target_dirs[0]}" "${target_dirs[1]}" "${target_dirs[2]}" "${target_dirs[3]}" \
         --outputDir "$BUILD_DIR/private/oss-attribution"
     
@@ -181,7 +179,7 @@ generate_unified_oss_attribution() {
     local code_oss_version=$(jq -r ".version" "$THIRD_PARTY_SRC_DIR/package.json")
     local code_oss_license=$(cat "$THIRD_PARTY_SRC_DIR/LICENSE.txt")
     local code_oss_third_party_licenses=$(cat "$THIRD_PARTY_SRC_DIR/ThirdPartyNotices.txt")
-    local additional_third_party_licenses=$(cat "$ROOT_DIR/build-tools/oss-attribution/additional-third-party-licenses.txt")
+    local additional_third_party_licenses=$(cat "$OSS_ATTRIBUTION_DIR/additional-third-party-licenses.txt")
     local attribution_licenses=$(cat "$BUILD_DIR/private/oss-attribution/attribution.txt")
     
     cat > "$combined_oss_attribution_output_dir/LICENSE-THIRD-PARTY" << EOF

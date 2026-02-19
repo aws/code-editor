@@ -8,5 +8,3 @@ code-editor-src
 vscode-reh-web-*
 code-editor-src-*
 node_modules
-package-lock.json
-package.json
