@@ -97,12 +97,10 @@ generate_additional_sboms() {
     # Create directory for additional SBOMs
     mkdir -p additional-node-js-sboms
     
-    # 1. Generate SBOM for @electrovir/oss-attribution-generator
-    echo "Generating SBOM for @electrovir/oss-attribution-generator"
+    # 1. Generate SBOM for oss-attribution-generator
+    echo "Generating SBOM for oss-attribution-generator"
     
-    # Find the global npm modules directory
-    global_npm_dir=$(npm list -g | head -1)
-    oss_attribution_dir="$global_npm_dir/node_modules/@electrovir/oss-attribution-generator"
+    oss_attribution_dir="$root_dir/build-tools/oss-attribution/oss-attribution-generator"
     
     echo "Found OSS attribution generator at: $oss_attribution_dir"
     cd "$oss_attribution_dir"
@@ -113,11 +111,13 @@ generate_additional_sboms() {
     # 2. Generate SBOM for semver package
     echo "Generating SBOM for semver package"
     
+    # Find the global npm modules directory
+    global_npm_dir=$(npm list -g | head -1)
     semver_dir="$global_npm_dir/node_modules/semver"
     
     echo "Found semver package at: $semver_dir"
     cd "$semver_dir"
-    npm install
+    npm install --omit dev
     cyclonedx-npm --omit dev --output-reproducible --spec-version 1.5 -o "$root_dir/additional-node-js-sboms/semver-sbom.json"
     cd - > /dev/null
     echo "Generated SBOM for semver package"
