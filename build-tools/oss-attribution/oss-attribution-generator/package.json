@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@electrovir/oss-attribution-generator": "2.0.0"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1"
+  }
+}

@@ -529,8 +529,7 @@ jobs:
           npm i -g @cyclonedx/cyclonedx-npm
 
           echo "Installing OSS Attribution Generator"
-          source .packageversionrc
-          npm i -g @electrovir/oss-attribution-generator@$oss_attribution_generator_version
+          npm ci --prefix build-tools/oss-attribution/oss-attribution-generator
 
           echo "Installing semver"
           npm i -g semver@$semver_version
