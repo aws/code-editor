@@ -84,7 +84,6 @@ jobs:
       - name: Build artifacts
         env:
           BUILD_TARGET: ${{ matrix.build-target }}
-          DISABLE_MANGLE: true
         run: |
           ./scripts/build-artifacts.sh "$BUILD_TARGET"
       
