@@ -699,7 +699,7 @@ Index: third-party-src/extensions/sagemaker-extension/src/capacityBlockWarning.t
 +    }
 +
 +    // Schedule all notifications within setTimeout range
-+    intervals.forEach((interval, index) => {
++    intervals.forEach((interval) => {
 +      if (interval.delay > 0) {
 +        const timeout = setTimeout(async () => {
 +          // Validate end time hasn't changed significantly
