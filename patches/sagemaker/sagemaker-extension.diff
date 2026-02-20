@@ -1,8 +1,8 @@
-Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/extension.ts
-@@ -0,0 +1,172 @@
++++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
+@@ -0,0 +1,205 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
 +import { SessionWarning } from "./sessionWarning";
@@ -18,11 +18,18 @@ Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
 +    SagemakerResourceMetadata,
 +    getExpiryTime
 +} from "./constant";
++import { NotificationManager } from './notificationManager';
++import { createCapacityBlockNotificationConfig } from './capacityBlockWarning';
 +import * as console from "console";
 +
 +
 +const PARSE_SAGEMAKER_COOKIE_COMMAND = 'sagemaker.parseCookies';
 +const ENABLE_AUTO_UPDATE_COMMAND = 'workbench.extensions.action.enableAutoUpdate';
++
++// Global notification manager instance
++let notificationManager: NotificationManager | null = null;
++
++
 +
 +function showWarningDialog() {
 +    vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(response => {
@@ -158,6 +165,18 @@ Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
 +    }
 +}
 +
++/**
++ * Initializes capacity block monitoring using the generic notification manager
++ */
++async function initializeCapacityBlockMonitoring(): Promise<void> {
++    if (!notificationManager) {
++        notificationManager = new NotificationManager();
++    }
++
++    const config = createCapacityBlockNotificationConfig();
++    await notificationManager.register(config);
++}
++
 +export function activate(context: vscode.ExtensionContext) {
 +
 +    // TODO: log activation of extension
@@ -172,13 +191,28 @@ Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
 +        updateStatusItemWithMetadata(context);
 +    });
 +
++    // Initialize capacity block monitoring
++    initializeCapacityBlockMonitoring();
++
 +    // render warning message regarding auto upgrade disabled
 +    renderExtensionAutoUpgradeDisabledNotification();
 +}
-Index: third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
++
++/**
++ * Called when extension is deactivated
++ */
++export function deactivate(): void {
++    console.log('[Extension] Deactivating Sagemaker Extension, cleaning up notifications');
++    if (notificationManager) {
++        notificationManager.unregisterAll();
++        notificationManager = null;
++    }
++}
+\ No newline at end of file
+Index: code-editor-src/extensions/sagemaker-extension/src/sessionWarning.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
++++ code-editor-src/extensions/sagemaker-extension/src/sessionWarning.ts
 @@ -0,0 +1,44 @@
 +import * as vscode from "vscode";
 +import {
@@ -225,10 +259,10 @@ Index: third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
 +    }
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-extension/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-extension/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/.vscodeignore
++++ code-editor-src/extensions/sagemaker-extension/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -241,10 +275,10 @@ Index: third-party-src/extensions/sagemaker-extension/.vscodeignore
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-extension/package.json
+Index: code-editor-src/extensions/sagemaker-extension/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/package.json
++++ code-editor-src/extensions/sagemaker-extension/package.json
 @@ -0,0 +1,52 @@
 +{
 +  "name": "sagemaker-extension",
@@ -298,10 +332,10 @@ Index: third-party-src/extensions/sagemaker-extension/package.json
 +  "repository": {
 +  }
 +}
-Index: third-party-src/extensions/sagemaker-extension/README.md
+Index: code-editor-src/extensions/sagemaker-extension/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/README.md
++++ code-editor-src/extensions/sagemaker-extension/README.md
 @@ -0,0 +1,5 @@
 +# Sagemaker Extension
 +
@@ -309,10 +343,10 @@ Index: third-party-src/extensions/sagemaker-extension/README.md
 +
 +Session Management: The extension monitors the SageMaker cookie to ensure seamless session continuity. It proactively alerts users to sign in again before the session expires, enhancing the user experience by preventing unexpected session interruptions.
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-extension/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-extension/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -324,10 +358,10 @@ Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
 @@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -342,10 +376,10 @@ Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.
 +		extension: './src/extension.ts'
 +	},
 +});
-Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
 @@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -363,11 +397,11 @@ Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.j
 +		extension: './src/extension.ts',
 +	}
 +});
-Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/constant.ts
-@@ -0,0 +1,72 @@
++++ code-editor-src/extensions/sagemaker-extension/src/constant.ts
+@@ -0,0 +1,115 @@
 +// Constants
 +export const WARNING_TIME_HEADER = 'Session expiring soon';
 +
@@ -440,11 +474,54 @@ Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
 +		return -1;
 +	}
 +}
++
++// Capacity Block notification constants - configurable via environment variables
++// Default values (in milliseconds)
++const DEFAULT_THIRTY_MINUTES_MILLIS = 30 * 60 * 1000;
++const DEFAULT_TEN_MINUTES_MILLIS = 10 * 60 * 1000;
++const DEFAULT_TWO_MINUTES_MILLIS = 2 * 60 * 1000;
++const DEFAULT_EC2_SHUTDOWN_BUFFER_MILLIS = 30 * 60 * 1000;
++const DEFAULT_CB_EXTENSION_TOLERANCE_MILLIS = 1 * 60 * 1000;
++
++// Scheduling constants
++const DEFAULT_MAX_TIMEOUT_MS = 2147483647; // Maximum safe setTimeout delay (~24.8 days)
++const DEFAULT_RECHECK_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // Check every 7 days
++
++// Read from environment variables with fallback to defaults
++export const THIRTY_MINUTES_INTERVAL_MILLIS = parseInt(process.env.CB_NOTIFICATION_30MIN_MS || '') || DEFAULT_THIRTY_MINUTES_MILLIS;
++export const TEN_MINUTES_INTERVAL_MILLIS = parseInt(process.env.CB_NOTIFICATION_10MIN_MS || '') || DEFAULT_TEN_MINUTES_MILLIS;
++export const TWO_MINUTES_INTERVAL_MILLIS = parseInt(process.env.CB_NOTIFICATION_2MIN_MS || '') || DEFAULT_TWO_MINUTES_MILLIS;
++export const EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS = parseInt(process.env.CB_EC2_SHUTDOWN_BUFFER_MS || '') || DEFAULT_EC2_SHUTDOWN_BUFFER_MILLIS;
++export const CB_EXTENSION_TOLERANCE_MILLIS = parseInt(process.env.CB_EXTENSION_TOLERANCE_MS || '') || DEFAULT_CB_EXTENSION_TOLERANCE_MILLIS;
++
++// Scheduling constants (exported directly, not configurable via env vars)
++export const MAX_TIMEOUT_MS = DEFAULT_MAX_TIMEOUT_MS;
++export const RECHECK_INTERVAL_MS = DEFAULT_RECHECK_INTERVAL_MS;
++
++// Feature flag for capacity block notifications (defaults to disabled)
++export const CB_NOTIFICATIONS_ENABLED = process.env.CB_NOTIFICATIONS_ENABLED === 'true' || false;
++
++export const SAGEMAKER_INTERNAL_METADATA_PATH = '/opt/.sagemakerinternal/internal-metadata.json';
++
++export const CB_WARNING_TOAST_HEADER = 'Capacity Compute Resources Expiring Soon';
++export const CB_WARNING_MODAL_HEADER = 'Critical: Compute Resources Expiring';
++export const CB_WARNING_MESSAGE_TEMPLATE = 'Your compute resources will terminate in less than {minutes} minutes. Save your work immediately to prevent data loss.';
++export const CB_SAVE_BUTTON = 'Save All';
++export const CB_DISMISS_BUTTON = 'Dismiss';
++
++export interface CapacityBlockMetadata {
++  CapacityBlockEndTime?: number;
++  CapacityBlockId?: string;
++}
++
++export interface SagemakerResourceInternalMetadata {
++  CapacityBlock?: CapacityBlockMetadata;
++}
 \ No newline at end of file
-Index: third-party-src/build/gulpfile.extensions.ts
+Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.ts
-+++ third-party-src/build/gulpfile.extensions.ts
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
 @@ -64,6 +64,7 @@ const compilations = [
  	'extensions/references-view/tsconfig.json',
  	'extensions/search-result/tsconfig.json',
@@ -453,10 +530,10 @@ Index: third-party-src/build/gulpfile.extensions.ts
  	'extensions/tunnel-forwarding/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
  	'extensions/typescript-language-features/tsconfig.json',
-Index: third-party-src/build/npm/dirs.ts
+Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
---- third-party-src.orig/build/npm/dirs.ts
-+++ third-party-src/build/npm/dirs.ts
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
 @@ -42,6 +42,7 @@ export const dirs = [
  	'extensions/npm',
  	'extensions/php-language-features',
@@ -465,3 +542,455 @@ Index: third-party-src/build/npm/dirs.ts
  	'extensions/search-result',
  	'extensions/simple-browser',
  	'extensions/tunnel-forwarding',
+Index: code-editor-src/extensions/sagemaker-extension/src/capacityBlockWarning.ts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-extension/src/capacityBlockWarning.ts
+@@ -0,0 +1,236 @@
++import * as vscode from 'vscode';
++import * as fs from 'fs';
++import {
++  CB_WARNING_MESSAGE_TEMPLATE,
++  CB_SAVE_BUTTON,
++  CB_WARNING_TOAST_HEADER,
++  CB_WARNING_MODAL_HEADER,
++  CapacityBlockMetadata,
++  SagemakerResourceInternalMetadata,
++  THIRTY_MINUTES_INTERVAL_MILLIS,
++  TEN_MINUTES_INTERVAL_MILLIS,
++  TWO_MINUTES_INTERVAL_MILLIS,
++  EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS,
++  CB_EXTENSION_TOLERANCE_MILLIS,
++  SAGEMAKER_INTERNAL_METADATA_PATH,
++  MAX_TIMEOUT_MS,
++  RECHECK_INTERVAL_MS,
++  CB_NOTIFICATIONS_ENABLED
++} from './constant';
++import { NotificationConfig, NotificationSeverity, NotificationData } from './notificationManager';
++
++// Capacity Block specific notification data
++interface CBNotificationData extends NotificationData {
++  timeRemaining: number;
++  isModal: boolean;
++}
++
++// Test helper for injecting metadata
++let _testInternalMetadata: SagemakerResourceInternalMetadata | null | undefined = undefined;
++
++export function _testSetInternalMetadata(metadata: SagemakerResourceInternalMetadata | null): void {
++  _testInternalMetadata = metadata;
++}
++
++export function _testClearInternalMetadata(): void {
++  _testInternalMetadata = undefined;
++}
++
++function fetchInternalMetadata(): SagemakerResourceInternalMetadata | null {
++  try {
++    const data = fs.readFileSync(SAGEMAKER_INTERNAL_METADATA_PATH, 'utf-8');
++    return JSON.parse(data) as SagemakerResourceInternalMetadata;
++  } catch (error) {
++    console.error('[CB] Error reading internal metadata file:', error);
++    return null;
++  }
++}
++
++function getInternalMetadataForTesting(): SagemakerResourceInternalMetadata | null {
++  if (_testInternalMetadata !== undefined) {
++    return _testInternalMetadata;
++  }
++  return fetchInternalMetadata();
++}
++
++/**
++ * Reads capacity block metadata from internal metadata object
++ * @param internalMetadata The internal metadata object
++ * @returns CapacityBlockMetadata or null if not found
++ */
++export function readCapacityBlockMetadata(internalMetadata: SagemakerResourceInternalMetadata | null): CapacityBlockMetadata | null {
++  if (!internalMetadata) {
++    console.error('[CB] Internal metadata is null');
++    return null;
++  }
++  return internalMetadata.CapacityBlock || null;
++}
++
++/**
++ * Extracts and validates capacity block end time
++ * @param internalMetadata The internal metadata object
++ * @returns End time as Unix timestamp (ms) or null if invalid
++ */
++export function getCapacityBlockEndTime(internalMetadata: SagemakerResourceInternalMetadata | null): number | null {
++  const metadata = readCapacityBlockMetadata(internalMetadata);
++  if (!metadata?.CapacityBlockEndTime) {
++    return null;
++  }
++
++  // Convert Unix timestamp from seconds to milliseconds
++  const endTime = metadata.CapacityBlockEndTime * 1000;
++
++  if (isNaN(endTime) || endTime <= Date.now()) {
++    console.error('[CB] Invalid or past end time:', metadata.CapacityBlockEndTime);
++    return null;
++  }
++
++  return endTime;
++}
++
++/**
++ * Creates a notification config for Capacity Block warnings
++ * This integrates CB monitoring with the generic notification system
++ */
++export function createCapacityBlockNotificationConfig(): NotificationConfig<CBNotificationData> {
++  let scheduledTimeouts: NodeJS.Timeout[] = [];
++  let originalEndTime: number | null = null;
++
++  /**
++   * Schedule all CB notifications based on end time
++   */
++  function scheduleNotifications(
++    endTime: number,
++    triggerNotification: (data: CBNotificationData) => Promise<void>
++  ): void {
++    const now = Date.now();
++    const bufferTime = EC2_THIRTY_MINUTES_SHUTDOWN_MILLIS;
++
++    const intervals = [
++      { delay: endTime - now - bufferTime - THIRTY_MINUTES_INTERVAL_MILLIS, timeRemaining: THIRTY_MINUTES_INTERVAL_MILLIS, isModal: false },
++      { delay: endTime - now - bufferTime - TEN_MINUTES_INTERVAL_MILLIS, timeRemaining: TEN_MINUTES_INTERVAL_MILLIS, isModal: false },
++      { delay: endTime - now - bufferTime - TWO_MINUTES_INTERVAL_MILLIS, timeRemaining: TWO_MINUTES_INTERVAL_MILLIS, isModal: true }
++    ];
++
++    // Check if earliest notification is beyond setTimeout limit
++    const positiveDelays = intervals.map(i => i.delay).filter(d => d > 0);
++    const earliestDelay = positiveDelays.length > 0 ? Math.min(...positiveDelays) : 0;
++    
++    // If we're already within 2 minutes of shutdown, show modal immediately
++    const actualTimeRemaining = endTime - now - bufferTime;
++    if (actualTimeRemaining > 0 && actualTimeRemaining <= TWO_MINUTES_INTERVAL_MILLIS) {
++      triggerNotification({
++        timeRemaining: actualTimeRemaining,
++        isModal: true
++      });
++      return; // Don't schedule any other notifications
++    }
++    
++    if (earliestDelay > MAX_TIMEOUT_MS) {
++      const recheckTimeout = setTimeout(() => {
++        const metadata = getInternalMetadataForTesting();
++        const currentEndTime = getCapacityBlockEndTime(metadata);
++        if (!currentEndTime) {
++          console.warn('[CB] No valid end time found during recheck, stopping');
++          return;
++        }
++        originalEndTime = currentEndTime;
++        scheduleNotifications(currentEndTime, triggerNotification);
++      }, RECHECK_INTERVAL_MS);
++      
++      scheduledTimeouts.push(recheckTimeout);
++      return;
++    }
++
++    // Schedule all notifications within setTimeout range
++    intervals.forEach((interval) => {
++      if (interval.delay > 0) {
++        const timeout = setTimeout(async () => {
++          // Validate end time hasn't changed significantly
++          const metadata = getInternalMetadataForTesting();
++          const currentEndTime = getCapacityBlockEndTime(metadata);
++          
++          if (currentEndTime && originalEndTime) {
++            const timeDiff = Math.abs(currentEndTime - originalEndTime);
++            if (timeDiff > CB_EXTENSION_TOLERANCE_MILLIS) {
++              // Cancel existing and reschedule
++              scheduledTimeouts.forEach(t => clearTimeout(t));
++              scheduledTimeouts = [];
++              originalEndTime = currentEndTime;
++              scheduleNotifications(currentEndTime, triggerNotification);
++              return;
++            }
++          }
++          
++          // Show notification
++          await triggerNotification({
++            timeRemaining: interval.timeRemaining,
++            isModal: interval.isModal
++          });
++        }, interval.delay);
++
++        scheduledTimeouts.push(timeout);
++      }
++    });
++  }
++
++  return {
++    id: 'capacity-block',
++    
++    initialize: () => {
++      // Check feature flag first
++      if (!CB_NOTIFICATIONS_ENABLED) {
++        return false;
++      }
++      
++      const metadata = getInternalMetadataForTesting();
++      const endTime = getCapacityBlockEndTime(metadata);
++      
++      if (!endTime) {
++        return false;
++      }
++      
++      originalEndTime = endTime;
++      return true;
++    },
++    
++    schedule: (triggerNotification) => {
++      if (!originalEndTime) {
++        console.error('[CB] Cannot schedule without valid end time');
++        return () => {};
++      }
++      
++      scheduleNotifications(originalEndTime, triggerNotification);
++      
++      // Return cleanup function
++      return () => {
++        scheduledTimeouts.forEach(timeout => clearTimeout(timeout));
++        scheduledTimeouts = [];
++        originalEndTime = null;
++      };
++    },
++    
++    getMessage: (data) => {
++      const minutes = Math.floor(data.timeRemaining / 60000);
++      return CB_WARNING_MESSAGE_TEMPLATE.replace('{minutes}', minutes.toString());
++    },
++    
++    getHeader: (data) => {
++      return data.isModal ? CB_WARNING_MODAL_HEADER : CB_WARNING_TOAST_HEADER;
++    },
++    
++    getSeverity: () => NotificationSeverity.Warning,
++    
++    isModal: (data) => data.isModal,
++    
++    getActions: () => [
++      {
++        label: CB_SAVE_BUTTON,
++        callback: async () => {
++          console.log('[CB] User selected Save All');
++          await vscode.workspace.saveAll();
++        }
++      }
++    ]
++  };
++}
+Index: code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
+@@ -0,0 +1,206 @@
++import * as vscode from 'vscode';
++
++/**
++ * Notification severity level
++ */
++export enum NotificationSeverity {
++  Info = 'info',
++  Warning = 'warning',
++  Error = 'error'
++}
++
++/**
++ * Action button configuration for notifications
++ */
++export interface NotificationAction {
++  label: string;
++  callback: () => void | Promise<void>;
++}
++
++/**
++ * Base notification data that can be extended for specific use cases
++ */
++export interface NotificationData {
++  [key: string]: any;
++}
++
++/**
++ * Generic notification configuration
++ * This interface is intentionally minimal to support any notification scenario
++ */
++export interface NotificationConfig<T extends NotificationData = NotificationData> {
++  /** Unique identifier for this notification type */
++  id: string;
++  
++  /** 
++   * Initialize the notification system
++   * Returns true if initialization succeeded, false otherwise
++   */
++  initialize: () => boolean | Promise<boolean>;
++  
++  /**
++   * Schedule notification triggers
++   * Implementation is responsible for calling triggerNotification when appropriate
++   * Returns cleanup function to cancel scheduled notifications
++   */
++  schedule: (triggerNotification: (data: T) => Promise<void>) => (() => void) | Promise<() => void>;
++  
++  /**
++   * Generate notification message from data
++   */
++  getMessage: (data: T) => string;
++  
++  /**
++   * Generate notification header/title from data
++   */
++  getHeader: (data: T) => string;
++  
++  /**
++   * Get notification severity level
++   */
++  getSeverity: (data: T) => NotificationSeverity;
++  
++  /**
++   * Determine if notification should be modal
++   */
++  isModal: (data: T) => boolean;
++  
++  /**
++   * Get available actions for the notification
++   */
++  getActions: (data: T) => NotificationAction[];
++}
++
++/**
++ * Generic notification manager that can handle any notification type
++ * Completely decoupled from specific notification implementations
++ */
++export class NotificationManager {
++  private cleanupFunctions: Map<string, () => void> = new Map();
++
++  /**
++   * Register and initialize a notification provider
++   */
++  async register<T extends NotificationData>(config: NotificationConfig<T>): Promise<void> {
++    console.log(`[NotificationManager] Registering notification provider: ${config.id}`);
++    
++    const initialized = await config.initialize();
++    if (!initialized) {
++      console.log(`[NotificationManager] ${config.id}: Initialization failed or not needed`);
++      return;
++    }
++
++    // Create trigger function that will show the notification
++    const triggerNotification = async (data: T) => {
++      await this.showNotification(config, data);
++    };
++
++    // Let the config handle its own scheduling logic
++    const cleanup = await config.schedule(triggerNotification);
++    
++    if (cleanup) {
++      this.cleanupFunctions.set(config.id, cleanup);
++    }
++    
++    console.log(`[NotificationManager] ${config.id}: Successfully registered`);
++  }
++
++  /**
++   * Show a notification using VSCode's notification API
++   */
++  private async showNotification<T extends NotificationData>(
++    config: NotificationConfig<T>,
++    data: T
++  ): Promise<void> {
++    try {
++      const message = config.getMessage(data);
++      const header = config.getHeader(data);
++      const severity = config.getSeverity(data);
++      const isModal = config.isModal(data);
++      const actions = config.getActions(data);
++      
++      const fullMessage = `${header}: ${message}`;
++      const actionLabels = actions.map(a => a.label);
++      
++      let selectedAction: string | undefined;
++      const options = isModal ? { modal: true, detail: message } : { modal: false, detail: message };
++      const notifcationMessage = isModal ? header : message;
++      
++      // Show notification based on severity
++      switch (severity) {
++        case NotificationSeverity.Error:
++          // selectedAction = await vscode.window.showErrorMessage(
++          //   fullMessage,
++          //   options as any,
++          //   ...actionLabels
++          // );
++          // selectedAction = await vscode.window.showErrorMessage(
++          //   header,
++          //   { modal: true, detail: message },
++          //   ...actionLabels
++          // );
++          selectedAction = await vscode.window.showWarningMessage(
++            `${message}`,
++            { modal: true },
++            ...actionLabels
++          );
++          break;
++        case NotificationSeverity.Warning:
++          // selectedAction = await vscode.window.showWarningMessage(
++          //   fullMessage,
++          //   options as any,
++          //   ...actionLabels
++          // );
++          selectedAction = await vscode.window.showWarningMessage(
++            notifcationMessage,
++            options as any,
++            ...actionLabels
++          );
++          break;
++        case NotificationSeverity.Info:
++        default:
++          selectedAction = await vscode.window.showInformationMessage(
++            fullMessage,
++            options as any,
++            ...actionLabels
++          );
++          break;
++      }
++
++      if (selectedAction) {
++        const action = actions.find(a => a.label === selectedAction);
++        if (action) {
++          console.log(`[NotificationManager] ${config.id}: User selected '${selectedAction}'`);
++          await action.callback();
++        }
++      }
++    } catch (error) {
++      console.error(`[NotificationManager] ${config.id}: Failed to show notification:`, error);
++    }
++  }
++
++  /**
++   * Unregister a specific notification provider
++   */
++  unregister(id: string): void {
++    console.log(`[NotificationManager] Unregistering notification provider: ${id}`);
++    
++    const cleanup = this.cleanupFunctions.get(id);
++    if (cleanup) {
++      cleanup();
++      this.cleanupFunctions.delete(id);
++    }
++  }
++
++  /**
++   * Unregister all notification providers
++   */
++  unregisterAll(): void {
++    console.log('[NotificationManager] Unregistering all notification providers');
++    for (const [id, cleanup] of this.cleanupFunctions.entries()) {
++      console.log(`[NotificationManager] Cleaning up: ${id}`);
++      cleanup();
++    }
++    this.cleanupFunctions.clear();
++  }
++}
