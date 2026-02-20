@@ -18,7 +18,7 @@ Index: code-editor-src/product.json
  	"nameShort": "SageMaker Code Editor",
  	"nameLong": "SageMaker Code Editor",
  	"codeEditorVersion": "1.0.0",
-+	"sagemakerCodeEditorVersion":"1.9",
++	"sagemakerCodeEditorVersion":"1.9.1",
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
  	"win32MutexName": "vscodeoss",
