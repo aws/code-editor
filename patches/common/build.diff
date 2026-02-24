@@ -1,7 +1,7 @@
-Index: code-editor-src/package.json
+Index: third-party-src/package.json
 ===================================================================
---- code-editor-src.orig/package.json
-+++ code-editor-src/package.json
+--- third-party-src.orig/package.json
++++ third-party-src/package.json
 @@ -78,10 +78,10 @@
      "@vscode/deviceid": "^0.1.1",
      "@vscode/iconv-lite-umd": "0.7.1",
@@ -23,6 +23,15 @@ Index: code-editor-src/package.json
      "minimist": "^1.2.8",
      "native-is-elevated": "0.8.0",
      "native-keymap": "^3.3.5",
+@@ -160,7 +159,7 @@
+     "css-loader": "^6.9.1",
+     "debounce": "^1.0.0",
+     "deemon": "^1.13.6",
+-    "electron": "39.2.7",
++    "electron": "40.6.0",
+     "eslint": "^9.36.0",
+     "eslint-formatter-compact": "^8.40.0",
+     "eslint-plugin-header": "3.1.1",
 @@ -225,9 +224,19 @@
    },
    "overrides": {
@@ -46,10 +55,10 @@ Index: code-editor-src/package.json
    },
    "repository": {
      "type": "git",
-Index: code-editor-src/remote/package.json
+Index: third-party-src/remote/package.json
 ===================================================================
---- code-editor-src.orig/remote/package.json
-+++ code-editor-src/remote/package.json
+--- third-party-src.orig/remote/package.json
++++ third-party-src/remote/package.json
 @@ -7,7 +7,7 @@
      "@microsoft/1ds-post-js": "^3.2.13",
      "@vscode/deviceid": "^0.1.1",
@@ -83,10 +92,10 @@ Index: code-editor-src/remote/package.json
 +    "node-gyp-build": "4.8.1"
    }
  }
-Index: code-editor-src/build/lib/mangle/index.ts
+Index: third-party-src/build/lib/mangle/index.ts
 ===================================================================
---- code-editor-src.orig/build/lib/mangle/index.ts
-+++ code-editor-src/build/lib/mangle/index.ts
+--- third-party-src.orig/build/lib/mangle/index.ts
++++ third-party-src/build/lib/mangle/index.ts
 @@ -430,7 +430,7 @@ export class Mangler {
  		this.config = config;
  
