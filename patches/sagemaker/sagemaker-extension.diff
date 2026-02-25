@@ -787,7 +787,7 @@ Index: code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
-@@ -0,0 +1,206 @@
+@@ -0,0 +1,191 @@
 +import * as vscode from 'vscode';
 +
 +/**
@@ -919,16 +919,6 @@ Index: code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
 +      // Show notification based on severity
 +      switch (severity) {
 +        case NotificationSeverity.Error:
-+          // selectedAction = await vscode.window.showErrorMessage(
-+          //   fullMessage,
-+          //   options as any,
-+          //   ...actionLabels
-+          // );
-+          // selectedAction = await vscode.window.showErrorMessage(
-+          //   header,
-+          //   { modal: true, detail: message },
-+          //   ...actionLabels
-+          // );
 +          selectedAction = await vscode.window.showWarningMessage(
 +            `${message}`,
 +            { modal: true },
@@ -936,11 +926,6 @@ Index: code-editor-src/extensions/sagemaker-extension/src/notificationManager.ts
 +          );
 +          break;
 +        case NotificationSeverity.Warning:
-+          // selectedAction = await vscode.window.showWarningMessage(
-+          //   fullMessage,
-+          //   options as any,
-+          //   ...actionLabels
-+          // );
 +          selectedAction = await vscode.window.showWarningMessage(
 +            notifcationMessage,
 +            options as any,
