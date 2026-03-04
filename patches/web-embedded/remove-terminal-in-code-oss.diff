@@ -5,10 +5,10 @@ This patch removes the entire terminal functionality from Code OSS, including al
  .../terminal/browser/terminal.contribution.ts | 92 +------------------
  1 file changed, 2 insertions(+), 90 deletions(-)
 
-Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 @@ -4,49 +4,30 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -135,10 +135,10 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -setupTerminalMenus();
 -
  registerColors();
-Index: third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 @@ -27,10 +27,6 @@ quickAccessRegistry.registerQuickAccessP
  	placeholder: nls.localize('tasksQuickAccessPlaceholder', "Type the name of a terminal to open."),
  	helpEntries: [{ description: nls.localize('tasksQuickAccessHelp', "Show All Opened Terminals"), commandId: TerminalQuickAccessCommandId.QuickOpenTerm }]

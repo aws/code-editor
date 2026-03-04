@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/globalCompositeBar.ts
-+++ third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/globalCompositeBar.ts
++++ code-editor-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
 @@ -132,7 +132,7 @@ export class GlobalCompositeBar extends
  	}
  
@@ -20,10 +20,10 @@ Index: third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
  	}
  
  	private set accountsVisibilityPreference(value: boolean) {
-Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 @@ -88,13 +88,6 @@ class AuthenticationContribution extends
  	}
  

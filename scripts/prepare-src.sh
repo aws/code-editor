@@ -257,6 +257,7 @@ rebase() {
         
         if [[ $exit_code -eq 0 ]]; then
             echo "Successfully applied patch: $(quilt top)"
+            quilt refresh
             
         else
             

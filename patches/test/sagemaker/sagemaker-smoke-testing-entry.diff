@@ -20,7 +20,7 @@ Index: code-editor-src/test/automation/src/playwrightBrowser.ts
  	const { serverProcess, endpoint } = await launchServer(options);
  
  	// Launch browser
-@@ -165,6 +174,144 @@ async function launchBrowser(options: La
+@@ -176,6 +185,144 @@ async function launchBrowser(options: La
  	return { browser, context, page, pageLoadedPromise };
  }
  
@@ -193,7 +193,7 @@ Index: code-editor-src/test/smoke/src/main.ts
  import { setup as setupLocalizationTests } from './areas/workbench/localization.test';
  import { setup as setupLaunchTests } from './areas/workbench/launch.test';
  import { setup as setupTerminalTests } from './areas/terminal/terminal.test';
-@@ -118,33 +112,10 @@ try {
+@@ -119,33 +113,10 @@ try {
  	logger.log(`Error enabling graceful-fs: ${error}`);
  }
  
@@ -229,7 +229,7 @@ Index: code-editor-src/test/smoke/src/main.ts
  
  function fail(errorMessage): void {
  	logger.log(errorMessage);
-@@ -221,7 +192,10 @@ else {
+@@ -222,7 +193,10 @@ else {
  	const testCodeServerPath = opts.build || process.env.VSCODE_REMOTE_SERVER_PATH;
  
  	if (typeof testCodeServerPath === 'string') {
@@ -241,7 +241,7 @@ Index: code-editor-src/test/smoke/src/main.ts
  			fail(`Cannot find Code server at ${testCodeServerPath}.`);
  		} else {
  			logger.log(`Running web smoke tests against ${testCodeServerPath}`);
-@@ -243,115 +217,6 @@ logger.log(`VS Code product quality: ${q
+@@ -244,115 +218,6 @@ logger.log(`VS Code product quality: ${q
  
  const userDataDir = path.join(testDataPath, 'd');
  
@@ -357,7 +357,7 @@ Index: code-editor-src/test/smoke/src/main.ts
  // Before all tests run setup
  before(async function () {
  	this.timeout(5 * 60 * 1000); // increase since we download VSCode
-@@ -376,19 +241,6 @@ before(async function () {
+@@ -377,19 +242,6 @@ before(async function () {
  		extraArgs: (opts.electronArgs || '').split(' ').map(arg => arg.trim()).filter(arg => !!arg)
  	};
  	this.defaultOptions = options;
@@ -377,7 +377,7 @@ Index: code-editor-src/test/smoke/src/main.ts
  });
  
  describe(`VSCode Smoke Tests (${opts.web ? 'Web' : 'Electron'})`, () => {
-@@ -401,7 +253,6 @@ describe(`VSCode Smoke Tests (${opts.web
+@@ -402,7 +254,6 @@ describe(`VSCode Smoke Tests (${opts.web
  	setupTaskTests(logger);
  	setupStatusbarTests(logger);
  	if (quality !== Quality.Dev && quality !== Quality.OSS) { setupExtensionTests(logger); }
@@ -389,7 +389,7 @@ Index: code-editor-src/test/automation/src/code.ts
 ===================================================================
 --- code-editor-src.orig/test/automation/src/code.ts
 +++ code-editor-src/test/automation/src/code.ts
-@@ -93,7 +93,9 @@ export async function launch(options: La
+@@ -94,7 +94,9 @@ export async function launch(options: La
  	// Browser smoke tests
  	if (options.web) {
  		const { serverProcess, driver } = await measureAndLog(() => launchPlaywrightBrowser(options), 'launch playwright (browser)', options.logger);
@@ -400,7 +400,7 @@ Index: code-editor-src/test/automation/src/code.ts
  
  		return new Code(driver, options.logger, serverProcess, undefined, options.quality, options.version);
  	}
-@@ -114,7 +116,7 @@ export class Code {
+@@ -115,7 +117,7 @@ export class Code {
  	constructor(
  		driver: PlaywrightDriver,
  		readonly logger: Logger,
@@ -409,7 +409,7 @@ Index: code-editor-src/test/automation/src/code.ts
  		private readonly safeToKill: Promise<void> | undefined,
  		readonly quality: Quality,
  		readonly version: { major: number; minor: number; patch: number }
-@@ -174,6 +176,13 @@ export class Code {
+@@ -175,6 +177,13 @@ export class Code {
  
  	async exit(): Promise<void> {
  		return measureAndLog(() => new Promise<void>(resolve => {

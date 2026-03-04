@@ -1,7 +1,7 @@
-Index: third-party-src/build/lib/getVersion.ts
+Index: code-editor-src/build/lib/getVersion.ts
 ===================================================================
---- third-party-src.orig/build/lib/getVersion.ts
-+++ third-party-src/build/lib/getVersion.ts
+--- code-editor-src.orig/build/lib/getVersion.ts
++++ code-editor-src/build/lib/getVersion.ts
 @@ -12,5 +12,5 @@ export function getVersion(root: string)
  		version = git.getVersion(root);
  	}
@@ -9,10 +9,10 @@ Index: third-party-src/build/lib/getVersion.ts
 -	return version;
 +	return version || "unknown";
  }
-Index: third-party-src/build/gulpfile.reh.ts
+Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.reh.ts
-+++ third-party-src/build/gulpfile.reh.ts
+--- code-editor-src.orig/build/gulpfile.reh.ts
++++ code-editor-src/build/gulpfile.reh.ts
 @@ -33,6 +33,7 @@ import log from 'fancy-log';
  import buildfile from './buildfile.ts';
  import { fetchUrls, fetchGithub } from './lib/fetch.ts';

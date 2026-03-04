@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 @@ -76,11 +76,11 @@ import { ExtensionEditor } from './exten
  import { ExtensionEnablementWorkspaceTrustTransitionParticipant } from './extensionEnablementWorkspaceTrustTransitionParticipant.js';
  import { ExtensionRecommendationNotificationService } from './extensionRecommendationNotificationService.js';

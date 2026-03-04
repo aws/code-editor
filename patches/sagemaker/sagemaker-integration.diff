@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/workbench/browser/client.ts
+Index: code-editor-src/src/vs/workbench/browser/client.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/src/vs/workbench/browser/client.ts
++++ code-editor-src/src/vs/workbench/browser/client.ts
 @@ -0,0 +1,61 @@
 +import { Disposable } from '../../base/common/lifecycle.js';
 +import { CommandsRegistry } from '../../platform/commands/common/commands.js';
@@ -65,19 +65,19 @@ Index: third-party-src/src/vs/workbench/browser/client.ts
 +	}
 +}
 \ No newline at end of file
-Index: third-party-src/src/vs/workbench/browser/web.main.ts
+Index: code-editor-src/src/vs/workbench/browser/web.main.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/web.main.ts
-+++ third-party-src/src/vs/workbench/browser/web.main.ts
-@@ -98,6 +98,7 @@ import { INotificationService, Severity
- import { IDefaultAccountService } from '../../platform/defaultAccount/common/defaultAccount.js';
- import { DefaultAccountService } from '../services/accounts/common/defaultAccount.js';
+--- code-editor-src.orig/src/vs/workbench/browser/web.main.ts
++++ code-editor-src/src/vs/workbench/browser/web.main.ts
+@@ -100,6 +100,7 @@ import { DefaultAccountService } from '.
  import { AccountPolicyService } from '../services/policies/common/accountPolicyService.js';
+ import { WorkbenchModeService } from '../services/layout/browser/workbenchModeService.js';
+ import { IWorkbenchModeService } from '../services/layout/common/workbenchModeService.js';
 +import { SagemakerServerClient } from '../../workbench/browser/client.js';
  
  export class BrowserMain extends Disposable {
  
-@@ -133,6 +134,9 @@ export class BrowserMain extends Disposa
+@@ -135,6 +136,9 @@ export class BrowserMain extends Disposa
  		// Startup
  		const instantiationService = workbench.startup();
  
@@ -87,10 +87,10 @@ Index: third-party-src/src/vs/workbench/browser/web.main.ts
  		// Window
  		this._register(instantiationService.createInstance(BrowserWindow));
  
-Index: third-party-src/product.json
+Index: code-editor-src/product.json
 ===================================================================
---- third-party-src.orig/product.json
-+++ third-party-src/product.json
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
 @@ -9,8 +9,8 @@
  		"nlsBaseUrl": "",
  		"publisherUrl": ""
@@ -102,10 +102,10 @@ Index: third-party-src/product.json
  	"codeEditorVersion": "1.0.0",
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
-Index: third-party-src/src/vs/platform/product/common/product.ts
+Index: code-editor-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/product/common/product.ts
-+++ third-party-src/src/vs/platform/product/common/product.ts
+--- code-editor-src.orig/src/vs/platform/product/common/product.ts
++++ code-editor-src/src/vs/platform/product/common/product.ts
 @@ -70,10 +70,12 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {

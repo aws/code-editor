@@ -6,10 +6,10 @@ Revise Help->About Modal content and buttons
  src/vs/workbench/browser/parts/dialogs/dialogHandler.ts           | 13 +++----------
  3 files changed, 9 insertions(+), 24 deletions(-)
 
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 @@ -71,7 +71,7 @@ export class DialogHandlerContribution e
  					result = await this.impl.value.prompt(args.prompt);
  				} else {
@@ -19,10 +19,10 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contrib
  				}
  			} catch (error) {
  				result = error;
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 @@ -70,22 +70,17 @@ export class BrowserDialogHandler extend
  		return { confirmed: button === 0, checkboxChecked, values };
  	}
@@ -49,10 +49,10 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
  	}
  
  	private async doShow(type: Severity | DialogType | undefined, message: string, buttons?: string[], detail?: string, cancelId?: number, checkbox?: ICheckbox, inputs?: IInputElement[], customOptions?: ICustomDialogOptions): Promise<IDialogResult> {
-Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+Index: code-editor-src/src/vs/platform/dialogs/browser/dialog.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/dialogs/browser/dialog.ts
-+++ third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+--- code-editor-src.orig/src/vs/platform/dialogs/browser/dialog.ts
++++ code-editor-src/src/vs/platform/dialogs/browser/dialog.ts
 @@ -6,7 +6,6 @@
  import { EventHelper } from '../../../base/browser/dom.js';
  import { StandardKeyboardEvent } from '../../../base/browser/keyboardEvent.js';

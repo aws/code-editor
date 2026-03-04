@@ -1,20 +1,22 @@
-Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -1198,26 +1198,6 @@ registerWorkbenchContribution2(UserToolS
- registerWorkbenchContribution2(PromptLanguageFeaturesProvider.ID, PromptLanguageFeaturesProvider, WorkbenchPhase.Eventually);
+--- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -1627,28 +1627,6 @@ registerWorkbenchContribution2(PromptLan
  registerWorkbenchContribution2(ChatWindowNotifier.ID, ChatWindowNotifier, WorkbenchPhase.AfterRestored);
+ registerWorkbenchContribution2(ChatRepoInfoContribution.ID, ChatRepoInfoContribution, WorkbenchPhase.Eventually);
  
 -registerChatActions();
 -registerChatAccessibilityActions();
 -registerChatCopyActions();
+-registerChatCustomizationDiagnosticsAction();
 -registerChatCodeBlockActions();
 -registerChatCodeCompareBlockActions();
 -registerChatFileTreeActions();
 -registerChatPromptNavigationActions();
 -registerChatTitleActions();
 -registerChatExecuteActions();
+-registerChatQueueActions();
 -registerQuickChatActions();
 -registerChatExportActions();
 -registerMoveActions();

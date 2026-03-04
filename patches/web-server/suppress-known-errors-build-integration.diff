@@ -1,7 +1,7 @@
-Index: third-party-src/src/vs/code/browser/workbench/workbench.html
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.html
-+++ third-party-src/src/vs/code/browser/workbench/workbench.html
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.html
++++ code-editor-src/src/vs/code/browser/workbench/workbench.html
 @@ -32,6 +32,32 @@
  	<body aria-label="">
  	</body>
@@ -35,10 +35,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.html
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
  		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
-Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
+Index: code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench-dev.html
-+++ third-party-src/src/vs/code/browser/workbench/workbench-dev.html
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench-dev.html
++++ code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 @@ -35,6 +35,32 @@
  	<body aria-label="">
  	</body>
@@ -72,10 +72,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
  	<!-- Startup (do not modify order of script tags!) -->
  	<script>
  		const baseUrl = new URL('{{WORKBENCH_WEB_BASE_URL}}', window.location.origin).toString();
-Index: third-party-src/build/gulpfile.reh.ts
+Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.reh.ts
-+++ third-party-src/build/gulpfile.reh.ts
+--- code-editor-src.orig/build/gulpfile.reh.ts
++++ code-editor-src/build/gulpfile.reh.ts
 @@ -81,6 +81,8 @@ const serverResourceIncludes = [
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration-login.zsh',
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',

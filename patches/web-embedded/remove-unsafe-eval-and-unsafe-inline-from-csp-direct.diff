@@ -7,10 +7,10 @@ Remove unsafe-eval and unsafe-inline from CSP directives
  .../extensions/worker/webWorkerExtensionHostIframe.html     | 2 +-
  4 files changed, 7 insertions(+), 7 deletions(-)
 
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
 @@ -423,7 +423,7 @@ export class WebClientServer {
  			'default-src \'self\';',
  			'img-src \'self\' https: data: blob:;',
@@ -29,10 +29,10 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  			'font-src \'self\' blob:;'
  		].join(' ');
  
-Index: third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+Index: code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
-+++ third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
++++ code-editor-src/src/vs/workbench/contrib/notebook/browser/view/renderers/backLayerWebView.ts
 @@ -320,8 +320,8 @@ export class BackLayerWebView<T extends
  				${enableCsp ?
  				`<meta http-equiv="Content-Security-Policy" content="
@@ -44,10 +44,10 @@ Index: third-party-src/src/vs/workbench/contrib/notebook/browser/view/renderers/
  					img-src ${webviewGenericCspSource} https: http: data:;
  					font-src ${webviewGenericCspSource} https:;
  					connect-src https:;
-Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
-+++ third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+--- code-editor-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 @@ -5,7 +5,7 @@
  	<meta charset="UTF-8">
  
@@ -57,10 +57,10 @@ Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"
-Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+++ third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+--- code-editor-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 @@ -4,7 +4,7 @@
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';

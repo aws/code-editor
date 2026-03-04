@@ -1,7 +1,7 @@
-Index: third-party-src/extensions/shared.webpack.config.mjs
+Index: code-editor-src/extensions/shared.webpack.config.mjs
 ===================================================================
---- third-party-src.orig/extensions/shared.webpack.config.mjs
-+++ third-party-src/extensions/shared.webpack.config.mjs
+--- code-editor-src.orig/extensions/shared.webpack.config.mjs
++++ code-editor-src/extensions/shared.webpack.config.mjs
 @@ -17,6 +17,7 @@ const require = createRequire(import.met
  const tsLoaderOptions = {
  	compilerOptions: {
