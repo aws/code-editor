@@ -24,7 +24,7 @@
 			originalLogError(...args);
 			const [message, filename, line, column, error] = args;
 
-			if (!window.isErrorSuppressed(message)) {
+			if (!window.isErrorSuppressed(message) && !!parentOrigin) {
 				window.parent.postMessage({
 				channel: 'code-editor.error',
 				type: 'application/x-code-editor+json',
