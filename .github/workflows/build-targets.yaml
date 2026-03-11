@@ -40,7 +40,7 @@ jobs:
           sudo apt-get install -y quilt libkrb5-dev libx11-dev libxkbfile-dev libxml2-utils
       
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
         
@@ -70,7 +70,7 @@ jobs:
           fi
       
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -96,14 +96,14 @@ jobs:
           tar -czf "${MATRIX_BUILD_TARGET}-build.tar.gz" "./$CODE_EDITOR_BUILD_TARGET"
       
       - name: Upload src artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.sha }}-${{ matrix.build-target }}-src
           path: ${{ matrix.build-target }}-src.tar.gz
           retention-days: 90
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.sha }}-${{ matrix.build-target }}-build
           path: ${{ matrix.build-target }}-build.tar.gz
@@ -147,7 +147,7 @@ jobs:
       - name: Use role credentials for metrics
         id: aws-creds
         continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900

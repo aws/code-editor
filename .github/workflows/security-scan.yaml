@@ -36,7 +36,7 @@ jobs:
       output-branch-name: ${{ steps.determine-pr-branches.outputs.output-branch-name || steps.get-upstream-branches.outputs.output-branch-name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -235,7 +235,7 @@ jobs:
     steps:
       - name: Assume IAM Role
         id: assume-aws-iam-role
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
@@ -255,7 +255,7 @@ jobs:
             --value 1
           
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branch }}
           submodules: recursive
@@ -301,7 +301,7 @@ jobs:
           ./scripts/prepare-src.sh "$TARGET"
       
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -326,7 +326,7 @@ jobs:
           ./scripts/security-scan.sh scan-main-dependencies "$TARGET" "$BRANCH"
       
       - name: Upload SBOM Files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-files-${{ matrix.target }}-${{ matrix.branch }}
           path: |
@@ -338,7 +338,7 @@ jobs:
           if-no-files-found: error
     
       - name: Upload Scan Result Files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: scan-results-${{ matrix.target }}-${{ matrix.branch }}
           path: |
@@ -364,7 +364,7 @@ jobs:
           echo "PASS" > "scan-success-$TARGET-${output_branch}.txt"
 
       - name: Upload Success Indicator File
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: scan-success-${{ matrix.target }}-${{ matrix.branch }}
           path: scan-success-${{ matrix.target }}-${{ matrix.branch }}.txt
@@ -408,7 +408,7 @@ jobs:
         branch: ${{ fromJson(needs.get-branches-to-scan.outputs.security-scan-branches) }}
     steps:
       - name: Download all scan success files
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: scan-success-*
           merge-multiple: true
@@ -451,7 +451,7 @@ jobs:
       
       - name: Upload Branch Success File
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: scan-success-branch-${{ matrix.branch }}
           path: scan-success-branch-${{ matrix.branch }}.txt
@@ -471,7 +471,7 @@ jobs:
     steps:
       - name: Assume IAM Role
         id: assume-aws-iam-role
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
@@ -490,7 +490,7 @@ jobs:
             --value 1
           
       - name: Checkout branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branch }}
           submodules: recursive
@@ -544,7 +544,7 @@ jobs:
           ./scripts/security-scan.sh scan-additional-dependencies
 
       - name: Upload Additional Node.js SBOMs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: additional-nodejs-sboms-${{ matrix.branch }}
           path: additional-node-js-sboms/
@@ -552,7 +552,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload Additional Inspector Scan Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: additional-inspector-results-${{ matrix.branch }}
           path: additional-scan-results/
@@ -577,7 +577,7 @@ jobs:
           echo "PASS" > "global-scan-success-${output_branch}.txt"
 
       - name: Upload Global Success Indicator File
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: global-scan-success-${{ matrix.branch }}
           path: global-scan-success-${{ matrix.branch }}.txt
@@ -632,7 +632,7 @@ jobs:
     steps:
       - name: Use role credentials for metrics
         id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
