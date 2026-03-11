@@ -24,7 +24,7 @@ jobs:
       TEST_SAGEMAKER_ROLE: ${{ secrets.TEST_SAGEMAKER_ROLE }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -35,7 +35,7 @@ jobs:
           sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
 
@@ -60,7 +60,7 @@ jobs:
           done
 
       - name: Configure ECR role AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.TEST_ECR_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -104,7 +104,7 @@ jobs:
           echo "Local build artifacts cleaned up"
 
       - name: Configure SageMaker role AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.TEST_SAGEMAKER_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -429,7 +429,7 @@ jobs:
 
       - name: Configure ECR role for cleanup
         if: always()
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.TEST_ECR_ROLE }}
           aws-region: ${{ env.AWS_REGION }}

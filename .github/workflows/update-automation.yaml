@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y quilt libxml2-utils jq
           
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: true
@@ -201,12 +201,12 @@ jobs:
           sudo apt-get install -y quilt libxml2-utils jq libx11-dev libxkbfile-dev
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'    
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
           fetch-depth: 0
@@ -268,7 +268,7 @@ jobs:
           done
           
       - name: Upload prepared source as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ github.run_id }}-prepared-source-${{ matrix.target }}
           path: code-editor-src/
@@ -307,12 +307,12 @@ jobs:
           npm i -g license-checker
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'    
           
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
           fetch-depth: 0
@@ -324,7 +324,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
       - name: Download prepared sources from artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: ${{ github.run_id }}-prepared-source-*
           merge-multiple: false
@@ -379,7 +379,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.update-automation.outputs.staging-branch }}
           fetch-depth: 0
@@ -453,14 +453,14 @@ jobs:
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: true
           fetch-depth: 1
           
       - name: Use role credentials for metrics
         id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
@@ -500,7 +500,7 @@ jobs:
       - name: Use role credentials for notification
         id: aws-creds
         continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
@@ -528,7 +528,7 @@ jobs:
     steps:
       - name: Use role credentials for metrics
         id: aws-creds
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
@@ -559,7 +559,7 @@ jobs:
       - name: Use role credentials for metrics
         id: aws-creds
         continue-on-error: ${{ env.REPOSITORY != 'aws/code-editor' }}
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
