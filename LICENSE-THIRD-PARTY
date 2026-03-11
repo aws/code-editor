@@ -3770,7 +3770,7 @@ SOFTWARE.
 ******************************
 
 @tootallnate/once
-3.0.0 <https://github.com/TooTallNate/once>
+3.0.1 <https://github.com/TooTallNate/once>
 MIT License
 
 Copyright (c) 2020 Nathan Rajlich
@@ -6623,7 +6623,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ******************************
 
 tar
-7.5.9 <https://github.com/isaacs/node-tar>
+7.5.11 <https://github.com/isaacs/node-tar>
 # Blue Oak Model License
 
 Version 1.0.0

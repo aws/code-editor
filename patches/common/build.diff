@@ -1,7 +1,7 @@
-Index: third-party-src/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- third-party-src.orig/package.json
-+++ third-party-src/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -76,10 +76,10 @@
      "@vscode/deviceid": "^0.1.1",
      "@vscode/iconv-lite-umd": "0.7.0",
@@ -58,7 +58,7 @@ Index: third-party-src/package.json
      "eslint": "^9.11.1",
      "eslint-formatter-compact": "^8.40.0",
      "eslint-plugin-header": "3.1.1",
-@@ -221,9 +221,20 @@
+@@ -221,9 +221,21 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
@@ -77,15 +77,16 @@ Index: third-party-src/package.json
 +      "koa": "^3.0.3"
 +    },
 +    "postcss": "^8.4.31",
-+    "playwright": "^1.55.1"
++    "playwright": "^1.55.1",
++    "@tootallnate/once": "^3.0.1"
 +
    },
    "repository": {
      "type": "git",
-Index: third-party-src/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- third-party-src.orig/remote/package.json
-+++ third-party-src/remote/package.json
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
 @@ -8,7 +8,7 @@
      "@parcel/watcher": "2.5.1",
      "@vscode/deviceid": "^0.1.1",
@@ -108,3 +109,12 @@ Index: third-party-src/remote/package.json
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "9.2.0",
+@@ -44,6 +44,7 @@
+     "node-gyp-build": "4.8.1",
+     "kerberos@2.1.1": {
+       "node-addon-api": "7.1.0"
+-    }
++    },
++    "@tootallnate/once": "^3.0.1"
+   }
+ }
