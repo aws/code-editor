@@ -1,91 +1,10 @@
 Patch that is needed for producing internal builds.
 
-Index: third-party-src/build/lib/mangle/index.ts
-===================================================================
---- third-party-src.orig/build/lib/mangle/index.ts
-+++ third-party-src/build/lib/mangle/index.ts
-@@ -407,7 +407,7 @@ export class Mangler {
- 	) {
- 
- 		this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
--			maxWorkers: 4,
-+			maxWorkers: 3,
- 			minWorkers: 'max'
- 		});
- 	}
-Index: third-party-src/build/lib/mangle/index.js
-===================================================================
---- third-party-src.orig/build/lib/mangle/index.js
-+++ third-party-src/build/lib/mangle/index.js
-@@ -354,7 +354,7 @@ class Mangler {
-         this.log = log;
-         this.config = config;
-         this.renameWorkerPool = workerpool_1.default.pool(path_1.default.join(__dirname, 'renameWorker.js'), {
--            maxWorkers: 4,
-+            maxWorkers: 3,
-             minWorkers: 'max'
-         });
-     }
-Index: third-party-src/build/lib/extensions.js
-===================================================================
---- third-party-src.orig/build/lib/extensions.js
-+++ third-party-src/build/lib/extensions.js
-@@ -125,6 +125,21 @@ function fromLocal(extensionPath, forWeb
-     }
-     return input;
- }
-+async function asyncRetry(func, maxRetries) {
-+	let retryNum = 0;
-+	for(;;) {
-+		try {
-+			return await func();
-+		} catch(err) {
-+			retryNum++;
-+			if (retryNum == maxRetries) {
-+				throw err;
-+			} else {
-+				console.warn(`retrying operation, attempt ${retryNum} out of ${maxRetries}`);
-+			}
-+		}
-+	}
-+}
- function fromLocalWebpack(extensionPath, webpackConfigFileName, disableMangle) {
-     const vsce = require('@vscode/vsce');
-     const webpack = require('webpack');
-@@ -140,12 +155,15 @@ function fromLocalWebpack(extensionPath,
-             }
-         }
-     }
-+    // During building, some of the parallel `npm list --prod --json` calls were failing intermittently
-+    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
-+    // Added this retry to make the build process more stable
-     // TODO: add prune support based on packagedDependencies to vsce.PackageManager.Npm similar
-     // to vsce.PackageManager.Yarn.
-     // A static analysis showed there are no webpack externals that are dependencies of the current
-     // local extensions so we can use the vsce.PackageManager.None config to ignore dependencies list
-     // as a temporary workaround.
--    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }).then(fileNames => {
-+    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.None, packagedDependencies }), 3).then(fileNames => {
-         const files = fileNames
-             .map(fileName => path_1.default.join(extensionPath, fileName))
-             .map(filePath => new vinyl_1.default({
-@@ -228,7 +246,10 @@ function fromLocalWebpack(extensionPath,
- function fromLocalNormal(extensionPath) {
-     const vsce = require('@vscode/vsce');
-     const result = event_stream_1.default.through();
--    vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm })
-+    // During building, some of the parallel `npm list --prod --json` calls were failing intermittently
-+    // A failure causes the whole build process to fail, but the operation seems to succeed on retry
-+    // Added this retry to make the build process more stable
-+    asyncRetry(() => vsce.listFiles({ cwd: extensionPath, packageManager: vsce.PackageManager.Npm }), 3)
-         .then(fileNames => {
-         const files = fileNames
-             .map(fileName => path_1.default.join(extensionPath, fileName))
 Index: third-party-src/build/lib/extensions.ts
 ===================================================================
 --- third-party-src.orig/build/lib/extensions.ts
 +++ third-party-src/build/lib/extensions.ts
-@@ -89,6 +89,21 @@ function fromLocal(extensionPath: string
+@@ -90,6 +90,21 @@ function fromLocal(extensionPath: string
  	return input;
  }
  
@@ -107,11 +26,10 @@ Index: third-party-src/build/lib/extensions.ts
  
  function fromLocalWebpack(extensionPath: string, webpackConfigFileName: string, disableMangle: boolean): Stream {
  	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
-@@ -106,13 +121,15 @@ function fromLocalWebpack(extensionPath:
- 			}
+@@ -108,12 +123,15 @@ function fromLocalWebpack(extensionPath:
  		}
  	}
--
+ 
 +	// During building, some of the parallel `npm list --prod --json` calls were failing intermittently
 +	// A failure causes the whole build process to fail, but the operation seems to succeed on retry
 +	// Added this retry to make the build process more stable
@@ -125,7 +43,7 @@ Index: third-party-src/build/lib/extensions.ts
  		const files = fileNames
  			.map(fileName => path.join(extensionPath, fileName))
  			.map(filePath => new File({
-@@ -208,8 +225,10 @@ function fromLocalWebpack(extensionPath:
+@@ -208,8 +226,10 @@ function fromLocalWebpack(extensionPath:
  function fromLocalNormal(extensionPath: string): Stream {
  	const vsce = require('@vscode/vsce') as typeof import('@vscode/vsce');
  	const result = es.through();
@@ -138,64 +56,86 @@ Index: third-party-src/build/lib/extensions.ts
  		.then(fileNames => {
  			const files = fileNames
  				.map(fileName => path.join(extensionPath, fileName))
-Index: third-party-src/package.json
-===================================================================
---- third-party-src.orig/package.json
-+++ third-party-src/package.json
-@@ -32,7 +32,7 @@
-     "watch-extensionsd": "deemon npm run watch-extensions",
-     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
-     "precommit": "node build/hygiene.js",
--    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
-+    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
-     "electron": "node build/lib/electron",
-     "7z": "7z",
-     "update-grammars": "node build/npm/update-all-grammars.mjs",
-@@ -77,7 +77,6 @@
-     "@vscode/iconv-lite-umd": "0.7.0",
-     "@vscode/policy-watcher": "^1.3.2",
-     "@vscode/proxy-agent": "^0.37.0",
--    "@vscode/ripgrep": "^1.15.11",
-     "@vscode/spdlog": "^0.15.2",
-     "@vscode/sqlite3": "5.1.12-vscode",
-     "@vscode/sudo-prompt": "9.3.1",
-@@ -102,7 +101,6 @@
-     "jschardet": "3.1.4",
-     "minimist": "^1.2.6",
-     "native-is-elevated": "0.7.0",
--    "native-keymap": "^3.3.5",
-     "native-watchdog": "^1.4.1",
-     "node-pty": "^1.1.0-beta33",
-     "open": "^8.4.2",
-@@ -140,7 +137,6 @@
-     "@typescript-eslint/utils": "^8.8.0",
-     "@vscode/gulp-electron": "^1.36.0",
-     "@vscode/l10n-dev": "0.0.35",
--    "@vscode/telemetry-extractor": "^1.10.2",
-     "@vscode/test-cli": "^0.0.6",
-     "@vscode/test-electron": "^2.4.0",
-     "@vscode/test-web": "^0.0.62",
-Index: third-party-src/remote/package.json
-===================================================================
---- third-party-src.orig/remote/package.json
-+++ third-party-src/remote/package.json
-@@ -9,7 +9,6 @@
-     "@vscode/deviceid": "^0.1.1",
-     "@vscode/iconv-lite-umd": "0.7.0",
-     "@vscode/proxy-agent": "^0.37.0",
--    "@vscode/ripgrep": "^1.15.11",
-     "@vscode/spdlog": "^0.15.2",
-     "@vscode/tree-sitter-wasm": "^0.1.4",
-     "@vscode/vscode-languagedetection": "1.0.21",
 Index: third-party-src/build/package.json
 ===================================================================
 --- third-party-src.orig/build/package.json
 +++ third-party-src/build/package.json
-@@ -36,7 +36,6 @@
+@@ -42,8 +42,8 @@
      "@types/workerpool": "^6.4.0",
      "@types/xml2js": "0.0.33",
-     "@vscode/iconv-lite-umd": "0.7.0",
--    "@vscode/ripgrep": "^1.15.10",
-     "@vscode/vsce": "2.20.1",
+     "@vscode/iconv-lite-umd": "0.7.1",
+-    "@vscode/ripgrep": "^1.15.13",
+     "@vscode/vsce": "3.6.1",
++    "@vscode/vsce-sign": "file:../../../../build-tools/vsce-sign",
+     "ansi-colors": "^3.2.3",
      "byline": "^5.0.0",
-     "cssnano": "^7.0.7",
+     "debug": "^4.3.2",
+Index: third-party-src/remote/package.json
+===================================================================
+--- third-party-src.orig/remote/package.json
++++ third-party-src/remote/package.json
+@@ -8,7 +8,6 @@
+     "@vscode/deviceid": "^0.1.1",
+     "@vscode/iconv-lite-umd": "0.7.1",
+     "@vscode/proxy-agent": "^0.37.0",
+-    "@vscode/ripgrep": "^1.15.13",
+     "@vscode/spdlog": "^0.15.2",
+     "@vscode/tree-sitter-wasm": "^0.3.0",
+     "@vscode/vscode-languagedetection": "1.0.21",
+@@ -39,7 +38,8 @@
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "^9.3.0",
+     "yauzl": "^3.0.0",
+-    "yazl": "^2.4.3"
++    "yazl": "^2.4.3",
++    "@vscode/vsce-sign": "file:../../../../build-tools/vsce-sign"
+   },
+   "overrides": {
+     "node-gyp-build": "4.8.1"
+Index: third-party-src/package.json
+===================================================================
+--- third-party-src.orig/package.json
++++ third-party-src/package.json
+@@ -34,7 +34,7 @@
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+     "precommit": "node build/hygiene.ts",
+-    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
++    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron.ts",
+     "7z": "7z",
+     "update-grammars": "node build/npm/update-all-grammars.ts",
+@@ -79,7 +79,6 @@
+     "@vscode/iconv-lite-umd": "0.7.1",
+     "@vscode/policy-watcher": "^1.3.2",
+     "@vscode/proxy-agent": "^0.37.0",
+-    "@vscode/ripgrep": "^1.15.13",
+     "@vscode/spdlog": "^0.15.2",
+     "@vscode/sqlite3": "5.1.12-vscode",
+     "@vscode/sudo-prompt": "9.3.1",
+@@ -105,7 +104,6 @@
+     "katex": "^0.16.22",
+     "minimist": "^1.2.8",
+     "native-is-elevated": "0.8.0",
+-    "native-keymap": "^3.3.5",
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta43",
+     "open": "^10.1.2",
+@@ -144,7 +142,6 @@
+     "@typescript/native-preview": "^7.0.0-dev.20250812.1",
+     "@vscode/gulp-electron": "^1.38.2",
+     "@vscode/l10n-dev": "0.0.35",
+-    "@vscode/telemetry-extractor": "^1.10.2",
+     "@vscode/test-cli": "^0.0.6",
+     "@vscode/test-electron": "^2.4.0",
+     "@vscode/test-web": "^0.0.76",
+@@ -236,7 +233,8 @@
+       "koa": "^3.0.3"
+     },
+     "postcss": "^8.4.31",
+-    "playwright": "^1.55.1"
++    "playwright": "^1.55.1",
++    "@vscode/vsce-sign": "file:../../../build-tools/vsce-sign"
+   },
+   "repository": {
+     "type": "git",
