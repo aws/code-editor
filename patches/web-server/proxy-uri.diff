@@ -1,3 +1,9 @@
+Add HTTP reverse proxy support for port forwarding
+
+Introduces http-proxy as a dependency and implements proxy URI resolution
+that routes localhost port requests through the Code Editor server,
+enabling port forwarding in web-based environments.
+
 Index: third-party-src/package.json
 ===================================================================
 --- third-party-src.orig/package.json

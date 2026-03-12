@@ -1,3 +1,9 @@
+Add SageMaker smoke test entry point with DataZone navigation
+
+Introduces a Playwright-based test launcher that navigates through the
+DataZone portal to reach the Code Editor, supporting SageMaker-specific
+test infrastructure with space selection and authentication flows.
+
 Index: code-editor-src/test/automation/src/playwrightBrowser.ts
 ===================================================================
 --- code-editor-src.orig/test/automation/src/playwrightBrowser.ts

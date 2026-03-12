@@ -1,3 +1,9 @@
+Remove the Continue Edit Session feature
+
+Removes the editSessions contribution import from the common workbench
+main file as this feature is not supported due to it using a third-party
+online service.
+
 Index: third-party-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/workbench.common.main.ts

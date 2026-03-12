@@ -1,3 +1,9 @@
+Disable online services by default
+
+Sets update mode to 'none', disables background updates, release notes,
+natural language settings search, and experiments. Prevents the editor
+from contacting Microsoft online services out of the box.
+
 Index: third-party-src/src/vs/platform/update/common/update.config.contribution.ts
 ===================================================================
 --- third-party-src.orig/src/vs/platform/update/common/update.config.contribution.ts

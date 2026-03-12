@@ -1,5 +1,9 @@
 Only allow opening webviews from same-origin or trusted parent origins
 
+Adds CSP style-src and connect-src directives for self-hosted webviews,
+reads trusted origins from product.json, and validates the parent origin
+against the trusted list before establishing the postMessage channel.
+
 Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html

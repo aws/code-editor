@@ -1,3 +1,5 @@
+Replace 'unsafe-eval' with 'wasm-unsafe-eval' in Content Security Policy directives
+
 Index: third-party-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- third-party-src.orig/src/vs/server/node/webClientServer.ts

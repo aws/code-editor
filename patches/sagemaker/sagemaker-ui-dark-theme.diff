@@ -1,3 +1,9 @@
+Add SageMaker UI dark theme extension
+
+Introduces a custom dark color theme extension tailored for the SageMaker
+Code Editor UI, providing consistent visual styling with the SageMaker
+console.
+
 Index: code-editor-src/extensions/sagemaker-ui-dark-theme/.vscodeignore
 ===================================================================
 --- /dev/null

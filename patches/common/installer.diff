@@ -1,3 +1,9 @@
+Customize the build and packaging pipeline for Code Editor
+
+Adds support for bundling a custom Node.js binary via CUSTOM_NODE_PATH,
+includes LICENSE-THIRD-PARTY in the server package, and handles missing
+git version gracefully by falling back to 'unknown'.
+
 Index: third-party-src/build/lib/getVersion.ts
 ===================================================================
 --- third-party-src.orig/build/lib/getVersion.ts

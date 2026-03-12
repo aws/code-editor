@@ -1,8 +1,8 @@
-Add custom cache to scanUserExtensions in reducing of excessive extension fetch requests
+Cache custom built-in extensions to reduce excessive fetch requests
 
----
- .../browser/webExtensionsScannerService.ts                   | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Adds an in-memory cache for the result of readCustomBuiltinExtensions()
+in the web extensions scanner service, preventing redundant network
+requests on every call to scanUserExtensions.
 
 Index: third-party-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
 ===================================================================

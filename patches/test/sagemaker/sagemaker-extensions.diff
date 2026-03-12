@@ -1,3 +1,9 @@
+Add SageMaker extension installation smoke tests
+
+Introduces e2e tests that verify extensions can be installed via the
+terminal CLI command and appear correctly in the activity bar within
+the SageMaker environment.
+
 Index: code-editor-src/test/smoke/src/areas/sagemaker-extensions/sagemaker-extensions-install.test.ts
 ===================================================================
 --- /dev/null

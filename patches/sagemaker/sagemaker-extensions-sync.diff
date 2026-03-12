@@ -1,3 +1,9 @@
+Add SageMaker extensions sync extension
+
+Introduces a built-in extension that detects missing pre-packaged extensions
+from the SageMaker Distribution and offers users the option to sync them
+into their extensions directory.
+
 Index: code-editor-src/extensions/sagemaker-extensions-sync/.vscodeignore
 ===================================================================
 --- /dev/null

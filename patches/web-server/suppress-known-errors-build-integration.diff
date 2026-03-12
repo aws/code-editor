@@ -1,3 +1,9 @@
+Integrate error suppression and reporting into the web server workbench HTML
+
+Adds the suppressedErrors.js script and a console.error monkey-patch to
+the workbench HTML that filters known errors and forwards unknown errors
+to the parent window via postMessage for metrics reporting.
+
 Index: third-party-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
 --- third-party-src.orig/src/vs/code/browser/workbench/workbench.html

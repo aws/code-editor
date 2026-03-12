@@ -1,3 +1,9 @@
+Add error suppression script for known non-critical errors
+
+Introduces suppressedErrors.js which loads error patterns from a JSON config
+file and provides an isErrorSuppressed() function to filter out known
+non-critical errors from being reported via the error channel.
+
 Index: third-party-src/src/vs/editor/common/errors/suppressedErrors.js
 ===================================================================
 --- /dev/null

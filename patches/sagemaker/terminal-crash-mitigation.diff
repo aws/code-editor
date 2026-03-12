@@ -1,3 +1,9 @@
+Add SageMaker terminal crash mitigation extension
+
+Introduces a built-in extension that monitors terminal processes and
+provides crash recovery mechanisms to improve terminal stability in the
+SageMaker environment.
+
 Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/.vscodeignore
 ===================================================================
 --- /dev/null

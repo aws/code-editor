@@ -1,3 +1,10 @@
+Add base path support for the web server
+
+Modifies URL resolution to prepend window.location.pathname for remote
+resource paths, adds rootEndpoint to the product configuration, and
+updates HTML templates to use relative base URLs for proper operation
+behind reverse proxies with path prefixes.
+
 Index: third-party-src/src/vs/base/common/network.ts
 ===================================================================
 --- third-party-src.orig/src/vs/base/common/network.ts

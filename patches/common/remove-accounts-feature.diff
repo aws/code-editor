@@ -1,3 +1,8 @@
+Remove the accounts feature from the activity bar and authentication contributions
+
+Hides the accounts visibility toggle, disables authentication action registrations,
+and comments out authentication workbench contributions.
+
 Index: third-party-src/src/vs/workbench/browser/parts/globalCompositeBar.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/browser/parts/globalCompositeBar.ts

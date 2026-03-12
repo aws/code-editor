@@ -1,3 +1,9 @@
+Use dynamic bootstrap for extension host web workers
+
+Replaces the static blob-based worker initialization with a dynamic
+approach that forwards the full bootstrap event data to the worker,
+avoiding inline script generation and improving CSP compatibility.
+
 Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html

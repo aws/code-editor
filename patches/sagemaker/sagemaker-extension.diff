@@ -1,3 +1,9 @@
+Add SageMaker session management extension
+
+Introduces the sagemaker-extension that monitors authentication cookies,
+displays session expiry warnings, and provides sign-in/save prompts to
+users when their SageMaker session is about to expire.
+
 Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
 --- /dev/null

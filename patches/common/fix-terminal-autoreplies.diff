@@ -1,6 +1,11 @@
-Backporting fix for GHSA-3pwg-f3hj-wp8p advisory: https://github.com/microsoft/vscode/security/advisories/GHSA-3pwg-f3hj-wp8p
+Backport fix for terminal auto-replies security vulnerability (GHSA-3pwg-f3hj-wp8p)
 
-Based on commit: https://github.com/microsoft/vscode/commit/670c6d9b2a6588cc90a1e347015966dc391795ba
+Adds the 'restricted' flag to the terminal.integrated.autoReplies setting
+to prevent untrusted workspaces from configuring automatic terminal replies,
+which could be exploited for command injection.
+
+Advisory: https://github.com/microsoft/vscode/security/advisories/GHSA-3pwg-f3hj-wp8p
+Based on: https://github.com/microsoft/vscode/commit/670c6d9b2a6588cc90a1e347015966dc391795ba
 
 Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/autoReplies/common/terminalAutoRepliesConfiguration.ts
 ===================================================================

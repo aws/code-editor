@@ -1,4 +1,8 @@
-Patch that is needed for producing internal builds.
+Adjust build configuration for internal builds
+
+Reduces mangle worker pool from 4 to 3 workers to prevent OOM failures
+in constrained build environments, and adds retry logic to vsce.listFiles
+calls to handle intermittent npm list failures during parallel builds.
 
 Index: third-party-src/build/lib/mangle/index.ts
 ===================================================================

@@ -1,3 +1,9 @@
+Enable advanced TypeScript language features for web-embedded
+
+Forces disableAutomaticTypingAcquisition for all server kinds and adds
+memfs:// to the allowed file system provider paths, enabling TypeScript
+IntelliSense to work with in-memory file systems.
+
 Index: third-party-src/extensions/typescript-language-features/src/tsServer/spawner.ts
 ===================================================================
 --- third-party-src.orig/extensions/typescript-language-features/src/tsServer/spawner.ts

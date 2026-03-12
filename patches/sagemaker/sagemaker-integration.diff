@@ -1,3 +1,9 @@
+Add SageMaker server-side integration client
+
+Introduces SagemakerServerClient which registers commands for parsing
+SageMaker authentication cookies and adds a logout menu entry. Provides
+the bridge between the Code Editor server and SageMaker's auth system.
+
 Index: third-party-src/src/vs/workbench/browser/client.ts
 ===================================================================
 --- /dev/null

@@ -1,3 +1,8 @@
+Include the error suppression script in the web-embedded build output
+
+Adds the suppressedErrors.js file path to the vscodeWebResourceIncludes
+array so it is packaged into the web-embedded distribution.
+
 Index: third-party-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- third-party-src.orig/build/gulpfile.vscode.web.ts

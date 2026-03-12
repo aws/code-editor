@@ -1,3 +1,9 @@
+Rebrand trusted domains help text from VS Code to Code Editor
+
+Updates the trusted domains configuration file examples and help text to
+reference amazon.com and aws.amazon.com, and replaces 'VS Code' with
+'Code Editor' in user-facing strings.
+
 Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsFileSystemProvider.ts

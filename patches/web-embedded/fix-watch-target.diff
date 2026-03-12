@@ -1,3 +1,9 @@
+Fix code-web.sh to work when node is available on PATH
+
+Adds a check for the node command and runs the web server directly
+instead of going through the code() wrapper function, fixing startup
+in environments where node is globally available.
+
 Index: third-party-src/scripts/code-web.sh
 ===================================================================
 --- third-party-src.orig/scripts/code-web.sh
