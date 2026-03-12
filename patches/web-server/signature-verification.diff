@@ -1,5 +1,8 @@
-Disable extension signature verification that was enabled for Linux in v1.100.
-It does not work since it depends on a closed-source proprietary package - @vscode/vsce-sign and it's not compatible with OpenVSX.
+Disable extension signature verification.
+
+Forces verifySignature to false regardless of configuration, since the
+verification depends on the closed-source @vscode/vsce-sign package and
+is not compatible with the Open VSX marketplace.
 
 Index: third-party-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
 ===================================================================

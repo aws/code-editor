@@ -1,3 +1,9 @@
+Update dependency versions and npm overrides for the build
+
+Bumps @vscode/proxy-agent, @vscode/sqlite3, and Electron versions. Removes
+kerberos dependency and adds npm overrides for security and compatibility fixes
+including braces, postcss, playwright, and @tootallnate/once.
+
 Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json

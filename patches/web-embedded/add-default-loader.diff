@@ -1,3 +1,9 @@
+Include index.html and product.json in the web-embedded build output
+
+Adds the server index.html and a version-stamped product.json to the
+web packaging pipeline so the embedded build can serve a standalone
+entry point.
+
 Index: third-party-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- third-party-src.orig/build/gulpfile.vscode.web.ts

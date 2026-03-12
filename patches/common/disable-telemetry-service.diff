@@ -1,5 +1,12 @@
-When pulling a new change from upstream, make sure to replace all .data.microsoft.com with 0.0.0.0
-Otherwise the OSS will still ping microsoft, even if the telemetry is set to OFF. 
+Disable all telemetry and crash reporting by default
+
+Forces telemetry level to OFF, disables crash reporting, and redirects
+telemetry endpoints (data.microsoft.com) to 0.0.0.0 to prevent any data
+from being sent even if settings are misconfigured.
+
+Note: when pulling a new change from upstream, make sure to replace all
+.data.microsoft.com with 0.0.0.0. Otherwise the OSS will still ping
+Microsoft, even if the telemetry is set to OFF.
 See: https://github.com/VSCodium/vscodium/issues/26
 
 Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts

@@ -1,9 +1,8 @@
-Remove import/export profiles and revert file menu items in file menu
+Remove import/export profiles and revert file menu items
 
----
- .../files/browser/fileActions.contribution.ts |  45 +----
- .../browser/userDataProfile.ts                | 162 +-----------------
- 2 files changed, 4 insertions(+), 203 deletions(-)
+Removes the Revert File command from the command palette. removes
+import/export functionality, as these features are not applicable in
+the embedded web environment.
 
 Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================

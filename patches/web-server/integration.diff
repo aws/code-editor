@@ -1,3 +1,9 @@
+Configure Open VSX as the extensions marketplace and add trusted domains
+
+Adds the Open VSX gallery service URLs to product.json, adds OIDC and
+SSO device authorization domains to the trusted domains list, and updates
+the welcome page branding.
+
 Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json

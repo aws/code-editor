@@ -1,3 +1,9 @@
+Add post-startup notifications extension for SageMaker
+
+Introduces a built-in extension that displays notifications to users after
+the editor starts, supporting configurable notification messages for the
+SageMaker environment.
+
 Index: code-editor-src/extensions/post-startup-notifications/.vscode/extensions.json
 ===================================================================
 --- /dev/null

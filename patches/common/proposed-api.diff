@@ -1,6 +1,10 @@
+Unconditionally enable all proposed APIs
+
 Original source: https://github.com/coder/code-server/blob/v4.101.2/patches/proposed-api.diff
 
-Unconditionally enable the proposed API, and disable the `isProposedApiEnabled` check.
+Makes isProposedApiEnabled always return true and forces
+_envEnablesProposedApiForAll to true, allowing all extensions to use
+proposed API features without explicit opt-in.
 
 Index: third-party-src/src/vs/workbench/services/extensions/common/extensions.ts
 ===================================================================

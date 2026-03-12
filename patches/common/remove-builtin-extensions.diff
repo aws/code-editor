@@ -1,3 +1,8 @@
+Remove built-in extensions from product.json
+
+Clears the builtInExtensions array to prevent downloading extensions
+from external sources during the build.
+
 Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json

@@ -1,10 +1,8 @@
-Revise Help->About Modal content and buttons
+Simplify the Help > About dialog for the web version
 
----
- src/vs/platform/dialogs/browser/dialog.ts                         | 18 ++++--------------
- src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts |  2 +-
- src/vs/workbench/browser/parts/dialogs/dialogHandler.ts           | 13 +++----------
- 3 files changed, 9 insertions(+), 24 deletions(-)
+Removes the Copy button from the About modal, leaving only OK. Passes
+the display details as the copy text instead of a separate formatted
+string, and simplifies the dialog handler to not track button selection.
 
 Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 ===================================================================

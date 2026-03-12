@@ -1,3 +1,9 @@
+Add SageMaker open notebook extension
+
+Introduces a built-in extension and configuration setting that allows
+opening notebooks directly from URL parameters (openNotebook, clusterId,
+region), enabling deep-linking into specific notebooks from SageMaker.
+
 Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts

@@ -1,3 +1,9 @@
+Re-add the codeWeb entry point to the web build
+
+Adds buildfile.codeWeb back to the vscodeWebEntryPoints array in the
+web gulp build file, ensuring the workbench code is included in the
+web-embedded distribution.
+
 Index: third-party-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- third-party-src.orig/build/gulpfile.vscode.web.ts

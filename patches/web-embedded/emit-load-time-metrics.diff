@@ -1,8 +1,8 @@
-Emit load time metrics
+Emit load time metrics to the embedding parent window
 
----
- src/vs/code/browser/workbench/workbench.ts | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+Measures the total workbench initialization time and sends it to the
+parent window via postMessage using the vscode.metrics channel, enabling
+the embedding application to track IDE load performance.
 
 Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================

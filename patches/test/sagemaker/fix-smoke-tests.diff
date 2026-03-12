@@ -1,3 +1,9 @@
+Fix smoke tests for SageMaker environment
+
+Removes the absolute path requirement for file opening in QuickAccess and
+fixes terminal label parsing to handle description text correctly in the
+SageMaker test environment.
+
 Index: code-editor-src/test/automation/src/quickaccess.ts
 ===================================================================
 --- code-editor-src.orig/test/automation/src/quickaccess.ts

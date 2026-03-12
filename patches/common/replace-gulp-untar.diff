@@ -1,3 +1,13 @@
+Replace gulp-untar with a custom tar extraction utility using the tar package
+
+Adds a custom untar() function to the build utilities that processes Vinyl
+file streams, replacing the deprecated gulp-untar dependency with the
+maintained tar package.
+
+Backported from: microsoft/vscode@1deca733b31c4a0d867381e035b70b8ccf01d714
+Backported from: microsoft/vscode/commit/fcfb37c8f86d43c46d4ae030e4e9c67c2a5f1fc2
+Fixed in: microsoft/vscode@1.109.0
+
 Index: third-party-src/build/lib/util.ts
 ===================================================================
 --- third-party-src.orig/build/lib/util.ts

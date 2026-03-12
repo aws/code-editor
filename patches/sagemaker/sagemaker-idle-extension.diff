@@ -1,3 +1,9 @@
+Add SageMaker idle activity tracking extension
+
+Introduces a built-in extension that monitors user activity (file changes,
+editor selections, terminal interactions) and logs the last active timestamp
+to a local file. Provides an /api/idle endpoint for external idle detection.
+
 Index: code-editor-src/extensions/sagemaker-idle-extension/README.md
 ===================================================================
 --- /dev/null

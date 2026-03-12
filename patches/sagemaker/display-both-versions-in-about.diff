@@ -1,3 +1,9 @@
+Display SageMaker Code Editor version in the About dialog
+
+Adds sagemakerCodeEditorVersion to the product configuration and updates
+the About dialog to show the SageMaker-specific version number alongside
+the Code OSS version.
+
 Index: code-editor-src/src/vs/base/common/product.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/base/common/product.ts

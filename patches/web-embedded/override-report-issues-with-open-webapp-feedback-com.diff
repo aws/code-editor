@@ -1,8 +1,8 @@
-Override report issues with open webapp feedback command
+Redirect issue reporting to the Lambda Console feedback command
 
----
- .../contrib/issue/common/issue.contribution.ts        | 11 ++---------
- 1 file changed, 2 insertions(+), 9 deletions(-)
+Replaces the built-in issue reporter handler with a delegation to the
+lambda-console.reportIssue command, routing bug reports through the
+embedding application's feedback mechanism instead of GitHub.
 
 Index: third-party-src/src/vs/workbench/contrib/issue/common/issue.contribution.ts
 ===================================================================

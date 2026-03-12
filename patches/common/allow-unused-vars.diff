@@ -1,3 +1,8 @@
+Relax TypeScript strict checks for unused locals and suppress ts-expect-error warnings
+
+Disables noUnusedLocals in tsconfig and replaces @ts-expect-error with @ts-ignore
+to prevent build failures caused by variables introduced by other patches.
+
 Index: third-party-src/src/tsconfig.base.json
 ===================================================================
 --- third-party-src.orig/src/tsconfig.base.json

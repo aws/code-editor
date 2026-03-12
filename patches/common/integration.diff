@@ -1,3 +1,9 @@
+Rebrand Code OSS to Code Editor
+
+Renames the product from 'Code - OSS' to 'Code Editor' across product.json,
+application names, data folder paths, server names, icons, and URLs. Adds
+codeEditorVersion field to the product configuration.
+
 Index: third-party-src/product.json
 ===================================================================
 --- third-party-src.orig/product.json

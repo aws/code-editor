@@ -1,5 +1,8 @@
-Do not use module type for service worker. Otherwise it will cause browser to not send cookies, which can result
-in a 401.
+Fix service worker registration to not use module type
+
+Removes { type: 'module' } from the service worker registration call.
+Using module type causes the browser to not send cookies with service
+worker requests, resulting in 401 authentication errors.
 
 Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================

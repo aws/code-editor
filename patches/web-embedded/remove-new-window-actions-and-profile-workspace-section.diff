@@ -1,10 +1,8 @@
-Remove new window actions and workspace section from profile page
+Remove "New Window" related actions and workspace section from profile page
 
----
- .../contrib/userDataProfile/browser/userDataProfile.ts   | 1 -
- .../userDataProfile/browser/userDataProfilesEditor.ts    | 2 --
- .../browser/userDataProfilesEditorModel.ts               | 9 ---------
- 3 files changed, 12 deletions(-)
+Removes all actions which can open a new window from the embedded Code Editor.
+This is needed because new window actions could be opened as a pop-up, which is
+not embedded. This is why multi-window is not supported in the web-embedded environment.
 
 Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 ===================================================================

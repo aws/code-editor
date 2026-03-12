@@ -1,8 +1,9 @@
-Clean up workbench and use TB CDN for webview in prod
+Clean up workbench initialization and use CDN for webview in production
 
----
- src/vs/code/browser/workbench/workbench.ts | 23 ++++++++++++++--------
- 1 file changed, 15 insertions(+), 8 deletions(-)
+Makes the workbench initialization async, reads configuration from URL
+parameters (origin, function, vsCodeCdn, isDevo), falls back to fetching
+product.json when no DOM config element exists, and sets the webview
+endpoint to the CDN origin in non-devo environments.
 
 Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================

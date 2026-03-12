@@ -1,3 +1,8 @@
+Remove all chat-related action registrations from the web-embedded build
+
+Disables registration of all chat related actions. These are not supported
+in the embedded Code Editor.
+
 Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts

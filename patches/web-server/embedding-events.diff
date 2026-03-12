@@ -1,3 +1,9 @@
+Add embedding events for remote connection state changes
+
+Introduces a SendEventToParentAction command and hooks into the remote
+agent connection state machine to forward connection/reconnection/
+disconnection events to the parent window via postMessage.
+
 Index: third-party-src/src/vs/workbench/contrib/remote/browser/remote.ts
 ===================================================================
 --- third-party-src.orig/src/vs/workbench/contrib/remote/browser/remote.ts
