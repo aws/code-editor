@@ -2,7 +2,7 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
-@@ -0,0 +1,212 @@
+@@ -0,0 +1,211 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
 +import { SessionWarning } from "./sessionWarning";
@@ -186,7 +186,6 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 +		return;
 +	}
 +
-+    // TODO: log activation of extension
 +    console.log('Activating Sagemaker Extension...');
 +
 +    // execute the get cookie command and save the data to cookies
