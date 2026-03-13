@@ -2,7 +2,7 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
-@@ -0,0 +1,205 @@
+@@ -0,0 +1,212 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
 +import { SessionWarning } from "./sessionWarning";
@@ -178,6 +178,13 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 +}
 +
 +export function activate(context: vscode.ExtensionContext) {
++
++    // this extension will only activate within a sagemaker app
++	const isSageMakerApp = !!process.env?.SAGEMAKER_APP_TYPE_LOWERCASE;
++	if (!isSageMakerApp) {
++        console.log('Skipping activation of Sagemaker Extension...');
++		return;
++	}
 +
 +    // TODO: log activation of extension
 +    console.log('Activating Sagemaker Extension...');
