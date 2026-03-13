@@ -3,11 +3,11 @@ Add /healthz health check endpoint to the remote extension host server
 Returns a JSON response with active connection status, enabling external
 health monitoring of the Code Editor server.
 
-Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
-+++ third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-@@ -130,6 +130,13 @@ class RemoteExtensionHostAgentServer ext
+--- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -131,6 +131,13 @@ class RemoteExtensionHostAgentServer ext
  			pathname = pathname.substring(this._serverProductPath.length);
  		}
  

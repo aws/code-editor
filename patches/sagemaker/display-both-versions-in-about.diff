@@ -28,11 +28,11 @@ Index: code-editor-src/product.json
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
  	"win32MutexName": "vscodeoss",
-Index: code-editor-src/src/vs/platform/dialogs/browser/dialog.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
 ===================================================================
---- code-editor-src.orig/src/vs/platform/dialogs/browser/dialog.ts
-+++ code-editor-src/src/vs/platform/dialogs/browser/dialog.ts
-@@ -46,8 +46,8 @@ export function createWorkbenchDialogOpt
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
+@@ -48,8 +48,8 @@ export function createWorkbenchDialogOpt
  export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string; detailsToCopy: string } {
  	const detailString = (useAgo: boolean): string => {
  		return localize('aboutDetail',

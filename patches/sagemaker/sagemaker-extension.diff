@@ -4,10 +4,10 @@ Introduces the sagemaker-extension that monitors authentication cookies,
 displays session expiry warnings, and provides sign-in/save prompts to
 users when their SageMaker session is about to expire.
 
-Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/extension.ts
++++ code-editor-src/extensions/sagemaker-extension/src/extension.ts
 @@ -0,0 +1,172 @@
 +import * as vscode from 'vscode';
 +import * as fs from 'fs';
@@ -181,10 +181,10 @@ Index: third-party-src/extensions/sagemaker-extension/src/extension.ts
 +    // render warning message regarding auto upgrade disabled
 +    renderExtensionAutoUpgradeDisabledNotification();
 +}
-Index: third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/sessionWarning.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
++++ code-editor-src/extensions/sagemaker-extension/src/sessionWarning.ts
 @@ -0,0 +1,44 @@
 +import * as vscode from "vscode";
 +import {
@@ -231,10 +231,10 @@ Index: third-party-src/extensions/sagemaker-extension/src/sessionWarning.ts
 +    }
 +}
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-extension/.vscodeignore
+Index: code-editor-src/extensions/sagemaker-extension/.vscodeignore
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/.vscodeignore
++++ code-editor-src/extensions/sagemaker-extension/.vscodeignore
 @@ -0,0 +1,11 @@
 +.vscode/**
 +.vscode-test/**
@@ -247,10 +247,10 @@ Index: third-party-src/extensions/sagemaker-extension/.vscodeignore
 +out/**
 +cgmanifest.json
 +preview-src/**
-Index: third-party-src/extensions/sagemaker-extension/package.json
+Index: code-editor-src/extensions/sagemaker-extension/package.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/package.json
++++ code-editor-src/extensions/sagemaker-extension/package.json
 @@ -0,0 +1,52 @@
 +{
 +  "name": "sagemaker-extension",
@@ -304,10 +304,10 @@ Index: third-party-src/extensions/sagemaker-extension/package.json
 +  "repository": {
 +  }
 +}
-Index: third-party-src/extensions/sagemaker-extension/README.md
+Index: code-editor-src/extensions/sagemaker-extension/README.md
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/README.md
++++ code-editor-src/extensions/sagemaker-extension/README.md
 @@ -0,0 +1,5 @@
 +# Sagemaker Extension
 +
@@ -315,10 +315,10 @@ Index: third-party-src/extensions/sagemaker-extension/README.md
 +
 +Session Management: The extension monitors the SageMaker cookie to ensure seamless session continuity. It proactively alerts users to sign in again before the session expires, enhancing the user experience by preventing unexpected session interruptions.
 \ No newline at end of file
-Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
+Index: code-editor-src/extensions/sagemaker-extension/tsconfig.json
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-extension/tsconfig.json
 @@ -0,0 +1,10 @@
 +{
 +	"extends": "../tsconfig.base.json",
@@ -330,10 +330,10 @@ Index: third-party-src/extensions/sagemaker-extension/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
++++ code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
 @@ -0,0 +1,13 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -348,10 +348,10 @@ Index: third-party-src/extensions/sagemaker-extension/extension-browser.webpack.
 +		extension: './src/extension.ts'
 +	},
 +});
-Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
+Index: code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/extension.webpack.config.js
++++ code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
 @@ -0,0 +1,16 @@
 +/*---------------------------------------------------------------------------------------------
 + *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
@@ -369,10 +369,10 @@ Index: third-party-src/extensions/sagemaker-extension/extension.webpack.config.j
 +		extension: './src/extension.ts',
 +	}
 +});
-Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
+Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/extensions/sagemaker-extension/src/constant.ts
++++ code-editor-src/extensions/sagemaker-extension/src/constant.ts
 @@ -0,0 +1,72 @@
 +// Constants
 +export const WARNING_TIME_HEADER = 'Session expiring soon';
@@ -447,11 +447,11 @@ Index: third-party-src/extensions/sagemaker-extension/src/constant.ts
 +	}
 +}
 \ No newline at end of file
-Index: third-party-src/build/gulpfile.extensions.ts
+Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.extensions.ts
-+++ third-party-src/build/gulpfile.extensions.ts
-@@ -64,6 +64,7 @@ const compilations = [
+--- code-editor-src.orig/build/gulpfile.extensions.ts
++++ code-editor-src/build/gulpfile.extensions.ts
+@@ -85,6 +85,7 @@ const compilations = [
  	'extensions/references-view/tsconfig.json',
  	'extensions/search-result/tsconfig.json',
  	'extensions/simple-browser/tsconfig.json',
@@ -459,10 +459,10 @@ Index: third-party-src/build/gulpfile.extensions.ts
  	'extensions/tunnel-forwarding/tsconfig.json',
  	'extensions/typescript-language-features/web/tsconfig.json',
  	'extensions/typescript-language-features/tsconfig.json',
-Index: third-party-src/build/npm/dirs.ts
+Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
---- third-party-src.orig/build/npm/dirs.ts
-+++ third-party-src/build/npm/dirs.ts
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
 @@ -42,6 +42,7 @@ export const dirs = [
  	'extensions/npm',
  	'extensions/php-language-features',

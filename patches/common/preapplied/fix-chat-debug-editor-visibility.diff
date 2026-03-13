@@ -1,0 +1,18 @@
+Fix upstream bug where setEditorVisible is missing protected modifier
+
+The chatDebugEditor.ts overrides setEditorVisible without the protected modifier,
+which causes the mangler to fail because it makes a protected method public.
+
+Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
++++ code-editor-src/src/vs/workbench/contrib/chat/browser/chatDebug/chatDebugEditor.ts
+@@ -303,7 +303,7 @@ export class ChatDebugEditor extends Edi
+ 		}
+ 	}
+ 
+-	override setEditorVisible(visible: boolean): void {
++	protected override setEditorVisible(visible: boolean): void {
+ 		super.setEditorVisible(visible);
+ 		if (visible) {
+ 			this.telemetryService.publicLog2<{}, ChatDebugPanelOpenedClassification>('chatDebugPanelOpened');

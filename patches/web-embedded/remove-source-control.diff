@@ -5,11 +5,11 @@ This patch removes the entire source control (SCM) feature from CODE OSS as it i
  .../contrib/scm/browser/scm.contribution.ts   | 444 +-----------------
  1 file changed, 1 insertion(+), 443 deletions(-)
 
-Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
-@@ -3,711 +3,15 @@
+--- code-editor-src.orig/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
+@@ -3,730 +3,15 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
  
@@ -40,6 +40,7 @@ Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 -import { SCMRepositoriesViewPane } from './scmRepositoriesViewPane.js';
 -import { IInstantiationService, ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
 -import { Context as SuggestContext } from '../../../../editor/contrib/suggest/browser/suggest.js';
+-import { InlineCompletionContextKeys } from '../../../../editor/contrib/inlineCompletions/browser/controller/inlineCompletionContextKeys.js';
 -import { MANAGE_TRUST_COMMAND_ID, WorkspaceTrustContext } from '../../workspace/common/workspace.js';
 +import { SCMViewService } from './scmViewService.js';
  import { IQuickDiffService } from '../common/quickDiff.js';
@@ -60,6 +61,7 @@ Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 -import { SCMHistoryItemContextContribution } from './scmHistoryChatContext.js';
 -import { ChatContextKeys } from '../../chat/common/actions/chatContextKeys.js';
 -import { CHAT_SETUP_SUPPORT_ANONYMOUS_ACTION_ID } from '../../chat/browser/actions/chatActions.js';
+-import { SCMInputContextKeys } from './scmInput.js';
 -import product from '../../../../platform/product/common/product.js';
 -
 -ModesRegistry.registerLanguage({
@@ -472,9 +474,27 @@ Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 -});
 -
 -KeybindingsRegistry.registerCommandAndKeybindingRule({
+-	id: 'scm.clearValidation',
+-	weight: KeybindingWeight.WorkbenchContrib,
+-	when: ContextKeyExpr.and(
+-		ContextKeyExpr.has('scmRepository'),
+-		SCMInputContextKeys.SCMInputHasValidationMessage),
+-	primary: KeyCode.Escape,
+-	handler: async (accessor) => {
+-		const scmViewService = accessor.get(ISCMViewService);
+-		scmViewService.activeRepository.get()?.repository.input.clearValidation();
+-	}
+-});
+-
+-KeybindingsRegistry.registerCommandAndKeybindingRule({
 -	id: 'scm.clearInput',
 -	weight: KeybindingWeight.WorkbenchContrib,
--	when: ContextKeyExpr.and(ContextKeyExpr.has('scmRepository'), SuggestContext.Visible.toNegated(), EditorContextKeys.hasNonEmptySelection.toNegated()),
+-	when: ContextKeyExpr.and(
+-		ContextKeyExpr.has('scmRepository'),
+-		SuggestContext.Visible.toNegated(),
+-		InlineCompletionContextKeys.inlineSuggestionVisible.toNegated(),
+-		SCMInputContextKeys.SCMInputHasValidationMessage.toNegated(),
+-		EditorContextKeys.hasNonEmptySelection.toNegated()),
 -	primary: KeyCode.Escape,
 -	handler: async (accessor) => {
 -		const scmService = accessor.get(ISCMService);
@@ -719,7 +739,6 @@ Index: third-party-src/src/vs/workbench/contrib/scm/browser/scm.contribution.ts
 -		await commandService.executeCommand(command, ...args);
 -	}
 -});
--
+ 
  
  registerSingleton(ISCMService, SCMService, InstantiationType.Delayed);
- registerSingleton(ISCMViewService, SCMViewService, InstantiationType.Delayed);

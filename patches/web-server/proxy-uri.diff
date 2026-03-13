@@ -2,21 +2,22 @@ Add HTTP reverse proxy support for port forwarding
 
 Introduces http-proxy as a dependency and implements proxy URI resolution
 that routes localhost port requests through the Code Editor server,
-enabling port forwarding in web-based environments.
+enabling port forwarding in web-based environments. Also adds undici
+dependency to remote/package.json for HTTP client support.
 
-Index: third-party-src/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- third-party-src.orig/package.json
-+++ third-party-src/package.json
-@@ -99,6 +99,7 @@
-     "@xterm/addon-webgl": "^0.20.0-beta.101",
-     "@xterm/headless": "^6.1.0-beta.91",
-     "@xterm/xterm": "^6.1.0-beta.91",
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -110,6 +110,7 @@
+     "@xterm/addon-webgl": "^0.20.0-beta.167",
+     "@xterm/headless": "^6.1.0-beta.168",
+     "@xterm/xterm": "^6.1.0-beta.168",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
-@@ -125,6 +126,7 @@
+@@ -136,6 +137,7 @@
      "@types/debug": "^4.1.5",
      "@types/eslint": "^9.6.1",
      "@types/gulp-svgmin": "^1.2.1",
@@ -24,22 +25,22 @@ Index: third-party-src/package.json
      "@types/http-proxy-agent": "^2.0.1",
      "@types/kerberos": "^1.1.2",
      "@types/minimist": "^1.2.1",
-Index: third-party-src/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- third-party-src.orig/remote/package.json
-+++ third-party-src/remote/package.json
-@@ -26,6 +26,7 @@
-     "@xterm/headless": "^6.1.0-beta.91",
-     "@xterm/xterm": "^6.1.0-beta.91",
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
+@@ -28,6 +28,7 @@
+     "@xterm/headless": "^6.1.0-beta.168",
+     "@xterm/xterm": "^6.1.0-beta.168",
      "cookie": "^0.7.0",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
 @@ -22,6 +22,7 @@ import type { IWorkbenchConstructionOpti
  import { AuthenticationSessionInfo } from '../../../workbench/services/authentication/browser/authenticationService.js';
  import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
@@ -69,10 +70,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  		secretStorageProvider: config.remoteAuthority && !secretStorageKeyPath
  			? undefined /* with a remote without embedder-preferred storage, store on the remote */
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
-Index: third-party-src/src/vs/server/node/proxyServer.ts
+Index: code-editor-src/src/vs/server/node/proxyServer.ts
 ===================================================================
 --- /dev/null
-+++ third-party-src/src/vs/server/node/proxyServer.ts
++++ code-editor-src/src/vs/server/node/proxyServer.ts
 @@ -0,0 +1,186 @@
 +import proxyServer from "http-proxy";
 +import * as http from "http";
@@ -260,10 +261,10 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +		}
 +	}
 +}
-Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
-+++ third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+--- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 @@ -3,6 +3,8 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -334,7 +335,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			const query = url.parse(req.url, true).query;
  			if (typeof query.reconnectionToken === 'string') {
  				reconnectionToken = query.reconnectionToken;
-@@ -500,6 +519,8 @@ class RemoteExtensionHostAgentServer ext
+@@ -506,6 +525,8 @@ class RemoteExtensionHostAgentServer ext
  			return this._rejectWebSocketConnection(logPrefix, protocol, `Unknown initial data received`);
  
  		}
@@ -343,7 +344,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  	}
  
  	private async _createTunnel(protocol: PersistentProtocol, tunnelStartParams: ITunnelConnectionStartParams): Promise<void> {
-@@ -632,7 +653,7 @@ export interface IServerAPI {
+@@ -638,7 +659,7 @@ export interface IServerAPI {
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */
@@ -352,10 +353,10 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */
-Index: third-party-src/src/server-main.ts
+Index: code-editor-src/src/server-main.ts
 ===================================================================
---- third-party-src.orig/src/server-main.ts
-+++ third-party-src/src/server-main.ts
+--- code-editor-src.orig/src/server-main.ts
++++ code-editor-src/src/server-main.ts
 @@ -93,14 +93,14 @@ if (shouldSpawnCli) {
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
  		return remoteExtensionHostAgentServer.handleRequest(req, res);
@@ -373,10 +374,10 @@ Index: third-party-src/src/server-main.ts
  	});
  	server.on('error', async (err) => {
  		const remoteExtensionHostAgentServer = await getRemoteExtensionHostAgentServer();
-Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+Index: code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
-+++ third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
++++ code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 @@ -4,7 +4,15 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -634,10 +635,10 @@ Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelFactory.ts
 +		}
 +	}
  }
-Index: third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
+Index: code-editor-src/src/vs/workbench/services/remote/common/tunnelModel.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/remote/common/tunnelModel.ts
-+++ third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
+--- code-editor-src.orig/src/vs/workbench/services/remote/common/tunnelModel.ts
++++ code-editor-src/src/vs/workbench/services/remote/common/tunnelModel.ts
 @@ -557,13 +557,7 @@ export class TunnelModel extends Disposa
  	}
  

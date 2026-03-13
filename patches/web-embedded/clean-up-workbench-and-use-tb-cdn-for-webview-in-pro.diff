@@ -5,10 +5,10 @@ parameters (origin, function, vsCodeCdn, isDevo), falls back to fetching
 product.json when no DOM config element exists, and sets the webview
 endpoint to the CDN origin in non-devo environments.
 
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
 @@ -597,16 +597,32 @@ function readCookie(name: string): strin
  	return undefined;
  }

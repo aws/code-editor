@@ -9,11 +9,11 @@ Note: when pulling a new change from upstream, make sure to replace all
 Microsoft, even if the telemetry is set to OFF.
 See: https://github.com/VSCodium/vscodium/issues/26
 
-Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
+Index: code-editor-src/src/vs/platform/telemetry/common/telemetryService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/telemetry/common/telemetryService.ts
-+++ third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
-@@ -274,7 +274,7 @@ configurationRegistry.registerConfigurat
+--- code-editor-src.orig/src/vs/platform/telemetry/common/telemetryService.ts
++++ code-editor-src/src/vs/platform/telemetry/common/telemetryService.ts
+@@ -287,7 +287,7 @@ configurationRegistry.registerConfigurat
  	'properties': {
  		[TELEMETRY_SETTING_ID]: {
  			'type': 'string',
@@ -22,7 +22,7 @@ Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
  			'enumDescriptions': [
  				localize('telemetry.telemetryLevel.default', "Sends usage data, errors, and crash reports."),
  				localize('telemetry.telemetryLevel.error', "Sends general error telemetry and crash reports."),
-@@ -282,7 +282,7 @@ configurationRegistry.registerConfigurat
+@@ -295,7 +295,7 @@ configurationRegistry.registerConfigurat
  				localize('telemetry.telemetryLevel.off', "Disables all product telemetry.")
  			],
  			'markdownDescription': getTelemetryLevelSettingDescription(),
@@ -31,7 +31,7 @@ Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
  			'restricted': true,
  			'scope': ConfigurationScope.APPLICATION,
  			'tags': ['usesOnlineServices', 'telemetry'],
-@@ -334,7 +334,7 @@ configurationRegistry.registerConfigurat
+@@ -347,7 +347,7 @@ configurationRegistry.registerConfigurat
  				!product.privacyStatementUrl ?
  					localize('telemetry.enableTelemetry', "Enable diagnostic data to be collected. This helps us to better understand how {0} is performing and where improvements need to be made.", product.nameLong) :
  					localize('telemetry.enableTelemetryMd', "Enable diagnostic data to be collected. This helps us to better understand how {0} is performing and where improvements need to be made. [Read more]({1}) about what we collect and our privacy statement.", product.nameLong, product.privacyStatementUrl),
@@ -40,10 +40,10 @@ Index: third-party-src/src/vs/platform/telemetry/common/telemetryService.ts
  			'restricted': true,
  			'markdownDeprecationMessage': localize('enableTelemetryDeprecated', "If this setting is false, no telemetry will be sent regardless of the new setting's value. Deprecated in favor of the {0} setting.", `\`#${TELEMETRY_SETTING_ID}#\``),
  			'scope': ConfigurationScope.APPLICATION,
-Index: third-party-src/src/vs/platform/telemetry/common/1dsAppender.ts
+Index: code-editor-src/src/vs/platform/telemetry/common/1dsAppender.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/telemetry/common/1dsAppender.ts
-+++ third-party-src/src/vs/platform/telemetry/common/1dsAppender.ts
+--- code-editor-src.orig/src/vs/platform/telemetry/common/1dsAppender.ts
++++ code-editor-src/src/vs/platform/telemetry/common/1dsAppender.ts
 @@ -19,8 +19,8 @@ export interface IAppInsightsCore {
  	unload(isAsync: boolean, unloadComplete: (unloadState: ITelemetryUnloadState) => void): void;
  }
@@ -55,11 +55,11 @@ Index: third-party-src/src/vs/platform/telemetry/common/1dsAppender.ts
  
  async function getClient(instrumentationKey: string, addInternalFlag?: boolean, xhrOverride?: IXHROverride): Promise<IAppInsightsCore> {
  	// eslint-disable-next-line local/code-amd-node-module
-Index: third-party-src/src/vs/workbench/electron-browser/desktop.contribution.ts
+Index: code-editor-src/src/vs/workbench/electron-browser/desktop.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/electron-browser/desktop.contribution.ts
-+++ third-party-src/src/vs/workbench/electron-browser/desktop.contribution.ts
-@@ -340,7 +340,7 @@ import { MAX_ZOOM_LEVEL, MIN_ZOOM_LEVEL
+--- code-editor-src.orig/src/vs/workbench/electron-browser/desktop.contribution.ts
++++ code-editor-src/src/vs/workbench/electron-browser/desktop.contribution.ts
+@@ -341,7 +341,7 @@ import product from '../../platform/prod
  			'telemetry.enableCrashReporter': {
  				'type': 'boolean',
  				'description': localize('telemetry.enableCrashReporting', "Enable crash reports to be collected. This helps us improve stability. \nThis option requires restart to take effect."),

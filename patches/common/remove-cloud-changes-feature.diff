@@ -4,11 +4,11 @@ Removes the editSessions contribution import from the common workbench
 main file as this feature is not supported due to it using a third-party
 online service.
 
-Index: third-party-src/src/vs/workbench/workbench.common.main.ts
+Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/workbench.common.main.ts
-+++ third-party-src/src/vs/workbench/workbench.common.main.ts
-@@ -379,9 +379,6 @@ import './contrib/userDataSync/browser/u
+--- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
++++ code-editor-src/src/vs/workbench/workbench.common.main.ts
+@@ -387,9 +387,6 @@ import './contrib/userDataSync/browser/u
  // User Data Profiles
  import './contrib/userDataProfile/browser/userDataProfile.contribution.js';
  

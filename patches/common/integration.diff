@@ -2,12 +2,16 @@ Rebrand Code OSS to Code Editor
 
 Renames the product from 'Code - OSS' to 'Code Editor' across product.json,
 application names, data folder paths, server names, icons, and URLs. Adds
-codeEditorVersion field to the product configuration.
+codeEditorVersion field to the product configuration. Customizes the About
+dialog to show Code Editor version alongside Code-OSS version.
 
-Index: third-party-src/product.json
+Note: In 1.111.x, the dialog.ts file moved from src/vs/platform/dialogs/browser/
+to src/vs/workbench/browser/parts/dialogs/.
+
+Index: code-editor-src/product.json
 ===================================================================
---- third-party-src.orig/product.json
-+++ third-party-src/product.json
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
 @@ -1,18 +1,19 @@
  {
 -	"nameShort": "Code - OSS",
@@ -49,10 +53,10 @@ Index: third-party-src/product.json
  	"nodejsRepository": "https://nodejs.org",
  	"urlProtocol": "code-oss",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
-Index: third-party-src/src/vs/base/common/product.ts
+Index: code-editor-src/src/vs/base/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/base/common/product.ts
-+++ third-party-src/src/vs/base/common/product.ts
+--- code-editor-src.orig/src/vs/base/common/product.ts
++++ code-editor-src/src/vs/base/common/product.ts
 @@ -69,6 +69,7 @@ export interface IProductConfiguration {
  	readonly date?: string;
  	readonly quality?: string;
@@ -61,10 +65,10 @@ Index: third-party-src/src/vs/base/common/product.ts
  
  	readonly nameShort: string;
  	readonly nameLong: string;
-Index: third-party-src/src/vs/platform/product/common/product.ts
+Index: code-editor-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/product/common/product.ts
-+++ third-party-src/src/vs/platform/product/common/product.ts
+--- code-editor-src.orig/src/vs/platform/product/common/product.ts
++++ code-editor-src/src/vs/platform/product/common/product.ts
 @@ -62,8 +62,8 @@ else {
  	if (Object.keys(product).length === 0) {
  		Object.assign(product, {
@@ -76,11 +80,11 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  			applicationName: 'code-oss',
  			dataFolderName: '.vscode-oss',
  			urlProtocol: 'code-oss',
-Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/dialogs/browser/dialog.ts
-+++ third-party-src/src/vs/platform/dialogs/browser/dialog.ts
-@@ -46,9 +46,9 @@ export function createWorkbenchDialogOpt
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
+@@ -48,9 +48,9 @@ export function createWorkbenchDialogOpt
  export function createBrowserAboutDialogDetails(productService: IProductService): { title: string; details: string; detailsToCopy: string } {
  	const detailString = (useAgo: boolean): string => {
  		return localize('aboutDetail',

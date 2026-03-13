@@ -4,10 +4,10 @@ Adds a check for the node command and runs the web server directly
 instead of going through the code() wrapper function, fixing startup
 in environments where node is globally available.
 
-Index: third-party-src/scripts/code-web.sh
+Index: code-editor-src/scripts/code-web.sh
 ===================================================================
---- third-party-src.orig/scripts/code-web.sh
-+++ third-party-src/scripts/code-web.sh
+--- code-editor-src.orig/scripts/code-web.sh
++++ code-editor-src/scripts/code-web.sh
 @@ -24,4 +24,9 @@ function code() {
  	$NODE ./scripts/code-web.js "$@"
  }

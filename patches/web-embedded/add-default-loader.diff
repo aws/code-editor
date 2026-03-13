@@ -4,11 +4,11 @@ Adds the server index.html and a version-stamped product.json to the
 web packaging pipeline so the embedded build can serve a standalone
 entry point.
 
-Index: third-party-src/build/gulpfile.vscode.web.ts
+Index: code-editor-src/build/gulpfile.vscode.web.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.vscode.web.ts
-+++ third-party-src/build/gulpfile.vscode.web.ts
-@@ -182,6 +182,10 @@ function packageTask(sourceFolderName: s
+--- code-editor-src.orig/build/gulpfile.vscode.web.ts
++++ code-editor-src/build/gulpfile.vscode.web.ts
+@@ -206,6 +206,10 @@ function packageTask(sourceFolderName: s
  			gulp.src('resources/server/code-192.png', { base: 'resources/server' }),
  			gulp.src('resources/server/code-512.png', { base: 'resources/server' })
  		);
@@ -19,7 +19,7 @@ Index: third-party-src/build/gulpfile.vscode.web.ts
  
  		const all = es.merge(
  			packageJsonStream,
-@@ -190,7 +194,9 @@ function packageTask(sourceFolderName: s
+@@ -214,7 +218,9 @@ function packageTask(sourceFolderName: s
  			deps,
  			favicon,
  			manifest,

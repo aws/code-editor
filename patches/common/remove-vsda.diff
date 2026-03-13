@@ -4,10 +4,10 @@ Replaces the proprietary VSDA WebAssembly-based signing implementation with
 stub methods that throw 'not supported' errors. OpenVSX does not currently
 support signed extensions.
 
-Index: third-party-src/src/vs/platform/sign/browser/signService.ts
+Index: code-editor-src/src/vs/platform/sign/browser/signService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/sign/browser/signService.ts
-+++ third-party-src/src/vs/platform/sign/browser/signService.ts
+--- code-editor-src.orig/src/vs/platform/sign/browser/signService.ts
++++ code-editor-src/src/vs/platform/sign/browser/signService.ts
 @@ -58,40 +58,12 @@ export class SignService extends Abstrac
  
  	@memoize

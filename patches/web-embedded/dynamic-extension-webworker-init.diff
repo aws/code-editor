@@ -4,10 +4,10 @@ Replaces the static blob-based worker initialization with a dynamic
 approach that forwards the full bootstrap event data to the worker,
 avoiding inline script generation and improving CSP compatibility.
 
-Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-+++ third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+--- code-editor-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 @@ -79,8 +79,8 @@
  			if (event.origin !== parentOrigin || event.data.type !== bootstrapNlsType) {
  				return;
@@ -57,10 +57,10 @@ Index: third-party-src/src/vs/workbench/services/extensions/worker/webWorkerExte
  				} else {
  					worker.onerror = console.error.bind(console);
  					window.parent.postMessage({
-Index: third-party-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+Index: code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
-+++ third-party-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
+--- code-editor-src.orig/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
++++ code-editor-src/src/vs/workbench/api/worker/extensionHostWorkerMain.ts
 @@ -3,7 +3,25 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/

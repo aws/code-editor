@@ -16,12 +16,12 @@ This patch disables or modifies various features and functionalities related to 
  .../browser/userDataProfileActions.ts         |  21 -
  12 files changed, 391 insertions(+), 521 deletions(-)
 
-Index: third-party-src/extensions/merge-conflict/package.json
+Index: code-editor-src/extensions/merge-conflict/package.json
 ===================================================================
---- third-party-src.orig/extensions/merge-conflict/package.json
-+++ third-party-src/extensions/merge-conflict/package.json
-@@ -29,80 +29,6 @@
-     "watch": "gulp watch-extension:merge-conflict"
+--- code-editor-src.orig/extensions/merge-conflict/package.json
++++ code-editor-src/extensions/merge-conflict/package.json
+@@ -35,80 +35,6 @@
+     "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
    },
    "contributes": {
 -    "commands": [
@@ -101,10 +101,10 @@ Index: third-party-src/extensions/merge-conflict/package.json
      "menus": {
        "scm/resourceState/context": [
          {
-Index: third-party-src/extensions/merge-conflict/src/commandHandler.ts
+Index: code-editor-src/extensions/merge-conflict/src/commandHandler.ts
 ===================================================================
---- third-party-src.orig/extensions/merge-conflict/src/commandHandler.ts
-+++ third-party-src/extensions/merge-conflict/src/commandHandler.ts
+--- code-editor-src.orig/extensions/merge-conflict/src/commandHandler.ts
++++ code-editor-src/extensions/merge-conflict/src/commandHandler.ts
 @@ -6,15 +6,6 @@ import * as vscode from 'vscode';
  import * as interfaces from './interfaces';
  import ContentProvider from './contentProvider';
@@ -393,10 +393,10 @@ Index: third-party-src/extensions/merge-conflict/src/commandHandler.ts
 -		};
 -	}
  }
-Index: third-party-src/extensions/references-view/package.json
+Index: code-editor-src/extensions/references-view/package.json
 ===================================================================
---- third-party-src.orig/extensions/references-view/package.json
-+++ third-party-src/extensions/references-view/package.json
+--- code-editor-src.orig/extensions/references-view/package.json
++++ code-editor-src/extensions/references-view/package.json
 @@ -121,23 +121,6 @@
          "icon": "$(refresh)"
        },
@@ -450,10 +450,10 @@ Index: third-party-src/extensions/references-view/package.json
            "command": "references-view.showSupertypes",
            "group": "navigation@1",
            "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != supertypes"
-Index: third-party-src/extensions/references-view/src/calls/index.ts
+Index: code-editor-src/extensions/references-view/src/calls/index.ts
 ===================================================================
---- third-party-src.orig/extensions/references-view/src/calls/index.ts
-+++ third-party-src/extensions/references-view/src/calls/index.ts
+--- code-editor-src.orig/extensions/references-view/src/calls/index.ts
++++ code-editor-src/extensions/references-view/src/calls/index.ts
 @@ -4,40 +4,11 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -530,10 +530,10 @@ Index: third-party-src/extensions/references-view/src/calls/index.ts
 -		this._mem.update(RichCallsDirection._key, value);
 -	}
 -}
-Index: third-party-src/extensions/references-view/src/extension.ts
+Index: code-editor-src/extensions/references-view/src/extension.ts
 ===================================================================
---- third-party-src.orig/extensions/references-view/src/extension.ts
-+++ third-party-src/extensions/references-view/src/extension.ts
+--- code-editor-src.orig/extensions/references-view/src/extension.ts
++++ code-editor-src/extensions/references-view/src/extension.ts
 @@ -4,7 +4,6 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -550,10 +550,10 @@ Index: third-party-src/extensions/references-view/src/extension.ts
  	types.register(tree, context);
  
  	function setInput(input: SymbolTreeInput<unknown>) {
-Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
+Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/actions/windowActions.ts
-+++ third-party-src/src/vs/workbench/browser/actions/windowActions.ts
+--- code-editor-src.orig/src/vs/workbench/browser/actions/windowActions.ts
++++ code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 @@ -7,7 +7,7 @@ import { localize, localize2 } from '../
  import { IWindowOpenable } from '../../../platform/window/common/window.js';
  import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
@@ -628,10 +628,10 @@ Index: third-party-src/src/vs/workbench/browser/actions/windowActions.ts
 -	group: '2_open',
 -	order: 4
 -});
-Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/authentication/browser/authentication.contribution.ts
 @@ -11,16 +11,10 @@ import { IExtensionManifest } from '../.
  import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
  import { Registry } from '../../../../platform/registry/common/platform.js';
@@ -657,10 +657,10 @@ Index: third-party-src/src/vs/workbench/contrib/authentication/browser/authentic
  	}
  }
  
-Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 @@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
@@ -725,10 +725,10 @@ Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contri
  	group: '5_autosave',
  	command: {
  		id: ToggleAutoSaveAction.ID,
-Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
+Index: code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
-+++ third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
++++ code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/commands.ts
 @@ -14,13 +14,12 @@ import { IDialogService } from '../../..
  import { ITextEditorOptions } from '../../../../../platform/editor/common/editor.js';
  import { ServicesAccessor } from '../../../../../platform/instantiation/common/instantiation.js';
@@ -765,10 +765,10 @@ Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/com
  export class AcceptAllCombination extends MergeEditorAction2 {
  	constructor() {
  		super({
-Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
+Index: code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
-+++ third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
++++ code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/commands/devCommands.ts
 @@ -139,7 +139,7 @@ export class MergeEditorLoadContentsFrom
  			category: MERGE_EDITOR_CATEGORY,
  			title: localize2('merge.dev.loadContentsFromFolder', "Load Merge Editor State from Folder"),
@@ -778,10 +778,10 @@ Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/commands/dev
  		});
  	}
  
-Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.contribution.ts
 @@ -15,7 +15,7 @@ import {
  	AcceptAllInput1, AcceptAllInput2, AcceptMerge, CompareInput1WithBaseCommand,
  	CompareInput2WithBaseCommand, GoToNextUnhandledConflict, GoToPreviousUnhandledConflict, OpenBaseFile, OpenMergeEditor,
@@ -799,10 +799,10 @@ Index: third-party-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.
  registerAction2(AcceptAllCombination);
  
  registerAction2(ToggleBetweenInputs);
-Index: third-party-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/editor/editor.contribution.ts
-+++ third-party-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/editor/editor.contribution.ts
++++ code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
 @@ -42,8 +42,7 @@ import {
  	ReOpenInTextEditorAction, DuplicateGroupDownAction, DuplicateGroupLeftAction, DuplicateGroupRightAction, DuplicateGroupUpAction, ToggleEditorTypeAction, SplitEditorToAboveGroupAction, SplitEditorToBelowGroupAction,
  	SplitEditorToFirstGroupAction, SplitEditorToLastGroupAction, SplitEditorToLeftGroupAction, SplitEditorToNextGroupAction, SplitEditorToPreviousGroupAction, SplitEditorToRightGroupAction, NavigateForwardInEditsAction,
@@ -896,10 +896,10 @@ Index: third-party-src/src/vs/workbench/browser/parts/editor/editor.contribution
  
  MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
  	group: '4_layouts',
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfileActions.ts
 @@ -8,27 +8,6 @@ import { Categories } from '../../../../
  import { Action2, registerAction2 } from '../../../../platform/actions/common/actions.js';
  import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';

@@ -4,10 +4,10 @@ Adds a constructor to ServerEnvironmentService that translates the deprecated --
 CLI argument to --server-base-path, maintaining backward
 compatibility with existing SageMaker deployment configurations.
 
-Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
+Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
-+++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
+--- code-editor-src.orig/src/vs/server/node/serverEnvironmentService.ts
++++ code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 @@ -9,6 +9,7 @@ import { NativeEnvironmentService } from
  import { OPTIONS, OptionDescriptions } from '../../platform/environment/node/argv.js';
  import { refineServiceDecorator } from '../../platform/instantiation/common/instantiation.js';

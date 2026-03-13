@@ -4,10 +4,10 @@ Adds CSP style-src and connect-src directives for self-hosted webviews,
 reads trusted origins from product.json, and validates the parent origin
 against the trusted list before establishing the postMessage channel.
 
-Index: third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
-+++ third-party-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+--- code-editor-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 @@ -5,7 +5,7 @@
  	<meta charset="UTF-8">
  

@@ -4,10 +4,10 @@ Adds the Open VSX gallery service URLs to product.json, adds OIDC and
 SSO device authorization domains to the trusted domains list, and updates
 the welcome page branding.
 
-Index: third-party-src/product.json
+Index: code-editor-src/product.json
 ===================================================================
---- third-party-src.orig/product.json
-+++ third-party-src/product.json
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
 @@ -1,4 +1,14 @@
  {
 +	"extensionsGallery": {
@@ -23,7 +23,7 @@ Index: third-party-src/product.json
  	"nameShort": "Code Editor",
  	"nameLong": "Code Editor",
  	"codeEditorVersion": "1.0.0",
-@@ -45,6 +55,9 @@
+@@ -53,6 +63,9 @@
  		"https://console.amazonaws-us-gov.com",
  		"https://console.amazonaws.cn",
  		"https://aws.amazon.com",
@@ -34,11 +34,11 @@ Index: third-party-src/product.json
 +		"https://device.sso.*.amazonaws.com"
  	]
  }
-Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-+++ third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-@@ -872,8 +872,8 @@ export class GettingStartedPage extends
+--- code-editor-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
++++ code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
+@@ -920,8 +920,8 @@ export class GettingStartedPage extends
  		}));
  
  		const header = $('.header', {},
@@ -49,11 +49,11 @@ Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/ge
  		);
  
  		const leftColumn = $('.categories-column.categories-column-left', {},);
-Index: third-party-src/src/vs/nls.ts
+Index: code-editor-src/src/vs/nls.ts
 ===================================================================
---- third-party-src.orig/src/vs/nls.ts
-+++ third-party-src/src/vs/nls.ts
-@@ -43,6 +43,7 @@ function _format(message: string, args:
+--- code-editor-src.orig/src/vs/nls.ts
++++ code-editor-src/src/vs/nls.ts
+@@ -47,6 +47,7 @@ function _format(message: string, args:
  		// FF3B and FF3D is the Unicode zenkaku representation for [ and ]
  		result = '\uFF3B' + result.replace(/[aouei]/g, '$&$&') + '\uFF3D';
  	}
@@ -61,10 +61,10 @@ Index: third-party-src/src/vs/nls.ts
  
  	return result;
  }
-Index: third-party-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+Index: code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/common/extHostLocalizationService.ts
-+++ third-party-src/src/vs/workbench/api/common/extHostLocalizationService.ts
+--- code-editor-src.orig/src/vs/workbench/api/common/extHostLocalizationService.ts
++++ code-editor-src/src/vs/workbench/api/common/extHostLocalizationService.ts
 @@ -46,7 +46,9 @@ export class ExtHostLocalizationService
  		if (!str) {
  			this.logService.warn(`Using default string since no string found in i18n bundle that has the key: ${key}`);
@@ -76,11 +76,11 @@ Index: third-party-src/src/vs/workbench/api/common/extHostLocalizationService.ts
  	}
  
  	getBundle(extensionId: string): { [key: string]: string } | undefined {
-Index: third-party-src/extensions/git/package.nls.json
+Index: code-editor-src/extensions/git/package.nls.json
 ===================================================================
---- third-party-src.orig/extensions/git/package.nls.json
-+++ third-party-src/extensions/git/package.nls.json
-@@ -226,7 +226,7 @@
+--- code-editor-src.orig/extensions/git/package.nls.json
++++ code-editor-src/extensions/git/package.nls.json
+@@ -257,7 +257,7 @@
  		"message": "List of git commands (ex: commit, push) that would have their `stdout` logged to the [git output](command:git.showOutput). If the git command has a client-side hook configured, the client-side hook's `stdout` will also be logged to the [git output](command:git.showOutput).",
  		"comment": [
  			"{Locked='](command:git.showOutput'}",
@@ -89,7 +89,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -254,8 +254,8 @@
+@@ -285,8 +285,8 @@
  	"config.untrackedChanges.hidden": "Untracked changes are hidden and excluded from several actions.",
  	"config.requireGitUserConfig": "Controls whether to require explicit Git user configuration or allow Git to guess if missing.",
  	"config.showCommitInput": "Controls whether to show the commit input in the Git source control panel.",
@@ -100,25 +100,7 @@ Index: third-party-src/extensions/git/package.nls.json
  	"config.timeline.showAuthor": "Controls whether to show the commit author in the Timeline view.",
  	"config.timeline.showUncommitted": "Controls whether to show uncommitted changes in the Timeline view.",
  	"config.timeline.date": "Controls which date to use for items in the Timeline view.",
-@@ -322,7 +322,7 @@
- 			"{Locked='](command:workbench.action.reloadWindow'}",
-			"{Locked='](command:git.showOutput'}",
-			"{Locked='](command:workbench.extensions.search?%22%40category%3A%5C%22scm%20providers%5C%22%22'}",
--			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for VS Code",
-+			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for Code-OSS",
- 			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
- 		]
- 	},
-@@ -332,7 +332,7 @@
- 			"{Locked='](command:workbench.action.reloadWindow'}",
-			"{Locked='](command:git.showOutput'}",
-			"{Locked='](command:workbench.extensions.search?%22%40category%3A%5C%22scm%20providers%5C%22%22'}",
--			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for VS Code",
-+			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for Code-OSS",
- 			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
- 		]
- 	},
-@@ -342,54 +342,54 @@
+@@ -356,7 +356,7 @@
  			"{Locked='](command:workbench.action.reloadWindow'}",
  			"{Locked='](command:git.showOutput'}",
  			"{Locked='](command:workbench.extensions.search?%22%40category%3A%5C%22scm%20providers%5C%22%22'}",
@@ -127,12 +109,25 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
- 	"view.workbench.scm.missing": {
--		"message": "Install Git, a popular source control system, to track code changes and collaborate with others. Learn more in our [Git guides](https://aka.ms/vscode-scm).",
-+		"message": "Install Git, a popular source control system, to track code changes and collaborate with others. Learn more in our [Git guides](https://aka.ms/vscode-scm).",
- 		"comment": [
- 			"{Locked='](https://aka.ms/vscode-scm'}",
+@@ -366,7 +366,7 @@
+ 			"{Locked='](command:workbench.action.reloadWindow'}",
+ 			"{Locked='](command:git.showOutput'}",
+ 			"{Locked='](command:workbench.extensions.search?%22%40category%3A%5C%22scm%20providers%5C%22%22'}",
+-			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for VS Code",
++			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for Code-OSS",
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
+ 		]
+ 	},
+@@ -376,7 +376,7 @@
+ 			"{Locked='](command:workbench.action.reloadWindow'}",
+ 			"{Locked='](command:git.showOutput'}",
+ 			"{Locked='](command:workbench.extensions.search?%22%40category%3A%5C%22scm%20providers%5C%22%22'}",
+-			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for VS Code",
++			"Do not translate the 'command:*' part inside of the '(..)'. It is an internal command syntax for Code-OSS",
+ 			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
+ 		]
+ 	},
+@@ -388,42 +388,42 @@
  		]
  	},
  	"view.workbench.scm.disabled": {
@@ -185,7 +180,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -404,7 +404,7 @@
+@@ -438,7 +438,7 @@
  		"comment": [
  			"{Locked='](command:git.openRepositoriesInParentFolders'}",
  			"{Locked='](command:workbench.action.openSettings?%5B%22git.openRepositoryInParentFolders%22%5D'}",
@@ -194,7 +189,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -413,7 +413,7 @@
+@@ -447,7 +447,7 @@
  		"comment": [
  			"{Locked='](command:git.openRepositoriesInParentFolders'}",
  			"{Locked='](command:workbench.action.openSettings?%5B%22git.openRepositoryInParentFolders%22%5D'}",
@@ -203,7 +198,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -421,7 +421,7 @@
+@@ -455,7 +455,7 @@
  		"message": "The detected Git repository is potentially unsafe as the folder is owned by someone other than the current user.\n[Manage Unsafe Repositories](command:git.manageUnsafeRepositories)\nTo learn more about unsafe repositories [read our docs](https://aka.ms/vscode-git-unsafe-repository).",
  		"comment": [
  			"{Locked='](command:git.manageUnsafeRepositories'}",
@@ -212,7 +207,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -429,23 +429,23 @@
+@@ -463,23 +463,23 @@
  		"message": "The detected Git repositories are potentially unsafe as the folders are owned by someone other than the current user.\n[Manage Unsafe Repositories](command:git.manageUnsafeRepositories)\nTo learn more about unsafe repositories [read our docs](https://aka.ms/vscode-git-unsafe-repository).",
  		"comment": [
  			"{Locked='](command:git.manageUnsafeRepositories'}",
@@ -241,7 +236,7 @@ Index: third-party-src/extensions/git/package.nls.json
  			"Please make sure there is no space between the right bracket and left parenthesis:  ]( this is an internal syntax for links"
  		]
  	},
-@@ -453,9 +453,9 @@
+@@ -487,9 +487,9 @@
  		"message": "You can clone a repository locally.\n[Clone Repository](command:git.clone 'Clone a repository once the Git extension has activated')",
  		"comment": [
  			"{Locked='](command:git.clone'}",
@@ -253,11 +248,11 @@ Index: third-party-src/extensions/git/package.nls.json
 -	"view.workbench.learnMore": "To learn more about how to use Git and source control in VS Code [read our docs](https://aka.ms/vscode-scm)."
 +	"view.workbench.learnMore": "To learn more about how to use Git and source control in Code-OSS [read our docs](https://aka.ms/vscode-scm)."
  }
-Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
+Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
-+++ third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
-@@ -357,8 +357,8 @@ export const walkthroughs: GettingStartedWalkthroughCo
+--- code-editor-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
++++ code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
+@@ -287,8 +287,8 @@ export const walkthroughs: GettingStarte
  
  	{
  		id: 'SetupWeb',
@@ -268,16 +263,16 @@ Index: third-party-src/src/vs/workbench/contrib/welcomeGettingStarted/common/get
  		isFeatured: true,
  		icon: setupIcon,
  		when: 'isWeb',
-Index: third-party-src/src/vs/workbench/workbench.common.main.ts
+Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/workbench.common.main.ts
-+++ third-party-src/src/vs/workbench/workbench.common.main.ts
-@@ -339,7 +339,7 @@ import './contrib/surveys/browser/langua
+--- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
++++ code-editor-src/src/vs/workbench/workbench.common.main.ts
+@@ -357,8 +357,6 @@ import './contrib/surveys/browser/langua
  
  // Welcome
  import './contrib/welcomeGettingStarted/browser/gettingStarted.contribution.js';
+-import './contrib/welcomeAgentSessions/browser/agentSessionsWelcome.contribution.js';
 -import './contrib/welcomeWalkthrough/browser/walkThrough.contribution.js';
-+
  import './contrib/welcomeViews/common/viewsWelcome.contribution.js';
  import './contrib/welcomeViews/common/newFile.contribution.js';
  

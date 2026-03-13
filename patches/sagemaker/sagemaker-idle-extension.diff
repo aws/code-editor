@@ -204,9 +204,10 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
   *--------------------------------------------------------------------------------------------*/
  
 -import { createReadStream, promises } from 'fs';
+-import type * as http from 'http';
 +import { createReadStream, promises, existsSync, writeFileSync } from 'fs';
 +import * as fs from 'fs';
- import * as http from 'http';
++import * as http from 'http';
 +import * as path from 'path';
  import * as url from 'url';
  import * as cookie from 'cookie';
@@ -305,7 +306,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -65,6 +65,7 @@ const compilations = [
+@@ -86,6 +86,7 @@ const compilations = [
  	'extensions/search-result/tsconfig.json',
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',
