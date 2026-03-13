@@ -4,11 +4,11 @@ Ensures the resource URI is properly revived via URI.revive() in the
 ExplorerItem constructor, fixing issues where file tree items could not
 be opened due to malformed URI objects.
 
-Index: third-party-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+Index: code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/files/common/explorerModel.ts
-+++ third-party-src/src/vs/workbench/contrib/files/common/explorerModel.ts
-@@ -92,9 +92,10 @@ export class ExplorerItem {
+--- code-editor-src.orig/src/vs/workbench/contrib/files/common/explorerModel.ts
++++ code-editor-src/src/vs/workbench/contrib/files/common/explorerModel.ts
+@@ -93,9 +93,10 @@ export class ExplorerItem {
  
  	public nestedParent: ExplorerItem | undefined;
  	public nestedChildren: ExplorerItem[] | undefined;
@@ -20,7 +20,7 @@ Index: third-party-src/src/vs/workbench/contrib/files/common/explorerModel.ts
  		private readonly fileService: IFileService,
  		private readonly configService: IConfigurationService,
  		private readonly filesConfigService: IFilesConfigurationService,
-@@ -107,6 +108,7 @@ export class ExplorerItem {
+@@ -108,6 +109,7 @@ export class ExplorerItem {
  		private _mtime?: number,
  		private _unknown = false
  	) {

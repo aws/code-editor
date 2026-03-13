@@ -7,7 +7,7 @@ Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
-@@ -635,7 +635,7 @@ function readCookie(name: string): strin
+@@ -641,7 +641,7 @@ function readCookie(name: string): strin
  			const localhostMatch = extractLocalHostUriMetaDataForPortMapping(resolvedUri)
  			if (localhostMatch && resolvedUri.authority !== location.host) {
  				if (config?.productConfiguration?.rootEndpoint) {

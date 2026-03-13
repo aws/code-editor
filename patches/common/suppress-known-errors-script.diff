@@ -4,10 +4,10 @@ Introduces suppressedErrors.js which loads error patterns from a JSON config
 file and provides an isErrorSuppressed() function to filter out known
 non-critical errors from being reported via the error channel.
 
-Index: third-party-src/src/vs/editor/common/errors/suppressedErrors.js
+Index: code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
 ===================================================================
 --- /dev/null
-+++ third-party-src/src/vs/editor/common/errors/suppressedErrors.js
++++ code-editor-src/src/vs/editor/common/errors/suppressedErrors.js
 @@ -0,0 +1,58 @@
 +/**
 + * 
@@ -67,5 +67,3 @@ Index: third-party-src/src/vs/editor/common/errors/suppressedErrors.js
 +}
 +
 +// Export the function for use in other files
-+window.isErrorSuppressed = isErrorSuppressed;
-\ No newline at end of file

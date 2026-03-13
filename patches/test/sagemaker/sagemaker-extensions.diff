@@ -72,15 +72,15 @@ Index: code-editor-src/test/smoke/src/main.ts
 ===================================================================
 --- code-editor-src.orig/test/smoke/src/main.ts
 +++ code-editor-src/test/smoke/src/main.ts
-@@ -21,6 +21,7 @@ import { setup as setupLaunchTests } fro
- import { setup as setupTerminalTests } from './areas/terminal/terminal.test';
+@@ -22,6 +22,7 @@ import { setup as setupTerminalTests } f
  import { setup as setupTaskTests } from './areas/task/task.test';
- import { setup as setupChatTests } from './areas/chat/chat.test';
+ import { setup as setupChatTests } from './areas/chat/chatDisabled.test';
+ import { setup as setupAccessibilityTests } from './areas/accessibility/accessibility.test';
 +import { setup as setupSageMakerExtensionsTests } from './areas/sagemaker-extensions/sagemaker-extensions.test';
  
  const rootPath = path.join(__dirname, '..', '..', '..');
  
-@@ -252,6 +253,7 @@ describe(`VSCode Smoke Tests (${opts.web
+@@ -253,6 +254,7 @@ describe(`VSCode Smoke Tests (${opts.web
  	setupTerminalTests(logger);
  	setupTaskTests(logger);
  	setupStatusbarTests(logger);

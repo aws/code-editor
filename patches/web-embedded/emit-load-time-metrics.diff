@@ -4,11 +4,11 @@ Measures the total workbench initialization time and sends it to the
 parent window via postMessage using the vscode.metrics channel, enabling
 the embedding application to track IDE load performance.
 
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
-@@ -22,6 +22,8 @@ import { AuthenticationSessionInfo } fro
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
+@@ -23,6 +23,8 @@ import { AuthenticationSessionInfo } fro
  import type { IURLCallbackProvider } from '../../../workbench/services/url/browser/urlService.js';
  import { create } from '../../../workbench/workbench.web.main.internal.js';
  
@@ -17,16 +17,16 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  interface ISecretStorageCrypto {
  	seal(data: string): Promise<string>;
  	unseal(data: string): Promise<string>;
-@@ -591,7 +593,7 @@ function readCookie(name: string): strin
+@@ -596,7 +598,7 @@ function readCookie(name: string): strin
  }
  
  (function () {
 -
 +	const start = Date.now();
  	// Find config by checking for DOM
+ 	// eslint-disable-next-line no-restricted-syntax
  	const configElement = mainWindow.document.getElementById('vscode-workbench-web-configuration');
- 	const configElementAttribute = configElement ? configElement.getAttribute('data-settings') : undefined;
-@@ -614,4 +616,13 @@ function readCookie(name: string): strin
+@@ -620,4 +622,13 @@ function readCookie(name: string): strin
  			? undefined /* with a remote without embedder-preferred storage, store on the remote */
  			: new LocalStorageSecretStorageProvider(secretStorageCrypto),
  	});

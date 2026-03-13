@@ -8,12 +8,12 @@ This patch remove the context menu entries for merge conflict options and merge 
  .../browser/parts/globalCompositeBar.ts       | 68 +++++++++----------
  4 files changed, 35 insertions(+), 71 deletions(-)
 
-Index: third-party-src/extensions/merge-conflict/package.json
+Index: code-editor-src/extensions/merge-conflict/package.json
 ===================================================================
---- third-party-src.orig/extensions/merge-conflict/package.json
-+++ third-party-src/extensions/merge-conflict/package.json
-@@ -29,32 +29,6 @@
-     "watch": "gulp watch-extension:merge-conflict"
+--- code-editor-src.orig/extensions/merge-conflict/package.json
++++ code-editor-src/extensions/merge-conflict/package.json
+@@ -35,32 +35,6 @@
+     "watch-typecheck-web": "tsgo --project ./tsconfig.json --noEmit --watch"
    },
    "contributes": {
 -    "menus": {
@@ -45,10 +45,10 @@ Index: third-party-src/extensions/merge-conflict/package.json
      "configuration": {
        "title": "%config.title%",
        "properties": {
-Index: third-party-src/extensions/references-view/package.json
+Index: code-editor-src/extensions/references-view/package.json
 ===================================================================
---- third-party-src.orig/extensions/references-view/package.json
-+++ third-party-src/extensions/references-view/package.json
+--- code-editor-src.orig/extensions/references-view/package.json
++++ code-editor-src/extensions/references-view/package.json
 @@ -260,16 +260,6 @@
            "when": "view == references-view.tree && viewItem == file-item || view == references-view.tree && viewItem == reference-item"
          },
@@ -66,11 +66,11 @@ Index: third-party-src/extensions/references-view/package.json
            "command": "references-view.showSupertypes",
            "group": "1",
            "when": "view == references-view.tree && viewItem == type-item"
-Index: third-party-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
-+++ third-party-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
-@@ -257,7 +257,6 @@ export class ActivityBarCompositeBar ext
+--- code-editor-src.orig/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
++++ code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
+@@ -309,7 +309,6 @@ export class ActivityBarCompositeBar ext
  		// Global Composite Bar
  		if (this.globalCompositeBar) {
  			actions.push(new Separator());

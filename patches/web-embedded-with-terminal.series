@@ -1,4 +1,5 @@
 common/preapplied/remove-unsafe-headers.diff
+common/preapplied/fix-chat-debug-editor-visibility.diff
 common/disable-online-services.diff
 common/disable-telemetry-service.diff
 common/remove-accounts-feature.diff
@@ -16,9 +17,7 @@ common/service-worker-fix.diff
 common/proposed-api.diff
 common/build.diff
 common/integration.diff
-common/replace-gulp-untar.diff
 common/fix-ts-rootdir-webpack.diff
-common/fix-terminal-autoreplies.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff

@@ -3,25 +3,28 @@ Remove all chat-related action registrations from the web-embedded build
 Disables registration of all chat related actions. These are not supported
 in the embedded Code Editor.
 
-Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -1198,26 +1198,6 @@ registerWorkbenchContribution2(UserToolS
- registerWorkbenchContribution2(PromptLanguageFeaturesProvider.ID, PromptLanguageFeaturesProvider, WorkbenchPhase.Eventually);
- registerWorkbenchContribution2(ChatWindowNotifier.ID, ChatWindowNotifier, WorkbenchPhase.AfterRestored);
+--- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
+@@ -1841,30 +1841,6 @@ registerWorkbenchContribution2(ChatWindo
+ registerWorkbenchContribution2(ChatRepoInfoContribution.ID, ChatRepoInfoContribution, WorkbenchPhase.Eventually);
+ registerWorkbenchContribution2(AgentPluginsViewsContribution.ID, AgentPluginsViewsContribution, WorkbenchPhase.AfterRestored);
  
 -registerChatActions();
 -registerChatAccessibilityActions();
 -registerChatCopyActions();
+-registerChatOpenAgentDebugPanelAction();
 -registerChatCodeBlockActions();
 -registerChatCodeCompareBlockActions();
 -registerChatFileTreeActions();
 -registerChatPromptNavigationActions();
 -registerChatTitleActions();
 -registerChatExecuteActions();
+-registerChatQueueActions();
 -registerQuickChatActions();
 -registerChatExportActions();
+-registerChatForkActions();
 -registerMoveActions();
 -registerNewChatActions();
 -registerChatContextActions();
@@ -30,7 +33,8 @@ Index: third-party-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 -registerChatElicitationActions();
 -registerChatToolActions();
 -registerLanguageModelActions();
+-registerChatPluginActions();
 -registerAction2(ConfigureToolSets);
  registerEditorFeature(ChatPasteProvidersFeature);
  
- 
+ agentPluginDiscoveryRegistry.register(new SyncDescriptor(ConfiguredAgentPluginDiscovery));

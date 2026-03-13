@@ -4,10 +4,10 @@ Forces verifySignature to false regardless of configuration, since the
 verification depends on the closed-source @vscode/vsce-sign package and
 is not compatible with the Open VSX marketplace.
 
-Index: third-party-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
+Index: code-editor-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionManagement/node/extensionManagementService.ts
-+++ third-party-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
+--- code-editor-src.orig/src/vs/platform/extensionManagement/node/extensionManagementService.ts
++++ code-editor-src/src/vs/platform/extensionManagement/node/extensionManagementService.ts
 @@ -339,8 +339,7 @@ export class ExtensionManagementService
  
  	private async downloadExtension(extension: IGalleryExtension, operation: InstallOperation, verifySignature: boolean, clientTargetPlatform?: TargetPlatform): Promise<{ readonly location: URI; readonly verificationStatus: ExtensionSignatureVerificationCode | undefined }> {

@@ -17,14 +17,14 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 +				scope: ConfigurationScope.APPLICATION,
 +				default: {},
 +			},
- 			[VerifyExtensionSignatureConfigKey]: {
+ 			'extensions.allowOpenInModalEditor': {
  				type: 'boolean',
- 				description: localize('extensions.verifySignature', "When enabled, extensions are verified to be signed before getting installed."),
+ 				description: localize('extensions.allowOpenInModalEditor', "Controls whether extensions and MCP servers open in a modal editor overlay."),
 Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWorkbenchService.ts
-@@ -1085,6 +1085,17 @@ export class ExtensionsWorkbenchService
+@@ -1087,6 +1087,17 @@ export class ExtensionsWorkbenchService
  		urlService.registerHandler(this);
  
  		this.whenInitialized = this.initialize();
@@ -293,7 +293,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -67,6 +67,7 @@ const compilations = [
+@@ -88,6 +88,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',

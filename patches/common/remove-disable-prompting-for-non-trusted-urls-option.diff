@@ -4,10 +4,10 @@ Removes the workbench.trustedDomains.promptInTrustedWorkspace setting
 and its bypass logic so that users are always prompted before opening
 non-trusted external URLs, regardless of workspace trust status.
 
-Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+Index: code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
-+++ third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
++++ code-editor-src/src/vs/workbench/contrib/url/browser/trustedDomainsValidator.ts
 @@ -8,7 +8,6 @@ import Severity from '../../../../base/c
  import { URI } from '../../../../base/common/uri.js';
  import { localize } from '../../../../nls.js';
@@ -23,7 +23,7 @@ Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValida
 -import { IWorkspaceTrustManagementService } from '../../../../platform/workspace/common/workspaceTrust.js';
  import { IWorkbenchContribution } from '../../../common/contributions.js';
  import { ITrustedDomainService } from './trustedDomainService.js';
- import { isURLDomainTrusted } from '../common/trustedDomains.js';
+ import { isURLDomainTrusted } from '../../../../platform/url/common/trustedDomains.js';
 @@ -35,8 +33,6 @@ export class OpenerValidatorContribution
  		@IClipboardService private readonly _clipboardService: IClipboardService,
  		@ITelemetryService private readonly _telemetryService: ITelemetryService,
@@ -44,10 +44,10 @@ Index: third-party-src/src/vs/workbench/contrib/url/browser/trustedDomainsValida
  		const originalResource = resource;
  		let resourceUri: URI;
  		if (typeof resource === 'string') {
-Index: third-party-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/url/browser/url.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/url/browser/url.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
 @@ -18,8 +18,6 @@ import { TrustedDomainsFileSystemProvide
  import { OpenerValidatorContributions } from './trustedDomainsValidator.js';
  import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
@@ -56,8 +56,8 @@ Index: third-party-src/src/vs/workbench/contrib/url/browser/url.contribution.ts
 -import { workbenchConfigurationNodeBase } from '../../../common/configuration.js';
  import { ITrustedDomainService, TrustedDomainService } from './trustedDomainService.js';
  import { registerSingleton, InstantiationType } from '../../../../platform/instantiation/common/extensions.js';
- 
-@@ -77,17 +75,4 @@ registerWorkbenchContribution2(
+ import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
+@@ -84,17 +82,4 @@ registerWorkbenchContribution2(
  );
  
  

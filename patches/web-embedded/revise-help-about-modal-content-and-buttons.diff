@@ -4,11 +4,11 @@ Removes the Copy button from the About modal, leaving only OK. Passes
 the display details as the copy text instead of a separate formatted
 string, and simplifies the dialog handler to not track button selection.
 
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
-@@ -71,7 +71,7 @@ export class DialogHandlerContribution e
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contribution.ts
+@@ -59,7 +59,7 @@ export class DialogHandlerContribution e
  					result = await this.impl.value.prompt(args.prompt);
  				} else {
  					const aboutDialogDetails = createBrowserAboutDialogDetails(this.productService);
@@ -17,11 +17,11 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialog.web.contrib
  				}
  			} catch (error) {
  				result = error;
-Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-+++ third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
-@@ -70,22 +70,17 @@ export class BrowserDialogHandler extend
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
+@@ -73,22 +73,17 @@ export class BrowserDialogHandler extend
  		return { confirmed: button === 0, checkboxChecked, values };
  	}
  
@@ -46,20 +46,20 @@ Index: third-party-src/src/vs/workbench/browser/parts/dialogs/dialogHandler.ts
 -		}
  	}
  
- 	private async doShow(type: Severity | DialogType | undefined, message: string, buttons?: string[], detail?: string, cancelId?: number, checkbox?: ICheckbox, inputs?: IInputElement[], customOptions?: ICustomDialogOptions): Promise<IDialogResult> {
-Index: third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+ 	private async doShow(type: Severity | DialogType | undefined, message: string, buttons?: string[], detail?: string, cancelId?: number, checkbox?: ICheckbox, inputs?: IInputElement[], customOptions?: ICustomDialogOptions, token?: CancellationToken): Promise<IDialogResult> {
+Index: code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/dialogs/browser/dialog.ts
-+++ third-party-src/src/vs/platform/dialogs/browser/dialog.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/dialogs/dialog.ts
++++ code-editor-src/src/vs/workbench/browser/parts/dialogs/dialog.ts
 @@ -6,7 +6,6 @@
- import { EventHelper } from '../../../base/browser/dom.js';
- import { StandardKeyboardEvent } from '../../../base/browser/keyboardEvent.js';
- import { IDialogOptions } from '../../../base/browser/ui/dialog/dialog.js';
--import { fromNow } from '../../../base/common/date.js';
- import { localize } from '../../../nls.js';
- import { IKeybindingService } from '../../keybinding/common/keybinding.js';
- import { ResultKind } from '../../keybinding/common/keybindingResolver.js';
-@@ -43,24 +42,14 @@ export function createWorkbenchDialogOpt
+ import { EventHelper } from '../../../../base/browser/dom.js';
+ import { StandardKeyboardEvent } from '../../../../base/browser/keyboardEvent.js';
+ import { IDialogOptions } from '../../../../base/browser/ui/dialog/dialog.js';
+-import { fromNow } from '../../../../base/common/date.js';
+ import { localize } from '../../../../nls.js';
+ import { IHostService } from '../../../services/host/browser/host.js';
+ import { IKeybindingService } from '../../../../platform/keybinding/common/keybinding.js';
+@@ -45,24 +44,14 @@ export function createWorkbenchDialogOpt
  	};
  }
  

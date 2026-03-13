@@ -4,11 +4,11 @@ Adds an in-memory cache for the result of readCustomBuiltinExtensions()
 in the web extensions scanner service, preventing redundant network
 requests on every call to scanUserExtensions.
 
-Index: third-party-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+Index: code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
-+++ third-party-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
-@@ -100,6 +100,7 @@ export class WebExtensionsScannerService
+--- code-editor-src.orig/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
++++ code-editor-src/src/vs/workbench/services/extensionManagement/browser/webExtensionsScannerService.ts
+@@ -101,6 +101,7 @@ export class WebExtensionsScannerService
  	private readonly customBuiltinExtensionsCacheResource: URI | undefined = undefined;
  	private readonly resourcesAccessQueueMap = new ResourceMap<Queue<IWebExtension[]>>();
  	private readonly extensionsEnabledWithApiProposalVersion: string[];
@@ -16,7 +16,7 @@ Index: third-party-src/src/vs/workbench/services/extensionManagement/browser/web
  
  	constructor(
  		@IBrowserWorkbenchEnvironmentService private readonly environmentService: IBrowserWorkbenchEnvironmentService,
-@@ -471,7 +472,9 @@ export class WebExtensionsScannerService
+@@ -472,7 +473,9 @@ export class WebExtensionsScannerService
  		const extensions = new Map<string, IScannedExtension>();
  
  		// Custom builtin extensions defined through `additionalBuiltinExtensions` API

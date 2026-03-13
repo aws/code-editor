@@ -4,10 +4,10 @@ Set default log level to error
  src/vs/platform/log/common/log.ts | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git third-party-src.orig/src/vs/platform/log/common/log.ts third-party-src/src/vs/platform/log/common/log.ts
-index 28fc419..fa75b46 100644
---- third-party-src.orig/src/vs/platform/log/common/log.ts
-+++ third-party-src/src/vs/platform/log/common/log.ts
+Index: code-editor-src/src/vs/platform/log/common/log.ts
+===================================================================
+--- code-editor-src.orig/src/vs/platform/log/common/log.ts
++++ code-editor-src/src/vs/platform/log/common/log.ts
 @@ -38,7 +38,7 @@ export enum LogLevel {
  	Error
  }
@@ -16,7 +16,4 @@ index 28fc419..fa75b46 100644
 +export const DEFAULT_LOG_LEVEL: LogLevel = LogLevel.Error;
  
  export interface ILogger extends IDisposable {
- 	onDidChangeLogLevel: Event<LogLevel>;
--- 
-2.40.1
-
+ 	readonly onDidChangeLogLevel: Event<LogLevel>;

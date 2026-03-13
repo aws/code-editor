@@ -4,11 +4,11 @@ Sets update mode to 'none', disables background updates, release notes,
 natural language settings search, and experiments. Prevents the editor
 from contacting Microsoft online services out of the box.
 
-Index: third-party-src/src/vs/platform/update/common/update.config.contribution.ts
+Index: code-editor-src/src/vs/platform/update/common/update.config.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/update/common/update.config.contribution.ts
-+++ third-party-src/src/vs/platform/update/common/update.config.contribution.ts
-@@ -18,7 +18,7 @@ configurationRegistry.registerConfigurat
+--- code-editor-src.orig/src/vs/platform/update/common/update.config.contribution.ts
++++ code-editor-src/src/vs/platform/update/common/update.config.contribution.ts
+@@ -19,7 +19,7 @@ configurationRegistry.registerConfigurat
  		'update.mode': {
  			type: 'string',
  			enum: ['none', 'manual', 'start', 'default'],
@@ -17,16 +17,16 @@ Index: third-party-src/src/vs/platform/update/common/update.config.contribution.
  			scope: ConfigurationScope.APPLICATION,
  			description: localize('updateMode', "Configure whether you receive automatic updates. Requires a restart after change. The updates are fetched from a Microsoft online service."),
  			tags: ['usesOnlineServices'],
-@@ -42,7 +42,7 @@ configurationRegistry.registerConfigurat
+@@ -65,7 +65,7 @@ configurationRegistry.registerConfigurat
  		},
  		'update.enableWindowsBackgroundUpdates': {
  			type: 'boolean',
 -			default: true,
 +			default: false,
  			scope: ConfigurationScope.APPLICATION,
- 			title: localize('enableWindowsBackgroundUpdatesTitle', "Enable Background Updates on Windows"),
- 			description: localize('enableWindowsBackgroundUpdates', "Enable to download and install new VS Code versions in the background on Windows."),
-@@ -50,7 +50,7 @@ configurationRegistry.registerConfigurat
+ 			title: localize('enableWindowsBackgroundUpdatesTitle', "Enable Background Updates"),
+ 			description: localize('enableWindowsBackgroundUpdates', "Enable to download and install new VS Code versions in the background."),
+@@ -73,7 +73,7 @@ configurationRegistry.registerConfigurat
  		},
  		'update.showReleaseNotes': {
  			type: 'boolean',
@@ -35,10 +35,10 @@ Index: third-party-src/src/vs/platform/update/common/update.config.contribution.
  			scope: ConfigurationScope.APPLICATION,
  			description: localize('showReleaseNotes', "Show Release Notes after an update. The Release Notes are fetched from a Microsoft online service."),
  			tags: ['usesOnlineServices']
-Index: third-party-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
-+++ third-party-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
++++ code-editor-src/src/vs/workbench/contrib/preferences/common/preferencesContribution.ts
 @@ -111,7 +111,7 @@ registry.registerConfiguration({
  		'workbench.settings.enableNaturalLanguageSearch': {
  			'type': 'boolean',
@@ -48,11 +48,11 @@ Index: third-party-src/src/vs/workbench/contrib/preferences/common/preferencesCo
  			'scope': ConfigurationScope.WINDOW,
  			'tags': ['usesOnlineServices']
  		},
-Index: third-party-src/src/vs/workbench/services/assignment/common/assignmentService.ts
+Index: code-editor-src/src/vs/workbench/services/assignment/common/assignmentService.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/assignment/common/assignmentService.ts
-+++ third-party-src/src/vs/workbench/services/assignment/common/assignmentService.ts
-@@ -146,7 +146,7 @@ registry.registerConfiguration({
+--- code-editor-src.orig/src/vs/workbench/services/assignment/common/assignmentService.ts
++++ code-editor-src/src/vs/workbench/services/assignment/common/assignmentService.ts
+@@ -329,7 +329,7 @@ registry.registerConfiguration({
  		'workbench.enableExperiments': {
  			'type': 'boolean',
  			'description': localize('workbench.enableExperiments', "Fetches experiments to run from a Microsoft online service."),

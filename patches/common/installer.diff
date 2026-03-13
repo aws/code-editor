@@ -4,10 +4,10 @@ Adds support for bundling a custom Node.js binary via CUSTOM_NODE_PATH,
 includes LICENSE-THIRD-PARTY in the server package, and handles missing
 git version gracefully by falling back to 'unknown'.
 
-Index: third-party-src/build/lib/getVersion.ts
+Index: code-editor-src/build/lib/getVersion.ts
 ===================================================================
---- third-party-src.orig/build/lib/getVersion.ts
-+++ third-party-src/build/lib/getVersion.ts
+--- code-editor-src.orig/build/lib/getVersion.ts
++++ code-editor-src/build/lib/getVersion.ts
 @@ -12,5 +12,5 @@ export function getVersion(root: string)
  		version = git.getVersion(root);
  	}
@@ -15,19 +15,19 @@ Index: third-party-src/build/lib/getVersion.ts
 -	return version;
 +	return version || "unknown";
  }
-Index: third-party-src/build/gulpfile.reh.ts
+Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
---- third-party-src.orig/build/gulpfile.reh.ts
-+++ third-party-src/build/gulpfile.reh.ts
-@@ -33,6 +33,7 @@ import log from 'fancy-log';
+--- code-editor-src.orig/build/gulpfile.reh.ts
++++ code-editor-src/build/gulpfile.reh.ts
+@@ -35,6 +35,7 @@ import log from 'fancy-log';
  import buildfile from './buildfile.ts';
  import { fetchUrls, fetchGithub } from './lib/fetch.ts';
  import jsonEditor from 'gulp-json-editor';
 +import through from 'through2';
  
  
- const REPO_ROOT = path.dirname(import.meta.dirname);
-@@ -197,6 +198,15 @@ function nodejs(platform: string, arch:
+ const rcedit = promisify(rceditCallback);
+@@ -201,6 +202,15 @@ function nodejs(platform: string, arch:
  		arch = 'x64';
  	}
  
@@ -43,7 +43,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  	log(`Downloading node.js ${nodeVersion} ${platform} ${arch} from ${product.nodejsRepository}...`);
  
  	const glibcPrefix = process.env['VSCODE_NODE_GLIBC'] ?? '';
-@@ -251,7 +261,7 @@ function nodejs(platform: string, arch:
+@@ -255,7 +265,7 @@ function nodejs(platform: string, arch:
  	}
  }
  
@@ -52,7 +52,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  	const destination = path.join(BUILD_ROOT, destinationFolderName);
  
  	return () => {
-@@ -328,6 +338,7 @@ function packageTask(type: string, platf
+@@ -332,6 +342,7 @@ function packageTask(type: string, platf
  			}));
  
  		const license = gulp.src(['remote/LICENSE'], { base: 'remote', allowEmpty: true });
@@ -60,7 +60,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  
  		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
  
-@@ -343,7 +354,10 @@ function packageTask(type: string, platf
+@@ -347,7 +358,10 @@ function packageTask(type: string, platf
  			.pipe(jsFilter.restore);
  
  		const nodePath = `.build/node/v${nodeVersion}/${platform}-${arch}`;
@@ -72,7 +72,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  
  		let web: NodeJS.ReadWriteStream[] = [];
  		if (type === 'reh-web') {
-@@ -359,6 +373,7 @@ function packageTask(type: string, platf
+@@ -363,6 +377,7 @@ function packageTask(type: string, platf
  			packageJsonStream,
  			productJsonStream,
  			license,
@@ -80,7 +80,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  			sources,
  			deps,
  			node,
-@@ -385,20 +400,24 @@ function packageTask(type: string, platf
+@@ -389,20 +404,24 @@ function packageTask(type: string, platf
  					.pipe(rename(`bin/${product.serverApplicationName}.cmd`)),
  			);
  		} else if (platform === 'linux' || platform === 'alpine' || platform === 'darwin') {
@@ -105,7 +105,7 @@ Index: third-party-src/build/gulpfile.reh.ts
  					.pipe(rename(`bin/${product.serverApplicationName}`))
  					.pipe(util.setExecutableBit())
  			);
-@@ -465,6 +484,13 @@ function tweakProductForServerWeb(produc
+@@ -503,6 +522,13 @@ function tweakProductForServerWeb(produc
  		['', 'min'].forEach(minified => {
  			const sourceFolderName = `out-vscode-${type}${dashed(minified)}`;
  			const destinationFolderName = `vscode-${type}${dashed(platform)}${dashed(arch)}`;
@@ -117,5 +117,5 @@ Index: third-party-src/build/gulpfile.reh.ts
 +			));
 +			gulp.task(slimServerTaskCI);
  
- 			const serverTaskCI = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}-ci`, task.series(
+ 			const packageTasks: task.Task[] = [
  				compileNativeExtensionsBuildTask,

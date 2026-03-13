@@ -5,11 +5,11 @@ resource paths, adds rootEndpoint to the product configuration, and
 updates HTML templates to use relative base URLs for proper operation
 behind reverse proxies with path prefixes.
 
-Index: third-party-src/src/vs/base/common/network.ts
+Index: code-editor-src/src/vs/base/common/network.ts
 ===================================================================
---- third-party-src.orig/src/vs/base/common/network.ts
-+++ third-party-src/src/vs/base/common/network.ts
-@@ -237,7 +237,9 @@ class RemoteAuthoritiesImpl {
+--- code-editor-src.orig/src/vs/base/common/network.ts
++++ code-editor-src/src/vs/base/common/network.ts
+@@ -242,7 +242,9 @@ class RemoteAuthoritiesImpl {
  		return URI.from({
  			scheme: platform.isWeb ? this._preferredWebSchema : Schemas.vscodeRemoteResource,
  			authority: `${host}:${port}`,
@@ -20,10 +20,10 @@ Index: third-party-src/src/vs/base/common/network.ts
  			query
  		});
  	}
-Index: third-party-src/src/vs/base/common/product.ts
+Index: code-editor-src/src/vs/base/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/base/common/product.ts
-+++ third-party-src/src/vs/base/common/product.ts
+--- code-editor-src.orig/src/vs/base/common/product.ts
++++ code-editor-src/src/vs/base/common/product.ts
 @@ -65,6 +65,7 @@ export type ExtensionVirtualWorkspaceSup
  };
  
@@ -32,10 +32,10 @@ Index: third-party-src/src/vs/base/common/product.ts
  	readonly version: string;
  	readonly date?: string;
  	readonly quality?: string;
-Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
+Index: code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench-dev.html
-+++ third-party-src/src/vs/code/browser/workbench/workbench-dev.html
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench-dev.html
++++ code-editor-src/src/vs/code/browser/workbench/workbench-dev.html
 @@ -63,7 +63,7 @@
  	</script>
  	<!-- Startup (do not modify order of script tags!) -->
@@ -45,10 +45,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench-dev.html
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
-Index: third-party-src/src/vs/code/browser/workbench/workbench.html
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.html
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.html
-+++ third-party-src/src/vs/code/browser/workbench/workbench.html
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.html
++++ code-editor-src/src/vs/code/browser/workbench/workbench.html
 @@ -60,7 +60,7 @@
  	</script>
  	<!-- Startup (do not modify order of script tags!) -->
@@ -58,10 +58,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.html
  		globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
  	</script>
  	<script>
-Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
+Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
---- third-party-src.orig/src/vs/code/browser/workbench/workbench.ts
-+++ third-party-src/src/vs/code/browser/workbench/workbench.ts
+--- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
++++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
 @@ -339,7 +339,8 @@ class LocalStorageURLCallbackProvider ex
  			this.startListening();
  		}
@@ -72,10 +72,10 @@ Index: third-party-src/src/vs/code/browser/workbench/workbench.ts
  	}
  
  	private startListening(): void {
-Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+Index: code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-+++ third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+--- code-editor-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
++++ code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 @@ -120,7 +120,7 @@ export abstract class AbstractExtensionR
  					: version,
  				path: 'extension'
@@ -85,10 +85,10 @@ Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionR
  		}
  		return undefined;
  	}
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
 @@ -245,7 +245,10 @@ export class WebClientServer {
  		};
  
@@ -199,10 +199,10 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
 +	const parts = originalUrl.split("?", 1)[0].split("/")
 +	return normalizeUrlPath("./" + parts[parts.length - 1])
 +}
-Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
+Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/serverEnvironmentService.ts
-+++ third-party-src/src/vs/server/node/serverEnvironmentService.ts
+--- code-editor-src.orig/src/vs/server/node/serverEnvironmentService.ts
++++ code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 @@ -97,6 +97,9 @@ export const serverOptions: OptionDescri
  
  	'compatibility': { type: 'string' },
@@ -223,10 +223,10 @@ Index: third-party-src/src/vs/server/node/serverEnvironmentService.ts
  	_: string[];
  }
  
-Index: third-party-src/src/vs/platform/remote/browser/browserSocketFactory.ts
+Index: code-editor-src/src/vs/platform/remote/browser/browserSocketFactory.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/remote/browser/browserSocketFactory.ts
-+++ third-party-src/src/vs/platform/remote/browser/browserSocketFactory.ts
+--- code-editor-src.orig/src/vs/platform/remote/browser/browserSocketFactory.ts
++++ code-editor-src/src/vs/platform/remote/browser/browserSocketFactory.ts
 @@ -282,6 +282,10 @@ export class BrowserSocketFactory implem
  	connect({ host, port }: WebSocketRemoteConnection, path: string, query: string, debugLabel: string): Promise<ISocket> {
  		return new Promise<ISocket>((resolve, reject) => {

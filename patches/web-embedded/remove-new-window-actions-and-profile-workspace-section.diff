@@ -4,19 +4,19 @@ Removes all actions which can open a new window from the embedded Code Editor.
 This is needed because new window actions could be opened as a pop-up, which is
 not embedded. This is why multi-window is not supported in the web-embedded environment.
 
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -35,7 +35,6 @@ import { IBrowserWorkbenchEnvironmentSer
- import { Extensions as DndExtensions, IDragAndDropContributionRegistry, IResourceDropHandler } from '../../../../platform/dnd/browser/dnd.js';
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+@@ -36,7 +36,6 @@ import { Extensions as DndExtensions, ID
  import { IUriIdentityService } from '../../../../platform/uriIdentity/common/uriIdentity.js';
+ import { ITextEditorService } from '../../../services/textfile/common/textEditorService.js';
  
 -export const OpenProfileMenu = new MenuId('OpenProfile');
  const ProfilesMenu = new MenuId('Profiles');
  
  export class UserDataProfilesWorkbenchContribution extends Disposable implements IWorkbenchContribution {
-@@ -147,8 +146,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -162,8 +161,6 @@ export class UserDataProfilesWorkbenchCo
  		this._register(this.registerManageProfilesAction());
  		this._register(this.registerSwitchProfileAction());
  
@@ -25,7 +25,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
-@@ -183,22 +180,12 @@ export class UserDataProfilesWorkbenchCo
+@@ -198,22 +195,12 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -48,7 +48,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  			}
  		}
  	}
-@@ -230,79 +217,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -245,80 +232,6 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -89,6 +89,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -		const disposables = new DisposableStore();
 -
 -		const id = `workbench.action.openProfile.${profile.name.replace('/\s+/', '_')}`;
+-		const precondition: ContextKeyExpression | undefined = HAS_PROFILES_CONTEXT;
 -
 -		disposables.add(registerAction2(class NewWindowAction extends Action2 {
 -
@@ -102,7 +103,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -					menu: {
 -						id: OpenProfileMenu,
 -						group: '0_profiles',
--						when: HAS_PROFILES_CONTEXT
+-						when: precondition
 -					}
 -				});
 -			}
@@ -118,7 +119,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -				id,
 -				category: PROFILES_CATEGORY,
 -				title: localize2('open', "Open {0} Profile", profile.name),
--				precondition: HAS_PROFILES_CONTEXT
+-				precondition
 -			},
 -		}));
 -
@@ -128,7 +129,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  	private registerSwitchProfileAction(): IDisposable {
  		const that = this;
  		return registerAction2(class SwitchProfileAction extends Action2 {
-@@ -412,14 +326,7 @@ export class UserDataProfilesWorkbenchCo
+@@ -428,14 +341,7 @@ export class UserDataProfilesWorkbenchCo
  					id: 'workbench.profiles.actions.createProfile',
  					title: localize2('create profile', "New Profile..."),
  					category: PROFILES_CATEGORY,
@@ -144,11 +145,11 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  				});
  			}
  
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-@@ -711,9 +711,7 @@ class ProfileTreeDataSource implements I
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+@@ -716,9 +716,7 @@ class ProfileTreeDataSource implements I
  					children.push({ element: 'name', root: element });
  					children.push({ element: 'icon', root: element });
  				}
@@ -158,13 +159,13 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  			}
  			return children;
  		}
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-@@ -1000,17 +1000,8 @@ export class UserDataProfilesEditorModel
- 			() => this.removeProfile(profileElement.profile)
- 		));
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+@@ -979,17 +979,8 @@ export class UserDataProfilesEditorModel
+ 
+ 
  
 -		const newWindowAction = disposables.add(new Action(
 -			'userDataProfile.newWindow',
@@ -178,5 +179,5 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		primaryActions.push(activateAction);
 -		primaryActions.push(newWindowAction);
  		const secondaryActions: IAction[] = [];
- 		secondaryActions.push(copyFromProfileAction);
- 		secondaryActions.push(exportAction);
+ 
+ 		const profileElement = disposables.add(this.instantiationService.createInstance(UserDataProfileElement,

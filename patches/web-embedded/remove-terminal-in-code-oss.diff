@@ -5,10 +5,10 @@ This patch removes the entire terminal functionality from Code OSS, including al
  .../terminal/browser/terminal.contribution.ts | 92 +------------------
  1 file changed, 2 insertions(+), 90 deletions(-)
 
-Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 @@ -4,49 +4,30 @@
   *--------------------------------------------------------------------------------------------*/
  
@@ -28,7 +28,7 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -import { ViewPaneContainer } from '../../../browser/parts/views/viewPaneContainer.js';
  import { WorkbenchPhase, registerWorkbenchContribution2 } from '../../../common/contributions.js';
 -import { EditorExtensions, IEditorFactoryRegistry } from '../../../common/editor.js';
--import { IViewContainersRegistry, IViewsRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation } from '../../../common/views.js';
+-import { IViewContainersRegistry, IViewsRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation, WindowVisibility } from '../../../common/views.js';
 -import { ITerminalProfileService, TERMINAL_VIEW_ID, TerminalCommandId } from '../common/terminal.js';
 +import { ITerminalProfileService } from '../common/terminal.js';
  import { TerminalEditingService } from './terminalEditingService.js';
@@ -61,7 +61,7 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
  
  // Register services
  registerSingleton(ITerminalLogService, TerminalLogService, InstantiationType.Delayed);
-@@ -68,72 +49,7 @@ registerWorkbenchContribution2(TerminalT
+@@ -68,74 +49,7 @@ registerWorkbenchContribution2(TerminalT
  registerTerminalPlatformConfiguration();
  registerTerminalConfiguration(getFontSnippets);
  
@@ -108,6 +108,7 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -	storageId: TERMINAL_VIEW_ID,
 -	hideIfEmpty: true,
 -	order: 3,
+-	windowVisibility: WindowVisibility.Both
 -}, ViewContainerLocation.Panel, { doNotRegisterOpenCommand: true, isDefault: true });
 -Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews([{
 -	id: TERMINAL_VIEW_ID,
@@ -116,6 +117,7 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -	canToggleVisibility: true,
 -	canMoveView: true,
 -	ctorDescriptor: new SyncDescriptor(TerminalViewPane),
+-	windowVisibility: WindowVisibility.Both,
 -	openCommandActionDescriptor: {
 -		id: TerminalCommandId.Toggle,
 -		mnemonicTitle: nls.localize({ key: 'miToggleIntegratedTerminal', comment: ['&& denotes a mnemonic'] }, "&&Terminal"),
@@ -135,10 +137,10 @@ Index: third-party-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -setupTerminalMenus();
 -
  registerColors();
-Index: third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/terminalContrib/quickAccess/browser/terminal.quickAccess.contribution.ts
 @@ -27,10 +27,6 @@ quickAccessRegistry.registerQuickAccessP
  	placeholder: nls.localize('tasksQuickAccessPlaceholder', "Type the name of a terminal to open."),
  	helpEntries: [{ description: nls.localize('tasksQuickAccessHelp', "Show All Opened Terminals"), commandId: TerminalQuickAccessCommandId.QuickOpenTerm }]

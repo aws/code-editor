@@ -5,10 +5,10 @@ SSH remote host connections are not supported in the light-weight web version. T
  src/vs/workbench/contrib/remote/browser/remote.contribution.ts | 2 --
  1 file changed, 2 deletions(-)
 
-Index: third-party-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/remote/browser/remote.contribution.ts
 @@ -9,7 +9,6 @@ import { ShowCandidateContribution } fro
  import { LifecyclePhase } from '../../../services/lifecycle/common/lifecycle.js';
  import { TunnelFactoryContribution } from './tunnelFactory.js';

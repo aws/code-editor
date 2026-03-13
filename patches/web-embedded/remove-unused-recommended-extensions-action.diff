@@ -4,10 +4,10 @@ Removes the ConfigureWorkspaceFolderRecommendedExtensionsAction and its
 associated menu entries and icon imports since workspace extension
 recommendations are not used in the embedded environment.
 
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 @@ -76,11 +76,11 @@ import { ExtensionEditor } from './exten
  import { ExtensionEnablementWorkspaceTrustTransitionParticipant } from './extensionEnablementWorkspaceTrustTransitionParticipant.js';
  import { ExtensionRecommendationNotificationService } from './extensionRecommendationNotificationService.js';
@@ -22,7 +22,7 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  import { InstallExtensionQuickAccessProvider, ManageExtensionsQuickAccessProvider } from './extensionsQuickAccess.js';
  import { BuiltInExtensionsContext, ExtensionMarketplaceStatusUpdater, ExtensionsSearchValueContext, ExtensionsSortByContext, ExtensionsViewletViewsContribution, ExtensionsViewPaneContainer, MaliciousExtensionChecker, RecommendedExtensionsContext, SearchHasTextContext, SearchMarketplaceExtensionsContext, StatusUpdater } from './extensionsViewlet.js';
  import { ExtensionsWorkbenchService } from './extensionsWorkbenchService.js';
-@@ -1282,22 +1282,6 @@ class ExtensionsContributions extends Di
+@@ -1291,22 +1291,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({
@@ -45,7 +45,7 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  			id: InstallSpecificVersionOfExtensionAction.ID,
  			title: { value: InstallSpecificVersionOfExtensionAction.LABEL, original: 'Install Specific Version of Extension...' },
  			category: ExtensionsLocalizedLabel,
-@@ -1887,17 +1871,6 @@ class ExtensionsContributions extends Di
+@@ -1896,17 +1880,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({

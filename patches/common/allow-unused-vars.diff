@@ -3,10 +3,10 @@ Relax TypeScript strict checks for unused locals and suppress ts-expect-error wa
 Disables noUnusedLocals in tsconfig and replaces @ts-expect-error with @ts-ignore
 to prevent build failures caused by variables introduced by other patches.
 
-Index: third-party-src/src/tsconfig.base.json
+Index: code-editor-src/src/tsconfig.base.json
 ===================================================================
---- third-party-src.orig/src/tsconfig.base.json
-+++ third-party-src/src/tsconfig.base.json
+--- code-editor-src.orig/src/tsconfig.base.json
++++ code-editor-src/src/tsconfig.base.json
 @@ -6,7 +6,7 @@
  		"experimentalDecorators": true,
  		"noImplicitReturns": true,
@@ -16,11 +16,11 @@ Index: third-party-src/src/tsconfig.base.json
  		"noUncheckedSideEffectImports": true,
  		"allowUnreachableCode": false,
  		"strict": true,
-Index: third-party-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
+Index: code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/remote/browser/tunnelView.ts
-+++ third-party-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
-@@ -762,7 +762,7 @@ export class TunnelPanel extends ViewPan
+--- code-editor-src.orig/src/vs/workbench/contrib/remote/browser/tunnelView.ts
++++ code-editor-src/src/vs/workbench/contrib/remote/browser/tunnelView.ts
+@@ -761,7 +761,7 @@ export class TunnelPanel extends ViewPan
  	private protocolChangableContextKey: IContextKey<boolean>;
  	private isEditing: boolean = false;
  	// TODO: Should this be removed?

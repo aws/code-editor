@@ -4,11 +4,11 @@ Forces disableAutomaticTypingAcquisition for all server kinds and adds
 memfs:// to the allowed file system provider paths, enabling TypeScript
 IntelliSense to work with in-memory file systems.
 
-Index: third-party-src/extensions/typescript-language-features/src/tsServer/spawner.ts
+Index: code-editor-src/extensions/typescript-language-features/src/tsServer/spawner.ts
 ===================================================================
---- third-party-src.orig/extensions/typescript-language-features/src/tsServer/spawner.ts
-+++ third-party-src/extensions/typescript-language-features/src/tsServer/spawner.ts
-@@ -208,9 +208,9 @@ export class TypeScriptServerSpawner {
+--- code-editor-src.orig/extensions/typescript-language-features/src/tsServer/spawner.ts
++++ code-editor-src/extensions/typescript-language-features/src/tsServer/spawner.ts
+@@ -207,9 +207,9 @@ export class TypeScriptServerSpawner {
  
  		args.push('--useInferredProjectPerProjectRoot');
  
@@ -21,11 +21,11 @@ Index: third-party-src/extensions/typescript-language-features/src/tsServer/spaw
  
  		if (kind === TsServerProcessKind.Semantic || kind === TsServerProcessKind.Main) {
  			args.push('--enableTelemetry');
-Index: third-party-src/extensions/typescript-language-features/web/src/serverHost.ts
+Index: code-editor-src/extensions/typescript-language-features/web/src/serverHost.ts
 ===================================================================
---- third-party-src.orig/extensions/typescript-language-features/web/src/serverHost.ts
-+++ third-party-src/extensions/typescript-language-features/web/src/serverHost.ts
-@@ -348,7 +348,9 @@ function createServerHost(
+--- code-editor-src.orig/extensions/typescript-language-features/web/src/serverHost.ts
++++ code-editor-src/extensions/typescript-language-features/web/src/serverHost.ts
+@@ -365,7 +365,9 @@ function createServerHost(
  			&& !path.startsWith('/vscode-global-typings/')
  			// Handle the case where a local folder has been opened in VS Code
  			// In these cases we do not want to use the mapped node_module

@@ -4,10 +4,10 @@ Removes the Revert File command from the command palette. removes
 import/export functionality, as these features are not applicable in
 the embedded web environment.
 
-Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 @@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
@@ -88,11 +88,11 @@ Index: third-party-src/src/vs/workbench/contrib/files/browser/fileActions.contri
  
  MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
  	group: '6_close',
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -152,8 +152,6 @@ export class UserDataProfilesWorkbenchCo
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
+@@ -167,8 +167,6 @@ export class UserDataProfilesWorkbenchCo
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
@@ -101,7 +101,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		this.registerCreateFromCurrentProfileAction();
  		this.registerNewProfileAction();
  		this.registerDeleteProfileAction();
-@@ -386,34 +384,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -402,34 +400,6 @@ export class UserDataProfilesWorkbenchCo
  		return disposables;
  	}
  
@@ -136,11 +136,11 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  
  	private registerCreateFromCurrentProfileAction(): void {
  		const that = this;
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
-@@ -223,13 +223,7 @@ export class UserDataProfilesEditor exte
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditor.ts
+@@ -224,13 +224,7 @@ export class UserDataProfilesEditor exte
  					const actions: IAction[] = [];
  					if (this.templates.length) {
  						actions.push(new SubmenuAction('from.template', localize('from template', "From Template"), this.getCreateFromTemplateActions()));
@@ -154,7 +154,7 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  					return actions;
  				}
  			},
-@@ -294,50 +288,9 @@ export class UserDataProfilesEditor exte
+@@ -295,50 +289,9 @@ export class UserDataProfilesEditor exte
  		if (templateActions.length) {
  			actions.push(new SubmenuAction('from.template', localize('new from template', "New Profile From Template"), templateActions));
  		}
@@ -205,10 +205,10 @@ Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  	async createNewProfile(copyFrom?: URI | IUserDataProfile): Promise<void> {
  		await this.model?.createNewProfile(copyFrom);
  	}
-Index: third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
-+++ third-party-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
++++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfilesEditorModel.ts
 @@ -977,28 +977,7 @@ export class UserDataProfilesEditorModel
  			() => this.userDataProfileManagementService.switchProfile(profileElement.profile)
  		));
