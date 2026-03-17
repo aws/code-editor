@@ -7,7 +7,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -1841,30 +1841,6 @@ registerWorkbenchContribution2(ChatWindo
+@@ -1834,30 +1834,6 @@ registerWorkbenchContribution2(ChatWindo
  registerWorkbenchContribution2(ChatRepoInfoContribution.ID, ChatRepoInfoContribution, WorkbenchPhase.Eventually);
  registerWorkbenchContribution2(AgentPluginsViewsContribution.ID, AgentPluginsViewsContribution, WorkbenchPhase.AfterRestored);
  
