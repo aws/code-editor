@@ -1,8 +1,13 @@
+Fix port forwarding proxy URI path for SageMaker
+
+Updates the port forwarding proxy URI to include the /codeeditor/default/
+path segment, matching the SageMaker routing convention for forwarded ports.
+
 Index: code-editor-src/src/vs/code/browser/workbench/workbench.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/code/browser/workbench/workbench.ts
 +++ code-editor-src/src/vs/code/browser/workbench/workbench.ts
-@@ -635,7 +635,7 @@ function readCookie(name: string): strin
+@@ -641,7 +641,7 @@ function readCookie(name: string): strin
  			const localhostMatch = extractLocalHostUriMetaDataForPortMapping(resolvedUri)
  			if (localhostMatch && resolvedUri.authority !== location.host) {
  				if (config?.productConfiguration?.rootEndpoint) {

@@ -34,10 +34,10 @@ received.
  src/vscode-dts/vscode.d.ts                    |  2 ++
  6 files changed, 47 insertions(+), 1 deletion(-)
 
-Index: third-party-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+Index: code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/browser/mainThreadWindow.ts
-+++ third-party-src/src/vs/workbench/api/browser/mainThreadWindow.ts
+--- code-editor-src.orig/src/vs/workbench/api/browser/mainThreadWindow.ts
++++ code-editor-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 @@ -3,6 +3,7 @@
   *  Licensed under the MIT License. See License.txt in the project root for license information.
   *--------------------------------------------------------------------------------------------*/
@@ -77,11 +77,11 @@ Index: third-party-src/src/vs/workbench/api/browser/mainThreadWindow.ts
 +		mainWindow.parent.postMessage(message, origin);
 +	}
  }
-Index: third-party-src/src/vs/workbench/api/common/extHost.api.impl.ts
+Index: code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/common/extHost.api.impl.ts
-+++ third-party-src/src/vs/workbench/api/common/extHost.api.impl.ts
-@@ -690,6 +690,14 @@ export function createApiFactoryAndRegis
+--- code-editor-src.orig/src/vs/workbench/api/common/extHost.api.impl.ts
++++ code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
+@@ -790,6 +790,14 @@ export function createApiFactoryAndRegis
  
  		// namespace: window
  		const window: typeof vscode.window = {
@@ -96,11 +96,11 @@ Index: third-party-src/src/vs/workbench/api/common/extHost.api.impl.ts
  			get activeTextEditor() {
  				return extHostEditors.getActiveTextEditor();
  			},
-Index: third-party-src/src/vs/workbench/api/common/extHost.protocol.ts
+Index: code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/common/extHost.protocol.ts
-+++ third-party-src/src/vs/workbench/api/common/extHost.protocol.ts
-@@ -1744,6 +1744,7 @@ export interface MainThreadWindowShape e
+--- code-editor-src.orig/src/vs/workbench/api/common/extHost.protocol.ts
++++ code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
+@@ -2045,6 +2045,7 @@ export interface MainThreadWindowShape e
  	$getInitialState(): Promise<{ isFocused: boolean; isActive: boolean }>;
  	$openUri(uri: UriComponents, uriString: string | undefined, options: IOpenUriOptions): Promise<boolean>;
  	$asExternalUri(uri: UriComponents, options: IOpenUriOptions): Promise<UriComponents>;
@@ -108,18 +108,18 @@ Index: third-party-src/src/vs/workbench/api/common/extHost.protocol.ts
  }
  
  export enum CandidatePortSource {
-@@ -2721,6 +2722,7 @@ export interface ExtHostWindowShape {
+@@ -3070,6 +3071,7 @@ export interface ExtHostWindowShape {
  	$onDidChangeWindowFocus(value: boolean): void;
  	$onDidChangeWindowActive(value: boolean): void;
  	$onDidChangeActiveNativeWindowHandle(handle: string | undefined): void;
 +	$receiveMessage(message: any): void;
  }
  
- export interface ExtHostLogLevelServiceShape {
-Index: third-party-src/src/vs/workbench/api/common/extHostWindow.ts
+ export type PowerSystemIdleState = 'active' | 'idle' | 'locked' | 'unknown';
+Index: code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/api/common/extHostWindow.ts
-+++ third-party-src/src/vs/workbench/api/common/extHostWindow.ts
+--- code-editor-src.orig/src/vs/workbench/api/common/extHostWindow.ts
++++ code-editor-src/src/vs/workbench/api/common/extHostWindow.ts
 @@ -26,6 +26,7 @@ export class ExtHostWindow implements Ex
  	private _proxy: MainThreadWindowShape;
  
@@ -155,10 +155,10 @@ Index: third-party-src/src/vs/workbench/api/common/extHostWindow.ts
  }
  
  export const IExtHostWindow = createDecorator<IExtHostWindow>('IExtHostWindow');
-Index: third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+Index: code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
-+++ third-party-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
+--- code-editor-src.orig/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
++++ code-editor-src/src/vs/workbench/services/extensions/common/extensionsProposedApi.ts
 @@ -44,7 +44,7 @@ export class ExtensionsProposedApi {
  			for (const [k, value] of Object.entries(productService.extensionEnabledApiProposals)) {
  				const key = ExtensionIdentifier.toKey(k);
@@ -168,11 +168,11 @@ Index: third-party-src/src/vs/workbench/services/extensions/common/extensionsPro
  						_logService.warn(`Via 'product.json#extensionEnabledApiProposals' extension '${key}' wants API proposal '${name}' but that proposal DOES NOT EXIST. Likely, the proposal has been finalized (check 'vscode.d.ts') or was abandoned.`);
  						return false;
  					}
-Index: third-party-src/src/vscode-dts/vscode.d.ts
+Index: code-editor-src/src/vscode-dts/vscode.d.ts
 ===================================================================
---- third-party-src.orig/src/vscode-dts/vscode.d.ts
-+++ third-party-src/src/vscode-dts/vscode.d.ts
-@@ -11000,6 +11000,8 @@ declare module 'vscode' {
+--- code-editor-src.orig/src/vscode-dts/vscode.d.ts
++++ code-editor-src/src/vscode-dts/vscode.d.ts
+@@ -11067,6 +11067,8 @@ declare module 'vscode' {
  	 * asking for user input.
  	 */
  	export namespace window {

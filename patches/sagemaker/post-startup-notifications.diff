@@ -1,3 +1,9 @@
+Add post-startup notifications extension for SageMaker
+
+Introduces a built-in extension that displays notifications to users after
+the editor starts, supporting configurable notification messages for the
+SageMaker environment.
+
 Index: code-editor-src/extensions/post-startup-notifications/.vscode/extensions.json
 ===================================================================
 --- /dev/null
@@ -775,7 +781,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -69,6 +69,7 @@ const compilations = [
+@@ -90,6 +90,7 @@ const compilations = [
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/sagemaker-ui-dark-theme/tsconfig.json',

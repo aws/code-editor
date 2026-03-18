@@ -5,10 +5,10 @@ This patch removes most of the debug functionality from CODE OSS, keeping only t
  .../debug/browser/debug.contribution.ts       | 461 +-----------------
  1 file changed, 8 insertions(+), 453 deletions(-)
 
-Index: third-party-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
-+++ third-party-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/debug/browser/debug.contribution.ts
 @@ -4,453 +4,26 @@
   *--------------------------------------------------------------------------------------------*/
  

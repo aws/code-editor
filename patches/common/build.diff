@@ -1,47 +1,49 @@
+Update dependency versions, npm overrides, and gulp command for the build
+
+Bumps Electron from 39.x to 40.6.0. Removes kerberos dependency and adds
+npm overrides for security and compatibility fixes including braces, postcss,
+playwright, form-data, tar-fs, koa, and serialize-javascript. Also updates
+the gulp command to allow NODE_OPTIONS override for memory allocation.
+
 Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -78,10 +78,10 @@
-     "@vscode/deviceid": "^0.1.1",
-     "@vscode/iconv-lite-umd": "0.7.1",
-     "@vscode/policy-watcher": "^1.3.2",
--    "@vscode/proxy-agent": "^0.36.0",
-+    "@vscode/proxy-agent": "^0.37.0",
-     "@vscode/ripgrep": "^1.15.13",
-     "@vscode/spdlog": "^0.15.2",
--    "@vscode/sqlite3": "5.1.10-vscode",
-+    "@vscode/sqlite3": "5.1.12-vscode",
-     "@vscode/sudo-prompt": "9.3.1",
-     "@vscode/tree-sitter-wasm": "^0.3.0",
-     "@vscode/vscode-languagedetection": "1.0.21",
-@@ -103,7 +103,6 @@
+@@ -39,7 +39,7 @@
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+     "precommit": "node --experimental-strip-types build/hygiene.ts",
+-    "gulp": "node --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
++    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron.ts",
+     "7z": "7z",
+     "update-grammars": "node build/npm/update-all-grammars.ts",
+@@ -114,7 +114,6 @@
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
      "katex": "^0.16.22",
 -    "kerberos": "2.1.1",
      "minimist": "^1.2.8",
-     "native-is-elevated": "0.8.0",
+     "native-is-elevated": "0.9.0",
      "native-keymap": "^3.3.5",
-@@ -160,7 +159,7 @@
+@@ -174,7 +173,7 @@
      "css-loader": "^6.9.1",
      "debounce": "^1.0.0",
      "deemon": "^1.13.6",
--    "electron": "39.2.7",
+-    "electron": "39.6.0",
 +    "electron": "40.6.0",
      "eslint": "^9.36.0",
      "eslint-formatter-compact": "^8.40.0",
      "eslint-plugin-header": "3.1.1",
-@@ -225,9 +224,20 @@
+@@ -238,9 +237,19 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
 -    "kerberos@2.1.1": {
 -      "node-addon-api": "7.1.0"
--    }
 +    "@types/node-fetch@^2.5.12": {
 +      "form-data": "^3.0.4"
-+    },
+     },
 +    "@azure/core-http@^2.3.2": {
 +      "form-data": "^4.0.4"
 +    },
@@ -52,37 +54,26 @@ Index: code-editor-src/package.json
 +    },
 +    "postcss": "^8.4.31",
 +    "playwright": "^1.55.1",
-+    "@tootallnate/once": "^3.0.1"
+     "serialize-javascript": "^7.0.3"
    },
    "repository": {
-     "type": "git",
 Index: code-editor-src/remote/package.json
 ===================================================================
 --- code-editor-src.orig/remote/package.json
 +++ code-editor-src/remote/package.json
-@@ -7,7 +7,7 @@
-     "@microsoft/1ds-post-js": "^3.2.13",
-     "@vscode/deviceid": "^0.1.1",
-     "@vscode/iconv-lite-umd": "0.7.1",
--    "@vscode/proxy-agent": "^0.36.0",
-+    "@vscode/proxy-agent": "^0.37.0",
-     "@vscode/ripgrep": "^1.15.13",
-     "@vscode/spdlog": "^0.15.2",
-     "@vscode/tree-sitter-wasm": "^0.3.0",
-@@ -30,11 +30,11 @@
+@@ -32,10 +32,10 @@
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
      "katex": "^0.16.22",
 -    "kerberos": "2.1.1",
      "minimist": "^1.2.8",
-     "native-watchdog": "^1.4.1",
-     "node-pty": "^1.1.0-beta43",
+     "node-pty": "^1.2.0-beta.10",
      "tas-client": "0.3.1",
 +    "undici": "^7.18.2",
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
-     "vscode-textmate": "^9.3.0",
-@@ -43,8 +43,6 @@
+     "vscode-textmate": "^9.3.2",
+@@ -44,8 +44,6 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
@@ -92,10 +83,10 @@ Index: code-editor-src/remote/package.json
 +    "@tootallnate/once": "^3.0.1"
    }
  }
-Index: third-party-src/build/lib/mangle/index.ts
+Index: code-editor-src/build/lib/mangle/index.ts
 ===================================================================
---- third-party-src.orig/build/lib/mangle/index.ts
-+++ third-party-src/build/lib/mangle/index.ts
+--- code-editor-src.orig/build/lib/mangle/index.ts
++++ code-editor-src/build/lib/mangle/index.ts
 @@ -430,7 +430,7 @@ export class Mangler {
  		this.config = config;
  

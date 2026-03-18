@@ -8,11 +8,11 @@ progress. Change to ProgressLocation.Window which doesn't require a view.
  .../workbench/contrib/scm/browser/quickDiffModel.ts     | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Index: third-party-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
+Index: code-editor-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
-+++ third-party-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
-@@ -241,7 +241,7 @@ export class QuickDiffModel extends Disp
+--- code-editor-src.orig/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
++++ code-editor-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
+@@ -243,7 +243,7 @@ export class QuickDiffModel extends Disp
  	}
  
  	private diff(): Promise<{ allChanges: QuickDiffChange[]; changes: QuickDiffChange[]; mapChanges: Map<string, number[]> } | null> {
