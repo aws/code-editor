@@ -73,7 +73,7 @@ Index: code-editor-src/remote/package.json
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "^9.3.2",
-@@ -43,8 +43,6 @@
+@@ -44,8 +44,6 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
