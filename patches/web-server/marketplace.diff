@@ -1,16 +1,19 @@
+Add Open VSX as default marketplace
+
 Adjusted from (MIT licensed) original source:
 - https://github.com/coder/code-server/blob/6d9530aa6b84514b8b54700d88cbcc66c70b789f/patches/marketplace.diff
 
-Add Open VSX as default marketplace. If environment variable EXTENSIONS_GALLERY is set,
-parse it as JSON and use as the custom extensions gallery configuration.
+If environment variable EXTENSIONS_GALLERY is set, parse it as JSON and use
+as the custom extensions gallery configuration. Adds IProductService and
+memoize imports to extensionsViewlet.ts for marketplace URL resolution.
 
 Adjusted ExtensionLatestVersionUri endpoint to be compatible with OpenVSX API
 (see: https://open-vsx.org/swagger-ui/index.html?urls.primaryName=VSCode%20Adapter)
 
-Index: third-party-src/src/vs/server/node/webClientServer.ts
+Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
---- third-party-src.orig/src/vs/server/node/webClientServer.ts
-+++ third-party-src/src/vs/server/node/webClientServer.ts
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
 @@ -338,14 +338,7 @@ export class WebClientServer {
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			rootEndpoint: base,
@@ -27,10 +30,10 @@ Index: third-party-src/src/vs/server/node/webClientServer.ts
  		};
  
  		const proposedApi = this._environmentService.args['enable-proposed-api'];
-Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+Index: code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
-+++ third-party-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
+--- code-editor-src.orig/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
++++ code-editor-src/src/vs/platform/extensionResourceLoader/common/extensionResourceLoader.ts
 @@ -163,9 +163,9 @@ export abstract class AbstractExtensionR
  	}
  
@@ -44,10 +47,10 @@ Index: third-party-src/src/vs/platform/extensionResourceLoader/common/extensionR
  	}
  
  }
-Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
-+++ third-party-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
+--- code-editor-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
++++ code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryManifestService.ts
 @@ -47,7 +47,7 @@ export class ExtensionGalleryManifestSer
  				type: ExtensionGalleryResourceType.ExtensionQueryService
  			},
@@ -57,10 +60,10 @@ Index: third-party-src/src/vs/platform/extensionManagement/common/extensionGalle
  				type: ExtensionGalleryResourceType.ExtensionLatestVersionUri
  			},
  			{
-Index: third-party-src/src/vs/platform/product/common/product.ts
+Index: code-editor-src/src/vs/platform/product/common/product.ts
 ===================================================================
---- third-party-src.orig/src/vs/platform/product/common/product.ts
-+++ third-party-src/src/vs/platform/product/common/product.ts
+--- code-editor-src.orig/src/vs/platform/product/common/product.ts
++++ code-editor-src/src/vs/platform/product/common/product.ts
 @@ -49,6 +49,14 @@ else if (globalThis._VSCODE_PRODUCT_JSON
  			version: pkg.version
  		});
@@ -76,20 +79,20 @@ Index: third-party-src/src/vs/platform/product/common/product.ts
  }
  
  // Web environment or unknown
-Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
+Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
 ===================================================================
---- third-party-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-+++ third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
-@@ -70,6 +70,8 @@ import { IExtensionGalleryManifest, IExt
+--- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
++++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsViewlet.ts
+@@ -67,6 +67,8 @@ import { KeyCode } from '../../../../bas
+ import { IExtensionGalleryManifest, IExtensionGalleryManifestService, ExtensionGalleryManifestStatus } from '../../../../platform/extensionManagement/common/extensionGalleryManifest.js';
  import { URI } from '../../../../base/common/uri.js';
- import { DEFAULT_ACCOUNT_SIGN_IN_COMMAND } from '../../../services/accounts/common/defaultAccount.js';
- import { IHoverService } from '../../../../platform/hover/browser/hover.js';
+ import { DEFAULT_ACCOUNT_SIGN_IN_COMMAND } from '../../../services/accounts/browser/defaultAccount.js';
 +import { IProductService } from '../../../../platform/product/common/productService.js';
 +import { memoize } from '../../../../base/common/decorators.js';
  
  export const ExtensionsSortByContext = new RawContextKey<string>('extensionsSortByValue', '');
  export const SearchMarketplaceExtensionsContext = new RawContextKey<boolean>('searchMarketplaceExtensions', false);
-@@ -97,7 +99,6 @@ interface IExtensionsViewletState {
+@@ -95,7 +97,6 @@ interface IExtensionsViewletState {
  }
  
  export class ExtensionsViewletViewsContribution extends Disposable implements IWorkbenchContribution {
@@ -97,15 +100,15 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
  	private readonly container: ViewContainer;
  
  	constructor(
-@@ -561,6 +562,7 @@ export class ExtensionsViewPaneContainer
+@@ -567,6 +568,7 @@ export class ExtensionsViewPaneContainer
  		@IExtensionService extensionService: IExtensionService,
  		@IViewDescriptorService viewDescriptorService: IViewDescriptorService,
  		@IPreferencesService private readonly preferencesService: IPreferencesService,
 +		@IProductService private readonly productService: IProductService,
  		@ICommandService private readonly commandService: ICommandService,
  		@ILogService logService: ILogService,
- 		@IHoverService private readonly hoverService: IHoverService,
-@@ -602,6 +604,15 @@ export class ExtensionsViewPaneContainer
+ 	) {
+@@ -609,6 +611,15 @@ export class ExtensionsViewPaneContainer
  			});
  	}
  
@@ -121,7 +124,7 @@ Index: third-party-src/src/vs/workbench/contrib/extensions/browser/extensionsVie
  	get searchValue(): string | undefined {
  		return this.searchBox?.getValue();
  	}
-@@ -616,8 +627,7 @@ export class ExtensionsViewPaneContainer
+@@ -623,8 +634,7 @@ export class ExtensionsViewPaneContainer
  		hide(overlay);
  
  		this.header = append(this.root, $('.header'));

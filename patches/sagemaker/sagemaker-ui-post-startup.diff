@@ -1,3 +1,9 @@
+Add post-startup script invocation API endpoint for SageMaker
+
+Adds a /api/poststartup HTTP endpoint to the web client server that
+triggers execution of post-startup scripts, with support for SageMaker
+Unified Studio environments.
+
 Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts

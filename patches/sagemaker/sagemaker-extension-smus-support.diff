@@ -1,3 +1,9 @@
+Add SageMaker Unified Studio (SMUS) support to the SageMaker extension
+
+Adds SMUS service name detection, DataZone metadata fields, and constructs
+the SMUS portal URL for session renewal when running in a SageMaker Unified
+Studio environment.
+
 Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
 --- code-editor-src.orig/extensions/sagemaker-extension/src/constant.ts

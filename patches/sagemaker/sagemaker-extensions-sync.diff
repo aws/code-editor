@@ -1,3 +1,9 @@
+Add SageMaker extensions sync extension
+
+Introduces a built-in extension that detects missing pre-packaged extensions
+from the SageMaker Distribution and offers users the option to sync them
+into their extensions directory.
+
 Index: code-editor-src/extensions/sagemaker-extensions-sync/.vscodeignore
 ===================================================================
 --- /dev/null
@@ -436,7 +442,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -67,6 +67,7 @@ const compilations = [
+@@ -88,6 +88,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
