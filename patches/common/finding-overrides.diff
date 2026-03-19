@@ -1,0 +1,46 @@
+Addresses npm dependency updates related to findings via version updates and overrides.
+
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -121,7 +121,7 @@
+     "open": "^10.1.2",
+     "playwright-core": "1.59.0-alpha-2026-02-20",
+     "tas-client": "0.3.1",
+-    "undici": "^7.18.2",
++    "undici": "^7.24.0",
+     "v8-inspect-profiler": "^0.1.1",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+@@ -173,7 +173,7 @@
+     "css-loader": "^6.9.1",
+     "debounce": "^1.0.0",
+     "deemon": "^1.13.6",
+-    "electron": "39.6.0",
++    "electron": "40.6.0",
+     "eslint": "^9.36.0",
+     "eslint-formatter-compact": "^8.40.0",
+     "eslint-plugin-header": "3.1.1",
+@@ -236,6 +236,9 @@
+     "yaserver": "^0.4.0"
+   },
+   "overrides": {
++    "braces": "^3.0.3",
++    "postcss": "^8.4.31",
++    "@tootallnate/once": "^3.0.1",
+     "node-gyp-build": "4.8.1",
+     "serialize-javascript": "^7.0.3"
+   },
+Index: code-editor-src/remote/package.json
+===================================================================
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
+@@ -42,6 +42,7 @@
+     "yazl": "^2.4.3"
+   },
+   "overrides": {
++    "undici": "^7.24.0",
+     "node-gyp-build": "4.8.1"
+   }
+ }

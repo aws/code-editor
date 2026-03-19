@@ -26,34 +26,13 @@ Index: code-editor-src/package.json
      "minimist": "^1.2.8",
      "native-is-elevated": "0.9.0",
      "native-keymap": "^3.3.5",
-@@ -174,7 +173,7 @@
-     "css-loader": "^6.9.1",
-     "debounce": "^1.0.0",
-     "deemon": "^1.13.6",
--    "electron": "39.6.0",
-+    "electron": "40.6.0",
-     "eslint": "^9.36.0",
-     "eslint-formatter-compact": "^8.40.0",
-     "eslint-plugin-header": "3.1.1",
-@@ -238,9 +237,19 @@
+@@ -238,9 +237,6 @@
    },
    "overrides": {
      "node-gyp-build": "4.8.1",
 -    "kerberos@2.1.1": {
 -      "node-addon-api": "7.1.0"
-+    "@types/node-fetch@^2.5.12": {
-+      "form-data": "^3.0.4"
-     },
-+    "@azure/core-http@^2.3.2": {
-+      "form-data": "^4.0.4"
-+    },
-+    "braces": "^3.0.3",
-+    "@vscode/test-web": {
-+      "tar-fs": "^3.1.1",
-+      "koa": "^3.0.3"
-+    },
-+    "postcss": "^8.4.31",
-+    "playwright": "^1.55.1",
+-    },
      "serialize-javascript": "^7.0.3"
    },
    "repository": {
@@ -61,7 +40,7 @@ Index: code-editor-src/remote/package.json
 ===================================================================
 --- code-editor-src.orig/remote/package.json
 +++ code-editor-src/remote/package.json
-@@ -32,10 +32,10 @@
+@@ -32,7 +32,6 @@
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
      "katex": "^0.16.22",
@@ -69,18 +48,14 @@ Index: code-editor-src/remote/package.json
      "minimist": "^1.2.8",
      "node-pty": "^1.2.0-beta.10",
      "tas-client": "0.3.1",
-+    "undici": "^7.18.2",
-     "vscode-oniguruma": "1.7.0",
-     "vscode-regexpp": "^3.1.0",
-     "vscode-textmate": "^9.3.2",
-@@ -44,8 +44,6 @@
+@@ -44,8 +43,5 @@
    },
    "overrides": {
-     "node-gyp-build": "4.8.1",
+-    "node-gyp-build": "4.8.1",
 -    "kerberos@2.1.1": {
 -      "node-addon-api": "7.1.0"
 -    }
-+    "@tootallnate/once": "^3.0.1"
++    "node-gyp-build": "4.8.1"
    }
  }
 Index: code-editor-src/build/lib/mangle/index.ts
