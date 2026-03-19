@@ -19,6 +19,7 @@ common/integration.diff
 common/fix-ts-rootdir-webpack.diff
 common/finding-overrides.diff
 common/fix-chat-debug-editor-visibility.diff
+common/guard-default-account-config.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff

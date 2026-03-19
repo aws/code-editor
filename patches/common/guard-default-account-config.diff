@@ -1,0 +1,43 @@
+Guard toDefaultAccountConfig against missing provider fields
+
+Code Editor replaces the upstream GitHub Copilot defaultChatAgent with a
+minimal Amazon Q configuration that omits provider, providerScopes, and
+other fields unused by Code Editor. Add optional chaining so the default
+account service initializes safely with missing fields instead of
+crashing at startup.
+
+Index: code-editor-src/src/vs/workbench/services/accounts/browser/defaultAccount.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/services/accounts/browser/defaultAccount.ts
++++ code-editor-src/src/vs/workbench/services/accounts/browser/defaultAccount.ts
+@@ -93,20 +93,20 @@ function toDefaultAccountConfig(defaultC
+ 		],
+ 		authenticationProvider: {
+ 			default: {
+-				id: defaultChatAgent.provider.default.id,
+-				name: defaultChatAgent.provider.default.name,
++				id: defaultChatAgent.provider?.default?.id ?? '',
++				name: defaultChatAgent.provider?.default?.name ?? '',
+ 			},
+ 			enterprise: {
+-				id: defaultChatAgent.provider.enterprise.id,
+-				name: defaultChatAgent.provider.enterprise.name,
++				id: defaultChatAgent.provider?.enterprise?.id ?? '',
++				name: defaultChatAgent.provider?.enterprise?.name ?? '',
+ 			},
+-			enterpriseProviderConfig: `${defaultChatAgent.completionsAdvancedSetting}.authProvider`,
+-			enterpriseProviderUriSetting: defaultChatAgent.providerUriSetting,
+-			scopes: defaultChatAgent.providerScopes,
++			enterpriseProviderConfig: `${defaultChatAgent.completionsAdvancedSetting ?? ''}.authProvider`,
++			enterpriseProviderUriSetting: defaultChatAgent.providerUriSetting ?? '',
++			scopes: defaultChatAgent.providerScopes ?? [],
+ 		},
+-		entitlementUrl: defaultChatAgent.entitlementUrl,
+-		tokenEntitlementUrl: defaultChatAgent.tokenEntitlementUrl,
+-		mcpRegistryDataUrl: defaultChatAgent.mcpRegistryDataUrl,
++		entitlementUrl: defaultChatAgent.entitlementUrl ?? '',
++		tokenEntitlementUrl: defaultChatAgent.tokenEntitlementUrl ?? '',
++		mcpRegistryDataUrl: defaultChatAgent.mcpRegistryDataUrl ?? '',
+ 	};
+ }
+ 
