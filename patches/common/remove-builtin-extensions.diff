@@ -13,21 +13,24 @@ This patch customizes Code Editor for AWS by:
    - Disables GitHub Copilot extension version tracking
 
 3. chat.contribution.ts:
-   - Adds `included: false` to all chat/AI configuration settings to hide them
-     from the Settings UI (features like chat tips, agent mode, MCP servers,
-     inline chat, checkpoints, etc.)
+   - Adds `included: false` to ALL chat/AI configuration settings to hide them
+     from the Settings UI. When updating this patch, ensure every chat.* and
+     ChatConfiguration.* setting has `included: false` — no exceptions.
 
-4. inlineChat.ts:
+4. chatParticipant.contribution.ts:
+   - Disables the chat view container registration to remove the Chat panel
+
+5. inlineChat.ts:
    - Adds `included: false` to inline chat settings (EnableV2, notebookAgent,
      Affordance, RenderMode, FixDiagnostics)
 
-5. accessibilityConfiguration.ts:
+6. accessibilityConfiguration.ts:
    - Adds `included: false` to chat-related accessibility settings
 
-6. settingsLayout.ts:
+7. settingsLayout.ts:
    - Removes mergeEditor settings group from the Settings UI layout
 
-7. Other files:
+8. Other files:
    - Disables various Copilot/chat-related features and telemetry settings
    - Hides experimental AI features from user-facing configuration
 
@@ -261,7 +264,14 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.ts
-@@ -195,56 +195,66 @@ configurationRegistry.registerConfigurat
+@@ -189,62 +189,73 @@ configurationRegistry.registerConfigurat
+ 			description: nls.localize('chat.experimentalSessionsWindowOverride', "When true, enables sessions-window-specific behavior for extensions."),
+ 			default: false,
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		'chat.fontSize': {
+ 			type: 'number',
  			description: nls.localize('chat.fontSize', "Controls the font size in pixels in chat messages."),
  			default: 13,
  			minimum: 6,
@@ -336,7 +346,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.implicitContext.enabled': {
  			type: 'object',
-@@ -265,31 +275,36 @@ configurationRegistry.registerConfigurat
+@@ -265,31 +276,36 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'startup'
@@ -375,7 +385,17 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.editing.explainChanges.enabled': {
  			type: 'boolean',
-@@ -308,7 +323,8 @@ configurationRegistry.registerConfigurat
+@@ -298,7 +314,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		'chat.tips.enabled': {
+ 			type: 'boolean',
+@@ -308,7 +325,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -385,7 +405,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.upvoteAnimation': {
  			type: 'string',
-@@ -322,17 +338,20 @@ configurationRegistry.registerConfigurat
+@@ -322,17 +340,20 @@ configurationRegistry.registerConfigurat
  			],
  			description: nls.localize('chat.upvoteAnimation', "Controls whether an animation is shown when clicking the thumbs up button on a chat response."),
  			default: 'floatingThumbs',
@@ -408,7 +428,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.InlineReferencesStyle]: {
  			type: 'string',
-@@ -342,7 +361,8 @@ configurationRegistry.registerConfigurat
+@@ -342,7 +363,8 @@ configurationRegistry.registerConfigurat
  				nls.localize('chat.inlineReferences.style.link', "Display file and symbol references as simple blue links without icons.")
  			],
  			description: nls.localize('chat.inlineReferences.style', "Controls how file and symbol references are displayed in chat messages."),
@@ -418,7 +438,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.EditorAssociations]: {
  			type: 'object',
-@@ -351,7 +371,8 @@ configurationRegistry.registerConfigurat
+@@ -351,7 +373,8 @@ configurationRegistry.registerConfigurat
  				type: 'string'
  			},
  			default: {
@@ -428,7 +448,30 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.NotifyWindowOnConfirmation]: {
  			type: 'string',
-@@ -383,6 +404,7 @@ configurationRegistry.registerConfigurat
+@@ -363,6 +386,7 @@ configurationRegistry.registerConfigurat
+ 			],
+ 			description: nls.localize('chat.notifyWindowOnConfirmation', "Controls whether a chat session should present the user with an OS notification when a confirmation or question needs input. This includes a window badge as well as notification toast."),
+ 			default: 'windowNotFocused',
++			included: false,
+ 		},
+ 		[ChatConfiguration.AutoReply]: {
+ 			default: false,
+@@ -370,12 +394,14 @@ configurationRegistry.registerConfigurat
+ 			type: 'boolean',
+ 			scope: ConfigurationScope.APPLICATION_MACHINE,
+ 			tags: ['experimental', 'advanced'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.AutopilotEnabled]: {
+ 			type: 'boolean',
+ 			markdownDescription: nls.localize('chat.autopilot.enabled', "Controls whether the Autopilot mode is available in the permissions picker. When enabled, Autopilot auto-approves all tool calls and continues until the task is done."),
+ 			default: product.quality !== 'stable', // don't enable by default in stable
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.GlobalAutoApprove]: {
+ 			default: false,
+@@ -383,6 +409,7 @@ configurationRegistry.registerConfigurat
  			type: 'boolean',
  			scope: ConfigurationScope.APPLICATION_MACHINE,
  			tags: ['experimental'],
@@ -436,7 +479,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  			policy: {
  				name: 'ChatToolsAutoApprove',
  				category: PolicyCategory.InteractiveSession,
-@@ -410,7 +432,8 @@ configurationRegistry.registerConfigurat
+@@ -410,7 +437,8 @@ configurationRegistry.registerConfigurat
  			type: 'object',
  			additionalProperties: {
  				type: 'boolean',
@@ -446,7 +489,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.AutoApprovedUrls]: {
  			default: {},
-@@ -427,7 +450,8 @@ configurationRegistry.registerConfigurat
+@@ -427,7 +455,8 @@ configurationRegistry.registerConfigurat
  						}
  					}
  				]
@@ -456,7 +499,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.EligibleForAutoApproval]: {
  			default: {},
-@@ -456,41 +480,48 @@ configurationRegistry.registerConfigurat
+@@ -456,41 +485,48 @@ configurationRegistry.registerConfigurat
  						value: nls.localize('chat.tools.eligibleForAutoApproval', 'Controls which tools are eligible for automatic approval. Tools set to \'false\' will always present a confirmation and will never offer the option to auto-approve. The default behavior (or setting a tool to \'true\') may result in the tool offering auto-approval options.')
  					}
  				},
@@ -509,7 +552,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.ChatViewSessionsOrientation]: {
  			type: 'string',
-@@ -501,16 +532,19 @@ configurationRegistry.registerConfigurat
+@@ -501,16 +537,19 @@ configurationRegistry.registerConfigurat
  			],
  			default: 'sideBySide',
  			description: nls.localize('chat.viewSessions.orientation', "Controls the orientation of the chat agent sessions view when it is shown alongside the chat."),
@@ -529,7 +572,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.NotifyWindowOnResponseReceived]: {
  			type: 'string',
-@@ -522,16 +556,19 @@ configurationRegistry.registerConfigurat
+@@ -522,16 +561,19 @@ configurationRegistry.registerConfigurat
  			],
  			default: 'windowNotFocused',
  			description: nls.localize('chat.notifyWindowOnResponseReceived', "Controls whether a chat session should present the user with an OS notification when a response is received. This includes a window badge as well as notification toast."),
@@ -550,7 +593,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[mcpAccessConfig]: {
  			type: 'string',
-@@ -577,7 +614,8 @@ configurationRegistry.registerConfigurat
+@@ -577,7 +619,8 @@ configurationRegistry.registerConfigurat
  						}
  					]
  				},
@@ -560,7 +603,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[mcpAutoStartConfig]: {
  			type: 'string',
-@@ -594,12 +632,14 @@ configurationRegistry.registerConfigurat
+@@ -594,12 +637,14 @@ configurationRegistry.registerConfigurat
  				nls.localize('chat.mcp.autostart.newAndOutdated', "Automatically start new and outdated MCP servers that are not yet running.")
  			],
  			tags: ['experimental'],
@@ -575,7 +618,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[mcpServerSamplingSection]: {
  			type: 'object',
-@@ -627,6 +667,7 @@ configurationRegistry.registerConfigurat
+@@ -627,6 +672,7 @@ configurationRegistry.registerConfigurat
  					}
  				}
  			},
@@ -583,7 +626,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[AssistedTypes[AddConfigurationType.NuGetPackage].enabledConfigKey]: {
  			type: 'boolean',
-@@ -635,7 +676,8 @@ configurationRegistry.registerConfigurat
+@@ -635,7 +681,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'startup'
@@ -593,7 +636,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.ExtensionToolsEnabled]: {
  			type: 'boolean',
-@@ -651,7 +693,8 @@ configurationRegistry.registerConfigurat
+@@ -651,13 +698,15 @@ configurationRegistry.registerConfigurat
  						value: nls.localize('chat.extensionToolsEnabled', "Enable using tools contributed by third-party extensions.")
  					}
  				},
@@ -603,7 +646,30 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.PluginsEnabled]: {
  			type: 'boolean',
-@@ -692,8 +735,9 @@ configurationRegistry.registerConfigurat
+ 			description: nls.localize('chat.plugins.enabled', "Enable agent plugin integration in chat."),
+ 			default: true,
+ 			tags: ['preview'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.PluginLocations]: {
+ 			type: 'object',
+@@ -666,6 +715,7 @@ configurationRegistry.registerConfigurat
+ 			markdownDescription: nls.localize('chat.pluginLocations', "Plugin directories to discover. Each key is a path that points directly to a plugin folder, and the value enables (`true`) or disables (`false`) it. Paths can be absolute, relative to the workspace root, or start with `~/` for the user's home directory."),
+ 			scope: ConfigurationScope.MACHINE,
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.PluginMarketplaces]: {
+ 			type: 'array',
+@@ -676,6 +726,7 @@ configurationRegistry.registerConfigurat
+ 			default: ['github/copilot-plugins', 'github/awesome-copilot'],
+ 			scope: ConfigurationScope.APPLICATION,
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.AgentEnabled]: {
+ 			type: 'boolean',
+@@ -692,8 +743,9 @@ configurationRegistry.registerConfigurat
  						key: 'chat.agent.enabled.description',
  						value: nls.localize('chat.agent.enabled.description', "When enabled, agent mode can be activated from chat and tools in agentic contexts with side effects can be used."),
  					}
@@ -615,7 +681,27 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.PlanAgentDefaultModel]: {
  			type: 'string',
-@@ -720,6 +764,7 @@ configurationRegistry.registerConfigurat
+@@ -701,7 +753,8 @@ configurationRegistry.registerConfigurat
+ 			default: '',
+ 			enum: PlanAgentDefaultModel.modelIds,
+ 			enumItemLabels: PlanAgentDefaultModel.modelLabels,
+-			markdownEnumDescriptions: PlanAgentDefaultModel.modelDescriptions
++			markdownEnumDescriptions: PlanAgentDefaultModel.modelDescriptions,
++			included: false,
+ 		},
+ 		[ChatConfiguration.ExploreAgentDefaultModel]: {
+ 			type: 'string',
+@@ -709,7 +762,8 @@ configurationRegistry.registerConfigurat
+ 			default: '',
+ 			enum: ExploreAgentDefaultModel.modelIds,
+ 			enumItemLabels: ExploreAgentDefaultModel.modelLabels,
+-			markdownEnumDescriptions: ExploreAgentDefaultModel.modelDescriptions
++			markdownEnumDescriptions: ExploreAgentDefaultModel.modelDescriptions,
++			included: false,
+ 		},
+ 		[ChatConfiguration.RequestQueueingDefaultAction]: {
+ 			type: 'string',
+@@ -720,6 +774,7 @@ configurationRegistry.registerConfigurat
  			],
  			description: nls.localize('chat.requestQueuing.defaultAction.description', "Controls which action is the default for the queue button when a request is in progress."),
  			default: 'steer',
@@ -623,7 +709,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.EditModeHidden]: {
  			type: 'boolean',
-@@ -728,18 +773,21 @@ configurationRegistry.registerConfigurat
+@@ -728,18 +783,21 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -646,7 +732,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		['chat.statusWidget.anonymous']: {
  			type: 'boolean',
-@@ -748,7 +796,8 @@ configurationRegistry.registerConfigurat
+@@ -748,7 +806,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental', 'advanced'],
  			experiment: {
  				mode: 'auto'
@@ -656,7 +742,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[mcpDiscoverySection]: {
  			type: 'object',
-@@ -756,13 +805,14 @@ configurationRegistry.registerConfigurat
+@@ -756,13 +815,14 @@ configurationRegistry.registerConfigurat
  			additionalProperties: false,
  			default: Object.fromEntries(allDiscoverySources.map(k => [k, false])),
  			markdownDescription: nls.localize('mcp.discovery.enabled', "Configures discovery of Model Context Protocol servers from configuration from various other applications."),
@@ -672,7 +758,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[mcpGalleryServiceUrlConfig]: {
  			type: 'string',
-@@ -815,6 +865,7 @@ configurationRegistry.registerConfigurat
+@@ -815,6 +875,7 @@ configurationRegistry.registerConfigurat
  					'/Users/vscode/repos/instructions': true,
  				},
  			],
@@ -680,7 +766,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.PROMPT_LOCATIONS_KEY]: {
  			type: 'object',
-@@ -848,6 +899,7 @@ configurationRegistry.registerConfigurat
+@@ -848,6 +909,7 @@ configurationRegistry.registerConfigurat
  					'/Users/vscode/repos/prompts': true,
  				},
  			],
@@ -688,7 +774,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.MODE_LOCATION_KEY]: {
  			type: 'object',
-@@ -878,6 +930,7 @@ configurationRegistry.registerConfigurat
+@@ -878,6 +940,7 @@ configurationRegistry.registerConfigurat
  					'/Users/vscode/repos/chatmodes': true,
  				},
  			],
@@ -696,7 +782,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.AGENTS_LOCATION_KEY]: {
  			type: 'object',
-@@ -914,6 +967,7 @@ configurationRegistry.registerConfigurat
+@@ -914,6 +977,7 @@ configurationRegistry.registerConfigurat
  					'~/.copilot/agents': true,
  				},
  			],
@@ -704,7 +790,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_AGENT_MD]: {
  			type: 'boolean',
-@@ -922,7 +976,8 @@ configurationRegistry.registerConfigurat
+@@ -922,7 +986,8 @@ configurationRegistry.registerConfigurat
  			default: true,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -714,7 +800,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_NESTED_AGENT_MD]: {
  			type: 'boolean',
-@@ -931,7 +986,8 @@ configurationRegistry.registerConfigurat
+@@ -931,7 +996,8 @@ configurationRegistry.registerConfigurat
  			default: false,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -724,7 +810,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_CLAUDE_MD]: {
  			type: 'boolean',
-@@ -940,7 +996,8 @@ configurationRegistry.registerConfigurat
+@@ -940,7 +1006,8 @@ configurationRegistry.registerConfigurat
  			default: true,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -734,7 +820,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_AGENT_SKILLS]: {
  			type: 'boolean',
-@@ -949,7 +1006,8 @@ configurationRegistry.registerConfigurat
+@@ -949,7 +1016,8 @@ configurationRegistry.registerConfigurat
  			default: true,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -744,7 +830,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_SKILL_ADHERENCE_PROMPT]: {
  			type: 'boolean',
-@@ -961,7 +1019,8 @@ configurationRegistry.registerConfigurat
+@@ -961,7 +1029,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental', 'prompts', 'reusable prompts', 'prompt snippets', 'instructions'],
  			experiment: {
  				mode: 'auto'
@@ -754,7 +840,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.INCLUDE_APPLYING_INSTRUCTIONS]: {
  			type: 'boolean',
-@@ -970,7 +1029,8 @@ configurationRegistry.registerConfigurat
+@@ -970,7 +1039,8 @@ configurationRegistry.registerConfigurat
  			default: true,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -764,7 +850,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.INCLUDE_REFERENCED_INSTRUCTIONS]: {
  			type: 'boolean',
-@@ -979,7 +1039,8 @@ configurationRegistry.registerConfigurat
+@@ -979,7 +1049,8 @@ configurationRegistry.registerConfigurat
  			default: false,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -774,7 +860,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.SKILLS_LOCATION_KEY]: {
  			type: 'object',
-@@ -1011,6 +1072,7 @@ configurationRegistry.registerConfigurat
+@@ -1011,6 +1082,7 @@ configurationRegistry.registerConfigurat
  					'~/.custom/skills': true,
  				},
  			],
@@ -782,7 +868,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.HOOKS_LOCATION_KEY]: {
  			type: 'object',
-@@ -1039,6 +1101,7 @@ configurationRegistry.registerConfigurat
+@@ -1039,6 +1111,7 @@ configurationRegistry.registerConfigurat
  					'custom-hooks/hooks.json': true,
  				},
  			],
@@ -790,7 +876,17 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.USE_CHAT_HOOKS]: {
  			type: 'boolean',
-@@ -1077,7 +1140,8 @@ configurationRegistry.registerConfigurat
+@@ -1059,7 +1132,8 @@ configurationRegistry.registerConfigurat
+ 						value: nls.localize('chat.useHooks.description', "Controls whether chat hooks are executed at strategic points during an agent's workflow. Hooks are loaded from the files configured in `#chat.hookFilesLocations#`.",)
+ 					}
+ 				},
+-			}
++			},
++			included: false,
+ 		},
+ 		[PromptsConfig.USE_CLAUDE_HOOKS]: {
+ 			type: 'boolean',
+@@ -1077,7 +1151,8 @@ configurationRegistry.registerConfigurat
  			default: false,
  			restricted: true,
  			disallowConfigurationDefault: true,
@@ -800,7 +896,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[PromptsConfig.PROMPT_FILES_SUGGEST_KEY]: {
  			type: 'object',
-@@ -1105,11 +1169,13 @@ configurationRegistry.registerConfigurat
+@@ -1105,11 +1180,13 @@ configurationRegistry.registerConfigurat
  					'document': 'resourceLangId == markdown'
  				}
  			],
@@ -814,7 +910,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.ThinkingStyle]: {
  			type: 'string',
-@@ -1122,12 +1188,14 @@ configurationRegistry.registerConfigurat
+@@ -1122,12 +1199,14 @@ configurationRegistry.registerConfigurat
  			],
  			description: nls.localize('chat.agent.thinkingStyle', "Controls how thinking is rendered."),
  			tags: ['experimental'],
@@ -829,7 +925,49 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.agent.thinking.collapsedTools': {
  			type: 'string',
-@@ -1194,17 +1262,20 @@ configurationRegistry.registerConfigurat
+@@ -1140,18 +1219,21 @@ configurationRegistry.registerConfigurat
+ 			],
+ 			markdownDescription: nls.localize('chat.agent.thinking.collapsedTools', "Controls how tool calls are displayed in relation to thinking sections."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.TerminalToolsInThinking]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			markdownDescription: nls.localize('chat.agent.thinking.terminalTools', "When enabled, terminal tool calls are displayed inside the thinking dropdown with a simplified view."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		[ChatConfiguration.SimpleTerminalCollapsible]: {
+ 			type: 'boolean',
+ 			default: true,
+ 			markdownDescription: nls.localize('chat.tools.terminal.simpleCollapsible', "When enabled, terminal tool calls are always displayed in a collapsible container with a simplified view."),
+ 			tags: ['experimental'],
++			included: false,
+ 		},
+ 		'chat.tools.usagesTool.enabled': {
+ 			type: 'boolean',
+@@ -1160,7 +1242,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['preview'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		'chat.tools.renameTool.enabled': {
+ 			type: 'boolean',
+@@ -1169,7 +1252,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['preview'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.ThinkingPhrases]: {
+ 			type: 'object',
+@@ -1194,17 +1278,20 @@ configurationRegistry.registerConfigurat
  			additionalProperties: false,
  			markdownDescription: nls.localize('chat.agent.thinking.phrases', "Customize the loading messages shown during agent operations. Use `\"mode\": \"replace\"` to use only your phrases, or `\"mode\": \"append\"` to add them to the defaults."),
  			tags: ['experimental'],
@@ -851,7 +989,17 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.allowAnonymousAccess': { // TODO@bpasero remove me eventually
  			type: 'boolean',
-@@ -1222,18 +1293,21 @@ configurationRegistry.registerConfigurat
+@@ -1213,7 +1300,8 @@ configurationRegistry.registerConfigurat
+ 			tags: ['experimental'],
+ 			experiment: {
+ 				mode: 'auto'
+-			}
++			},
++			included: false,
+ 		},
+ 		[ChatConfiguration.GrowthNotificationEnabled]: {
+ 			type: 'boolean',
+@@ -1222,18 +1310,21 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -875,7 +1023,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		'chat.extensionUnification.enabled': {
  			type: 'boolean',
-@@ -1242,7 +1316,8 @@ configurationRegistry.registerConfigurat
+@@ -1242,7 +1333,8 @@ configurationRegistry.registerConfigurat
  			tags: ['experimental'],
  			experiment: {
  				mode: 'auto'
@@ -885,7 +1033,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  		[ChatConfiguration.SubagentToolCustomAgents]: {
  			type: 'boolean',
-@@ -1250,13 +1325,15 @@ configurationRegistry.registerConfigurat
+@@ -1250,13 +1342,15 @@ configurationRegistry.registerConfigurat
  			default: true,
  			experiment: {
  				mode: 'auto'
@@ -902,7 +1050,7 @@ Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chat.contribution.t
  		},
  	}
  });
-@@ -1463,6 +1540,7 @@ class ChatAgentSettingContribution exten
+@@ -1463,6 +1557,7 @@ class ChatAgentSettingContribution exten
  							markdownDescription: nls.localize('chat.agent.maxRequests', "The maximum number of requests to allow per-turn when using an agent. When the limit is reached, will ask to confirm to continue."),
  							default: value ?? 50,
  							order: 2,
@@ -1232,7 +1380,39 @@ Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/chatAgentTools/c
  	},
  	[TerminalChatAgentToolsSettingId.TerminalSandboxEnabled]: {
  		markdownDescription: localize('terminalSandbox.enabledSetting', "Controls whether to run commands in a sandboxed terminal for the run in terminal tool."),
-@@ -622,6 +632,7 @@ export const terminalChatAgentToolsConfi
+@@ -519,6 +529,7 @@ export const terminalChatAgentToolsConfi
+ 		default: false,
+ 		tags: ['preview'],
+ 		restricted: true,
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.TerminalSandboxNetwork]: {
+ 		markdownDescription: localize('terminalSandbox.networkSetting', "Note: this setting is applicable only when {0} is enabled. Controls network access in the terminal sandbox.", `\`#${TerminalChatAgentToolsSettingId.TerminalSandboxEnabled}#\``),
+@@ -549,6 +560,7 @@ export const terminalChatAgentToolsConfi
+ 		},
+ 		tags: ['preview'],
+ 		restricted: true,
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.TerminalSandboxLinuxFileSystem]: {
+ 		markdownDescription: localize('terminalSandbox.linuxFileSystemSetting', "Note: this setting is applicable only when {0} is enabled. Controls file system access in the terminal sandbox on Linux. Paths do not support glob patterns, only literal paths (ex: ./src/, ~/.ssh, .env). **bubblewrap** and **socat** should be installed for this setting to work.", `\`#${TerminalChatAgentToolsSettingId.TerminalSandboxEnabled}#\``),
+@@ -580,6 +592,7 @@ export const terminalChatAgentToolsConfi
+ 		},
+ 		tags: ['preview'],
+ 		restricted: true,
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.TerminalSandboxMacFileSystem]: {
+ 		markdownDescription: localize('terminalSandbox.macFileSystemSetting', "Note: this setting is applicable only when {0} is enabled. Controls file system access in the terminal sandbox on macOS. Paths also support git-style glob patterns(ex: *.ts, ./src, ./src/**/*.ts, file?.txt).", `\`#${TerminalChatAgentToolsSettingId.TerminalSandboxEnabled}#\``),
+@@ -611,6 +624,7 @@ export const terminalChatAgentToolsConfi
+ 		},
+ 		tags: ['preview'],
+ 		restricted: true,
++		included: false,
+ 	},
+ 	[TerminalChatAgentToolsSettingId.PreventShellHistory]: {
+ 		type: 'boolean',
+@@ -622,6 +636,7 @@ export const terminalChatAgentToolsConfi
  			`- \`fish\`: ${localize('preventShellHistory.description.fish', "Sets `fish_private_mode` to prevent any command from entering history")}`,
  			`- \`pwsh\`: ${localize('preventShellHistory.description.pwsh', "Sets a custom history handler via PSReadLine's `AddToHistoryHandler` to prevent any command from entering history")}`,
  		].join('\n'),
@@ -1240,7 +1420,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/chatAgentTools/c
  	},
  	[TerminalChatAgentToolsSettingId.EnforceTimeoutFromModel]: {
  		restricted: true,
-@@ -632,6 +643,7 @@ export const terminalChatAgentToolsConfi
+@@ -632,6 +647,7 @@ export const terminalChatAgentToolsConfi
  			mode: 'auto'
  		},
  		markdownDescription: localize('enforceTimeoutFromModel.description', "Whether to enforce the timeout value provided by the model in the run in terminal tool. When enabled, if the model provides a timeout parameter, the tool will stop tracking the command after that duration and return the output collected so far."),
@@ -1248,7 +1428,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/chatAgentTools/c
  	}
  };
  
-@@ -644,6 +656,7 @@ for (const id of [
+@@ -644,6 +660,7 @@ for (const id of [
  ]) {
  	terminalChatAgentToolsConfiguration[id] = {
  		deprecated: true,
@@ -1356,3 +1536,30 @@ Index: code-editor-src/src/vs/workbench/contrib/editTelemetry/browser/editTeleme
  		this._register(autorun(r => {
  			const enabled = aiStatsEnabled.read(r);
  			const aiDisabled = chatEntitlementService.sentimentObs.read(r).hidden;
+Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
+@@ -77,7 +77,7 @@ const chatViewDescriptor: IViewDescripto
+ 		ChatContextKeys.extensionInvalid
+ 	)
+ };
+-Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry).registerViews([chatViewDescriptor], chatViewContainer);
++// Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry).registerViews([chatViewDescriptor], chatViewContainer);
+ 
+ const chatParticipantExtensionPoint = extensionsRegistry.ExtensionsRegistry.registerExtensionPoint<IRawChatParticipantContribution[]>({
+ 	extensionPoint: 'chatParticipants',
+Index: code-editor-src/src/vs/workbench/contrib/inlineChat/browser/inlineChatDefaultModel.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/inlineChat/browser/inlineChatDefaultModel.ts
++++ code-editor-src/src/vs/workbench/contrib/inlineChat/browser/inlineChatDefaultModel.ts
+@@ -46,7 +46,8 @@ Registry.as<IConfigurationRegistry>(Conf
+ 			order: 1,
+ 			enum: InlineChatDefaultModel.modelIds,
+ 			enumItemLabels: InlineChatDefaultModel.modelLabels,
+-			markdownEnumDescriptions: InlineChatDefaultModel.modelDescriptions
++			markdownEnumDescriptions: InlineChatDefaultModel.modelDescriptions,
++			included: false,
+ 		}
+ 	}
+ });
