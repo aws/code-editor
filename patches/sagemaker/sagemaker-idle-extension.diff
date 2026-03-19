@@ -104,11 +104,12 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,11 @@
 +{
 +	"extends": "../tsconfig.base.json",
 +	"compilerOptions": {
-+		"outDir": "./out"
++		"outDir": "./out",
++		"skipLibCheck": true
 +	},
 +	"include": [
 +		"../sagemaker-idle-extension/src/**/*",
