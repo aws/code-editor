@@ -23,6 +23,15 @@ Index: code-editor-src/package.json
      "minimist": "^1.2.8",
      "native-is-elevated": "0.8.0",
      "native-keymap": "^3.3.5",
+@@ -111,7 +110,7 @@
+     "node-pty": "^1.1.0-beta43",
+     "open": "^10.1.2",
+     "tas-client": "0.3.1",
+-    "undici": "^7.9.0",
++    "undici": "^7.24.0",
+     "v8-inspect-profiler": "^0.1.1",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
 @@ -160,7 +159,7 @@
      "css-loader": "^6.9.1",
      "debounce": "^1.0.0",
@@ -78,7 +87,7 @@ Index: code-editor-src/remote/package.json
      "native-watchdog": "^1.4.1",
      "node-pty": "^1.1.0-beta43",
      "tas-client": "0.3.1",
-+    "undici": "^7.18.2",
++    "undici": "^7.24.0",
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "^9.3.0",
@@ -92,10 +101,10 @@ Index: code-editor-src/remote/package.json
 +    "@tootallnate/once": "^3.0.1"
    }
  }
-Index: third-party-src/build/lib/mangle/index.ts
+Index: code-editor-src/build/lib/mangle/index.ts
 ===================================================================
---- third-party-src.orig/build/lib/mangle/index.ts
-+++ third-party-src/build/lib/mangle/index.ts
+--- code-editor-src.orig/build/lib/mangle/index.ts
++++ code-editor-src/build/lib/mangle/index.ts
 @@ -430,7 +430,7 @@ export class Mangler {
  		this.config = config;
  
