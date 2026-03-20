@@ -6288,7 +6288,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************
 
 undici
-7.19.0 <https://github.com/nodejs/undici>
+7.24.5 <https://github.com/nodejs/undici>
 MIT License
 
 Copyright (c) Matteo Collina and Undici contributors
