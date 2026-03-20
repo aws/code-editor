@@ -38,7 +38,7 @@ Index: code-editor-src/product.json
 ===================================================================
 --- code-editor-src.orig/product.json
 +++ code-editor-src/product.json
-@@ -33,127 +33,14 @@
+@@ -33,127 +33,32 @@
  	"nodejsRepository": "https://nodejs.org",
  	"urlProtocol": "code-oss",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
@@ -108,23 +108,33 @@ Index: code-editor-src/product.json
 -		"manageOverageUrl": "https://aka.ms/github-copilot-manage-overage",
 -		"upgradePlanUrl": "https://aka.ms/github-copilot-upgrade-plan",
 -		"signUpUrl": "https://aka.ms/github-sign-up",
--		"provider": {
--			"default": {
++		"extensionId": "Amazon.amazon-q-vscode",
++		"chatExtensionId": "Amazon.amazon-q-vscode",
+ 		"provider": {
+ 			"default": {
 -				"id": "github",
 -				"name": "GitHub"
--			},
--			"enterprise": {
++				"id": "",
++				"name": ""
+ 			},
+ 			"enterprise": {
 -				"id": "github-enterprise",
 -				"name": "GHE.com"
--			},
--			"google": {
++				"id": "",
++				"name": ""
+ 			},
+ 			"google": {
 -				"id": "google",
 -				"name": "Google"
--			},
--			"apple": {
++				"id": "",
++				"name": ""
+ 			},
+ 			"apple": {
 -				"id": "apple",
 -				"name": "Apple"
--			}
++				"id": "",
++				"name": ""
+ 			}
 -		},
 -		"providerExtensionId": "vscode.github-authentication",
 -		"providerUriSetting": "github-enterprise.uri",
@@ -157,8 +167,7 @@ Index: code-editor-src/product.json
 -		"nextEditSuggestionsSetting": "github.copilot.nextEditSuggestions.enabled",
 -		"tokenEntitlementUrl": "https://api.github.com/copilot_internal/v2/token",
 -		"mcpRegistryDataUrl": "https://api.github.com/copilot/mcp_registry"
-+		"extensionId": "Amazon.amazon-q-vscode",
-+		"chatExtensionId": "Amazon.amazon-q-vscode"
++		}
  	},
  	"trustedExtensionAuthAccess": {
 -		"github": [
