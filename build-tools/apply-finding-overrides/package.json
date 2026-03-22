@@ -1,0 +1,20 @@
+{
+  "name": "apply-finding-overrides",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Consumes AWS Inspector SBOM scan results and generates quilt patches to override vulnerable npm packages",
+  "type": "module",
+  "scripts": {
+    "apply": "ts-node apply-finding-overrides.ts apply",
+    "prune": "ts-node apply-finding-overrides.ts prune"
+  },
+  "dependencies": {
+    "semver": "^7.7.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/semver": "^7.5.8"
+  }
+}
