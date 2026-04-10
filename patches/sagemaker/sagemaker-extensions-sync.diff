@@ -147,7 +147,7 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
-@@ -0,0 +1,100 @@
+@@ -0,0 +1,103 @@
 +import * as process from "process";
 +import * as vscode from 'vscode';
 +
@@ -169,8 +169,11 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
 +	// this extension will only activate within a sagemaker app
 +	const isSageMakerApp = !!process.env?.SAGEMAKER_APP_TYPE_LOWERCASE;
 +	if (!isSageMakerApp) {
++		console.log('Skipping activation of Sagemaker Extension Sync...');
 +		return;
 +	}
++
++	console.log('Activating Sagemaker Extension Sync...');
 +
 +	// get installed extensions. this could be different from pvExtensions b/c vscode sometimes doesn't delete the assets
 +	// for an old extension when uninstalling or changing versions
