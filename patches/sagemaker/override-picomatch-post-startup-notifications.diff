@@ -1,0 +1,19 @@
+Override picomatch to 2.3.2 in post-startup-notifications extension to resolve:
+- CVE-2026-33671 (high): method injection via POSIX bracket expressions
+- CVE-2026-33672 (medium): same root cause, integrity impact
+Remove when upstream Code-OSS updates picomatch to >= 2.3.2.
+
+Index: b/extensions/post-startup-notifications/package.json
+===================================================================
+--- a/extensions/post-startup-notifications/package.json
++++ b/extensions/post-startup-notifications/package.json
+@@ -53,5 +53,8 @@
+     },
+     "dependencies": {
+         "chokidar": "^4.0.3"
++    },
++    "overrides": {
++        "picomatch": "2.3.2"
+     }
+ }
+\ No newline at end of file
