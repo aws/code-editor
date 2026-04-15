@@ -1,0 +1,29 @@
+Description: Override follow-redirects to ^1.16.0 to fix GHSA-r4q5-vmmm-2653 (custom header leak on cross-domain redirect)
+Author: Amazon Web Services
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -240,7 +240,8 @@
+     "postcss": "^8.4.31",
+     "playwright": "^1.55.1",
+     "@tootallnate/once": "^3.0.1",
+-    "picomatch": "^2.3.2"
++    "picomatch": "^2.3.2",
++    "follow-redirects": "^1.16.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -45,6 +45,7 @@
+   "overrides": {
+     "node-gyp-build": "4.8.1",
+     "@tootallnate/once": "^3.0.1",
+-    "picomatch": "^2.3.2"
++    "picomatch": "^2.3.2",
++    "follow-redirects": "^1.16.0"
+   }
+ }

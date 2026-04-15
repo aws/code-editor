@@ -1,0 +1,16 @@
+Description: Override picomatch to ^2.3.2 in post-startup-notifications extension to fix CVE-2026-33671 and CVE-2026-33672
+Author: Amazon Web Services
+Index: b/extensions/post-startup-notifications/package.json
+===================================================================
+--- a/extensions/post-startup-notifications/package.json
++++ b/extensions/post-startup-notifications/package.json
+@@ -51,6 +51,9 @@
+         "webpack": "^5.98.0",
+         "webpack-cli": "^6.0.1"
+     },
++    "overrides": {
++        "picomatch": "^2.3.2"
++    },
+     "dependencies": {
+         "chokidar": "^4.0.3"
+     }
