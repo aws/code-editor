@@ -20,6 +20,9 @@ common/fix-ts-rootdir-webpack.diff
 common/finding-overrides.diff
 common/fix-chat-debug-editor-visibility.diff
 common/guard-default-account-config.diff
+common/override-picomatch.diff
+common/override-lodash-es.diff
+common/override-follow-redirects.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
@@ -45,3 +48,4 @@ sagemaker/sagemaker-extensions-sync.diff
 sagemaker/fix-port-forwarding.diff
 sagemaker/display-both-versions-in-about.diff
 sagemaker/validate-http-request-referer.diff
+sagemaker/override-picomatch-post-startup-notifications.diff

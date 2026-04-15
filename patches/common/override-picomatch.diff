@@ -1,0 +1,40 @@
+Override picomatch to ^4.0.4 (top-level) and ^2.3.2 (nested for 2.x consumers)
+to address CVE-2026-33671 (high) and CVE-2026-33672 (medium).
+Uses nested overrides because the dependency tree spans major versions 2.x and 4.x.
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -242,7 +242,17 @@
+     "postcss": "^8.4.31",
+     "@tootallnate/once": "^3.0.1",
+     "node-gyp-build": "4.8.1",
+-    "serialize-javascript": "^7.0.3"
++    "serialize-javascript": "^7.0.3",
++    "picomatch": "^4.0.4",
++    "anymatch": {
++      "picomatch": "^2.3.2"
++    },
++    "micromatch": {
++      "picomatch": "^2.3.2"
++    },
++    "readdirp": {
++      "picomatch": "^2.3.2"
++    }
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -44,6 +44,7 @@
+   },
+   "overrides": {
+     "undici": "^7.24.0",
+-    "node-gyp-build": "4.8.1"
++    "node-gyp-build": "4.8.1",
++    "picomatch": "^4.0.4"
+   }
+ }
