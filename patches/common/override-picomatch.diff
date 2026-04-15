@@ -1,0 +1,29 @@
+Description: Override picomatch to ^2.3.2 to fix CVE-2026-33671 (ReDoS) and CVE-2026-33672 (method injection)
+Author: Amazon Web Services
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -239,7 +239,8 @@
+     },
+     "postcss": "^8.4.31",
+     "playwright": "^1.55.1",
+-    "@tootallnate/once": "^3.0.1"
++    "@tootallnate/once": "^3.0.1",
++    "picomatch": "^2.3.2"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -44,6 +44,7 @@
+   },
+   "overrides": {
+     "node-gyp-build": "4.8.1",
+-    "@tootallnate/once": "^3.0.1"
++    "@tootallnate/once": "^3.0.1",
++    "picomatch": "^2.3.2"
+   }
+ }

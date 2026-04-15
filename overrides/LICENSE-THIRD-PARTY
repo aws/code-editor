@@ -4557,7 +4557,7 @@ THE SOFTWARE.
 ******************************
 
 follow-redirects
-1.15.11 <https://github.com/follow-redirects/follow-redirects>
+1.16.0 <https://github.com/follow-redirects/follow-redirects>
 Copyright 2014–present Olivier Lalonde <olalonde@gmail.com>, James Talmage <james@talmage.io>, Ruben Verborgh
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -5925,7 +5925,7 @@ SOFTWARE.
 ******************************
 
 picomatch
-2.3.1 <https://github.com/micromatch/picomatch>
+2.3.2 <https://github.com/micromatch/picomatch>
 The MIT License (MIT)
 
 Copyright (c) 2017-present, Jon Schlinkert.
