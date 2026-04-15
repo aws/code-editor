@@ -1,0 +1,29 @@
+Override follow-redirects to ^1.16.0 to address GHSA-r4q5-vmmm-2653 (medium).
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -253,7 +253,8 @@
+     "readdirp": {
+       "picomatch": "^2.3.2"
+     },
+-    "lodash-es": "^4.18.0"
++    "lodash-es": "^4.18.0",
++    "follow-redirects": "^1.16.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -46,6 +46,7 @@
+     "undici": "^7.24.0",
+     "node-gyp-build": "4.8.1",
+     "picomatch": "^4.0.4",
+-    "lodash-es": "^4.18.0"
++    "lodash-es": "^4.18.0",
++    "follow-redirects": "^1.16.0"
+   }
+ }

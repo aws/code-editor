@@ -1,0 +1,18 @@
+Override picomatch to ^2.3.2 in post-startup-notifications extension
+to address CVE-2026-33671 (high) and CVE-2026-33672 (medium).
+
+Index: b/extensions/post-startup-notifications/package.json
+===================================================================
+--- a/extensions/post-startup-notifications/package.json
++++ b/extensions/post-startup-notifications/package.json
+@@ -53,5 +53,8 @@
+     },
+     "dependencies": {
+         "chokidar": "^4.0.3"
++    },
++    "overrides": {
++        "picomatch": "^2.3.2"
+     }
+-}
+\ No newline at end of file
++}

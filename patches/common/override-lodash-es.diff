@@ -1,0 +1,30 @@
+Override lodash-es to ^4.18.0 to address CVE-2026-4800 (critical)
+and CVE-2026-2950 (medium).
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -252,7 +252,8 @@
+     },
+     "readdirp": {
+       "picomatch": "^2.3.2"
+-    }
++    },
++    "lodash-es": "^4.18.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -45,6 +45,7 @@
+   "overrides": {
+     "undici": "^7.24.0",
+     "node-gyp-build": "4.8.1",
+-    "picomatch": "^4.0.4"
++    "picomatch": "^4.0.4",
++    "lodash-es": "^4.18.0"
+   }
+ }
