@@ -19,6 +19,8 @@ common/integration.diff
 common/replace-gulp-untar.diff
 common/fix-ts-rootdir-webpack.diff
 common/fix-terminal-autoreplies.diff
+common/override-picomatch.diff
+common/override-follow-redirects.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
@@ -44,3 +46,4 @@ sagemaker/sagemaker-extensions-sync.diff
 sagemaker/fix-port-forwarding.diff
 sagemaker/display-both-versions-in-about.diff
 sagemaker/validate-http-request-referer.diff
+sagemaker/override-picomatch-post-startup-notifications.diff

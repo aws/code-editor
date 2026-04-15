@@ -19,6 +19,8 @@ common/integration.diff
 common/replace-gulp-untar.diff
 common/fix-ts-rootdir-webpack.diff
 common/fix-terminal-autoreplies.diff
+common/override-picomatch.diff
+common/override-follow-redirects.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff
