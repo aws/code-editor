@@ -145,7 +145,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +		return {
 +			base,
 +			port,
-+			target: url.resolve(`http://0.0.0.0:${port}/`, targetPathname),
++			target: url.resolve(`http://0.0.0.0:${port}/`, targetPathname + (sourceUrl.search ?? "")),
 +		};
 +	}
 +
