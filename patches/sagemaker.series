@@ -50,3 +50,4 @@ sagemaker/display-both-versions-in-about.diff
 sagemaker/validate-http-request-referer.diff
 sagemaker/sanitize-terminal-sendtext-paths.diff
 sagemaker/override-picomatch-post-startup-notifications.diff
+sagemaker/remove-delay-shutdown-endpoint.diff
