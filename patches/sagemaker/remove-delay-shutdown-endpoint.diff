@@ -1,0 +1,37 @@
+Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+===================================================================
+--- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -158,13 +158,6 @@ class RemoteExtensionHostAgentServer ext
+ 			return void res.end(this._productService.commit || '');
+ 		}
+ 
+-		// Delay shutdown
+-		if (pathname === '/delay-shutdown') {
+-			this._delayShutdown();
+-			res.writeHead(200);
+-			return void res.end('OK');
+-		}
+-
+ 		if (!httpRequestHasValidConnectionToken(this._connectionToken, req, parsedUrl)) {
+ 			// invalid connection token
+ 			return serveError(req, res, 403, `Forbidden.`);
+@@ -630,18 +623,6 @@ class RemoteExtensionHostAgentServer ext
+ 		}
+ 	}
+ 
+-	/**
+-	 * If the server is in a shutdown timeout, cancel it and start over
+-	 */
+-	private _delayShutdown(): void {
+-		if (this.shutdownTimer) {
+-			console.log('Got delay-shutdown request while in shutdown timeout, delaying');
+-			this._logService.info('Got delay-shutdown request while in shutdown timeout, delaying');
+-			this._cancelShutdown();
+-			this._waitThenShutdown();
+-		}
+-	}
+-
+ 	private _cancelShutdown(): void {
+ 		if (this.shutdownTimer) {
+ 			console.log('Cancelling previous shutdown timeout');
