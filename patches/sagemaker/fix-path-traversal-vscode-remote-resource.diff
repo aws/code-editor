@@ -1,0 +1,31 @@
+Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+===================================================================
+--- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
++++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
+@@ -17,7 +17,7 @@ import { isSigPipeError, onUnexpectedErr
+ import { isEqualOrParent } from '../../base/common/extpath.js';
+ import { Disposable, DisposableStore } from '../../base/common/lifecycle.js';
+ import { connectionTokenQueryName, FileAccess, getServerProductSegment, Schemas } from '../../base/common/network.js';
+-import { dirname, join } from '../../base/common/path.js';
++import { dirname, join, resolve } from '../../base/common/path.js';
+ import * as perf from '../../base/common/performance.js';
+ import * as platform from '../../base/common/platform.js';
+ import { createRegExp, escapeRegExpCharacters } from '../../base/common/strings.js';
+@@ -191,6 +191,17 @@ class RemoteExtensionHostAgentServer ext
+ 				return serveError(req, res, 400, `Bad request.`);
+ 			}
+ 
++			// @secure_recommendation: Restrict file serving to allowed directories to prevent path traversal (P401260599)
++			const resolvedPath = resolve(filePath);
++			const allowedRoots = [
++				this._environmentService.builtinExtensionsPath,
++				this._environmentService.extensionsPath,
++				this._environmentService.userDataPath
++			];
++			if (!allowedRoots.some(root => isEqualOrParent(resolvedPath, root, !platform.isLinux))) {
++				return serveError(req, res, 403, `Forbidden.`);
++			}
++
+ 			const responseHeaders: Record<string, string> = Object.create(null);
+ 			if (this._environmentService.isBuilt) {
+ 				if (isEqualOrParent(filePath, this._environmentService.builtinExtensionsPath, !platform.isLinux)
