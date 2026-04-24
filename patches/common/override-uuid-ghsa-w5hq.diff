@@ -1,0 +1,31 @@
+Override uuid to 14.0.0 to resolve:
+
+Remove when upstream Code-OSS updates uuid to >= 14.0.0.
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -238,7 +238,8 @@
+     "playwright": "^1.55.1",
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "2.3.2",
+-    "follow-redirects": "1.16.0"
++    "follow-redirects": "1.16.0",
++    "uuid": "14.0.0"
+ 
+   },
+   "repository": {
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -48,6 +48,7 @@
+     },
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "2.3.2",
+-    "follow-redirects": "1.16.0"
++    "follow-redirects": "1.16.0",
++    "uuid": "14.0.0"
+   }
+ }

@@ -21,6 +21,7 @@ common/adopt-new-proxy-agent.diff
 common/fix-terminal-autoreplies.diff
 common/override-picomatch-cve-2026-33671.diff
 common/override-follow-redirects-ghsa-r4q5.diff
+common/override-uuid-ghsa-w5hq.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
