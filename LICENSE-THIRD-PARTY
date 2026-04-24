@@ -6341,7 +6341,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************
 
 uuid
-9.0.1 <https://github.com/uuidjs/uuid>
+14.0.0 <https://github.com/uuidjs/uuid>
 The MIT License (MIT)
 
 Copyright (c) 2010-2020 Robert Kieffer and other contributors

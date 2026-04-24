@@ -1,0 +1,29 @@
+Description: Override uuid to ^14.0.0 under @vscode/deviceid to fix GHSA-w5hq-g745-h8pq (out-of-bounds write in v3/v5/v6)
+Author: Amazon Web Services
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -241,7 +241,8 @@
+     "playwright": "^1.55.1",
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "^2.3.2",
+-    "follow-redirects": "^1.16.0"
++    "follow-redirects": "^1.16.0",
++    "uuid": "^14.0.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -46,6 +46,7 @@
+     "node-gyp-build": "4.8.1",
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "^2.3.2",
+-    "follow-redirects": "^1.16.0"
++    "follow-redirects": "^1.16.0",
++    "uuid": "^14.0.0"
+   }
+ }
