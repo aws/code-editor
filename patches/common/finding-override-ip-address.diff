@@ -1,0 +1,36 @@
+Override ip-address to ^10.1.1.
+Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override global:ip-address=^10.1.1 --override remote/package.json@global:ip-address=^10.1.1
+Remove when upstream Code-OSS updates ip-address to >= 10.1.1.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override 'global:ip-address=^10.1.1' --override 'remote/package.json@global:ip-address=^10.1.1'
+@override-package: ip-address@^10.1.1
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -237,8 +237,8 @@
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "2.3.2",
+     "follow-redirects": "1.16.0",
+-    "uuid": "14.0.0"
+-
++    "uuid": "14.0.0",
++    "ip-address": "^10.1.1"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -48,6 +48,7 @@
+     "@tootallnate/once": "^3.0.1",
+     "picomatch": "2.3.2",
+     "follow-redirects": "1.16.0",
+-    "uuid": "14.0.0"
++    "uuid": "14.0.0",
++    "ip-address": "^10.1.1"
+   }
+ }
