@@ -23,6 +23,7 @@ common/override-picomatch.diff
 common/override-follow-redirects.diff
 common/override-uuid-ghsa-w5hq.diff
 common/finding-override-ip-address.diff
+common/fix-mcp-server-editor-disclosure.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff

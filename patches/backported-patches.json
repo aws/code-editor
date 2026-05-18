@@ -10,5 +10,31 @@
         "affected_versions": "<1.109.1",
         "patch_path": "common/fix-terminal-autoreplies.diff",
         "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-21523"
+    },
+    {
+        "finding_id": "CVE-2026-41613",
+        "affected_versions": "<1.119.1",
+        "patch_path": "common/fix-mcp-server-editor-disclosure.diff",
+        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41613"
+    },
+    {
+        "finding_id": "GHSA-9f6c-63gp-pwpf",
+        "affected_versions": "<1.119.1",
+        "patch_path": "common/fix-mcp-server-editor-disclosure.diff",
+        "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-9f6c-63gp-pwpf"
+    },
+    {
+        "finding_id": "CVE-2026-41109",
+        "affected_versions": "<1.119.1",
+        "patch_path": "N/A",
+        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41109",
+        "note": "Copilot extension not present in Code-OSS 1.108.2"
+    },
+    {
+        "finding_id": "GHSA-rg3f-8xq5-hwh6",
+        "affected_versions": "<1.119.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-rg3f-8xq5-hwh6",
+        "note": "Copilot extension not present in Code-OSS 1.108.2"
     }
 ]
