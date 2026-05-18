@@ -1,0 +1,69 @@
+Backport MCP server editor configuration disclosure from upstream Code-OSS.
+Remove when Code-OSS is updated to >= 1.119.1.
+
+@backported: https://github.com/microsoft/vscode/commit/be09b4c7a118ae389662646f4fb9dcaa84757521
+@finding-id: CVE-2026-41613 GHSA-9f6c-63gp-pwpf
+Index: b/src/vs/workbench/contrib/mcp/browser/mcpServerEditor.ts
+===================================================================
+--- a/src/vs/workbench/contrib/mcp/browser/mcpServerEditor.ts
++++ b/src/vs/workbench/contrib/mcp/browser/mcpServerEditor.ts
+@@ -735,6 +735,26 @@ export class McpServerEditor extends Edi
+ 				const argsValue = append(argsSection, $('code.config-value'));
+ 				argsValue.textContent = config.args.join(' ');
+ 			}
++
++			// Environment variables (if present)
++			if (config.env && Object.keys(config.env).length > 0) {
++				const envSection = append(container, $('.config-section'));
++				const envLabel = append(envSection, $('.config-label'));
++				envLabel.textContent = localize('environment', "Environment:");
++				const envValue = append(envSection, $('.config-value'));
++				for (const [key, value] of Object.entries(config.env)) {
++					append(envValue, $('code.env-entry', undefined, `${key}=${value ?? ''}`));
++				}
++			}
++
++			// Env file (if present)
++			if (config.envFile) {
++				const envFileSection = append(container, $('.config-section'));
++				const envFileLabel = append(envFileSection, $('.config-label'));
++				envFileLabel.textContent = localize('envFile', "Environment File:");
++				const envFileValue = append(envFileSection, $('code.config-value'));
++				envFileValue.textContent = config.envFile;
++			}
+ 		} else if (config.type === McpServerType.REMOTE) {
+ 			// URL
+ 			const urlSection = append(container, $('.config-section'));
+@@ -742,6 +762,17 @@ export class McpServerEditor extends Edi
+ 			urlLabel.textContent = localize('url', "URL:");
+ 			const urlValue = append(urlSection, $('code.config-value'));
+ 			urlValue.textContent = config.url;
++
++			// Headers (if present)
++			if (config.headers && Object.keys(config.headers).length > 0) {
++				const headersSection = append(container, $('.config-section'));
++				const headersLabel = append(headersSection, $('.config-label'));
++				headersLabel.textContent = localize('headers', "Headers:");
++				const headersValue = append(headersSection, $('.config-value'));
++				for (const [key, value] of Object.entries(config.headers)) {
++					append(headersValue, $('code.env-entry', undefined, `${key}: ${value ?? ''}`));
++				}
++			}
+ 		}
+ 	}
+ 
+Index: b/src/vs/workbench/contrib/mcp/browser/media/mcpServerEditor.css
+===================================================================
+--- a/src/vs/workbench/contrib/mcp/browser/media/mcpServerEditor.css
++++ b/src/vs/workbench/contrib/mcp/browser/media/mcpServerEditor.css
+@@ -25,6 +25,10 @@
+ 		word-break: break-all;
+ 	}
+ 
++	.config-value .env-entry {
++		display: block;
++	}
++
+ 	.no-config {
+ 		color: var(--vscode-descriptionForeground);
+ 		font-style: italic;
