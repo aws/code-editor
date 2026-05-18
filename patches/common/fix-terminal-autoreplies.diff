@@ -1,7 +1,8 @@
-Backporting fix for GHSA-3pwg-f3hj-wp8p advisory: https://github.com/microsoft/vscode/security/advisories/GHSA-3pwg-f3hj-wp8p
+Backport terminal autoreply restriction from upstream Code-OSS.
+Remove when Code-OSS is updated to >= 1.109.1.
 
-Based on commit: https://github.com/microsoft/vscode/commit/670c6d9b2a6588cc90a1e347015966dc391795ba
-
+@backported: https://github.com/microsoft/vscode/commit/670c6d9b2a6588cc90a1e347015966dc391795ba
+@finding-id: CVE-2026-21523 GHSA-3pwg-f3hj-wp8p
 Index: code-editor-src/src/vs/workbench/contrib/terminalContrib/autoReplies/common/terminalAutoRepliesConfiguration.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/terminalContrib/autoReplies/common/terminalAutoRepliesConfiguration.ts
