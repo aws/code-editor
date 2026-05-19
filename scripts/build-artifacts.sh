@@ -106,14 +106,16 @@ build() {
     local present_working_dir="$(pwd)"
     local build_src_dir="${present_working_dir}/code-editor-src"
     
-    local build_target="${code_oss_build_target_base}-min"
+    # core-ci always produces minified bundles, so packaging always uses -min-ci
+    local package_target="${code_oss_build_target_base}-min-ci"
     
-    echo "Building Code Editor with '$build_target' as target with ${max_space_size_mb} MiB allocated heap"
+    echo "Building Code Editor: core-ci + '${package_target}' with ${max_space_size_mb} MiB allocated heap"
     
     cd "$build_src_dir"
-    env \
-        NODE_OPTIONS="--max-old-space-size=${max_space_size_mb}" \
-        npm run gulp "$build_target"
+    env NODE_OPTIONS="--max-old-space-size=${max_space_size_mb}" \
+        npm run gulp core-ci
+    env NODE_OPTIONS="--max-old-space-size=${max_space_size_mb}" \
+        npm run gulp "$package_target"
     cd ..
 }
 

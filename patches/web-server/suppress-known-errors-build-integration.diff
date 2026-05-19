@@ -91,3 +91,17 @@ Index: code-editor-src/build/gulpfile.reh.ts
  ];
  
  const serverResourceExcludes = [
+Index: code-editor-src/build/next/index.ts
+===================================================================
+--- code-editor-src.orig/build/next/index.ts
++++ code-editor-src/build/next/index.ts
+@@ -323,6 +323,9 @@ const serverResourcePatterns = [
+ 	'vs/workbench/contrib/terminal/common/scripts/psreadline/*.ps1xml',
+ 	'vs/workbench/contrib/terminal/common/scripts/psreadline/net6plus/*.dll',
+ 	'vs/workbench/contrib/terminal/common/scripts/psreadline/netstd/*.dll',
++
++	// Error handler
++	'vs/editor/common/errors/suppressedErrors.js',
+ ];
+ 
+ // Resources for server-web target (server + web UI)
