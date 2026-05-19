@@ -1,0 +1,64 @@
+Improve host validation for web extension resource proxy
+
+Strengthen hostname validation for the web-extension-resource route
+to ensure requests are only proxied to the configured extension gallery.
+
+--- code-editor-src.orig/src/vs/server/node/webClientServer.ts
++++ code-editor-src/src/vs/server/node/webClientServer.ts
+@@ -46,6 +46,24 @@ const enum ServiceName {
+ }
+ 
+ /**
++ * Validates that a requested hostname matches the configured gallery hostname.
++ */
++function isAllowedExtensionResourceHost(templateHostname: string, requestedHostname: string): boolean {
++	if (!templateHostname || !requestedHostname) {
++		return false;
++	}
++
++	const normalizedTemplate = templateHostname.toLowerCase();
++	const normalizedRequested = requestedHostname.toLowerCase();
++
++	if (normalizedRequested === normalizedTemplate) {
++		return true;
++	}
++
++	return normalizedRequested.endsWith('.' + normalizedTemplate);
++}
++
++/**
+  * Return an error to the client.
+  */
+ export async function serveError(req: http.IncomingMessage, res: http.ServerResponse, errorCode: number, errorMessage: string): Promise<void> {
+@@ -183,6 +201,11 @@ export class WebClientServer {
+ 			}
+ 			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
+ 				// extension resource support
++				const resourcePath = pathname.substring(WEB_EXTENSION_PATH.length + 1);
++				const requestedHost = resourcePath.substring(0, resourcePath.indexOf('/'));
++				if (!this._isAllowedWebExtensionResourceHost(requestedHost)) {
++					return serveError(req, res, 403, 'Request Forbidden');
++				}
+ 				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
+ 			}
+ 
+@@ -612,6 +635,19 @@ export class WebClientServer {
+ 			}
+ 		}
+ 	}
++
++	private _isAllowedWebExtensionResourceHost(requestedHost: string): boolean {
++		if (!this._productService.extensionsGallery?.resourceUrlTemplate) {
++			return false;
++		}
++
++		try {
++			const templateUrl = new URL(this._productService.extensionsGallery.resourceUrlTemplate);
++			return isAllowedExtensionResourceHost(templateUrl.hostname, requestedHost);
++		} catch {
++			return false;
++		}
++	}
+ }
+ 
+ 
