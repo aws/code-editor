@@ -53,3 +53,4 @@ sagemaker/fix-path-traversal-vscode-remote-resource.diff
 sagemaker/sanitize-terminal-sendtext-paths.diff
 sagemaker/override-picomatch-post-startup-notifications.diff
 sagemaker/remove-delay-shutdown-endpoint.diff
+sagemaker/fix-web-extension-resource-host-validation.diff
