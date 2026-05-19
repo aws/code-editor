@@ -152,6 +152,13 @@ prepare_patch_directory() {
     
     echo "Copying third party source to the patch directory"
     rsync -a "${PRESENT_WORKING_DIR}/third-party-src/" "${PATCHED_SRC_DIR}"
+    
+    # Replace submodule gitlink with a proper .git so build tooling can read the commit
+    local commit_hash
+    commit_hash=$(cd "${PRESENT_WORKING_DIR}/third-party-src" && git rev-parse HEAD)
+    rm -f "${PATCHED_SRC_DIR}/.git"
+    mkdir -p "${PATCHED_SRC_DIR}/.git"
+    echo "$commit_hash" > "${PATCHED_SRC_DIR}/.git/HEAD"
 }
 
 apply_patches() {
