@@ -21,7 +21,7 @@ Index: code-editor-src/src/vs/server/node/serverServices.ts
  import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
  import { ConfigurationService } from '../../platform/configuration/common/configurationService.js';
-@@ -263,6 +263,9 @@ export async function setupServerService
+@@ -287,6 +287,9 @@ export async function setupServerService
  
  		socketServer.registerChannel('mcpManagement', new McpManagementChannel(mcpManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority)));
  
@@ -35,7 +35,7 @@ Index: code-editor-src/src/vs/platform/environment/common/environmentService.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/platform/environment/common/environmentService.ts
 +++ code-editor-src/src/vs/platform/environment/common/environmentService.ts
-@@ -98,7 +98,7 @@ export abstract class AbstractNativeEnvi
+@@ -112,7 +112,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
  
@@ -189,7 +189,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  import { CharCode } from '../../base/common/charCode.js';
  import { IExtensionManifest } from '../../platform/extensions/common/extensions.js';
  import { ICSSDevelopmentService } from '../../platform/cssDev/node/cssDevService.js';
-@@ -370,14 +371,22 @@ export class WebClientServer {
+@@ -390,14 +391,22 @@ export class WebClientServer {
  		};
  
  		const cookies = cookie.parse(req.headers.cookie || '');
@@ -226,7 +226,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
  
  	/* ----- server setup ----- */
  
-@@ -104,6 +105,7 @@ export const serverOptions: OptionDescri
+@@ -107,6 +108,7 @@ export const serverOptions: OptionDescri
  };
  
  export interface ServerParsedArgs {
@@ -295,7 +295,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsAct
  		}
  
  		// Prefers to run on UI
-@@ -2072,17 +2069,6 @@ export class SetLanguageAction extends E
+@@ -2284,17 +2281,6 @@ export class SetLanguageAction extends E
  	update(): void {
  		this.enabled = false;
  		this.class = SetLanguageAction.DisabledClass;
@@ -313,7 +313,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsAct
  	}
  
  	override async run(): Promise<any> {
-@@ -2099,7 +2085,6 @@ export class ClearLanguageAction extends
+@@ -2311,7 +2297,6 @@ export class ClearLanguageAction extends
  	private static readonly DisabledClass = `${this.EnabledClass} disabled`;
  
  	constructor(
@@ -321,7 +321,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsAct
  		@ILocaleService private readonly localeService: ILocaleService,
  	) {
  		super(ClearLanguageAction.ID, ClearLanguageAction.TITLE.value, ClearLanguageAction.DisabledClass, false);
-@@ -2109,17 +2094,6 @@ export class ClearLanguageAction extends
+@@ -2321,17 +2306,6 @@ export class ClearLanguageAction extends
  	update(): void {
  		this.enabled = false;
  		this.class = ClearLanguageAction.DisabledClass;

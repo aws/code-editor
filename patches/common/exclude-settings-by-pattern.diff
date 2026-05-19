@@ -1,0 +1,58 @@
+Hide settings and actions by pattern via product.json configuration
+
+Adds excludedSettingPatterns and excludedActionPatterns arrays to product.json,
+adds excludedSettingPatterns to the IProductConfiguration interface in product.ts,
+and modifies configurationRegistry.ts to route pattern-matched settings to
+excludedConfigurationProperties (hidden from the Settings UI).
+
+Index: code-editor-src/src/vs/base/common/product.ts
+===================================================================
+--- code-editor-src.orig/src/vs/base/common/product.ts
++++ code-editor-src/src/vs/base/common/product.ts
+@@ -142,6 +142,7 @@ export interface IProductConfiguration {
+ 	readonly languageExtensionTips?: readonly string[];
+ 	readonly trustedExtensionUrlPublicKeys?: IStringDictionary<string[]>;
+ 	readonly trustedExtensionAuthAccess?: string[] | IStringDictionary<string[]>;
++	readonly excludedSettingPatterns?: readonly string[];
+ 	readonly trustedMcpAuthAccess?: string[] | IStringDictionary<string[]>;
+ 	readonly inheritAuthAccountPreference?: IStringDictionary<string[]>;
+ 	readonly trustedExtensionProtocolHandlers?: readonly string[];
+Index: code-editor-src/src/vs/platform/configuration/common/configurationRegistry.ts
+===================================================================
+--- code-editor-src.orig/src/vs/platform/configuration/common/configurationRegistry.ts
++++ code-editor-src/src/vs/platform/configuration/common/configurationRegistry.ts
+@@ -530,8 +530,7 @@ class ConfigurationRegistry extends Disp
+ 			source,
+ 			defaultValueSource: source
+ 		};
+-		this.configurationProperties[key] = property;
+-		this.defaultLanguageConfigurationOverridesNode.properties![key] = property;
++		this.excludedConfigurationProperties[key] = property;
+ 	}
+ 
+ 	private mergeDefaultConfigurationsForOverrideIdentifier(overrideIdentifier: string, configurationValueObject: IStringDictionary<unknown>, valueSource: ConfigurationDefaultSource | undefined, existingDefaultOverride: IConfigurationDefaultOverrideValue | undefined): IConfigurationDefaultOverrideValue | undefined {
+@@ -725,7 +724,8 @@ class ConfigurationRegistry extends Disp
+ 					property.experiment = { mode: 'startup' };
+ 				}
+ 
+-				const excluded = properties[key].hasOwnProperty('included') && !properties[key].included;
++				const excluded = (properties[key].hasOwnProperty('included') && !properties[key].included)
++					|| this._isExcludedByPattern(key);
+ 				const policyName = properties[key].policy?.name;
+ 
+ 				if (excluded) {
+@@ -758,6 +758,14 @@ class ConfigurationRegistry extends Disp
+ 		}
+ 	}
+ 
++	private _excludedSettingPatterns: readonly string[] | undefined;
++	private _isExcludedByPattern(key: string): boolean {
++		if (!this._excludedSettingPatterns) {
++			this._excludedSettingPatterns = product.excludedSettingPatterns ?? [];
++		}
++		return this._excludedSettingPatterns.some(p => key.startsWith(p));
++	}
++
+ 	// Only for tests
+ 	getConfigurations(): IConfigurationNode[] {
+ 		return this.configurationContributors;

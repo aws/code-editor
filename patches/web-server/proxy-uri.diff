@@ -9,15 +9,15 @@ Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -110,6 +110,7 @@
-     "@xterm/addon-webgl": "^0.20.0-beta.167",
-     "@xterm/headless": "^6.1.0-beta.168",
-     "@xterm/xterm": "^6.1.0-beta.168",
+@@ -121,6 +121,7 @@
+     "@xterm/headless": "^6.1.0-beta.197",
+     "@xterm/xterm": "^6.1.0-beta.197",
+     "chrome-remote-interface": "^0.33.0",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
      "https-proxy-agent": "^7.0.2",
      "jschardet": "3.1.4",
-@@ -136,6 +137,7 @@
+@@ -150,6 +151,7 @@
      "@types/debug": "^4.1.5",
      "@types/eslint": "^9.6.1",
      "@types/gulp-svgmin": "^1.2.1",
@@ -29,9 +29,9 @@ Index: code-editor-src/remote/package.json
 ===================================================================
 --- code-editor-src.orig/remote/package.json
 +++ code-editor-src/remote/package.json
-@@ -28,6 +28,7 @@
-     "@xterm/headless": "^6.1.0-beta.168",
-     "@xterm/xterm": "^6.1.0-beta.168",
+@@ -31,6 +31,7 @@
+     "@xterm/headless": "^6.1.0-beta.197",
+     "@xterm/xterm": "^6.1.0-beta.197",
      "cookie": "^0.7.0",
 +    "http-proxy": "^1.18.1",
      "http-proxy-agent": "^7.0.0",
@@ -275,14 +275,14 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  import type * as http from 'http';
  import * as net from 'net';
 @@ -63,6 +65,7 @@ class RemoteExtensionHostAgentServer ext
- 	private readonly _managementConnections: { [reconnectionToken: string]: ManagementConnection };
  	private readonly _allReconnectionTokens: Set<string>;
+ 	private readonly _extHostLifetimeTokens = this._register(new DisposableMap<string>());
  	private readonly _webClientServer: WebClientServer | null;
 +	private readonly _proxyServer: ProxyServer | null;
  	private readonly _webEndpointOriginChecker: WebEndpointOriginChecker;
  	private readonly _reconnectionGraceTime: number;
  
-@@ -99,6 +102,11 @@ class RemoteExtensionHostAgentServer ext
+@@ -98,11 +101,23 @@ class RemoteExtensionHostAgentServer ext
  				? this._instantiationService.createInstance(WebClientServer, this._connectionToken, serverBasePath ?? '/', this._serverProductPath)
  				: null
  		);
@@ -293,8 +293,6 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +		);
  		this._logService.info(`Extension host agent started.`);
  		this._reconnectionGraceTime = this._environmentService.reconnectionGraceTime;
- 
-@@ -106,6 +114,13 @@ class RemoteExtensionHostAgentServer ext
  	}
  
  	public async handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -308,7 +306,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  		// Only serve GET requests
  		if (req.method !== 'GET') {
  			return serveError(req, res, 405, `Unsupported method ${req.method}`);
-@@ -134,7 +149,6 @@ class RemoteExtensionHostAgentServer ext
+@@ -131,7 +146,6 @@ class RemoteExtensionHostAgentServer ext
  		// Custom health check endpoint
  		if (pathname === '/healthz') {
  			res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -316,7 +314,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			return void res.end(JSON.stringify({ hasActiveConnections }));
  		}
  
-@@ -199,12 +213,17 @@ class RemoteExtensionHostAgentServer ext
+@@ -196,12 +210,17 @@ class RemoteExtensionHostAgentServer ext
  		return void res.end('Not found');
  	}
  
@@ -335,7 +333,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  			const query = url.parse(req.url, true).query;
  			if (typeof query.reconnectionToken === 'string') {
  				reconnectionToken = query.reconnectionToken;
-@@ -506,6 +525,8 @@ class RemoteExtensionHostAgentServer ext
+@@ -504,6 +523,8 @@ class RemoteExtensionHostAgentServer ext
  			return this._rejectWebSocketConnection(logPrefix, protocol, `Unknown initial data received`);
  
  		}
@@ -344,7 +342,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  	}
  
  	private async _createTunnel(protocol: PersistentProtocol, tunnelStartParams: ITunnelConnectionStartParams): Promise<void> {
-@@ -638,7 +659,7 @@ export interface IServerAPI {
+@@ -570,7 +591,7 @@ export interface IServerAPI {
  	/**
  	 * Do not remove!!. Called from server-main.js
  	 */

@@ -1,0 +1,160 @@
+Disable call hierarchy in references-view extension
+
+Removes call hierarchy functionality from the references-view extension
+for the web-embedded target.
+Index: code-editor-src/extensions/references-view/package.json
+===================================================================
+--- code-editor-src.orig/extensions/references-view/package.json
++++ code-editor-src/extensions/references-view/package.json
+@@ -121,23 +121,6 @@
+         "icon": "$(refresh)"
+       },
+       {
+-        "command": "references-view.showCallHierarchy",
+-        "title": "%cmd.references-view.showCallHierarchy%",
+-        "category": "Calls"
+-      },
+-      {
+-        "command": "references-view.showOutgoingCalls",
+-        "title": "%cmd.references-view.showOutgoingCalls%",
+-        "category": "Calls",
+-        "icon": "$(call-incoming)"
+-      },
+-      {
+-        "command": "references-view.showIncomingCalls",
+-        "title": "%cmd.references-view.showIncomingCalls%",
+-        "category": "Calls",
+-        "icon": "$(call-outgoing)"
+-      },
+-      {
+         "command": "references-view.removeCallItem",
+         "title": "%cmd.references-view.removeCallItem%",
+         "icon": "$(close)"
+@@ -188,11 +171,6 @@
+           "group": "0_navigation@2"
+         },
+         {
+-          "command": "references-view.showCallHierarchy",
+-          "when": "editorHasCallHierarchyProvider",
+-          "group": "0_navigation@3"
+-        },
+-        {
+           "command": "references-view.showTypeHierarchy",
+           "when": "editorHasTypeHierarchyProvider",
+           "group": "0_navigation@4"
+@@ -215,16 +193,6 @@
+           "when": "view == references-view.tree && reference-list.hasResult"
+         },
+         {
+-          "command": "references-view.showOutgoingCalls",
+-          "group": "navigation@1",
+-          "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showIncoming"
+-        },
+-        {
+-          "command": "references-view.showIncomingCalls",
+-          "group": "navigation@1",
+-          "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == callHierarchy &&  references-view.callHierarchyMode == showOutgoing"
+-        },
+-        {
+           "command": "references-view.showSupertypes",
+           "group": "navigation@1",
+           "when": "view == references-view.tree && reference-list.hasResult && reference-list.source == typeHierarchy &&  references-view.typeHierarchyMode != supertypes"
+Index: code-editor-src/extensions/references-view/src/calls/index.ts
+===================================================================
+--- code-editor-src.orig/extensions/references-view/src/calls/index.ts
++++ code-editor-src/extensions/references-view/src/calls/index.ts
+@@ -4,40 +4,11 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as vscode from 'vscode';
+-import { SymbolsTree } from '../tree';
+-import { ContextKey } from '../utils';
+ import { CallItem, CallsDirection, CallsTreeInput } from './model';
+ 
+-export function register(tree: SymbolsTree, context: vscode.ExtensionContext): void {
+-
+-	const direction = new RichCallsDirection(context.workspaceState, CallsDirection.Incoming);
+-
+-	function showCallHierarchy() {
+-		if (vscode.window.activeTextEditor) {
+-			const input = new CallsTreeInput(new vscode.Location(vscode.window.activeTextEditor.document.uri, vscode.window.activeTextEditor.selection.active), direction.value);
+-			tree.setInput(input);
+-		}
+-	}
+-
+-	function setCallsDirection(value: CallsDirection, anchor: CallItem | unknown) {
+-		direction.value = value;
+-
+-		let newInput: CallsTreeInput | undefined;
+-		const oldInput = tree.getInput();
+-		if (anchor instanceof CallItem) {
+-			newInput = new CallsTreeInput(new vscode.Location(anchor.item.uri, anchor.item.selectionRange.start), direction.value);
+-		} else if (oldInput instanceof CallsTreeInput) {
+-			newInput = new CallsTreeInput(oldInput.location, direction.value);
+-		}
+-		if (newInput) {
+-			tree.setInput(newInput);
+-		}
+-	}
++export function register(context: vscode.ExtensionContext): void {
+ 
+ 	context.subscriptions.push(
+-		vscode.commands.registerCommand('references-view.showCallHierarchy', showCallHierarchy),
+-		vscode.commands.registerCommand('references-view.showOutgoingCalls', (item: CallItem | unknown) => setCallsDirection(CallsDirection.Outgoing, item)),
+-		vscode.commands.registerCommand('references-view.showIncomingCalls', (item: CallItem | unknown) => setCallsDirection(CallsDirection.Incoming, item)),
+ 		vscode.commands.registerCommand('references-view.removeCallItem', removeCallItem)
+ 	);
+ }
+@@ -47,32 +18,3 @@ function removeCallItem(item: CallItem |
+ 		item.remove();
+ 	}
+ }
+-
+-class RichCallsDirection {
+-
+-	private static _key = 'references-view.callHierarchyMode';
+-
+-	private _ctxMode = new ContextKey<'showIncoming' | 'showOutgoing'>('references-view.callHierarchyMode');
+-
+-	constructor(
+-		private _mem: vscode.Memento,
+-		private _value: CallsDirection = CallsDirection.Outgoing,
+-	) {
+-		const raw = _mem.get<number>(RichCallsDirection._key);
+-		if (typeof raw === 'number' && raw >= 0 && raw <= 1) {
+-			this.value = raw;
+-		} else {
+-			this.value = _value;
+-		}
+-	}
+-
+-	get value() {
+-		return this._value;
+-	}
+-
+-	set value(value: CallsDirection) {
+-		this._value = value;
+-		this._ctxMode.set(this._value === CallsDirection.Incoming ? 'showIncoming' : 'showOutgoing');
+-		this._mem.update(RichCallsDirection._key, value);
+-	}
+-}
+Index: code-editor-src/extensions/references-view/src/extension.ts
+===================================================================
+--- code-editor-src.orig/extensions/references-view/src/extension.ts
++++ code-editor-src/extensions/references-view/src/extension.ts
+@@ -4,7 +4,6 @@
+  *--------------------------------------------------------------------------------------------*/
+ 
+ import * as vscode from 'vscode';
+-import * as calls from './calls';
+ import * as references from './references';
+ import { SymbolTree, SymbolTreeInput } from './references-view';
+ import { SymbolsTree } from './tree';
+@@ -15,7 +14,6 @@ export function activate(context: vscode
+ 	const tree = new SymbolsTree();
+ 
+ 	references.register(tree, context);
+-	calls.register(tree, context);
+ 	types.register(tree, context);
+ 
+ 	function setInput(input: SymbolTreeInput<unknown>) {

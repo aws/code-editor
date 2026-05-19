@@ -1,0 +1,32 @@
+Adjust build tooling for Code Editor
+
+Allows NODE_OPTIONS override for the gulp command so build scripts can
+control memory allocation externally. Reduces mangle worker pool from 4
+to 3 to prevent OOM on constrained build hosts.
+
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -39,7 +39,7 @@
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+     "precommit": "node --experimental-strip-types build/hygiene.ts",
+-    "gulp": "node --experimental-strip-types --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
++    "gulp": "NODE_OPTIONS=\"${NODE_OPTIONS:---max-old-space-size=8192}\" node --experimental-strip-types ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron.ts",
+     "7z": "7z",
+     "update-grammars": "node build/npm/update-all-grammars.ts",
+Index: code-editor-src/build/lib/mangle/index.ts
+===================================================================
+--- code-editor-src.orig/build/lib/mangle/index.ts
++++ code-editor-src/build/lib/mangle/index.ts
+@@ -431,7 +431,7 @@ export class Mangler {
+ 		this.config = config;
+ 
+ 		this.renameWorkerPool = workerpool.pool(path.join(import.meta.dirname, 'renameWorker.ts'), {
+-			maxWorkers: 4,
++			maxWorkers: 3,
+ 			minWorkers: 'max'
+ 		});
+ 	}

@@ -70,7 +70,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPar
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
 +++ code-editor-src/src/vs/workbench/browser/parts/activitybar/activitybarPart.ts
-@@ -309,7 +309,6 @@ export class ActivityBarCompositeBar ext
+@@ -310,7 +310,6 @@ export class ActivityBarCompositeBar ext
  		// Global Composite Bar
  		if (this.globalCompositeBar) {
  			actions.push(new Separator());

@@ -8,7 +8,7 @@ Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
 +++ code-editor-src/src/vs/workbench/workbench.common.main.ts
-@@ -387,9 +387,6 @@ import './contrib/userDataSync/browser/u
+@@ -403,9 +403,6 @@ import './contrib/userDataSync/browser/u
  // User Data Profiles
  import './contrib/userDataProfile/browser/userDataProfile.contribution.js';
  

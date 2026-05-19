@@ -9,7 +9,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contribution.ts
-@@ -4,49 +4,30 @@
+@@ -4,27 +4,15 @@
   *--------------------------------------------------------------------------------------------*/
  
  import { getFontSnippets } from '../../../../base/browser/fonts.js';
@@ -28,9 +28,8 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -import { ViewPaneContainer } from '../../../browser/parts/views/viewPaneContainer.js';
  import { WorkbenchPhase, registerWorkbenchContribution2 } from '../../../common/contributions.js';
 -import { EditorExtensions, IEditorFactoryRegistry } from '../../../common/editor.js';
--import { IViewContainersRegistry, IViewsRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation, WindowVisibility } from '../../../common/views.js';
--import { ITerminalProfileService, TERMINAL_VIEW_ID, TerminalCommandId } from '../common/terminal.js';
-+import { ITerminalProfileService } from '../common/terminal.js';
+-import { IViewContainersRegistry, IViewsRegistry, Extensions as ViewContainerExtensions, ViewContainerLocation, WindowEnablement } from '../../../common/views.js';
+ import { ITerminalProfileService, TERMINAL_VIEW_ID, TerminalCommandId } from '../common/terminal.js';
  import { TerminalEditingService } from './terminalEditingService.js';
  import { registerColors } from '../common/terminalColorRegistry.js';
  import { registerTerminalConfiguration } from '../common/terminalConfiguration.js';
@@ -38,10 +37,9 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
  import './media/terminal.css';
  import './media/terminalVoice.css';
  import './media/widgets.css';
- import './media/xterm.css';
+@@ -32,22 +20,14 @@ import './media/xterm.css';
  import { RemoteTerminalBackendContribution } from './remoteTerminalBackend.js';
--import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService, TerminalDataTransfers, terminalEditorId } from './terminal.js';
-+import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService } from './terminal.js';
+ import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService, TerminalDataTransfers, terminalEditorId } from './terminal.js';
  import { registerTerminalActions } from './terminalActions.js';
 -import { setupTerminalCommands } from './terminalCommands.js';
  import { TerminalConfigurationService } from './terminalConfigurationService.js';
@@ -58,10 +56,11 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
  import { TerminalService } from './terminalService.js';
  import { TerminalTelemetryContribution } from './terminalTelemetry.js';
 -import { TerminalViewPane } from './terminalView.js';
+-import { AgentHostTerminalService, IAgentHostTerminalService } from './agentHostTerminalService.js';
  
  // Register services
  registerSingleton(ITerminalLogService, TerminalLogService, InstantiationType.Delayed);
-@@ -68,74 +49,7 @@ registerWorkbenchContribution2(TerminalT
+@@ -70,74 +50,7 @@ registerWorkbenchContribution2(TerminalT
  registerTerminalPlatformConfiguration();
  registerTerminalConfiguration(getFontSnippets);
  
@@ -108,7 +107,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -	storageId: TERMINAL_VIEW_ID,
 -	hideIfEmpty: true,
 -	order: 3,
--	windowVisibility: WindowVisibility.Both
+-	windowEnablement: WindowEnablement.Both
 -}, ViewContainerLocation.Panel, { doNotRegisterOpenCommand: true, isDefault: true });
 -Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews([{
 -	id: TERMINAL_VIEW_ID,
@@ -117,7 +116,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -	canToggleVisibility: true,
 -	canMoveView: true,
 -	ctorDescriptor: new SyncDescriptor(TerminalViewPane),
--	windowVisibility: WindowVisibility.Both,
+-	windowEnablement: WindowEnablement.Both,
 -	openCommandActionDescriptor: {
 -		id: TerminalCommandId.Toggle,
 -		mnemonicTitle: nls.localize({ key: 'miToggleIntegratedTerminal', comment: ['&& denotes a mnemonic'] }, "&&Terminal"),

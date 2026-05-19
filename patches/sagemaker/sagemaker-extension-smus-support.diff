@@ -164,8 +164,8 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
  }
  
  // Render warning message regarding auto upgrade disabled
-@@ -158,6 +167,9 @@ export function activate(context: vscode
-     // TODO: log activation of extension
+@@ -164,6 +173,9 @@ export function activate(context: vscode
+ 
      console.log('Activating Sagemaker Extension...');
  
 +    // First set smusRedirectUrl if we are in SMUS environment
@@ -174,7 +174,7 @@ Index: code-editor-src/extensions/sagemaker-extension/src/extension.ts
      // execute the get cookie command and save the data to cookies
      vscode.commands.executeCommand(PARSE_SAGEMAKER_COOKIE_COMMAND).then(r => {
  
-@@ -170,3 +182,11 @@ export function activate(context: vscode
+@@ -176,3 +188,11 @@ export function activate(context: vscode
      // render warning message regarding auto upgrade disabled
      renderExtensionAutoUpgradeDisabledNotification();
  }

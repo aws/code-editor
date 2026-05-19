@@ -81,7 +81,7 @@ Index: code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/api/common/extHost.api.impl.ts
 +++ code-editor-src/src/vs/workbench/api/common/extHost.api.impl.ts
-@@ -790,6 +790,14 @@ export function createApiFactoryAndRegis
+@@ -793,6 +793,14 @@ export function createApiFactoryAndRegis
  
  		// namespace: window
  		const window: typeof vscode.window = {
@@ -100,7 +100,7 @@ Index: code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/api/common/extHost.protocol.ts
 +++ code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
-@@ -2045,6 +2045,7 @@ export interface MainThreadWindowShape e
+@@ -2166,6 +2166,7 @@ export interface MainThreadWindowShape e
  	$getInitialState(): Promise<{ isFocused: boolean; isActive: boolean }>;
  	$openUri(uri: UriComponents, uriString: string | undefined, options: IOpenUriOptions): Promise<boolean>;
  	$asExternalUri(uri: UriComponents, options: IOpenUriOptions): Promise<UriComponents>;
@@ -108,7 +108,7 @@ Index: code-editor-src/src/vs/workbench/api/common/extHost.protocol.ts
  }
  
  export enum CandidatePortSource {
-@@ -3070,6 +3071,7 @@ export interface ExtHostWindowShape {
+@@ -3192,6 +3193,7 @@ export interface ExtHostWindowShape {
  	$onDidChangeWindowFocus(value: boolean): void;
  	$onDidChangeWindowActive(value: boolean): void;
  	$onDidChangeActiveNativeWindowHandle(handle: string | undefined): void;

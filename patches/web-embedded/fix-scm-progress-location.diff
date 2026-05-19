@@ -12,11 +12,12 @@ Index: code-editor-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
 +++ code-editor-src/src/vs/workbench/contrib/scm/browser/quickDiffModel.ts
-@@ -243,7 +243,7 @@ export class QuickDiffModel extends Disp
+@@ -245,8 +245,7 @@ export class QuickDiffModel extends Disp
  	}
  
  	private diff(): Promise<{ allChanges: QuickDiffChange[]; changes: QuickDiffChange[]; mapChanges: Map<string, number[]> } | null> {
--		return this.progressService.withProgress({ location: ProgressLocation.Scm, delay: 250 }, async () => {
+-		const location = this.environmentService.isSessionsWindow ? ProgressLocation.Window : ProgressLocation.Scm;
+-		return this.progressService.withProgress({ location, delay: 250 }, async () => {
 +		return this.progressService.withProgress({ location: ProgressLocation.Window, delay: 250 }, async () => {
  			const originalURIs = await this.getQuickDiffsPromise();
  			if (this._disposed || this._model.isDisposed() || (originalURIs.length === 0)) {

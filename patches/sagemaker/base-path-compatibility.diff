@@ -16,7 +16,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
  import { memoize } from '../../base/common/decorators.js';
  import { URI } from '../../base/common/uri.js';
  import { joinPath } from '../../base/common/resources.js';
-@@ -247,6 +248,16 @@ export interface IServerEnvironmentServi
+@@ -253,6 +254,16 @@ export interface IServerEnvironmentServi
  }
  
  export class ServerEnvironmentService extends NativeEnvironmentService implements IServerEnvironmentService {

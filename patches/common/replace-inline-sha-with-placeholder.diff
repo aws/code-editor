@@ -1,0 +1,35 @@
+Replace inline script SHA256 hashes with __INLINE_SCRIPT_SHA__ placeholders.
+
+The placeholders are resolved by update_inline_sha in prepare-src.sh after
+all patches are applied. This patch WILL be regenerated on every version
+update since upstream SHA values change with each release.
+
+@generated
+@generator: replace-inline-sha-with-placeholder.sh code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+
+Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
++++ code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
+@@ -5,7 +5,7 @@
+ 	<meta charset="UTF-8">
+ 
+ 	<meta http-equiv="Content-Security-Policy"
+-		content="default-src 'none'; script-src 'sha256-q+WTr+fBXpLLE3++yWNaxT6BTWQtsKscoeIlynBRk4E=' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
++		content="default-src 'none'; script-src 'sha256-__INLINE_SCRIPT_SHA__' 'self'; frame-src 'self'; style-src 'unsafe-inline';">
+ 
+ 	<!-- Disable pinch zooming -->
+ 	<meta name="viewport"
+Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
++++ code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
+@@ -4,7 +4,7 @@
+ 		<meta http-equiv="Content-Security-Policy" content="
+ 			default-src 'none';
+ 			child-src 'self' data: blob:;
+-			script-src 'self' 'wasm-unsafe-eval' 'sha256-cl8ijlOzEe+0GRCQNJQu2k6nUQ0fAYNYIuuKEm72JDs=' https: http://localhost:* blob:;
++			script-src 'self' 'wasm-unsafe-eval' 'sha256-__INLINE_SCRIPT_SHA__' https: http://localhost:* blob:;
+ 			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
+ 	</head>
+ 	<body>

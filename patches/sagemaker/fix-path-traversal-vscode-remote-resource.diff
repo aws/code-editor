@@ -4,14 +4,14 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 @@ -17,7 +17,7 @@ import { isSigPipeError, onUnexpectedErr
  import { isEqualOrParent } from '../../base/common/extpath.js';
- import { Disposable, DisposableStore } from '../../base/common/lifecycle.js';
+ import { Disposable, DisposableMap, DisposableStore } from '../../base/common/lifecycle.js';
  import { connectionTokenQueryName, FileAccess, getServerProductSegment, Schemas } from '../../base/common/network.js';
 -import { dirname, join } from '../../base/common/path.js';
 +import { dirname, join, resolve } from '../../base/common/path.js';
  import * as perf from '../../base/common/performance.js';
  import * as platform from '../../base/common/platform.js';
  import { createRegExp, escapeRegExpCharacters } from '../../base/common/strings.js';
-@@ -191,6 +191,17 @@ class RemoteExtensionHostAgentServer ext
+@@ -189,6 +189,17 @@ class RemoteExtensionHostAgentServer ext
  				return serveError(req, res, 400, `Bad request.`);
  			}
  

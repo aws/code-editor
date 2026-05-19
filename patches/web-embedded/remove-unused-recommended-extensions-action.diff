@@ -8,21 +8,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -76,11 +76,11 @@ import { ExtensionEditor } from './exten
- import { ExtensionEnablementWorkspaceTrustTransitionParticipant } from './extensionEnablementWorkspaceTrustTransitionParticipant.js';
- import { ExtensionRecommendationNotificationService } from './extensionRecommendationNotificationService.js';
- import { ExtensionRecommendationsService } from './extensionRecommendationsService.js';
--import { ClearLanguageAction, ConfigureWorkspaceFolderRecommendedExtensionsAction, ConfigureWorkspaceRecommendedExtensionsAction, InstallAction, InstallAnotherVersionAction, InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction } from './extensionsActions.js';
-+import { ClearLanguageAction, InstallAction, InstallAnotherVersionAction, InstallSpecificVersionOfExtensionAction, SetColorThemeAction, SetFileIconThemeAction, SetProductIconThemeAction, ToggleAutoUpdateForExtensionAction, ToggleAutoUpdatesForPublisherAction, TogglePreReleaseExtensionAction } from './extensionsActions.js';
- import { ExtensionActivationProgress } from './extensionsActivationProgress.js';
- import { ExtensionsCompletionItemsProvider } from './extensionsCompletionItemsProvider.js';
- import { ExtensionDependencyChecker } from './extensionsDependencyChecker.js';
--import { clearSearchResultsIcon, configureRecommendedIcon, extensionsViewIcon, filterIcon, installWorkspaceRecommendedIcon, refreshIcon } from './extensionsIcons.js';
-+import { clearSearchResultsIcon, extensionsViewIcon, filterIcon, installWorkspaceRecommendedIcon, refreshIcon } from './extensionsIcons.js';
- import { InstallExtensionQuickAccessProvider, ManageExtensionsQuickAccessProvider } from './extensionsQuickAccess.js';
- import { BuiltInExtensionsContext, ExtensionMarketplaceStatusUpdater, ExtensionsSearchValueContext, ExtensionsSortByContext, ExtensionsViewletViewsContribution, ExtensionsViewPaneContainer, MaliciousExtensionChecker, RecommendedExtensionsContext, SearchHasTextContext, SearchMarketplaceExtensionsContext, StatusUpdater } from './extensionsViewlet.js';
- import { ExtensionsWorkbenchService } from './extensionsWorkbenchService.js';
-@@ -1291,22 +1291,6 @@ class ExtensionsContributions extends Di
+@@ -1297,22 +1297,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({
@@ -45,7 +31,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  			id: InstallSpecificVersionOfExtensionAction.ID,
  			title: { value: InstallSpecificVersionOfExtensionAction.LABEL, original: 'Install Specific Version of Extension...' },
  			category: ExtensionsLocalizedLabel,
-@@ -1896,17 +1880,6 @@ class ExtensionsContributions extends Di
+@@ -1902,17 +1886,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({

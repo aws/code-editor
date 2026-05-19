@@ -13,45 +13,6 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/README.md
 +
 +The Code Editor Idle Extension tracks user activity and logs the last active timestamp (in UTC) to a local file. User activities monitored include file changes, text editor selection changes, and terminal interactions. Additionally, it provides an API endpoint `/api/idle` that returns the lastActiveTimestamp.
 \ No newline at end of file
-Index: code-editor-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-idle-extension/extension-browser.webpack.config.js
-@@ -0,0 +1,13 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
-+
-+export default withBrowserDefaults({
-+	context: import.meta.dirname,
-+	entry: {
-+		extension: './src/extension.ts'
-+	},
-+});
-Index: code-editor-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-idle-extension/extension.webpack.config.js
-@@ -0,0 +1,16 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import withDefaults from '../shared.webpack.config.mjs';
-+
-+export default withDefaults({
-+	context: import.meta.dirname,
-+	resolve: {
-+		mainFields: ['module', 'main']
-+	},
-+	entry: {
-+		extension: './src/extension.ts',
-+	}
-+});
 Index: code-editor-src/extensions/sagemaker-idle-extension/package.json
 ===================================================================
 --- /dev/null
@@ -213,7 +174,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  import * as url from 'url';
  import * as cookie from 'cookie';
  import * as crypto from 'crypto';
-@@ -91,11 +93,45 @@ export async function serveFile(filePath
+@@ -110,11 +112,45 @@ export async function serveFile(filePath
  	}
  }
  
@@ -259,7 +220,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  
  export class WebClientServer {
  
-@@ -133,6 +169,9 @@ export class WebClientServer {
+@@ -152,6 +188,9 @@ export class WebClientServer {
  				// callback support
  				return this._handleCallback(res);
  			}
@@ -269,7 +230,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			if (pathname.startsWith(WEB_EXTENSION_PATH) && pathname.charCodeAt(WEB_EXTENSION_PATH.length) === CharCode.Slash) {
  				// extension resource support
  				return this._handleWebExtensionResource(req, res, pathname.substring(WEB_EXTENSION_PATH.length));
-@@ -505,6 +544,33 @@ export class WebClientServer {
+@@ -525,6 +564,33 @@ export class WebClientServer {
  		});
  		return void res.end(data);
  	}
@@ -307,7 +268,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -86,6 +86,7 @@ const compilations = [
+@@ -87,6 +87,7 @@ const compilations = [
  	'extensions/search-result/tsconfig.json',
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',
@@ -319,7 +280,7 @@ Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
 --- code-editor-src.orig/build/npm/dirs.ts
 +++ code-editor-src/build/npm/dirs.ts
-@@ -43,6 +43,7 @@ export const dirs = [
+@@ -44,6 +44,7 @@ export const dirs = [
  	'extensions/php-language-features',
  	'extensions/references-view',
  	'extensions/sagemaker-extension',

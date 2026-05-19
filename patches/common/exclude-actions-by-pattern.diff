@@ -1,0 +1,63 @@
+Exclude action registrations by pattern from product.json
+
+Adds pattern-based filtering to registerAction2 and MenuRegistry.appendMenuItem.
+Actions whose command ID matches a prefix in product.json excludedActionPatterns
+are silently dropped — no command, menu entry, or keybinding is registered.
+Index: code-editor-src/src/vs/base/common/product.ts
+===================================================================
+--- code-editor-src.orig/src/vs/base/common/product.ts
++++ code-editor-src/src/vs/base/common/product.ts
+@@ -143,6 +143,7 @@ export interface IProductConfiguration {
+ 	readonly trustedExtensionUrlPublicKeys?: IStringDictionary<string[]>;
+ 	readonly trustedExtensionAuthAccess?: string[] | IStringDictionary<string[]>;
+ 	readonly excludedSettingPatterns?: readonly string[];
++	readonly excludedActionPatterns?: readonly string[];
+ 	readonly trustedMcpAuthAccess?: string[] | IStringDictionary<string[]>;
+ 	readonly inheritAuthAccountPreference?: IStringDictionary<string[]>;
+ 	readonly trustedExtensionProtocolHandlers?: readonly string[];
+Index: code-editor-src/src/vs/platform/actions/common/actions.ts
+===================================================================
+--- code-editor-src.orig/src/vs/platform/actions/common/actions.ts
++++ code-editor-src/src/vs/platform/actions/common/actions.ts
+@@ -14,6 +14,7 @@ import { CommandsRegistry, ICommandServi
+ import { ContextKeyExpr, ContextKeyExpression, IContextKeyService } from '../../contextkey/common/contextkey.js';
+ import { createDecorator, ServicesAccessor } from '../../instantiation/common/instantiation.js';
+ import { IKeybindingRule, KeybindingsRegistry } from '../../keybinding/common/keybindingsRegistry.js';
++import product from '../../product/common/product.js';
+ 
+ export interface IMenuItem {
+ 	command: ICommandAction;
+@@ -489,6 +490,9 @@ export const MenuRegistry: IMenuRegistry
+ 	}
+ 
+ 	appendMenuItem(id: MenuId, item: IMenuItem | ISubmenuItem): IDisposable {
++		if (isIMenuItem(item) && _isExcludedAction(item.command.id)) {
++			return toDisposable(() => {});
++		}
+ 		let list = this._menuItems.get(id);
+ 		if (!list) {
+ 			list = new LinkedList();
+@@ -713,6 +717,10 @@ export function registerAction2(ctor: {
+ 
+ 	const { f1, menu, keybinding, ...command } = action.desc;
+ 
++	if (_isExcludedAction(command.id)) {
++		return toDisposable(() => {});
++	}
++
+ 	if (CommandsRegistry.getCommand(command.id)) {
+ 		throw new Error(`Cannot register two commands with the same id: ${command.id}`);
+ 	}
+@@ -761,4 +769,12 @@ export function registerAction2(ctor: {
+ 		}
+ 	};
+ }
++let _excludedActionPatterns: readonly string[] | undefined;
++function _isExcludedAction(id: string): boolean {
++	if (!_excludedActionPatterns) {
++		_excludedActionPatterns = product.excludedActionPatterns ?? [];
++	}
++	return _excludedActionPatterns.some(p => id.startsWith(p));
++}
++
+ //#endregion

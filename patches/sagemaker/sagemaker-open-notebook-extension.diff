@@ -8,7 +8,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -265,6 +265,11 @@ Registry.as<IConfigurationRegistry>(Conf
+@@ -266,6 +266,11 @@ Registry.as<IConfigurationRegistry>(Conf
  				description: localize('extensionsInQuickAccess', "When enabled, extensions can be searched for via Quick Access and report issues from there."),
  				default: true
  			},
@@ -42,45 +42,6 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensionsWor
  	}
  
  	private async initialize(): Promise<void> {
-Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension-browser.webpack.config.js
-@@ -0,0 +1,13 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
-+
-+export default withBrowserDefaults({
-+	context: import.meta.dirname,
-+	entry: {
-+		extension: './src/extension.ts'
-+	},
-+});
-Index: code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-open-notebook-extension/extension.webpack.config.js
-@@ -0,0 +1,16 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import withDefaults from '../shared.webpack.config.mjs';
-+
-+export default withDefaults({
-+	context: import.meta.dirname,
-+	resolve: {
-+		mainFields: ['module', 'main']
-+	},
-+	entry: {
-+		extension: './src/extension.ts',
-+	}
-+});
 Index: code-editor-src/extensions/sagemaker-open-notebook-extension/package.json
 ===================================================================
 --- /dev/null
@@ -294,7 +255,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -88,6 +88,7 @@ const compilations = [
+@@ -89,6 +89,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
@@ -306,7 +267,7 @@ Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
 --- code-editor-src.orig/build/npm/dirs.ts
 +++ code-editor-src/build/npm/dirs.ts
-@@ -45,6 +45,7 @@ export const dirs = [
+@@ -46,6 +46,7 @@ export const dirs = [
  	'extensions/sagemaker-extension',
  	'extensions/sagemaker-idle-extension',
  	'extensions/sagemaker-terminal-crash-mitigation',

@@ -1,0 +1,70 @@
+Remove unused dependencies (kerberos, @github/copilot)
+
+Removes dependencies that are not needed for Code Editor:
+- kerberos: cannot compile on the Brazil fleet
+- kerberos node-addon-api override: no longer needed without kerberos
+- @github/copilot: Copilot features are disabled in Code Editor
+
+@generated
+@generator: scripts/patches/apply-package-config.sh
+
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -83,7 +83,6 @@
+   },
+   "dependencies": {
+     "@anthropic-ai/sdk": "^0.82.0",
+-    "@github/copilot": "1.0.39",
+     "@github/copilot-sdk": "^0.3.0",
+     "@microsoft/1ds-core-js": "^3.2.13",
+     "@microsoft/1ds-post-js": "^3.2.13",
+@@ -126,7 +125,6 @@
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+     "katex": "^0.16.22",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.8",
+     "native-is-elevated": "0.9.0",
+     "native-keymap": "^3.3.5",
+@@ -247,9 +245,6 @@
+   },
+   "overrides": {
+     "node-gyp-build": "4.8.1",
+-    "kerberos@2.1.1": {
+-      "node-addon-api": "7.1.0"
+-    },
+     "serialize-javascript": "^7.0.3",
+     "ssh2": {
+       "cpu-features": "0.0.0"
+Index: code-editor-src/remote/package.json
+===================================================================
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
+@@ -3,7 +3,6 @@
+   "version": "0.0.0",
+   "private": true,
+   "dependencies": {
+-    "@github/copilot": "1.0.39",
+     "@github/copilot-sdk": "^0.3.0",
+     "@microsoft/1ds-core-js": "^3.2.13",
+     "@microsoft/1ds-post-js": "^3.2.13",
+@@ -36,7 +35,6 @@
+     "https-proxy-agent": "^7.0.2",
+     "jschardet": "3.1.4",
+     "katex": "^0.16.22",
+-    "kerberos": "2.1.1",
+     "minimist": "^1.2.8",
+     "node-pty": "^1.2.0-beta.12",
+     "ssh2": "^1.16.0",
+@@ -50,9 +48,6 @@
+   },
+   "overrides": {
+     "node-gyp-build": "4.8.1",
+-    "kerberos@2.1.1": {
+-      "node-addon-api": "7.1.0"
+-    },
+     "ssh2": {
+       "cpu-features": "0.0.0"
+     }

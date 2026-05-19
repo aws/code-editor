@@ -44,7 +44,7 @@ Index: code-editor-src/src/vs/workbench/services/environment/browser/environment
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/services/environment/browser/environmentService.ts
 +++ code-editor-src/src/vs/workbench/services/environment/browser/environmentService.ts
-@@ -227,7 +227,7 @@ export class BrowserWorkbenchEnvironment
+@@ -230,7 +230,7 @@ export class BrowserWorkbenchEnvironment
  
  	@memoize
  	get webviewExternalEndpoint(): string {
@@ -57,7 +57,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts
 +++ code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -364,6 +364,7 @@ export class WebClientServer {
+@@ -384,6 +384,7 @@ export class WebClientServer {
  		const workbenchWebConfiguration = {
  			remoteAuthority,
  			userDataPath: this._environmentService.userDataPath,
@@ -69,7 +69,7 @@ Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/webview/browser/pre/index.html
 +++ code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
-@@ -370,6 +370,12 @@
+@@ -332,6 +332,12 @@
  
  				const hostname = location.hostname;
  

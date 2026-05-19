@@ -1,0 +1,30 @@
+Skip mangling for dev builds
+
+Use compileBuildWithoutManglingTask for non-minified (dev) builds of
+vscode-reh and vscode-reh-web targets. Mangling is only needed for
+production (-min) builds and is both memory-intensive and slow.
+
+The import is added as a separate statement to avoid conflicts when
+upstream adds new imports from gulpfile.compile.ts.
+
+Index: code-editor-src/build/gulpfile.reh.ts
+===================================================================
+--- code-editor-src.orig/build/gulpfile.reh.ts
++++ code-editor-src/build/gulpfile.reh.ts
+@@ -27,6 +27,7 @@ import * as fs from 'fs';
+ import glob from 'glob';
+ import { promisify } from 'util';
+ import rceditCallback from 'rcedit';
++import { compileBuildWithoutManglingTask } from './gulpfile.compile.ts';
+ import { compileBuildWithManglingTask } from './gulpfile.compile.ts';
+ import { cleanExtensionsBuildTask, compileNonNativeExtensionsBuildTask, compileNativeExtensionsBuildTask, compileExtensionMediaBuildTask } from './gulpfile.extensions.ts';
+ import { vscodeWebResourceIncludes, createVSCodeWebFileContentMapper } from './gulpfile.vscode.web.ts';
+@@ -548,7 +549,7 @@ function tweakProductForServerWeb(produc
+ 			gulp.task(serverTaskCI);
+ 
+ 			const serverTask = task.define(`vscode-${type}${dashed(platform)}${dashed(arch)}${dashed(minified)}`, task.series(
+-				compileBuildWithManglingTask,
++				minified ? compileBuildWithManglingTask : compileBuildWithoutManglingTask,
+ 				cleanExtensionsBuildTask,
+ 				compileNonNativeExtensionsBuildTask,
+ 				compileExtensionMediaBuildTask,
