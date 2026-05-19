@@ -17,7 +17,7 @@ Index: code-editor-src/src/vs/workbench/services/extensions/common/extensions.ts
 -	if (!extension.enabledApiProposals) {
 -		return false;
 -	}
--	return extension.enabledApiProposals.includes(proposal);
+-	return true;// extension.enabledApiProposals.includes(proposal);
 +	return true;
  }
  

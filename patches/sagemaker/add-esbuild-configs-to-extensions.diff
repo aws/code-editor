@@ -1,0 +1,302 @@
+Add esbuild build configs to SageMaker extensions
+
+Since Code-OSS 1.116, extensions are compiled via esbuild during the
+build pipeline. Extensions without an esbuild.mts config use the
+fromLocalNormal path which only packages pre-existing files (via
+vsce.listFiles). Since our extensions have out/** in .vscodeignore,
+the compiled output was never included in the build artifact.
+
+This adds esbuild.mts to each SageMaker extension so they are properly
+compiled and bundled during the gulp build. The build system
+automatically rewrites package.json main from ./out/extension to
+./dist/extension for esbuild-bundled extensions.
+
+Also adds typeRoots and types:["node"] to tsconfigs so tsgo type
+checking passes.
+
+Add esbuild build configs to SageMaker extensions
+
+Since Code-OSS 1.116, extensions are compiled via esbuild during the
+build pipeline. Extensions without an esbuild.mts config use the
+fromLocalNormal path which only packages pre-existing files (via
+vsce.listFiles). Since our extensions have out/** in .vscodeignore,
+the compiled output was never included in the build artifact.
+
+This adds esbuild.mts to each SageMaker extension so they are properly
+compiled and bundled during the gulp build. The build system
+automatically rewrites package.json main from ./out/extension to
+./dist/extension for esbuild-bundled extensions.
+
+Index: code-editor-src/extensions/post-startup-notifications/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/post-startup-notifications/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-extension/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-extension/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-extensions-sync/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-extensions-sync/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-idle-extension/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-idle-extension/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/esbuild.mts
+===================================================================
+--- /dev/null
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/esbuild.mts
+@@ -0,0 +1,14 @@
++import * as path from 'node:path';
++import { run } from '../esbuild-extension-common.mts';
++
++const srcDir = path.join(import.meta.dirname, 'src');
++const outDir = path.join(import.meta.dirname, 'dist');
++
++run({
++	platform: 'node',
++	entryPoints: {
++		'extension': path.join(srcDir, 'extension.ts'),
++	},
++	srcDir,
++	outdir: outDir,
++}, process.argv);
+Index: code-editor-src/extensions/sagemaker-extension/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-extension/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"src/**/*",
+Index: code-editor-src/extensions/sagemaker-extensions-sync/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-extensions-sync/tsconfig.json
++++ code-editor-src/extensions/sagemaker-extensions-sync/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"../sagemaker-extensions-sync/src/**/*",
+Index: code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-idle-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-idle-extension/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"../sagemaker-idle-extension/src/**/*",
+Index: code-editor-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-open-notebook-extension/tsconfig.json
++++ code-editor-src/extensions/sagemaker-open-notebook-extension/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"../sagemaker-open-notebook-extension/src/**/*",
+Index: code-editor-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
++++ code-editor-src/extensions/sagemaker-terminal-crash-mitigation/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"../sagemaker-terminal-crash-mitigation/src/**/*",
+Index: code-editor-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/sagemaker-ui-dark-theme/tsconfig.json
++++ code-editor-src/extensions/sagemaker-ui-dark-theme/tsconfig.json
+@@ -2,7 +2,13 @@
+ 	"extends": "../tsconfig.base.json",
+ 	"compilerOptions": {
+ 		"outDir": "./out",
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"typeRoots": [
++			"../../node_modules/@types"
++		],
++		"types": [
++			"node"
++		]
+ 	},
+ 	"include": [
+ 		"src/**/*",
+Index: code-editor-src/extensions/post-startup-notifications/tsconfig.json
+===================================================================
+--- code-editor-src.orig/extensions/post-startup-notifications/tsconfig.json
++++ code-editor-src/extensions/post-startup-notifications/tsconfig.json
+@@ -12,13 +12,18 @@
+ 		"strict": true,
+ 		"isolatedModules": true,
+ 		"typeRoots": [
+-			"./node_modules/@types"
++			"./node_modules/@types",
++			"../../node_modules/@types"
+ 		],
+-		"skipLibCheck": true
++		"skipLibCheck": true,
++		"types": [
++			"node"
++		]
+ 	},
+ 	"exclude": [
+ 		"node_modules",
+-		".vscode-test"
++		".vscode-test",
++		"src/test"
+ 	],
+ 	"include": [
+ 		"src/**/*",

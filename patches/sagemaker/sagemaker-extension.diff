@@ -337,45 +337,6 @@ Index: code-editor-src/extensions/sagemaker-extension/tsconfig.json
 +		"../../src/vscode-dts/vscode.d.ts"
 +	]
 +}
-Index: code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-extension/extension-browser.webpack.config.js
-@@ -0,0 +1,13 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
-+
-+export default withBrowserDefaults({
-+	context: import.meta.dirname,
-+	entry: {
-+		extension: './src/extension.ts'
-+	},
-+});
-Index: code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-extension/extension.webpack.config.js
-@@ -0,0 +1,16 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import withDefaults from '../shared.webpack.config.mjs';
-+
-+export default withDefaults({
-+	context: import.meta.dirname,
-+	resolve: {
-+		mainFields: ['module', 'main']
-+	},
-+	entry: {
-+		extension: './src/extension.ts',
-+	}
-+});
 Index: code-editor-src/extensions/sagemaker-extension/src/constant.ts
 ===================================================================
 --- /dev/null
@@ -458,7 +419,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -85,6 +85,7 @@ const compilations = [
+@@ -86,6 +86,7 @@ const compilations = [
  	'extensions/references-view/tsconfig.json',
  	'extensions/search-result/tsconfig.json',
  	'extensions/simple-browser/tsconfig.json',
@@ -470,7 +431,7 @@ Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
 --- code-editor-src.orig/build/npm/dirs.ts
 +++ code-editor-src/build/npm/dirs.ts
-@@ -42,6 +42,7 @@ export const dirs = [
+@@ -43,6 +43,7 @@ export const dirs = [
  	'extensions/npm',
  	'extensions/php-language-features',
  	'extensions/references-view',

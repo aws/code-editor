@@ -7,7 +7,7 @@ Index: code-editor-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.vscode.web.ts
 +++ code-editor-src/build/gulpfile.vscode.web.ts
-@@ -89,7 +89,10 @@ export const vscodeWebResourceIncludes =
+@@ -90,7 +90,10 @@ export const vscodeWebResourceIncludes =
  	'out-build/vs/editor/common/languages/injections/*.scm',
  
  	// Extension Host Worker

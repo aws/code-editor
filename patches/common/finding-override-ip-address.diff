@@ -6,13 +6,13 @@ Remove when upstream Code-OSS updates ip-address to >= 10.1.1.
 @generator: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override 'global:ip-address=^10.1.1' --override 'remote/package.json@global:ip-address=^10.1.1'
 @override-package: ip-address@^10.1.1
 
-Index: b/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
-@@ -253,7 +253,8 @@
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -251,7 +251,8 @@
+       "cpu-features": "0.0.0"
      },
-     "lodash-es": "^4.18.0",
      "follow-redirects": "^1.16.0",
 -    "uuid": "^14.0.0"
 +    "uuid": "^14.0.0",
@@ -20,14 +20,14 @@ Index: b/package.json
    },
    "repository": {
      "type": "git",
-Index: b/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- a/remote/package.json
-+++ b/remote/package.json
-@@ -47,6 +47,7 @@
-     "picomatch": "^4.0.4",
-     "lodash-es": "^4.18.0",
-     "follow-redirects": "^1.16.0",
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
+@@ -51,6 +51,7 @@
+     "ssh2": {
+       "cpu-features": "0.0.0"
+     },
 -    "uuid": "^14.0.0"
 +    "uuid": "^14.0.0",
 +    "ip-address": "^10.1.1"

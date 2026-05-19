@@ -1,0 +1,297 @@
+Disable GitHub Copilot features and AI telemetry
+
+Removes the built-in Copilot extension from the build pipeline entirely:
+- Removes compileCopilotExtensionBuildTask and ripgrep shim from gulpfile.reh.ts
+- Removes extensions/copilot from build/npm/dirs.ts (no npm install)
+- Removes copilot-related npm scripts (watch-copilot, copilot:setup, etc.)
+
+Also: inlines IExperimentationFilterProvider to remove tas-client dependency,
+disables Copilot extension version tracking, forces chat entitlement to hidden,
+defaults AI edit telemetry stats to false, and marks mermaid-chat-features as
+not included.
+
+Index: code-editor-src/extensions/mermaid-chat-features/package.json
+===================================================================
+--- code-editor-src.orig/extensions/mermaid-chat-features/package.json
++++ code-editor-src/extensions/mermaid-chat-features/package.json
+@@ -75,7 +75,8 @@
+           "type": "boolean",
+           "default": true,
+           "description": "%config.enabled.description%",
+-          "scope": "application"
++          "scope": "application",
++          "included": false
+         }
+       }
+     },
+Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
+@@ -80,7 +80,7 @@ const chatViewDescriptor: IViewDescripto
+ 		)
+ 	)
+ };
+-Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry).registerViews([chatViewDescriptor], chatViewContainer);
++// Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry).registerViews([chatViewDescriptor], chatViewContainer);
+ 
+ const chatParticipantExtensionPoint = extensionsRegistry.ExtensionsRegistry.registerExtensionPoint<IRawChatParticipantContribution[]>({
+ 	extensionPoint: 'chatParticipants',
+Index: code-editor-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
++++ code-editor-src/src/vs/workbench/contrib/editTelemetry/browser/editTelemetryContribution.ts
+@@ -39,7 +39,7 @@ export class EditTelemetryContribution e
+ 			r.store.add(instantiationService.createInstance(EditTrackingFeature, workspace.read(r), annotatedDocuments.read(r)));
+ 		}));
+ 
+-		const aiStatsEnabled = observableConfigValue(AI_STATS_SETTING_ID, true, configurationService);
++		const aiStatsEnabled = observableConfigValue(AI_STATS_SETTING_ID, false, configurationService);
+ 		this._register(autorun(r => {
+ 			const enabled = aiStatsEnabled.read(r);
+ 			const aiDisabled = chatEntitlementService.sentimentObs.read(r).hidden;
+Index: code-editor-src/src/vs/workbench/services/assignment/common/assignmentFilters.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/services/assignment/common/assignmentFilters.ts
++++ code-editor-src/src/vs/workbench/services/assignment/common/assignmentFilters.ts
+@@ -3,8 +3,14 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import type { IExperimentationFilterProvider } from 'tas-client';
+-import { Emitter } from '../../../../base/common/event.js';
++import { Emitter, Event } from '../../../../base/common/event.js';
++
++// Inline interface to avoid tas-client dependency
++interface IExperimentationFilterProvider {
++	getFilterValue(filter: string): string | null;
++	getFilters(): Map<string, string | null>;
++	onDidChangeFilters?: Event<void>;
++}
+ import { Disposable } from '../../../../base/common/lifecycle.js';
+ import { getInternalOrg } from '../../../../platform/assignment/common/assignment.js';
+ import { IDefaultAccountService } from '../../../../platform/defaultAccount/common/defaultAccount.js';
+@@ -101,11 +107,12 @@ export class CopilotAssignmentFilterProv
+ 		this.copilotIsSn = this._storageService.get(StorageVersionKeys.CopilotIsSn, StorageScope.PROFILE);
+ 		this.copilotIsFcv1 = this._storageService.get(StorageVersionKeys.CopilotIsFcv1, StorageScope.PROFILE);
+ 
+-		this._register(this._extensionService.onDidChangeExtensionsStatus(extensionIdentifiers => {
+-			if (extensionIdentifiers.some(identifier => ExtensionIdentifier.equals(identifier, 'github.copilot') || ExtensionIdentifier.equals(identifier, 'github.copilot-chat'))) {
+-				this.updateExtensionVersions();
+-			}
+-		}));
++		// Disabled: GitHub Copilot extensions are not included in this build
++		// this._register(this._extensionService.onDidChangeExtensionsStatus(extensionIdentifiers => {
++		// 	if (extensionIdentifiers.some(identifier => ExtensionIdentifier.equals(identifier, 'github.copilot') || ExtensionIdentifier.equals(identifier, 'github.copilot-chat'))) {
++		// 		this.updateExtensionVersions();
++		// 	}
++		// }));
+ 
+ 		this._register(this._chatEntitlementService.onDidChangeEntitlement(() => {
+ 			this.updateCopilotEntitlementInfo();
+@@ -115,45 +122,15 @@ export class CopilotAssignmentFilterProv
+ 			this.updateCopilotTokenInfo();
+ 		}));
+ 
+-		this.updateExtensionVersions();
++		// Disabled: GitHub Copilot extensions are not included in this build
++		// this.updateExtensionVersions();
+ 		this.updateCopilotEntitlementInfo();
+ 		this.updateCopilotTokenInfo();
+ 	}
+ 
+ 	private async updateExtensionVersions() {
+-		let copilotExtensionVersion;
+-		let copilotChatExtensionVersion;
+-		let copilotCompletionsVersion;
+-
+-		try {
+-			const [copilotExtension, copilotChatExtension] = await Promise.all([
+-				this._extensionService.getExtension('github.copilot'),
+-				this._extensionService.getExtension('github.copilot-chat'),
+-			]);
+-
+-			copilotExtensionVersion = copilotExtension?.version;
+-			copilotChatExtensionVersion = copilotChatExtension?.version;
+-			copilotCompletionsVersion = (copilotChatExtension as typeof copilotChatExtension & { completionsCoreVersion?: string })?.completionsCoreVersion;
+-		} catch (error) {
+-			this._logService.error('Failed to update extension version assignments', error);
+-		}
+-
+-		if (this.copilotCompletionsVersion === copilotCompletionsVersion &&
+-			this.copilotExtensionVersion === copilotExtensionVersion &&
+-			this.copilotChatExtensionVersion === copilotChatExtensionVersion) {
+-			return;
+-		}
+-
+-		this.copilotExtensionVersion = copilotExtensionVersion;
+-		this.copilotChatExtensionVersion = copilotChatExtensionVersion;
+-		this.copilotCompletionsVersion = copilotCompletionsVersion;
+-
+-		this._storageService.store(StorageVersionKeys.CopilotExtensionVersion, this.copilotExtensionVersion, StorageScope.PROFILE, StorageTarget.MACHINE);
+-		this._storageService.store(StorageVersionKeys.CopilotChatExtensionVersion, this.copilotChatExtensionVersion, StorageScope.PROFILE, StorageTarget.MACHINE);
+-		this._storageService.store(StorageVersionKeys.CompletionsVersion, this.copilotCompletionsVersion, StorageScope.PROFILE, StorageTarget.MACHINE);
+-
+-		// Notify that the filters have changed.
+-		this._onDidChangeFilters.fire();
++		// Disabled: GitHub Copilot extensions are not included in this build
++		return;
+ 	}
+ 
+ 	private updateCopilotEntitlementInfo() {
+Index: code-editor-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
++++ code-editor-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
+@@ -1206,14 +1206,11 @@ export class ChatEntitlementContext exte
+ 	private _forceHidden = false;
+ 
+ 	private withConfiguration(state: IChatEntitlementContextState): IChatEntitlementContextState {
+-		if (this._forceHidden || this.configurationService.getValue(ChatEntitlementContext.CHAT_DISABLED_CONFIGURATION_KEY) === true) {
+-			return {
+-				...state,
+-				hidden: true
+-			};
+-		}
+-
+-		return state;
++		// Always hide AI features in this build
++		return {
++			...state,
++			hidden: true
++		};
+ 	}
+ 
+ 	setForceHidden(hidden: boolean): void {
+Index: code-editor-src/build/gulpfile.reh.ts
+===================================================================
+--- code-editor-src.orig/build/gulpfile.reh.ts
++++ code-editor-src/build/gulpfile.reh.ts
+@@ -28,13 +28,13 @@ import glob from 'glob';
+ import { promisify } from 'util';
+ import rceditCallback from 'rcedit';
+ import { compileBuildWithManglingTask } from './gulpfile.compile.ts';
+-import { cleanExtensionsBuildTask, compileNonNativeExtensionsBuildTask, compileNativeExtensionsBuildTask, compileExtensionMediaBuildTask, compileCopilotExtensionBuildTask } from './gulpfile.extensions.ts';
++import { cleanExtensionsBuildTask, compileNonNativeExtensionsBuildTask, compileNativeExtensionsBuildTask, compileExtensionMediaBuildTask } from './gulpfile.extensions.ts';
+ import { vscodeWebResourceIncludes, createVSCodeWebFileContentMapper } from './gulpfile.vscode.web.ts';
+ import * as cp from 'child_process';
+ import log from 'fancy-log';
+ import buildfile from './buildfile.ts';
+ import { fetchUrls, fetchGithub } from './lib/fetch.ts';
+-import { getCopilotExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib/copilot.ts';
++// Copilot build support removed
+ import jsonEditor from 'gulp-json-editor';
+ import through from 'through2';
+ 
+@@ -355,7 +355,7 @@ function packageTask(type: string, platf
+ 			.pipe(filter(['**', '!**/package-lock.json', '!**/*.{js,css}.map']))
+ 			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, '.moduleignore')))
+ 			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, `.moduleignore.${process.platform}`)))
+-			.pipe(filter(getCopilotExcludeFilter(platform, arch)))
++			
+ 			.pipe(jsFilter)
+ 			.pipe(util.stripSourceMappingURL())
+ 			.pipe(jsFilter.restore);
+@@ -482,16 +482,6 @@ function patchWin32DependenciesTask(dest
+ 	};
+ }
+ 
+-function prepareCopilotRipgrepShimTaskREH(platform: string, arch: string, destinationFolderName: string) {
+-	return async () => {
+-		const outputDir = path.join(BUILD_ROOT, destinationFolderName);
+-		const nodeModulesDir = path.join(outputDir, 'node_modules');
+-
+-		const builtInCopilotExtensionDir = path.join(outputDir, 'extensions', 'copilot');
+-		prepareBuiltInCopilotRipgrepShim(platform, arch, builtInCopilotExtensionDir, nodeModulesDir);
+-	};
+-}
+-
+ /**
+  * @param product The parsed product.json file contents
+  */
+@@ -548,7 +538,6 @@ function tweakProductForServerWeb(produc
+ 				gulp.task(`node-${platform}-${arch}`) as task.Task,
+ 				util.rimraf(path.join(BUILD_ROOT, destinationFolderName)),
+ 				packageTask(type, platform, arch, sourceFolderName, destinationFolderName),
+-				prepareCopilotRipgrepShimTaskREH(platform, arch, destinationFolderName)
+ 			];
+ 
+ 			if (platform === 'win32') {
+@@ -562,7 +551,6 @@ function tweakProductForServerWeb(produc
+ 				compileBuildWithManglingTask,
+ 				cleanExtensionsBuildTask,
+ 				compileNonNativeExtensionsBuildTask,
+-				compileCopilotExtensionBuildTask,
+ 				compileExtensionMediaBuildTask,
+ 				minified ? minifyTask : bundleTask,
+ 				serverTaskCI
+Index: code-editor-src/build/npm/dirs.ts
+===================================================================
+--- code-editor-src.orig/build/npm/dirs.ts
++++ code-editor-src/build/npm/dirs.ts
+@@ -15,7 +15,6 @@ export const dirs = [
+ 	'build/vite',
+ 	'extensions',
+ 	'extensions/configuration-editing',
+-	'extensions/copilot',
+ 	'extensions/css-language-features',
+ 	'extensions/css-language-features/server',
+ 	'extensions/debug-auto-launch',
+Index: code-editor-src/build/npm/postinstall.ts
+===================================================================
+--- code-editor-src.orig/build/npm/postinstall.ts
++++ code-editor-src/build/npm/postinstall.ts
+@@ -330,21 +330,6 @@ async function main() {
+ 	if (claudeSkillsLinkType !== 'existing') {
+ 		log('.', `Created ${claudeSkillsLinkType} .claude/skills -> .agents/skills`);
+ 	}
+-
+-	// Temporary: patch @github/copilot-sdk session.js to fix ESM import
+-	// (missing .js extension on vscode-jsonrpc/node). Fixed upstream in v0.1.32.
+-	// TODO: Remove once @github/copilot-sdk is updated to >=0.1.32
+-	for (const dir of ['', 'remote']) {
+-		const sessionFile = path.join(root, dir, 'node_modules', '@github', 'copilot-sdk', 'dist', 'session.js');
+-		if (fs.existsSync(sessionFile)) {
+-			const content = fs.readFileSync(sessionFile, 'utf8');
+-			const patched = content.replace(/from "vscode-jsonrpc\/node"/g, 'from "vscode-jsonrpc/node.js"');
+-			if (content !== patched) {
+-				fs.writeFileSync(sessionFile, patched);
+-				log(dir || '.', 'Patched @github/copilot-sdk session.js (vscode-jsonrpc ESM import fix)');
+-			}
+-		}
+-	}
+ }
+ 
+ main().catch(err => {
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -21,7 +21,7 @@
+     "postinstall": "node build/npm/postinstall.ts",
+     "compile": "npm run gulp compile",
+     "compile-check-ts-native": "tsgo --project ./src/tsconfig.json --noEmit --skipLibCheck",
+-    "watch": "npm-run-all2 -lp watch-client-transpile watch-client watch-extensions watch-copilot",
++    "watch": "npm-run-all2 -lp watch-client-transpile watch-client watch-extensions",
+     "watchd": "deemon npm run watch",
+     "watch-webd": "deemon npm run watch-web",
+     "kill-watchd": "deemon --kill npm run watch",
+@@ -38,9 +38,6 @@
+     "watch-extensions": "npm run gulp watch-extensions watch-extension-media",
+     "watch-extensionsd": "deemon npm run watch-extensions",
+     "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
+-    "watch-copilot": "npm --prefix extensions/copilot run watch",
+-    "watch-copilotd": "deemon npm run watch-copilot",
+-    "kill-watch-copilotd": "deemon --kill npm run watch-copilot",
+     "precommit": "node --experimental-strip-types build/hygiene.ts",
+     "gulp": "node --experimental-strip-types --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
+     "electron": "node build/lib/electron.ts",
+@@ -79,8 +76,6 @@
+     "perf": "node scripts/code-perf.js",
+     "perf:chat": "node scripts/chat-simulation/test-chat-perf-regression.js",
+     "perf:chat-leak": "node scripts/chat-simulation/test-chat-mem-leaks.js",
+-    "copilot:setup": "npm --prefix extensions/copilot run setup",
+-    "copilot:get_token": "npm --prefix extensions/copilot run get_token",
+     "update-build-ts-version": "npm install -D typescript@next && npm install -D @typescript/native-preview && (cd build && npm run typecheck)",
+     "install-local-component-explorer": "npm install ../vscode-packages/js-component-explorer/dist/vscode-component-explorer-0.1.0.tgz ../vscode-packages/js-component-explorer/dist/vscode-component-explorer-cli-0.1.0.tgz --no-save && cd build/rspack && npm install ../../../vscode-packages/js-component-explorer/dist/vscode-component-explorer-webpack-plugin-0.1.0.tgz --no-save && cd ../vite && npm install ../../../vscode-packages/js-component-explorer/dist/vscode-component-explorer-vite-plugin-0.1.0.tgz --no-save",
+     "symlink-local-component-explorer": "npm install ../vscode-packages/js-component-explorer/packages/explorer ../vscode-packages/js-component-explorer/packages/cli --no-save && cd build/rspack && npm install ../../../vscode-packages/js-component-explorer/packages/webpack-plugin ../../../vscode-packages/js-component-explorer/packages/explorer --no-save && cd ../vite && npm install ../../../vscode-packages/js-component-explorer/packages/vite-plugin ../../../vscode-packages/js-component-explorer/packages/explorer --no-save",

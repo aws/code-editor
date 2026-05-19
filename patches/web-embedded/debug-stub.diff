@@ -1,0 +1,58 @@
+Replace debug.contribution.ts with minimal stub for web-embedded
+
+Instead of patching the 700+ line debug.contribution.ts (which conflicts
+on every upstream update), create a minimal stub file that only registers
+the essential services and view container. The original file is left
+untouched but unreferenced (dead code, not compiled into the bundle).
+
+The stub keeps:
+- registerSingleton(IDebugService) — injected by 12+ other modules
+- registerSingleton(IDebugVisualizerService) — used by visualizer consumers
+- registerViewContainer — extensions contribute debug views here
+- registerColors — debug color tokens used by themes
+
+Index: code-editor-src/src/vs/workbench/contrib/debug/browser/debug-stub.contribution.ts
+===================================================================
+--- /dev/null
++++ code-editor-src/src/vs/workbench/contrib/debug/browser/debug-stub.contribution.ts
+@@ -0,0 +1,27 @@
++/*---------------------------------------------------------------------------------------------
++ *  Copyright (c) Microsoft Corporation. All rights reserved.
++ *  Licensed under the MIT License. See License.txt in the project root for license information.
++ *--------------------------------------------------------------------------------------------*/
++
++import * as nls from '../../../../nls.js';
++import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
++import { InstantiationType, registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
++import { Registry } from '../../../../platform/registry/common/platform.js';
++import { IViewContainersRegistry, ViewContainerLocation, Extensions as ViewExtensions } from '../../../common/views.js';
++import { IDebugService, VIEWLET_ID } from '../common/debug.js';
++import { DebugVisualizerService, IDebugVisualizerService } from '../common/debugVisualizers.js';
++import { registerColors } from './debugColors.js';
++import * as icons from './debugIcons.js';
++import { DebugService } from './debugService.js';
++import { DebugViewPaneContainer } from './debugViewlet.js';
++import './media/debug.contribution.css';
++
++registerColors();
++registerSingleton(IDebugService, DebugService, InstantiationType.Delayed);
++registerSingleton(IDebugVisualizerService, DebugVisualizerService, InstantiationType.Delayed);
++
++Registry.as<IViewContainersRegistry>(ViewExtensions.ViewContainersRegistry).registerViewContainer({
++	icon: icons.debugViewIcon,
++	ctorDescriptor: new SyncDescriptor(DebugViewPaneContainer),
++	storageId: VIEWLET_ID,
++	hideIfEmpty: true,
+Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
++++ code-editor-src/src/vs/workbench/workbench.common.main.ts
+@@ -270,7 +270,7 @@ import './contrib/scm/browser/quickDiff.
+ import './contrib/scm/browser/scm.service.contribution.js';
+ 
+ // Debug
+-import './contrib/debug/browser/debug.contribution.js';
++import './contrib/debug/browser/debug-stub.contribution.js';
+ import './contrib/debug/browser/debugEditorContribution.js';
+ import './contrib/debug/browser/breakpointEditorContribution.js';
+ import './contrib/debug/browser/callStackEditorContribution.js';

@@ -1,29 +1,33 @@
-Override uuid to ^14.0.0
+Override uuid to ^14.0.0.
 
-Index: b/package.json
+@generated
+@generator: apply-override.sh --patch common/override-uuid-ghsa-w5hq.diff --header 'Override uuid to ^14.0.0.' --override 'global:uuid=^14.0.0' --override 'remote/package.json@global:uuid=^14.0.0'
+@override-package: uuid@^14.0.0
+
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
-@@ -254,7 +254,8 @@
-       "picomatch": "^2.3.2"
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -250,7 +250,8 @@
+     "ssh2": {
+       "cpu-features": "0.0.0"
      },
-     "lodash-es": "^4.18.0",
 -    "follow-redirects": "^1.16.0"
 +    "follow-redirects": "^1.16.0",
 +    "uuid": "^14.0.0"
    },
    "repository": {
      "type": "git",
-Index: b/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- a/remote/package.json
-+++ b/remote/package.json
-@@ -47,6 +47,7 @@
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
+@@ -50,6 +50,7 @@
      "node-gyp-build": "4.8.1",
-     "picomatch": "^4.0.4",
-     "lodash-es": "^4.18.0",
--    "follow-redirects": "^1.16.0"
-+    "follow-redirects": "^1.16.0",
+     "ssh2": {
+       "cpu-features": "0.0.0"
+-    }
++    },
 +    "uuid": "^14.0.0"
    }
  }

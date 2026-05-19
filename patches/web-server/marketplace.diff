@@ -14,7 +14,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts
 +++ code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -338,14 +338,7 @@ export class WebClientServer {
+@@ -358,14 +358,7 @@ export class WebClientServer {
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
  			rootEndpoint: base,
  			embedderIdentifier: 'server-distro',

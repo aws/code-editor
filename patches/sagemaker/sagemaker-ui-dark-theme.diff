@@ -26,45 +26,6 @@ Index: code-editor-src/extensions/sagemaker-ui-dark-theme/README.md
 +++ code-editor-src/extensions/sagemaker-ui-dark-theme/README.md
 @@ -0,0 +1 @@
 +# SageMaker UI Dark Theme
-Index: code-editor-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js
-@@ -0,0 +1,13 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import { browser as withBrowserDefaults } from '../shared.webpack.config.mjs';
-+
-+export default withBrowserDefaults({
-+	context: import.meta.dirname,
-+	entry: {
-+		extension: './src/extension.ts'
-+	},
-+});
-Index: code-editor-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
-===================================================================
---- /dev/null
-+++ code-editor-src/extensions/sagemaker-ui-dark-theme/extension.webpack.config.js
-@@ -0,0 +1,16 @@
-+/*---------------------------------------------------------------------------------------------
-+ *  Copyright Amazon.com Inc. or its affiliates. All rights reserved.
-+ *  Licensed under the MIT License. See License.txt in the project root for license information.
-+ *--------------------------------------------------------------------------------------------*/
-+// @ts-check
-+import withDefaults from '../shared.webpack.config.mjs';
-+
-+export default withDefaults({
-+	context: import.meta.dirname,
-+	resolve: {
-+		mainFields: ['module', 'main']
-+	},
-+	entry: {
-+		extension: './src/extension.ts',
-+	}
-+});
 Index: code-editor-src/extensions/sagemaker-ui-dark-theme/src/extension.ts
 ===================================================================
 --- /dev/null
@@ -374,7 +335,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -89,6 +89,7 @@ const compilations = [
+@@ -90,6 +90,7 @@ const compilations = [
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
@@ -386,7 +347,7 @@ Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
 --- code-editor-src.orig/build/npm/dirs.ts
 +++ code-editor-src/build/npm/dirs.ts
-@@ -46,6 +46,7 @@ export const dirs = [
+@@ -47,6 +47,7 @@ export const dirs = [
  	'extensions/sagemaker-idle-extension',
  	'extensions/sagemaker-terminal-crash-mitigation',
  	'extensions/sagemaker-open-notebook-extension',

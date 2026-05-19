@@ -1,58 +1,12 @@
-Rebrand Code OSS to Code Editor
+Rebrand Code OSS to Code Editor (TypeScript support)
 
-Renames the product from 'Code - OSS' to 'Code Editor' across product.json,
-application names, data folder paths, server names, icons, and URLs. Adds
-codeEditorVersion field to the product configuration. Customizes the About
-dialog to show Code Editor version alongside Code-OSS version.
+Adds codeEditorVersion to the product type definitions and customizes
+the About dialog to show Code Editor version alongside Code-OSS version.
 
-Note: In 1.111.x, the dialog.ts file moved from src/vs/platform/dialogs/browser/
+Note: product.json changes are in product-config.diff (generated patch).
+In 1.111.x, the dialog.ts file moved from src/vs/platform/dialogs/browser/
 to src/vs/workbench/browser/parts/dialogs/.
 
-Index: code-editor-src/product.json
-===================================================================
---- code-editor-src.orig/product.json
-+++ code-editor-src/product.json
-@@ -1,18 +1,19 @@
- {
--	"nameShort": "Code - OSS",
--	"nameLong": "Code - OSS",
--	"applicationName": "code-oss",
--	"dataFolderName": ".vscode-oss",
-+	"nameShort": "Code Editor",
-+	"nameLong": "Code Editor",
-+	"codeEditorVersion": "1.0.0",
-+	"applicationName": "code",
-+	"dataFolderName": ".vscode-editor",
- 	"win32MutexName": "vscodeoss",
- 	"licenseName": "MIT",
--	"licenseUrl": "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
--	"serverLicenseUrl": "https://github.com/microsoft/vscode/blob/main/LICENSE.txt",
-+	"licenseUrl": "https://github.com/aws/code-editor/blob/main/LICENSE",
-+	"serverLicenseUrl": "https://github.com/aws/code-editor/blob/main/LICENSE",
- 	"serverGreeting": [],
- 	"serverLicense": [],
- 	"serverLicensePrompt": "",
--	"serverApplicationName": "code-server-oss",
--	"serverDataFolderName": ".vscode-server-oss",
--	"tunnelApplicationName": "code-tunnel-oss",
-+	"serverApplicationName": "code-editor-server",
-+	"serverDataFolderName": ".code-editor-server",
-+	"tunnelApplicationName": "code-editor-tunnel",
- 	"win32DirName": "Microsoft Code OSS",
- 	"win32NameVersion": "Microsoft Code OSS",
- 	"win32RegValueName": "CodeOSS",
-@@ -27,9 +28,9 @@
- 	"darwinBundleIdentifier": "com.visualstudio.code.oss",
- 	"darwinProfileUUID": "47827DD9-4734-49A0-AF80-7E19B11495CC",
- 	"darwinProfilePayloadUUID": "CF808BE7-53F3-46C6-A7E2-7EDB98A5E959",
--	"linuxIconName": "code-oss",
-+	"linuxIconName": "code-editor",
- 	"licenseFileName": "LICENSE.txt",
--	"reportIssueUrl": "https://github.com/microsoft/vscode/issues/new",
-+	"reportIssueUrl": "https://github.com/aws/code-editor/issues/new",
- 	"nodejsRepository": "https://nodejs.org",
- 	"urlProtocol": "code-oss",
- 	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
 Index: code-editor-src/src/vs/base/common/product.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/base/common/product.ts

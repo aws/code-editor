@@ -1,0 +1,18 @@
+Override postcss to ^8.4.31.
+
+@generated
+@generator: apply-override.sh --patch common/override-postcss.diff --override 'global:postcss=^8.4.31'
+@override-package: postcss@^8.4.31
+
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -244,6 +244,7 @@
+     "yaserver": "^0.4.0"
+   },
+   "overrides": {
++    "postcss": "^8.4.31",
+     "node-gyp-build": "4.8.1",
+     "serialize-javascript": "^7.0.3",
+     "ssh2": {

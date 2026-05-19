@@ -22,8 +22,8 @@ Index: code-editor-src/product.json
 +	},
  	"nameShort": "Code Editor",
  	"nameLong": "Code Editor",
- 	"codeEditorVersion": "1.0.0",
-@@ -53,6 +63,9 @@
+ 	"applicationName": "code",
+@@ -150,7 +160,10 @@
  		"https://console.amazonaws-us-gov.com",
  		"https://console.amazonaws.cn",
  		"https://aws.amazon.com",
@@ -32,13 +32,14 @@ Index: code-editor-src/product.json
 +		"https://open-vsx.org",
 +		"https://oidc.*.amazonaws.com",
 +		"https://device.sso.*.amazonaws.com"
- 	]
- }
+ 	],
+ 	"excludedSettingPatterns": [
+ 		"chat.",
 Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 +++ code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-@@ -920,8 +920,8 @@ export class GettingStartedPage extends
+@@ -921,8 +921,8 @@ export class GettingStartedPage extends
  		}));
  
  		const header = $('.header', {},
@@ -267,7 +268,7 @@ Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
 +++ code-editor-src/src/vs/workbench/workbench.common.main.ts
-@@ -357,8 +357,6 @@ import './contrib/surveys/browser/langua
+@@ -370,8 +370,6 @@ import './contrib/surveys/browser/langua
  
  // Welcome
  import './contrib/welcomeGettingStarted/browser/gettingStarted.contribution.js';

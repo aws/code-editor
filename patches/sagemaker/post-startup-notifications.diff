@@ -790,7 +790,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -90,6 +90,7 @@ const compilations = [
+@@ -91,6 +91,7 @@ const compilations = [
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/sagemaker-ui-dark-theme/tsconfig.json',
@@ -802,7 +802,7 @@ Index: code-editor-src/build/npm/dirs.ts
 ===================================================================
 --- code-editor-src.orig/build/npm/dirs.ts
 +++ code-editor-src/build/npm/dirs.ts
-@@ -47,6 +47,7 @@ export const dirs = [
+@@ -48,6 +48,7 @@ export const dirs = [
  	'extensions/sagemaker-terminal-crash-mitigation',
  	'extensions/sagemaker-open-notebook-extension',
  	'extensions/sagemaker-ui-dark-theme',

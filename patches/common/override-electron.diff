@@ -1,0 +1,18 @@
+Override electron to 40.6.0.
+
+@generated
+@generator: apply-override.sh --patch common/override-electron.diff --override 'direct-dev:electron=40.6.0'
+
+Index: code-editor-src/package.json
+===================================================================
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
+@@ -186,7 +186,7 @@
+     "cookie": "^0.7.2",
+     "debounce": "^1.0.0",
+     "deemon": "^1.13.6",
+-    "electron": "39.8.8",
++    "electron": "40.6.0",
+     "eslint": "^9.36.0",
+     "eslint-formatter-compact": "^8.40.0",
+     "eslint-plugin-header": "3.1.1",

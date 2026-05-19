@@ -7,7 +7,7 @@ Index: code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/remoteExtensionHostAgentServer.ts
 +++ code-editor-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
-@@ -131,6 +131,13 @@ class RemoteExtensionHostAgentServer ext
+@@ -128,6 +128,13 @@ class RemoteExtensionHostAgentServer ext
  			pathname = pathname.substring(this._serverProductPath.length);
  		}
  

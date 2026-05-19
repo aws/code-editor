@@ -8,10 +8,10 @@ Index: code-editor-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.vscode.web.ts
 +++ code-editor-src/build/gulpfile.vscode.web.ts
-@@ -115,6 +115,7 @@ const vscodeWebEntryPoints = [
- 	buildfile.workerBackgroundTokenization,
+@@ -117,6 +117,7 @@ const vscodeWebEntryPoints = [
  	buildfile.keyboardMaps,
  	buildfile.workbenchWeb,
+ 	buildfile.sessionsWeb,
 +	buildfile.codeWeb,
  ].flat();
  

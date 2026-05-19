@@ -8,7 +8,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 +++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -36,7 +36,6 @@ import { Extensions as DndExtensions, ID
+@@ -37,7 +37,6 @@ import { Extensions as DndExtensions, ID
  import { IUriIdentityService } from '../../../../platform/uriIdentity/common/uriIdentity.js';
  import { ITextEditorService } from '../../../services/textfile/common/textEditorService.js';
  
@@ -16,7 +16,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  const ProfilesMenu = new MenuId('Profiles');
  
  export class UserDataProfilesWorkbenchContribution extends Disposable implements IWorkbenchContribution {
-@@ -162,8 +161,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -163,8 +162,6 @@ export class UserDataProfilesWorkbenchCo
  		this._register(this.registerManageProfilesAction());
  		this._register(this.registerSwitchProfileAction());
  
@@ -25,7 +25,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
-@@ -198,22 +195,12 @@ export class UserDataProfilesWorkbenchCo
+@@ -199,23 +196,12 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -35,6 +35,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -			submenu: OpenProfileMenu,
 -			group: '1_new',
 -			order: 4,
+-			when: IsSessionsWindowContext.negate()
 -		});
 -	}
 -
@@ -48,7 +49,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  			}
  		}
  	}
-@@ -245,80 +232,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -247,80 +233,6 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -129,7 +130,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  	private registerSwitchProfileAction(): IDisposable {
  		const that = this;
  		return registerAction2(class SwitchProfileAction extends Action2 {
-@@ -428,14 +341,7 @@ export class UserDataProfilesWorkbenchCo
+@@ -430,14 +342,7 @@ export class UserDataProfilesWorkbenchCo
  					id: 'workbench.profiles.actions.createProfile',
  					title: localize2('create profile', "New Profile..."),
  					category: PROFILES_CATEGORY,

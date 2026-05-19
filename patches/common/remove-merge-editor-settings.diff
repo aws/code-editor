@@ -1,0 +1,21 @@
+Remove merge editor settings from the Settings UI
+
+The merge editor is not used in Code Editor. This removes the Merge Editor
+group from the Features section of the Settings UI.
+
+Index: code-editor-src/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
++++ code-editor-src/src/vs/workbench/contrib/preferences/browser/settingsLayout.ts
+@@ -370,11 +370,6 @@ export const tocData: ITOCEntry<string>
+ 					settings: ['notebook.*', 'interactiveWindow.*']
+ 				},
+ 				{
+-					id: 'features/mergeEditor',
+-					label: localize('mergeEditor', 'Merge Editor'),
+-					settings: ['mergeEditor.*']
+-				},
+-				{
+ 					id: 'features/issueReporter',
+ 					label: localize('issueReporter', 'Issue Reporter'),
+ 					settings: ['issueReporter.*'],

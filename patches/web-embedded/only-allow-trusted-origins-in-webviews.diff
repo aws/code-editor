@@ -12,12 +12,12 @@ Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  	<meta charset="UTF-8">
  
  	<meta http-equiv="Content-Security-Policy"
--		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self';">
-+		content="default-src 'none'; script-src 'sha256-TaWGDzV7c9rUH2q/5ygOyYUHSyHIqBMYfucPh3lnKvU=' 'self'; frame-src 'self'; style-src 'unsafe-inline'; connect-src 'self';">
+-		content="default-src 'none'; script-src 'sha256-__INLINE_SCRIPT_SHA__' 'self'; frame-src 'self';">
++		content="default-src 'none'; script-src 'sha256-__INLINE_SCRIPT_SHA__' 'self'; frame-src 'self'; style-src 'unsafe-inline'; connect-src 'self';">
  
  	<!-- Disable pinch zooming -->
  	<meta name="viewport"
-@@ -361,12 +361,23 @@
+@@ -323,12 +323,23 @@
  			}
  
  			async signalReady() {
@@ -42,7 +42,7 @@ Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  
  				const hostname = location.hostname;
  
-@@ -375,6 +386,12 @@
+@@ -337,6 +348,12 @@
  					throw new Error(`'crypto.subtle' is not available so webviews will not work. This is likely because the editor is not running in a secure context (https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).`);
  				}
  
@@ -55,7 +55,7 @@ Index: code-editor-src/src/vs/workbench/contrib/webview/browser/pre/index.html
  				// Here the `parentOriginHash()` function from `src/vs/workbench/common/webview.ts` is inlined
  				// compute a sha-256 composed of `parentOrigin` and `salt` converted to base 32
  				let parentOriginHash;
-@@ -396,7 +413,7 @@
+@@ -358,7 +375,7 @@
  					return start(parentOrigin);
  				}
  

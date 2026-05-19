@@ -9,7 +9,7 @@ Index: code-editor-src/src/vs/base/common/network.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/base/common/network.ts
 +++ code-editor-src/src/vs/base/common/network.ts
-@@ -242,7 +242,9 @@ class RemoteAuthoritiesImpl {
+@@ -245,7 +245,9 @@ class RemoteAuthoritiesImpl {
  		return URI.from({
  			scheme: platform.isWeb ? this._preferredWebSchema : Schemas.vscodeRemoteResource,
  			authority: `${host}:${port}`,
@@ -89,7 +89,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/webClientServer.ts
 +++ code-editor-src/src/vs/server/node/webClientServer.ts
-@@ -245,7 +245,10 @@ export class WebClientServer {
+@@ -265,7 +265,10 @@ export class WebClientServer {
  		};
  
  		// Prefix routes with basePath for clients
@@ -101,7 +101,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  
  		const queryConnectionToken = parsedUrl.query[connectionTokenQueryName];
  		if (typeof queryConnectionToken === 'string') {
-@@ -287,7 +290,7 @@ export class WebClientServer {
+@@ -307,7 +310,7 @@ export class WebClientServer {
  		let remoteAuthority = (
  			useTestResolver
  				? 'test+test'
@@ -110,7 +110,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  		);
  		if (!remoteAuthority) {
  			return serveError(req, res, 400, `Bad request.`);
-@@ -333,6 +336,7 @@ export class WebClientServer {
+@@ -353,6 +356,7 @@ export class WebClientServer {
  		} : undefined;
  
  		const productConfiguration: Partial<Mutable<IProductConfiguration>> = {
@@ -118,7 +118,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			embedderIdentifier: 'server-distro',
  			extensionsGallery: this._webExtensionResourceUrlTemplate && this._productService.extensionsGallery ? {
  				...this._productService.extensionsGallery,
-@@ -360,7 +364,7 @@ export class WebClientServer {
+@@ -380,7 +384,7 @@ export class WebClientServer {
  		const workbenchWebConfiguration = {
  			remoteAuthority,
  			userDataPath: this._environmentService.userDataPath,
@@ -127,7 +127,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  			_wrapWebWorkerExtHostInIframe,
  			developmentOptions: { enableSmokeTestDriver: this._environmentService.args['enable-smoke-test-driver'] ? true : undefined, logLevel: this._logService.getLevel() },
  			settingsSyncOptions: !this._environmentService.isBuilt && this._environmentService.args['enable-sync'] ? { enabled: true } : undefined,
-@@ -387,7 +391,9 @@ export class WebClientServer {
+@@ -407,7 +411,9 @@ export class WebClientServer {
  			WORKBENCH_AUTH_SESSION: authSessionInfo ? asJSON(authSessionInfo) : '',
  			WORKBENCH_WEB_BASE_URL: staticRoute,
  			WORKBENCH_NLS_URL,
@@ -138,7 +138,7 @@ Index: code-editor-src/src/vs/server/node/webClientServer.ts
  		};
  
  		// DEV ---------------------------------------------------------------------------------------
-@@ -497,3 +503,60 @@ export class WebClientServer {
+@@ -517,3 +523,60 @@ export class WebClientServer {
  		return void res.end(data);
  	}
  }
@@ -203,7 +203,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/serverEnvironmentService.ts
 +++ code-editor-src/src/vs/server/node/serverEnvironmentService.ts
-@@ -97,6 +97,9 @@ export const serverOptions: OptionDescri
+@@ -100,6 +100,9 @@ export const serverOptions: OptionDescri
  
  	'compatibility': { type: 'string' },
  
@@ -213,7 +213,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
  	_: OPTIONS['_']
  };
  
-@@ -226,6 +229,9 @@ export interface ServerParsedArgs {
+@@ -232,6 +235,9 @@ export interface ServerParsedArgs {
  
  	compatibility: string;
  

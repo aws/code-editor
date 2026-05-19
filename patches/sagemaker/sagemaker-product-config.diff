@@ -1,0 +1,31 @@
+Apply SageMaker-specific product.json configuration
+
+Renames Code Editor to SageMaker Code Editor and adds the
+sagemakerCodeEditorVersion placeholder field.
+
+@generated
+@generator: scripts/patches/apply-product-config.sh --target sagemaker
+
+Index: code-editor-src/product.json
+===================================================================
+--- code-editor-src.orig/product.json
++++ code-editor-src/product.json
+@@ -9,8 +9,8 @@
+ 		"nlsBaseUrl": "",
+ 		"publisherUrl": ""
+ 	},
+-	"nameShort": "Code Editor",
+-	"nameLong": "Code Editor",
++	"nameShort": "SageMaker Code Editor",
++	"nameLong": "SageMaker Code Editor",
+ 	"applicationName": "code",
+ 	"dataFolderName": ".vscode-editor",
+ 	"sharedDataFolderName": ".vscode-editor-shared",
+@@ -197,5 +197,6 @@
+ 		"workbench.action.terminal.chat.",
+ 		"github.copilot.",
+ 		"workbench.action.edits."
+-	]
++	],
++	"sagemakerCodeEditorVersion": "__SAGEMAKER_VERSION__"
+ }

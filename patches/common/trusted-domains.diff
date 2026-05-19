@@ -94,25 +94,3 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeWalkthrough/browser/edito
  
  
  ## Thanks!
-Index: code-editor-src/product.json
-===================================================================
---- code-editor-src.orig/product.json
-+++ code-editor-src/product.json
-@@ -155,5 +155,16 @@
- 		"github-enterprise": [
- 			"GitHub.copilot-chat"
- 		]
--	}
-+	},
-+	"linkProtectionTrustedDomains": [
-+		"https://docs.aws.amazon.com",
-+		"https://docs.amazonaws.cn",
-+		"https://dcaprod.www.docs.aws.a2z.com",
-+		"https://lckprod.www.docs.aws.a2z.com",
-+		"https://console.aws.amazon.com",
-+		"https://console.amazonaws-us-gov.com",
-+		"https://console.amazonaws.cn",
-+		"https://aws.amazon.com",
-+		"https://*.amazon.com"
-+	]
- }
