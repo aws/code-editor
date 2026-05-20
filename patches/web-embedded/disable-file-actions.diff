@@ -2,17 +2,17 @@ Disable file actions and window actions
 
 Removes file save/open actions, window actions, and editor contribution
 commands not applicable to the web-embedded target.
-Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+Index: b/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
---- code-editor-src.orig/src/vs/workbench/browser/actions/windowActions.ts
-+++ code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
+--- a/src/vs/workbench/browser/actions/windowActions.ts
++++ b/src/vs/workbench/browser/actions/windowActions.ts
 @@ -7,7 +7,7 @@ import { localize, localize2 } from '../
  import { IWindowOpenable } from '../../../platform/window/common/window.js';
  import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
  import { MenuRegistry, MenuId, Action2, registerAction2 } from '../../../platform/actions/common/actions.js';
 -import { KeyChord, KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
 +import { KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
- import { IsMainWindowFullscreenContext } from '../../common/contextkeys.js';
+ import { IsMainWindowFullscreenContext, IsSessionsWindowContext } from '../../common/contextkeys.js';
  import { IsMacNativeContext, IsDevelopmentContext, IsWebContext, IsIOSContext } from '../../../platform/contextkey/common/contextkeys.js';
  import { Categories } from '../../../platform/action/common/actionCommonCategories.js';
 @@ -23,7 +23,7 @@ import { URI } from '../../../base/commo
@@ -24,7 +24,7 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
  import { ContextKeyExpr } from '../../../platform/contextkey/common/contextkey.js';
  import { inQuickPickContext, getQuickNavigateHandler } from '../quickaccess.js';
  import { IHostService } from '../../services/host/browser/host.js';
-@@ -411,36 +411,6 @@ class ShowAboutDialogAction extends Acti
+@@ -412,37 +412,6 @@ class ShowAboutDialogAction extends Acti
  	}
  }
  
@@ -38,6 +38,7 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 -				mnemonicTitle: localize({ key: 'miNewWindow', comment: ['&& denotes a mnemonic'] }, "New &&Window"),
 -			},
 -			f1: true,
+-			precondition: IsSessionsWindowContext.negate(),
 -			keybinding: {
 -				weight: KeybindingWeight.WorkbenchContrib,
 -				primary: isWeb ? (isWindows ? KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Alt | KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyN,
@@ -46,7 +47,8 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 -			menu: {
 -				id: MenuId.MenubarFileMenu,
 -				group: '1_new',
--				order: 3
+-				order: 3,
+-				when: IsSessionsWindowContext.negate()
 -			}
 -		});
 -	}
@@ -57,11 +59,10 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 -		return hostService.openWindow({ remoteAuthority: null });
 -	}
 -}
--
+ 
  class BlurAction extends Action2 {
  
- 	constructor() {
-@@ -460,7 +430,6 @@ class BlurAction extends Action2 {
+@@ -463,7 +432,6 @@ class BlurAction extends Action2 {
  
  // --- Actions Registration
  
@@ -69,7 +70,7 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
  registerAction2(ToggleFullScreenAction);
  registerAction2(QuickPickRecentAction);
  registerAction2(OpenRecentAction);
-@@ -511,10 +480,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -514,11 +482,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	order: 1,
  	when: IsWebContext
  });
@@ -78,13 +79,14 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 -	title: localize({ key: 'miOpenRecent', comment: ['&& denotes a mnemonic'] }, "Open &&Recent"),
 -	submenu: MenuId.MenubarRecentMenu,
 -	group: '2_open',
--	order: 4
+-	order: 4,
+-	when: IsSessionsWindowContext.negate()
 -});
-Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+Index: b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
 ===================================================================
---- code-editor-src.orig/src/vs/workbench/browser/parts/editor/editor.contribution.ts
-+++ code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
-@@ -42,8 +42,7 @@ import {
+--- a/src/vs/workbench/browser/parts/editor/editor.contribution.ts
++++ b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+@@ -43,8 +43,7 @@ import {
  	ReOpenInTextEditorAction, DuplicateGroupDownAction, DuplicateGroupLeftAction, DuplicateGroupRightAction, DuplicateGroupUpAction, ToggleEditorTypeAction, SplitEditorToAboveGroupAction, SplitEditorToBelowGroupAction,
  	SplitEditorToFirstGroupAction, SplitEditorToLastGroupAction, SplitEditorToLeftGroupAction, SplitEditorToNextGroupAction, SplitEditorToPreviousGroupAction, SplitEditorToRightGroupAction, NavigateForwardInEditsAction,
  	NavigateBackwardsInEditsAction, NavigateForwardInNavigationsAction, NavigateBackwardsInNavigationsAction, NavigatePreviousInNavigationsAction, NavigatePreviousInEditsAction, NavigateToLastNavigationLocationAction,
@@ -94,7 +96,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  	ClearEditorHistoryWithoutConfirmAction
  } from './editorActions.js';
  import {
-@@ -51,8 +50,8 @@ import {
+@@ -52,8 +51,8 @@ import {
  	CLOSE_PINNED_EDITOR_COMMAND_ID, CLOSE_SAVED_EDITORS_COMMAND_ID, KEEP_EDITOR_COMMAND_ID, PIN_EDITOR_COMMAND_ID, SHOW_EDITORS_IN_GROUP, SPLIT_EDITOR_DOWN, SPLIT_EDITOR_LEFT,
  	SPLIT_EDITOR_RIGHT, SPLIT_EDITOR_UP, TOGGLE_KEEP_EDITORS_COMMAND_ID, UNPIN_EDITOR_COMMAND_ID, setup as registerEditorCommands, REOPEN_WITH_COMMAND_ID,
  	TOGGLE_LOCK_GROUP_COMMAND_ID, UNLOCK_GROUP_COMMAND_ID, SPLIT_EDITOR_IN_GROUP, JOIN_EDITOR_IN_GROUP, FOCUS_FIRST_SIDE_EDITOR, FOCUS_SECOND_SIDE_EDITOR, TOGGLE_SPLIT_EDITOR_IN_GROUP_LAYOUT, LOCK_GROUP_COMMAND_ID,
@@ -105,7 +107,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  } from './editorCommands.js';
  import { GOTO_NEXT_CHANGE, GOTO_PREVIOUS_CHANGE, TOGGLE_DIFF_IGNORE_TRIM_WHITESPACE, TOGGLE_DIFF_SIDE_BY_SIDE, DIFF_SWAP_SIDES } from './diffEditorCommands.js';
  import { inQuickPickContext, getQuickNavigateHandler } from '../../quickaccess.js';
-@@ -301,12 +300,7 @@ registerAction2(QuickAccessPreviousRecen
+@@ -302,12 +301,7 @@ registerAction2(QuickAccessPreviousRecen
  registerAction2(QuickAccessLeastRecentlyUsedEditorInGroupAction);
  registerAction2(QuickAccessPreviousEditorFromHistoryAction);
  
@@ -118,7 +120,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  
  const quickAccessNavigateNextInEditorPickerId = 'workbench.action.quickOpenNavigateNextInEditorPicker';
  KeybindingsRegistry.registerCommandAndKeybindingRule({
-@@ -359,7 +353,7 @@ MenuRegistry.appendMenuItem(MenuId.Empty
+@@ -360,7 +354,7 @@ MenuRegistry.appendMenuItem(MenuId.Empty
  MenuRegistry.appendMenuItem(MenuId.EmptyEditorGroupContext, { command: { id: SPLIT_EDITOR_DOWN, title: localize('splitDown', "Split Down") }, group: '2_split', order: 20 });
  MenuRegistry.appendMenuItem(MenuId.EmptyEditorGroupContext, { command: { id: SPLIT_EDITOR_LEFT, title: localize('splitLeft', "Split Left") }, group: '2_split', order: 30 });
  MenuRegistry.appendMenuItem(MenuId.EmptyEditorGroupContext, { command: { id: SPLIT_EDITOR_RIGHT, title: localize('splitRight', "Split Right") }, group: '2_split', order: 40 });
@@ -127,7 +129,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  MenuRegistry.appendMenuItem(MenuId.EmptyEditorGroupContext, { command: { id: TOGGLE_LOCK_GROUP_COMMAND_ID, title: localize('toggleLockGroup', "Lock Group"), toggled: ActiveEditorGroupLockedContext }, group: '4_lock', order: 10, when: IsAuxiliaryWindowContext.toNegated() /* already a primary action for aux windows */ });
  MenuRegistry.appendMenuItem(MenuId.EmptyEditorGroupContext, { command: { id: CLOSE_EDITOR_GROUP_COMMAND_ID, title: localize('close', "Close") }, group: '5_close', order: 10, when: MultipleEditorGroupsContext });
  
-@@ -369,8 +363,7 @@ MenuRegistry.appendMenuItem(MenuId.Edito
+@@ -370,8 +364,7 @@ MenuRegistry.appendMenuItem(MenuId.Edito
  MenuRegistry.appendMenuItem(MenuId.EditorTabsBarContext, { command: { id: SPLIT_EDITOR_LEFT, title: localize('splitLeft', "Split Left") }, group: '2_split', order: 30 });
  MenuRegistry.appendMenuItem(MenuId.EditorTabsBarContext, { command: { id: SPLIT_EDITOR_RIGHT, title: localize('splitRight', "Split Right") }, group: '2_split', order: 40 });
  
@@ -137,7 +139,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  
  MenuRegistry.appendMenuItem(MenuId.EditorTabsBarContext, { submenu: MenuId.EditorTabsBarShowTabsSubmenu, title: localize('tabBar', "Tab Bar"), group: '4_config', order: 10, when: InEditorZenModeContext.negate() });
  MenuRegistry.appendMenuItem(MenuId.EditorTabsBarShowTabsSubmenu, { command: { id: ShowMultipleEditorTabsAction.ID, title: localize('multipleTabs', "Multiple Tabs"), toggled: ContextKeyExpr.equals('config.workbench.editor.showTabs', 'multiple') }, group: '1_config', order: 10 });
-@@ -402,8 +395,7 @@ MenuRegistry.appendMenuItem(MenuId.Edito
+@@ -403,8 +396,7 @@ MenuRegistry.appendMenuItem(MenuId.Edito
  MenuRegistry.appendMenuItem(MenuId.EditorTitleContext, { command: { id: SPLIT_EDITOR, title: localize('splitRight', "Split Right") }, group: '5_split', order: 10, when: SplitEditorsVertically.negate() });
  MenuRegistry.appendMenuItem(MenuId.EditorTitleContext, { command: { id: SPLIT_EDITOR, title: localize('splitDown', "Split Down") }, group: '5_split', order: 10, when: SplitEditorsVertically });
  MenuRegistry.appendMenuItem(MenuId.EditorTitleContext, { submenu: MenuId.EditorSplitMoveSubmenu, title: localize('splitAndMoveEditor', "Split & Move"), group: '5_split', order: 15 });
@@ -147,7 +149,7 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  MenuRegistry.appendMenuItem(MenuId.EditorTitleContext, { submenu: MenuId.EditorTitleContextShare, title: localize('share', "Share"), group: '11_share', order: -1, when: MultipleEditorsSelectedInGroupContext.negate() });
  
  // Editor Title Context Menu: Split & Move Editor Submenu
-@@ -768,29 +760,7 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -776,29 +768,7 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	order: 1
  });
  
@@ -177,10 +179,10 @@ Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution
  
  MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
  	group: '4_layouts',
-Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+Index: b/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
---- code-editor-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
-+++ code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+--- a/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ b/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 @@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';
@@ -190,7 +192,7 @@ Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contri
  import { CommandsRegistry, ICommandHandler } from '../../../../platform/commands/common/commands.js';
  import { ContextKeyExpr, ContextKeyExpression } from '../../../../platform/contextkey/common/contextkey.js';
  import { KeybindingsRegistry, KeybindingWeight } from '../../../../platform/keybinding/common/keybindingsRegistry.js';
-@@ -486,17 +486,6 @@ MenuRegistry.appendMenuItem(MenuId.Explo
+@@ -460,17 +460,6 @@ MenuRegistry.appendMenuItem(MenuId.Explo
  
  MenuRegistry.appendMenuItem(MenuId.ExplorerContext, {
  	group: 'navigation',
@@ -208,7 +210,7 @@ Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contri
  	order: 10,
  	command: openToSideCommand,
  	when: ContextKeyExpr.and(ExplorerFolderContext.toNegated(), ResourceContextKey.HasResource)
-@@ -685,36 +674,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -659,36 +648,6 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  });
  
  MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {

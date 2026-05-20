@@ -1,0 +1,33 @@
+Override ws to ^8.20.1.
+Remove when upstream Code-OSS updates ws to >= 8.20.1.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-ws.diff --override 'direct:ws=^8.20.1' --override 'remote/package.json@direct:ws=^8.20.1'
+@override-package: ws@^8.20.1
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -138,7 +138,7 @@
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "^9.3.2",
+-    "ws": "^8.19.0",
++    "ws": "^8.20.1",
+     "yauzl": "^3.0.0",
+     "yazl": "^2.4.3"
+   },
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -43,7 +43,7 @@
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "^9.3.2",
+-    "ws": "^8.19.0",
++    "ws": "^8.20.1",
+     "yauzl": "^3.0.0",
+     "yazl": "^2.4.3"
+   },
