@@ -60,3 +60,7 @@ sagemaker/sanitize-terminal-sendtext-paths.diff
 sagemaker/override-picomatch-post-startup-notifications.diff
 sagemaker/remove-delay-shutdown-endpoint.diff
 sagemaker/add-esbuild-configs-to-extensions.diff
+common/finding-override-axios.diff
+common/finding-override-ws.diff
+common/finding-override-anthropic-sdk.diff
+common/finding-override-github-copilot.diff
