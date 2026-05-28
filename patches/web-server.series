@@ -27,10 +27,7 @@ common/override-postcss.diff
 common/guard-default-account-config.diff
 common/override-uuid-ghsa-w5hq.diff
 common/skip-mangling-for-dev-builds.diff
-common/finding-override-axios.diff
-common/finding-override-ws.diff
-common/finding-override-anthropic-sdk.diff
-common/finding-override-github-copilot.diff
+common/fix-xterm-clipboard-type.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
