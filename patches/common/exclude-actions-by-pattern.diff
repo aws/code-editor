@@ -27,7 +27,7 @@ Index: code-editor-src/src/vs/platform/actions/common/actions.ts
  
  export interface IMenuItem {
  	command: ICommandAction;
-@@ -489,6 +490,9 @@ export const MenuRegistry: IMenuRegistry
+@@ -493,6 +494,9 @@ export const MenuRegistry: IMenuRegistry
  	}
  
  	appendMenuItem(id: MenuId, item: IMenuItem | ISubmenuItem): IDisposable {
@@ -37,7 +37,7 @@ Index: code-editor-src/src/vs/platform/actions/common/actions.ts
  		let list = this._menuItems.get(id);
  		if (!list) {
  			list = new LinkedList();
-@@ -713,6 +717,10 @@ export function registerAction2(ctor: {
+@@ -717,6 +721,10 @@ export function registerAction2(ctor: {
  
  	const { f1, menu, keybinding, ...command } = action.desc;
  
@@ -48,7 +48,7 @@ Index: code-editor-src/src/vs/platform/actions/common/actions.ts
  	if (CommandsRegistry.getCommand(command.id)) {
  		throw new Error(`Cannot register two commands with the same id: ${command.id}`);
  	}
-@@ -761,4 +769,12 @@ export function registerAction2(ctor: {
+@@ -765,4 +773,12 @@ export function registerAction2(ctor: {
  		}
  	};
  }

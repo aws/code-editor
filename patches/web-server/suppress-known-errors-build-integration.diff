@@ -82,7 +82,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.reh.ts
 +++ code-editor-src/build/gulpfile.reh.ts
-@@ -88,6 +88,8 @@ const serverResourceIncludes = [
+@@ -82,6 +82,8 @@ const serverResourceIncludes = [
  	'out-build/vs/workbench/contrib/terminal/common/scripts/shellIntegration.fish',
  	'out-build/vs/workbench/contrib/terminal/common/scripts/psreadline/**',
  

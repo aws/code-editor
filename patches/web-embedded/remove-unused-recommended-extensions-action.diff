@@ -8,7 +8,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -1297,22 +1297,6 @@ class ExtensionsContributions extends Di
+@@ -1316,22 +1316,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({
@@ -31,7 +31,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
  			id: InstallSpecificVersionOfExtensionAction.ID,
  			title: { value: InstallSpecificVersionOfExtensionAction.LABEL, original: 'Install Specific Version of Extension...' },
  			category: ExtensionsLocalizedLabel,
-@@ -1902,17 +1886,6 @@ class ExtensionsContributions extends Di
+@@ -1921,17 +1905,6 @@ class ExtensionsContributions extends Di
  		});
  
  		this.registerExtensionAction({

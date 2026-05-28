@@ -268,7 +268,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -87,6 +87,7 @@ const compilations = [
+@@ -84,6 +84,7 @@ const compilations = [
  	'extensions/search-result/tsconfig.json',
  	'extensions/simple-browser/tsconfig.json',
  	'extensions/sagemaker-extension/tsconfig.json',

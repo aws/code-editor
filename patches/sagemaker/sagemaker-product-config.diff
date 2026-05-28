@@ -21,7 +21,7 @@ Index: code-editor-src/product.json
  	"applicationName": "code",
  	"dataFolderName": ".vscode-editor",
  	"sharedDataFolderName": ".vscode-editor-shared",
-@@ -197,5 +197,6 @@
+@@ -200,5 +200,6 @@
  		"workbench.action.terminal.chat.",
  		"github.copilot.",
  		"workbench.action.edits."

@@ -21,7 +21,7 @@ Index: code-editor-src/src/vs/server/node/serverServices.ts
  import { ProtocolConstants } from '../../base/parts/ipc/common/ipc.net.js';
  import { IConfigurationService } from '../../platform/configuration/common/configuration.js';
  import { ConfigurationService } from '../../platform/configuration/common/configurationService.js';
-@@ -287,6 +287,9 @@ export async function setupServerService
+@@ -345,6 +345,9 @@ export async function setupServerService
  
  		socketServer.registerChannel('mcpManagement', new McpManagementChannel(mcpManagementService, (ctx: RemoteAgentConnectionContext) => getUriTransformer(ctx.remoteAuthority)));
  
@@ -35,7 +35,7 @@ Index: code-editor-src/src/vs/platform/environment/common/environmentService.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/platform/environment/common/environmentService.ts
 +++ code-editor-src/src/vs/platform/environment/common/environmentService.ts
-@@ -112,7 +112,7 @@ export abstract class AbstractNativeEnvi
+@@ -98,7 +98,7 @@ export abstract class AbstractNativeEnvi
  			return URI.file(join(vscodePortable, 'argv.json'));
  		}
  
@@ -226,7 +226,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
  
  	/* ----- server setup ----- */
  
-@@ -107,6 +108,7 @@ export const serverOptions: OptionDescri
+@@ -111,6 +112,7 @@ export const serverOptions: OptionDescri
  };
  
  export interface ServerParsedArgs {

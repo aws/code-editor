@@ -8,12 +8,12 @@ Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -250,7 +250,8 @@
+@@ -255,7 +255,8 @@
+     "serialize-javascript": "^7.0.3",
      "ssh2": {
        "cpu-features": "0.0.0"
-     },
--    "follow-redirects": "^1.16.0"
-+    "follow-redirects": "^1.16.0",
+-    }
++    },
 +    "uuid": "^14.0.0"
    },
    "repository": {
@@ -22,7 +22,7 @@ Index: code-editor-src/remote/package.json
 ===================================================================
 --- code-editor-src.orig/remote/package.json
 +++ code-editor-src/remote/package.json
-@@ -50,6 +50,7 @@
+@@ -52,6 +52,7 @@
      "node-gyp-build": "4.8.1",
      "ssh2": {
        "cpu-features": "0.0.0"
