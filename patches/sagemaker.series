@@ -32,6 +32,8 @@ web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
 web-server/webview.diff
+common/finding-override-anthropic-sdk.diff
+common/finding-override-ws.diff
 web-server/marketplace.diff
 web-server/integration.diff
 web-server/embedding-events.diff

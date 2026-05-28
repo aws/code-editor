@@ -28,6 +28,8 @@ common/guard-default-account-config.diff
 common/override-uuid-ghsa-w5hq.diff
 common/skip-mangling-for-dev-builds.diff
 common/fix-xterm-clipboard-type.diff
+common/finding-override-ws.diff
+common/finding-override-anthropic-sdk.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff

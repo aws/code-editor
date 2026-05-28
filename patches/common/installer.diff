@@ -115,7 +115,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
 +				util.rimraf(path.join(BUILD_ROOT, slimDestinationFolderName)),
 +				packageTask(type, platform, arch, sourceFolderName, slimDestinationFolderName, true)
 +			));
-+			gulp.task(slimServerTaskCI);
++			task.task(slimServerTaskCI);
  
  			const packageTasks: task.Task[] = [
  				compileNativeExtensionsBuildTask,
