@@ -16,7 +16,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  const ProfilesMenu = new MenuId('Profiles');
  
  export class UserDataProfilesWorkbenchContribution extends Disposable implements IWorkbenchContribution {
-@@ -163,8 +162,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -159,8 +158,6 @@ export class UserDataProfilesWorkbenchCo
  		this._register(this.registerManageProfilesAction());
  		this._register(this.registerSwitchProfileAction());
  
@@ -25,7 +25,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  
-@@ -199,23 +196,12 @@ export class UserDataProfilesWorkbenchCo
+@@ -195,14 +192,6 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -35,21 +35,20 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -			submenu: OpenProfileMenu,
 -			group: '1_new',
 -			order: 4,
--			when: IsSessionsWindowContext.negate()
 -		});
 -	}
--
+ 
  	private readonly profilesDisposable = this._register(new MutableDisposable<DisposableStore>());
  	private registerProfilesActions(): void {
- 		this.profilesDisposable.value = new DisposableStore();
+@@ -210,7 +199,6 @@ export class UserDataProfilesWorkbenchCo
  		for (const profile of this.userDataProfilesService.profiles) {
- 			if (!profile.isTransient) {
+ 			if (!profile.isInternal) {
  				this.profilesDisposable.value.add(this.registerProfileEntryAction(profile));
 -				this.profilesDisposable.value.add(this.registerNewWindowAction(profile));
  			}
  		}
  	}
-@@ -247,80 +233,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -242,81 +230,6 @@ export class UserDataProfilesWorkbenchCo
  		});
  	}
  
@@ -70,10 +69,12 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -				const hostService = accessor.get(IHostService);
 -
 -				const pick = await quickInputService.pick(
--					userDataProfilesService.profiles.map(profile => ({
--						label: profile.name,
--						profile
--					})),
+-					userDataProfilesService.profiles
+-						.filter(profile => !profile.isInternal)
+-						.map(profile => ({
+-							label: profile.name,
+-							profile
+-						})),
 -					{
 -						title: localize('new window with profile', "New Window with Profile"),
 -						placeHolder: localize('pick profile', "Select Profile"),
@@ -126,11 +127,10 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 -
 -		return disposables;
 -	}
--
+ 
  	private registerSwitchProfileAction(): IDisposable {
  		const that = this;
- 		return registerAction2(class SwitchProfileAction extends Action2 {
-@@ -430,14 +342,7 @@ export class UserDataProfilesWorkbenchCo
+@@ -430,14 +343,7 @@ export class UserDataProfilesWorkbenchCo
  					id: 'workbench.profiles.actions.createProfile',
  					title: localize2('create profile', "New Profile..."),
  					category: PROFILES_CATEGORY,

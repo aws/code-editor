@@ -7,7 +7,7 @@ Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -186,7 +186,7 @@
+@@ -192,7 +192,7 @@
      "cookie": "^0.7.2",
      "debounce": "^1.0.0",
      "deemon": "^1.13.6",

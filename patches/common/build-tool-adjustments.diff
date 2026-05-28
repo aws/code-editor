@@ -8,7 +8,7 @@ Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -39,7 +39,7 @@
+@@ -41,7 +41,7 @@
      "watch-extensionsd": "deemon npm run watch-extensions",
      "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
      "precommit": "node --experimental-strip-types build/hygiene.ts",

@@ -74,7 +74,7 @@ Index: code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userData
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
 +++ code-editor-src/src/vs/workbench/contrib/userDataProfile/browser/userDataProfile.ts
-@@ -168,8 +168,6 @@ export class UserDataProfilesWorkbenchCo
+@@ -164,8 +164,6 @@ export class UserDataProfilesWorkbenchCo
  		this.registerProfilesActions();
  		this._register(this.userDataProfilesService.onDidChangeProfiles(() => this.registerProfilesActions()));
  

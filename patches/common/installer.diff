@@ -19,15 +19,15 @@ Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.reh.ts
 +++ code-editor-src/build/gulpfile.reh.ts
-@@ -36,6 +36,7 @@ import buildfile from './buildfile.ts';
+@@ -30,6 +30,7 @@ import log from 'fancy-log';
+ import buildfile from './buildfile.ts';
  import { fetchUrls, fetchGithub } from './lib/fetch.ts';
- import { getCopilotExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib/copilot.ts';
- import jsonEditor from 'gulp-json-editor';
+ import { getCopilotExcludeFilter, getCopilotRuntimePrebuildFiles, getRipgrepExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib/copilot.ts';
 +import through from 'through2';
  
  
  const rcedit = promisify(rceditCallback);
-@@ -203,6 +204,15 @@ function nodejs(platform: string, arch:
+@@ -197,6 +198,15 @@ function nodejs(platform: string, arch:
  		arch = 'x64';
  	}
  
@@ -43,7 +43,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  	log(`Downloading node.js ${nodeVersion} ${platform} ${arch} from ${product.nodejsRepository}...`);
  
  	const glibcPrefix = process.env['VSCODE_NODE_GLIBC'] ?? '';
-@@ -257,7 +267,7 @@ function nodejs(platform: string, arch:
+@@ -251,7 +261,7 @@ function nodejs(platform: string, arch:
  	}
  }
  
@@ -52,7 +52,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  	const destination = path.join(BUILD_ROOT, destinationFolderName);
  
  	return () => {
-@@ -334,6 +344,7 @@ function packageTask(type: string, platf
+@@ -328,6 +338,7 @@ function packageTask(type: string, platf
  			}));
  
  		const license = gulp.src(['remote/LICENSE'], { base: 'remote', allowEmpty: true });
@@ -60,7 +60,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  
  		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
  
-@@ -350,7 +361,10 @@ function packageTask(type: string, platf
+@@ -347,7 +358,10 @@ function packageTask(type: string, platf
  			.pipe(jsFilter.restore);
  
  		const nodePath = `.build/node/v${nodeVersion}/${platform}-${arch}`;
@@ -72,7 +72,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  
  		let web: NodeJS.ReadWriteStream[] = [];
  		if (type === 'reh-web') {
-@@ -366,6 +380,7 @@ function packageTask(type: string, platf
+@@ -363,6 +377,7 @@ function packageTask(type: string, platf
  			packageJsonStream,
  			productJsonStream,
  			license,
@@ -80,7 +80,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  			sources,
  			deps,
  			node,
-@@ -392,20 +407,24 @@ function packageTask(type: string, platf
+@@ -389,20 +404,24 @@ function packageTask(type: string, platf
  					.pipe(rename(`bin/${product.serverApplicationName}.cmd`)),
  			);
  		} else if (platform === 'linux' || platform === 'alpine' || platform === 'darwin') {
@@ -105,7 +105,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
  					.pipe(rename(`bin/${product.serverApplicationName}`))
  					.pipe(util.setExecutableBit())
  			);
-@@ -516,6 +535,13 @@ function tweakProductForServerWeb(produc
+@@ -547,6 +566,13 @@ function tweakProductForServerWeb(produc
  		['', 'min'].forEach(minified => {
  			const sourceFolderName = `out-vscode-${type}${dashed(minified)}`;
  			const destinationFolderName = `vscode-${type}${dashed(platform)}${dashed(arch)}`;
@@ -115,7 +115,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
 +				util.rimraf(path.join(BUILD_ROOT, slimDestinationFolderName)),
 +				packageTask(type, platform, arch, sourceFolderName, slimDestinationFolderName, true)
 +			));
-+			gulp.task(slimServerTaskCI);
++			task.task(slimServerTaskCI);
  
  			const packageTasks: task.Task[] = [
  				compileNativeExtensionsBuildTask,

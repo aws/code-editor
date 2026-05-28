@@ -8,7 +8,7 @@ Index: code-editor-src/build/gulpfile.vscode.web.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.vscode.web.ts
 +++ code-editor-src/build/gulpfile.vscode.web.ts
-@@ -117,6 +117,7 @@ const vscodeWebEntryPoints = [
+@@ -114,6 +114,7 @@ const vscodeWebEntryPoints = [
  	buildfile.keyboardMaps,
  	buildfile.workbenchWeb,
  	buildfile.sessionsWeb,

@@ -59,7 +59,7 @@ Index: code-editor-src/src/vs/workbench/electron-browser/desktop.contribution.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/electron-browser/desktop.contribution.ts
 +++ code-editor-src/src/vs/workbench/electron-browser/desktop.contribution.ts
-@@ -344,7 +344,7 @@ import product from '../../platform/prod
+@@ -345,7 +345,7 @@ import product from '../../platform/prod
  			'telemetry.enableCrashReporter': {
  				'type': 'boolean',
  				'description': localize('telemetry.enableCrashReporting', "Enable crash reports to be collected. This helps us improve stability. \nThis option requires restart to take effect."),

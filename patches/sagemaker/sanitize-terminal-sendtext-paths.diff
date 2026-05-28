@@ -57,7 +57,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminalInstanc
  import { editorBackground } from '../../../../platform/theme/common/colorRegistry.js';
  import { getIconRegistry } from '../../../../platform/theme/common/iconRegistry.js';
  import { IColorTheme, IThemeService } from '../../../../platform/theme/common/themeService.js';
-@@ -1356,6 +1357,9 @@ export class TerminalInstance extends Di
+@@ -1375,6 +1376,9 @@ export class TerminalInstance extends Di
  	}
  
  	async sendText(text: string, shouldExecute: boolean, forceBracketedPasteMode?: boolean): Promise<void> {

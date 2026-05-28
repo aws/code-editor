@@ -21,7 +21,7 @@ Index: code-editor-src/src/vs/platform/configuration/common/configurationRegistr
 ===================================================================
 --- code-editor-src.orig/src/vs/platform/configuration/common/configurationRegistry.ts
 +++ code-editor-src/src/vs/platform/configuration/common/configurationRegistry.ts
-@@ -530,8 +530,7 @@ class ConfigurationRegistry extends Disp
+@@ -546,8 +546,7 @@ class ConfigurationRegistry extends Disp
  			source,
  			defaultValueSource: source
  		};
@@ -31,7 +31,7 @@ Index: code-editor-src/src/vs/platform/configuration/common/configurationRegistr
  	}
  
  	private mergeDefaultConfigurationsForOverrideIdentifier(overrideIdentifier: string, configurationValueObject: IStringDictionary<unknown>, valueSource: ConfigurationDefaultSource | undefined, existingDefaultOverride: IConfigurationDefaultOverrideValue | undefined): IConfigurationDefaultOverrideValue | undefined {
-@@ -725,7 +724,8 @@ class ConfigurationRegistry extends Disp
+@@ -741,7 +740,8 @@ class ConfigurationRegistry extends Disp
  					property.experiment = { mode: 'startup' };
  				}
  
@@ -41,7 +41,7 @@ Index: code-editor-src/src/vs/platform/configuration/common/configurationRegistr
  				const policyName = properties[key].policy?.name;
  
  				if (excluded) {
-@@ -758,6 +758,14 @@ class ConfigurationRegistry extends Disp
+@@ -774,6 +774,14 @@ class ConfigurationRegistry extends Disp
  		}
  	}
  

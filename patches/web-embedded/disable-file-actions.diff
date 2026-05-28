@@ -2,17 +2,17 @@ Disable file actions and window actions
 
 Removes file save/open actions, window actions, and editor contribution
 commands not applicable to the web-embedded target.
-Index: b/src/vs/workbench/browser/actions/windowActions.ts
+Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
---- a/src/vs/workbench/browser/actions/windowActions.ts
-+++ b/src/vs/workbench/browser/actions/windowActions.ts
+--- code-editor-src.orig/src/vs/workbench/browser/actions/windowActions.ts
++++ code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 @@ -7,7 +7,7 @@ import { localize, localize2 } from '../
  import { IWindowOpenable } from '../../../platform/window/common/window.js';
  import { IDialogService } from '../../../platform/dialogs/common/dialogs.js';
  import { MenuRegistry, MenuId, Action2, registerAction2 } from '../../../platform/actions/common/actions.js';
 -import { KeyChord, KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
 +import { KeyCode, KeyMod } from '../../../base/common/keyCodes.js';
- import { IsMainWindowFullscreenContext, IsSessionsWindowContext } from '../../common/contextkeys.js';
+ import { IsMainWindowFullscreenContext } from '../../common/contextkeys.js';
  import { IsMacNativeContext, IsDevelopmentContext, IsWebContext, IsIOSContext } from '../../../platform/contextkey/common/contextkeys.js';
  import { Categories } from '../../../platform/action/common/actionCommonCategories.js';
 @@ -23,7 +23,7 @@ import { URI } from '../../../base/commo
@@ -24,7 +24,7 @@ Index: b/src/vs/workbench/browser/actions/windowActions.ts
  import { ContextKeyExpr } from '../../../platform/contextkey/common/contextkey.js';
  import { inQuickPickContext, getQuickNavigateHandler } from '../quickaccess.js';
  import { IHostService } from '../../services/host/browser/host.js';
-@@ -412,37 +412,6 @@ class ShowAboutDialogAction extends Acti
+@@ -411,35 +411,6 @@ class ShowAboutDialogAction extends Acti
  	}
  }
  
@@ -38,7 +38,6 @@ Index: b/src/vs/workbench/browser/actions/windowActions.ts
 -				mnemonicTitle: localize({ key: 'miNewWindow', comment: ['&& denotes a mnemonic'] }, "New &&Window"),
 -			},
 -			f1: true,
--			precondition: IsSessionsWindowContext.negate(),
 -			keybinding: {
 -				weight: KeybindingWeight.WorkbenchContrib,
 -				primary: isWeb ? (isWindows ? KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Alt | KeyMod.Shift | KeyCode.KeyN) : KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyN,
@@ -48,7 +47,6 @@ Index: b/src/vs/workbench/browser/actions/windowActions.ts
 -				id: MenuId.MenubarFileMenu,
 -				group: '1_new',
 -				order: 3,
--				when: IsSessionsWindowContext.negate()
 -			}
 -		});
 -	}
@@ -62,7 +60,7 @@ Index: b/src/vs/workbench/browser/actions/windowActions.ts
  
  class BlurAction extends Action2 {
  
-@@ -463,7 +432,6 @@ class BlurAction extends Action2 {
+@@ -460,7 +431,6 @@ class BlurAction extends Action2 {
  
  // --- Actions Registration
  
@@ -70,22 +68,20 @@ Index: b/src/vs/workbench/browser/actions/windowActions.ts
  registerAction2(ToggleFullScreenAction);
  registerAction2(QuickPickRecentAction);
  registerAction2(OpenRecentAction);
-@@ -514,11 +482,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
- 	order: 1,
+@@ -512,9 +482,3 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	when: IsWebContext
  });
--
+ 
 -MenuRegistry.appendMenuItem(MenuId.MenubarFileMenu, {
 -	title: localize({ key: 'miOpenRecent', comment: ['&& denotes a mnemonic'] }, "Open &&Recent"),
 -	submenu: MenuId.MenubarRecentMenu,
 -	group: '2_open',
 -	order: 4,
--	when: IsSessionsWindowContext.negate()
 -});
-Index: b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+Index: code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
 ===================================================================
---- a/src/vs/workbench/browser/parts/editor/editor.contribution.ts
-+++ b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/browser/parts/editor/editor.contribution.ts
++++ code-editor-src/src/vs/workbench/browser/parts/editor/editor.contribution.ts
 @@ -43,8 +43,7 @@ import {
  	ReOpenInTextEditorAction, DuplicateGroupDownAction, DuplicateGroupLeftAction, DuplicateGroupRightAction, DuplicateGroupUpAction, ToggleEditorTypeAction, SplitEditorToAboveGroupAction, SplitEditorToBelowGroupAction,
  	SplitEditorToFirstGroupAction, SplitEditorToLastGroupAction, SplitEditorToLeftGroupAction, SplitEditorToNextGroupAction, SplitEditorToPreviousGroupAction, SplitEditorToRightGroupAction, NavigateForwardInEditsAction,
@@ -149,7 +145,7 @@ Index: b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
  MenuRegistry.appendMenuItem(MenuId.EditorTitleContext, { submenu: MenuId.EditorTitleContextShare, title: localize('share', "Share"), group: '11_share', order: -1, when: MultipleEditorsSelectedInGroupContext.negate() });
  
  // Editor Title Context Menu: Split & Move Editor Submenu
-@@ -776,29 +768,7 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -789,29 +781,7 @@ MenuRegistry.appendMenuItem(MenuId.Menub
  	order: 1
  });
  
@@ -179,10 +175,10 @@ Index: b/src/vs/workbench/browser/parts/editor/editor.contribution.ts
  
  MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
  	group: '4_layouts',
-Index: b/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+Index: code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 ===================================================================
---- a/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
-+++ b/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
+--- code-editor-src.orig/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
++++ code-editor-src/src/vs/workbench/contrib/files/browser/fileActions.contribution.ts
 @@ -10,7 +10,7 @@ import { MenuId, MenuRegistry, registerA
  import { ICommandAction } from '../../../../platform/action/common/action.js';
  import { KeyMod, KeyCode } from '../../../../base/common/keyCodes.js';

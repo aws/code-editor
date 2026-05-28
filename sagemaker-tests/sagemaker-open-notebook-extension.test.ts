@@ -5,8 +5,8 @@ import './test-framework';
 const PATCHED_VSCODE_DIR = join(process.cwd(), 'code-editor-src');
 
 describe('sagemaker-open-notebook-extension.patch validation', () => {
-  test('gulpfile.extensions.js should include sagemaker-open-notebook-extension', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'build/gulpfile.extensions.js');
+  test('gulpfile.extensions.ts should include sagemaker-open-notebook-extension', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'build/gulpfile.extensions.ts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
@@ -19,11 +19,11 @@ describe('sagemaker-open-notebook-extension.patch validation', () => {
       throw new Error(`Expected gulpfile entry not found in ${filePath}`);
     }
     
-    console.log('PASS: Open notebook extension added to gulpfile.extensions.js');
+    console.log('PASS: Open notebook extension added to gulpfile.extensions.ts');
   });
 
-  test('dirs.js should include sagemaker-open-notebook-extension', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'build/npm/dirs.js');
+  test('dirs.ts should include sagemaker-open-notebook-extension', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'build/npm/dirs.ts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
@@ -33,10 +33,10 @@ describe('sagemaker-open-notebook-extension.patch validation', () => {
     const expectedEntry = "'extensions/sagemaker-open-notebook-extension',";
     
     if (!content.includes(expectedEntry)) {
-      throw new Error(`Expected dirs.js entry not found in ${filePath}`);
+      throw new Error(`Expected dirs.ts entry not found in ${filePath}`);
     }
     
-    console.log('PASS: Open notebook extension added to dirs.js');
+    console.log('PASS: Open notebook extension added to dirs.ts');
   });
 
   test('sagemaker-open-notebook-extension should have package.json', () => {
