@@ -5,8 +5,8 @@ import './test-framework';
 const PATCHED_VSCODE_DIR = join(process.cwd(), 'code-editor-src');
 
 describe('sagemaker-extensions-sync.patch validation', () => {
-  test('gulpfile.extensions.js should include sagemaker-extensions-sync', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'build/gulpfile.extensions.js');
+  test('gulpfile.extensions.ts should include sagemaker-extensions-sync', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'build/gulpfile.extensions.ts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
@@ -19,11 +19,11 @@ describe('sagemaker-extensions-sync.patch validation', () => {
       throw new Error(`Expected gulpfile entry not found in ${filePath}`);
     }
     
-    console.log('PASS: Extensions sync added to gulpfile.extensions.js');
+    console.log('PASS: Extensions sync added to gulpfile.extensions.ts');
   });
 
-  test('dirs.js should include sagemaker-extensions-sync', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'build/npm/dirs.js');
+  test('dirs.ts should include sagemaker-extensions-sync', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'build/npm/dirs.ts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
@@ -33,10 +33,10 @@ describe('sagemaker-extensions-sync.patch validation', () => {
     const expectedEntry = "'extensions/sagemaker-extensions-sync',";
     
     if (!content.includes(expectedEntry)) {
-      throw new Error(`Expected dirs.js entry not found in ${filePath}`);
+      throw new Error(`Expected dirs.ts entry not found in ${filePath}`);
     }
     
-    console.log('PASS: Extensions sync added to dirs.js');
+    console.log('PASS: Extensions sync added to dirs.ts');
   });
 
   test('sagemaker-extensions-sync should have .vscodeignore', () => {

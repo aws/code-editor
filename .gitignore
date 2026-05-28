@@ -7,4 +7,5 @@ build-private
 code-editor-src
 vscode-reh-web-*
 code-editor-src-*
-node_modules.update-logs/
+node_modules
+.update-logs/

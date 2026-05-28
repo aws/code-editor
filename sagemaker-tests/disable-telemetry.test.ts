@@ -30,7 +30,7 @@ describe('disable-telemetry.diff validation', () => {
   });
 
   test('desktop.contribution.ts should have crash reporter disabled', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'src/vs/workbench/electron-sandbox/desktop.contribution.ts');
+    const filePath = join(PATCHED_VSCODE_DIR, 'src/vs/workbench/electron-browser/desktop.contribution.ts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
