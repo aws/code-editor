@@ -4,6 +4,10 @@ Introduces a built-in extension that monitors user activity (file changes,
 editor selections, terminal interactions) and logs the last active timestamp
 to a local file. Provides an /api/idle endpoint for external idle detection.
 
+Also monitors background state on a 60-second interval: active VS Code tasks,
+debug sessions, and unsaved documents (text files and notebooks) are treated
+as activity signals that prevent idle shutdown.
+
 Index: code-editor-src/extensions/sagemaker-idle-extension/README.md
 ===================================================================
 --- /dev/null
@@ -97,16 +101,28 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
-@@ -0,0 +1,58 @@
+@@ -0,0 +1,92 @@
 +import * as vscode from "vscode";
 +import * as fs from "fs";
 +import * as path from "path";
 +
++const CHECK_INTERVAL = 60000;
 +let idleFilePath: string;
++let backgroundStateInterval: ReturnType<typeof setInterval> | undefined;
 +
 +export function activate(context: vscode.ExtensionContext) {
 +	initializeIdleFilePath();
 +	registerEventListeners(context);
++	backgroundStateInterval = startMonitoringBackgroundState();
++
++	context.subscriptions.push({
++		dispose: () => {
++			if (backgroundStateInterval) {
++				clearInterval(backgroundStateInterval);
++				backgroundStateInterval = undefined;
++			}
++		}
++	});
 +}
 +
 +export function deactivate() {}
@@ -155,6 +171,28 @@ Index: code-editor-src/extensions/sagemaker-idle-extension/src/extension.ts
 +function updateLastActivityTimestamp() {
 +	const timestamp = new Date().toISOString();
 +	fs.writeFileSync(idleFilePath, timestamp);
++}
++
++/**
++ * Monitors background state (tasks, debug sessions, unsaved work) on an interval.
++ * Updates the idle file if any background activity is detected.
++ */
++function startMonitoringBackgroundState(): ReturnType<typeof setInterval> {
++	return setInterval(() => {
++		const hasActiveTasks = vscode.tasks.taskExecutions.length > 0;
++		const hasDebugSession = vscode.debug.activeDebugSession !== undefined;
++
++		const hasUnsavedText = vscode.workspace.textDocuments.some(
++			(doc) => doc.isDirty && (doc.uri.scheme === "file" || doc.uri.scheme === "untitled")
++		);
++		const hasUnsavedNotebooks = vscode.workspace.notebookDocuments.some(
++			(notebook) => notebook.isDirty
++		);
++
++		if (hasActiveTasks || hasDebugSession || hasUnsavedText || hasUnsavedNotebooks) {
++			updateLastActivityTimestamp();
++		}
++	}, CHECK_INTERVAL);
 +}
 \ No newline at end of file
 Index: code-editor-src/src/vs/server/node/webClientServer.ts

@@ -41,18 +41,70 @@ describe('sagemaker-idle-extension.patch validation', () => {
 
   test('sagemaker-idle-extension should have package.json with correct name', () => {
     const filePath = join(PATCHED_VSCODE_DIR, 'extensions/sagemaker-idle-extension/package.json');
-    
+
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
     }
-    
+
     const content = readFileSync(filePath, 'utf8');
     const packageJson = JSON.parse(content);
-    
+
     if (packageJson.name !== 'sagemaker-idle-extension') {
       throw new Error(`Expected extension name 'sagemaker-idle-extension', got: ${packageJson.name}`);
     }
-    
+
     console.log('PASS: SageMaker idle extension package.json is valid');
+  });
+
+  test('sagemaker-idle-extension should monitor background state (tasks, debug, unsaved work)', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'extensions/sagemaker-idle-extension/src/extension.ts');
+
+    if (!existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    const content = readFileSync(filePath, 'utf8');
+
+    if (!content.includes('vscode.tasks.taskExecutions.length > 0')) {
+      throw new Error('Expected task execution check not found in extension.ts');
+    }
+
+    if (!content.includes('vscode.debug.activeDebugSession !== undefined')) {
+      throw new Error('Expected debug session check not found in extension.ts');
+    }
+
+    if (!content.includes('doc.isDirty')) {
+      throw new Error('Expected unsaved text document check not found in extension.ts');
+    }
+
+    if (!content.includes('vscode.workspace.notebookDocuments.some')) {
+      throw new Error('Expected unsaved notebook check not found in extension.ts');
+    }
+
+    if (!content.includes('startMonitoringBackgroundState')) {
+      throw new Error('Expected startMonitoringBackgroundState function not found in extension.ts');
+    }
+
+    console.log('PASS: SageMaker idle extension monitors background state');
+  });
+
+  test('sagemaker-idle-extension should clean up interval on dispose', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'extensions/sagemaker-idle-extension/src/extension.ts');
+
+    if (!existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+
+    const content = readFileSync(filePath, 'utf8');
+
+    if (!content.includes('clearInterval(backgroundStateInterval)')) {
+      throw new Error('Expected clearInterval cleanup not found in extension.ts');
+    }
+
+    if (!content.includes('context.subscriptions.push')) {
+      throw new Error('Expected subscription push for dispose not found in extension.ts');
+    }
+
+    console.log('PASS: SageMaker idle extension cleans up interval on dispose');
   });
 });
