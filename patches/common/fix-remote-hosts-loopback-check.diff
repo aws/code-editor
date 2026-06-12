@@ -1,0 +1,31 @@
+Backport remote hosts loopback check from upstream Code-OSS.
+Add isLoopbackHost helper for remote authority validation.
+Remove when Code-OSS is updated to >= 1.123.1.
+
+@backported: https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e
+@finding-id: CVE-2026-47281 GHSA-5j3g-c7qg-xfvx
+Index: b/src/vs/platform/remote/common/remoteHosts.ts
+===================================================================
+--- a/src/vs/platform/remote/common/remoteHosts.ts
++++ b/src/vs/platform/remote/common/remoteHosts.ts
+@@ -63,3 +63,20 @@ function parseAuthority(authority: strin
+ 	// doesn't contain a port
+ 	return { host: authority, port: undefined };
+ }
++
++const loopbackHosts = new Set([
++	'localhost',
++	'127.0.0.1',
++	'::1',
++	'[::1]',
++	'0000:0000:0000:0000:0000:0000:0000:0001',
++	'[0000:0000:0000:0000:0000:0000:0000:0001]'
++]);
++
++/**
++ * Returns whether the given host (as found in a direct `<host>:<port>` remote
++ * authority) refers to the local loopback interface.
++ */
++export function isLoopbackHost(host: string): boolean {
++	return loopbackHosts.has(host.toLowerCase());
++}

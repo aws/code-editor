@@ -23,6 +23,11 @@ common/override-picomatch-cve-2026-33671.diff
 common/override-follow-redirects-ghsa-r4q5.diff
 common/override-uuid-ghsa-w5hq.diff
 common/finding-override-ip-address.diff
+common/finding-override-shell-quote.diff
+common/fix-github-credential-provider-host-check.diff
+common/fix-extpath-is-equal-or-parent.diff
+common/fix-snippets-path-traversal.diff
+common/fix-remote-hosts-loopback-check.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff

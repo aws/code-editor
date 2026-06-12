@@ -1,0 +1,22 @@
+Override shell-quote to ^1.8.4 to resolve CVE-2026-9277 (critical).
+Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-shell-quote.diff --override 'global:shell-quote=^1.8.4'
+Remove when upstream Code-OSS updates shell-quote to >= 1.8.4.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-shell-quote.diff --override 'global:shell-quote=^1.8.4'
+@override-package: shell-quote@^1.8.4
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -238,7 +238,8 @@
+     "picomatch": "2.3.2",
+     "follow-redirects": "1.16.0",
+     "uuid": "14.0.0",
+-    "ip-address": "^10.1.1"
++    "ip-address": "^10.1.1",
++    "shell-quote": "^1.8.4"
+   },
+   "repository": {
+     "type": "git",

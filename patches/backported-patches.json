@@ -1,42 +1,26 @@
 [
-    {
-        "finding_id": "GHSA-3pwg-f3hj-wp8p",
-        "affected_versions": "<1.109.1",
-        "patch_path": "common/fix-terminal-autoreplies.diff",
-        "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-3pwg-f3hj-wp8p"
-    },
-    {
-        "finding_id": "CVE-2026-21523",
-        "affected_versions": "<1.109.1",
-        "patch_path": "common/fix-terminal-autoreplies.diff",
-        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-21523"
-    },
-    {
-        "finding_id": "GHSA-9f6c-63gp-pwpf",
-        "affected_versions": "<1.119.1",
-        "patch_path": "N/A",
-        "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-9f6c-63gp-pwpf",
-        "note": "vulnerable code path does not exist in Code-OSS 1.101.2"
-    },
-    {
-        "finding_id": "CVE-2026-41613",
-        "affected_versions": "<1.119.1",
-        "patch_path": "N/A",
-        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41613",
-        "note": "vulnerable code path does not exist in Code-OSS 1.101.2"
-    },
-    {
-        "finding_id": "CVE-2026-41109",
-        "affected_versions": "<1.119.1",
-        "patch_path": "N/A",
-        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-41109",
-        "note": "Copilot extension does not exist in Code-OSS 1.101.2"
-    },
-    {
-        "finding_id": "GHSA-rg3f-8xq5-hwh6",
-        "affected_versions": "<1.119.1",
-        "patch_path": "N/A",
-        "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-rg3f-8xq5-hwh6",
-        "note": "Copilot extension does not exist in Code-OSS 1.101.2"
-    }
+  {
+    "finding_id": "CVE-2026-21523",
+    "affected_versions": "< 1.109.1",
+    "patch_path": "patches/common/fix-terminal-autoreplies.diff",
+    "link": "https://github.com/microsoft/vscode/commit/6534f6ba"
+  },
+  {
+    "finding_id": "CVE-2026-47284",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-github-credential-provider-host-check.diff",
+    "link": "https://github.com/microsoft/vscode/commit/4b6e2467dbd828018d602f73cc25d1b11f699d2c"
+  },
+  {
+    "finding_id": "CVE-2026-47287",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-snippets-path-traversal.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9b31ff896671125cbfc65f33731c4a99660d6201"
+  },
+  {
+    "finding_id": "CVE-2026-47281",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-remote-hosts-loopback-check.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e"
+  }
 ]

@@ -1,0 +1,50 @@
+Backport extpath isEqualOrParent path traversal normalization from upstream.
+Normalizes paths containing '..' segments before comparison to prevent
+path traversal attacks via isEqualOrParent checks.
+Remove when Code-OSS is updated to >= 1.123.1.
+
+@backported: https://github.com/microsoft/vscode/commit/0f1ba1ea103757f3023cc1f9c3eb7327c3ec4b02
+@finding-id: GHSA-extpath-is-equal-or-parent
+Index: b/src/vs/base/common/extpath.ts
+===================================================================
+--- a/src/vs/base/common/extpath.ts
++++ b/src/vs/base/common/extpath.ts
+@@ -224,7 +224,9 @@ export function isEqual(pathA: string, p
+  * you are in a context without services, consider to pass down the `extUri` from the
+  * outside, or use `extUriBiasedIgnorePathCase` if you know what you are doing.
+  */
+-export function isEqualOrParent(base: string, parentCandidate: string, ignoreCase?: boolean, separator = sep): boolean {
++export function isEqualOrParent(base: string, parentCandidate: string, ignoreCase?: boolean, forcePosixSemantics = false): boolean {
++	const separator = forcePosixSemantics ? posix.sep : sep;
++
+ 	if (base === parentCandidate) {
+ 		return true;
+ 	}
+@@ -233,6 +235,14 @@ export function isEqualOrParent(base: st
+ 		return false;
+ 	}
+ 
++	if (
++		base.indexOf('..') >= 0 ||
++		parentCandidate.indexOf('..') >= 0
++	) {
++		base = forcePosixSemantics ? posix.normalize(base) : normalize(base);
++		parentCandidate = forcePosixSemantics ? posix.normalize(parentCandidate) : normalize(parentCandidate);
++	}
++
+ 	if (parentCandidate.length > base.length) {
+ 		return false;
+ 	}
+Index: b/src/vs/base/common/resources.ts
+===================================================================
+--- a/src/vs/base/common/resources.ts
++++ b/src/vs/base/common/resources.ts
+@@ -174,7 +174,7 @@ export class ExtUri implements IExtUri {
+ 				return extpath.isEqualOrParent(originalFSPath(base), originalFSPath(parentCandidate), this._ignorePathCasing(base)) && base.query === parentCandidate.query && (ignoreFragment || base.fragment === parentCandidate.fragment);
+ 			}
+ 			if (isEqualAuthority(base.authority, parentCandidate.authority)) {
+-				return extpath.isEqualOrParent(base.path, parentCandidate.path, this._ignorePathCasing(base), '/') && base.query === parentCandidate.query && (ignoreFragment || base.fragment === parentCandidate.fragment);
++				return extpath.isEqualOrParent(base.path, parentCandidate.path, this._ignorePathCasing(base), true) && base.query === parentCandidate.query && (ignoreFragment || base.fragment === parentCandidate.fragment);
+ 			}
+ 		}
+ 		return false;
