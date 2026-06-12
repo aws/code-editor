@@ -12,6 +12,12 @@
         "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-21523"
     },
     {
+        "finding_id": "CVE-2026-21518",
+        "affected_versions": "<1.109.1",
+        "patch_path": "common/fix-mcp-workspace-trust.diff",
+        "link": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-21518"
+    },
+    {
         "finding_id": "CVE-2026-41613",
         "affected_versions": "<1.119.1",
         "patch_path": "common/fix-mcp-server-editor-disclosure.diff",
@@ -36,5 +42,29 @@
         "patch_path": "N/A",
         "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-rg3f-8xq5-hwh6",
         "note": "Copilot extension not present in Code-OSS 1.108.2"
+    },
+    {
+        "finding_id": "GHSA-credential-provider-host-match",
+        "affected_versions": "<1.123.1",
+        "patch_path": "common/fix-github-credential-provider-host-match.diff",
+        "link": "https://github.com/microsoft/vscode/commit/4b6e2467dbd828018d602f73cc25d1b11f699d2c"
+    },
+    {
+        "finding_id": "GHSA-extpath-is-equal-or-parent",
+        "affected_versions": "<1.123.1",
+        "patch_path": "common/fix-extpath-is-equal-or-parent.diff",
+        "link": "https://github.com/microsoft/vscode/commit/0f1ba1ea103757f3023cc1f9c3eb7327c3ec4b02"
+    },
+    {
+        "finding_id": "GHSA-snippets-path-traversal",
+        "affected_versions": "<1.123.1",
+        "patch_path": "common/fix-snippets-path-traversal.diff",
+        "link": "https://github.com/microsoft/vscode/commit/9b31ff896671125cbfc65f33731c4a99660d6201"
+    },
+    {
+        "finding_id": "GHSA-remote-hosts-loopback",
+        "affected_versions": "<1.123.1",
+        "patch_path": "common/fix-remote-hosts-loopback-check.diff",
+        "link": "https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e"
     }
 ]

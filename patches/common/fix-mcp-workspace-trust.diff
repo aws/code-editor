@@ -1,0 +1,183 @@
+Backport MCP workspace trust requirement from upstream Code-OSS.
+Requires workspace trust before starting MCP servers defined in workspace
+files. Also adds punycode encoding utilities needed for MCP server URL
+validation.
+Remove when Code-OSS is updated to >= 1.109.1.
+
+@backported: https://github.com/microsoft/vscode/commit/cd11faec7b031b928bc5ec37f350d623ffb28713
+@finding-id: CVE-2026-21518
+Index: b/src/vs/base/common/strings.ts
+===================================================================
+--- a/src/vs/base/common/strings.ts
++++ b/src/vs/base/common/strings.ts
+@@ -1362,3 +1362,134 @@ function toBinary(str: string): string {
+ export function multibyteAwareBtoa(str: string): string {
+ 	return btoa(toBinary(str));
+ }
++
++//#region Punycode
++
++// RFC 3492 constants
++const enum PunycodeConstants {
++	BASE = 36,
++	TMIN = 1,
++	TMAX = 26,
++	SKEW = 38,
++	DAMP = 700,
++	INITIAL_BIAS = 72,
++	INITIAL_N = 128,
++	DELIMITER = CharCode.Dash
++}
++
++function encodePunycodeDigit(d: number): number {
++	return d < 26 ? CharCode.a + d : CharCode.Digit0 + d - 26;
++}
++
++function adaptPunycodeBias(delta: number, numPoints: number, firstTime: boolean): number {
++	delta = firstTime ? Math.floor(delta / PunycodeConstants.DAMP) : delta >> 1;
++	delta += Math.floor(delta / numPoints);
++
++	let k = 0;
++	const baseMinusTmin = PunycodeConstants.BASE - PunycodeConstants.TMIN;
++	while (delta > (baseMinusTmin * PunycodeConstants.TMAX) >> 1) {
++		delta = Math.floor(delta / baseMinusTmin);
++		k += PunycodeConstants.BASE;
++	}
++	return k + Math.floor((baseMinusTmin + 1) * delta / (delta + PunycodeConstants.SKEW));
++}
++
++export function punycodeEncode(input: string): string {
++	const output: number[] = [];
++
++	const codePoints: number[] = [];
++	const iterator = new CodePointIterator(input);
++	while (!iterator.eol()) {
++		const cp = iterator.nextCodePoint();
++		if (cp >= 0xD800 && cp <= 0xDFFF) {
++			throw new Error('Invalid surrogate pair in input');
++		}
++		codePoints.push(cp);
++	}
++
++	let basicCount = 0;
++	for (const cp of codePoints) {
++		if (cp < PunycodeConstants.INITIAL_N) {
++			output.push(cp);
++			basicCount++;
++		}
++	}
++
++	const handledCount = basicCount;
++	if (basicCount > 0 && basicCount < codePoints.length) {
++		output.push(PunycodeConstants.DELIMITER);
++	}
++
++	let n = PunycodeConstants.INITIAL_N;
++	let delta = 0;
++	let bias = PunycodeConstants.INITIAL_BIAS;
++	let h = handledCount;
++
++	while (h < codePoints.length) {
++		let m = 0x10FFFF;
++		for (const cp of codePoints) {
++			if (cp >= n && cp < m) {
++				m = cp;
++			}
++		}
++
++		const deltaIncrement = (m - n) * (h + 1);
++		if (delta > Number.MAX_SAFE_INTEGER - deltaIncrement) {
++			throw new Error('Punycode overflow');
++		}
++		delta += deltaIncrement;
++		n = m;
++
++		for (const cp of codePoints) {
++			if (cp < n) {
++				delta++;
++				if (delta === 0) {
++					throw new Error('Punycode overflow');
++				}
++			} else if (cp === n) {
++				let q = delta;
++				for (let k = PunycodeConstants.BASE; ; k += PunycodeConstants.BASE) {
++					const t = k <= bias ? PunycodeConstants.TMIN :
++						k >= bias + PunycodeConstants.TMAX ? PunycodeConstants.TMAX :
++							k - bias;
++					if (q < t) {
++						break;
++					}
++					const digit = t + ((q - t) % (PunycodeConstants.BASE - t));
++					output.push(encodePunycodeDigit(digit));
++					q = Math.floor((q - t) / (PunycodeConstants.BASE - t));
++				}
++				output.push(encodePunycodeDigit(q));
++				bias = adaptPunycodeBias(delta, h + 1, h === handledCount);
++				delta = 0;
++				h++;
++			}
++		}
++		delta++;
++		n++;
++	}
++
++	let ret = '';
++	for (const ch of output) {
++		ret += String.fromCharCode(ch);
++	}
++	return ret;
++}
++
++export function toPunycodeACE(label: string): string {
++	let hasNonASCII = false;
++	for (let i = 0; i < label.length; i++) {
++		if (label.charCodeAt(i) >= PunycodeConstants.INITIAL_N) {
++			hasNonASCII = true;
++			break;
++		}
++	}
++
++	if (!hasNonASCII) {
++		return label;
++	}
++
++	return 'xn--' + punycodeEncode(label);
++}
++
++//#endregion
+Index: b/src/vs/workbench/contrib/mcp/common/mcpRegistry.ts
+===================================================================
+--- a/src/vs/workbench/contrib/mcp/common/mcpRegistry.ts
++++ b/src/vs/workbench/contrib/mcp/common/mcpRegistry.ts
+@@ -26,6 +26,7 @@ import { observableConfigValue } from '.
+ import { IQuickInputButton, IQuickInputService, IQuickPickItem } from '../../../../platform/quickinput/common/quickInput.js';
+ import { StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
+ import { IWorkspaceFolderData } from '../../../../platform/workspace/common/workspace.js';
++import { IWorkspaceTrustManagementService, IWorkspaceTrustRequestService } from '../../../../platform/workspace/common/workspaceTrust.js';
+ import { IConfigurationResolverService } from '../../../services/configurationResolver/common/configurationResolver.js';
+ import { ConfigurationResolverExpression, IResolvedValue } from '../../../services/configurationResolver/common/configurationResolverExpression.js';
+ import { AUX_WINDOW_GROUP, IEditorService } from '../../../services/editor/common/editorService.js';
+@@ -85,6 +86,8 @@ export class McpRegistry extends Disposa
+ 		@IQuickInputService private readonly _quickInputService: IQuickInputService,
+ 		@ILabelService private readonly _labelService: ILabelService,
+ 		@ILogService private readonly _logService: ILogService,
++		@IWorkspaceTrustManagementService private readonly _workspaceTrustManagementService: IWorkspaceTrustManagementService,
++		@IWorkspaceTrustRequestService private readonly _workspaceTrustRequestService: IWorkspaceTrustRequestService,
+ 	) {
+ 		super();
+ 		this._mcpAccessValue = observableConfigValue(mcpAccessConfig, McpAccessValue.All, configurationService);
+@@ -211,6 +214,14 @@ export class McpRegistry extends Disposa
+ 		autoTrustChanges = false,
+ 		errorOnUserInteraction = false,
+ 	}: IMcpResolveConnectionOptions) {
++		if (collection.scope === StorageScope.WORKSPACE && !this._workspaceTrustManagementService.isWorkspaceTrusted()) {
++			if (errorOnUserInteraction) {
++				throw new UserInteractionRequiredError('workspaceTrust');
++			} else if (!await this._workspaceTrustRequestService.requestWorkspaceTrust({ message: localize('runTrust', "This MCP server definition is defined in your workspace files.") })) {
++				return false;
++			}
++		}
++
+ 		if (collection.trustBehavior === McpServerTrust.Kind.Trusted) {
+ 			this._logService.trace(`MCP server ${definition.id} is trusted, no trust prompt needed`);
+ 			return true;
