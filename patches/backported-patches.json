@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "commit": "4b6e2467",
+    "patch": "common/ghsa-credential-provider-host-match.diff",
+    "description": "GitHub credential provider: change regex host match to strict equality",
+    "upstreamFixVersion": "1.123.1"
+  },
+  {
+    "commit": "9b31ff89",
+    "patch": "common/ghsa-snippets-path-traversal.diff",
+    "description": "Profile snippets: fix path traversal in snippet import",
+    "upstreamFixVersion": "1.123.1"
+  },
+  {
+    "commit": "9505d0fc",
+    "patch": "common/ghsa-remote-hosts-loopback.diff",
+    "description": "Remote hosts: add isLoopbackHost function for authority validation",
+    "upstreamFixVersion": "1.123.1"
+  }
+]
