@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "finding_id": "CVE-2026-47284",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-credential-provider-host-match.diff",
+    "link": "https://github.com/microsoft/vscode/commit/4b6e2467dbd828018d602f73cc25d1b11f699d2c"
+  },
+  {
+    "finding_id": "CVE-2026-47287",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-snippets-path-traversal.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9b31ff896671125cbfc65f33731c4a99660d6201"
+  },
+  {
+    "finding_id": "CVE-2026-47281",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/fix-remote-hosts-loopback.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e"
+  }
+]
