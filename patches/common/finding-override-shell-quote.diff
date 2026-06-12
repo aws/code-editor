@@ -1,0 +1,32 @@
+Override shell-quote to ^1.8.4.
+Regenerate: npx ts-node build-tools/apply-finding-overrides/apply-finding-overrides.ts apply --patch common/finding-override-shell-quote.diff --override global:shell-quote=^1.8.4 --override remote/package.json@global:shell-quote=^1.8.4
+Remove when upstream Code-OSS updates shell-quote to >= 1.8.4.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-shell-quote.diff --override 'global:shell-quote=^1.8.4' --override 'remote/package.json@global:shell-quote=^1.8.4'
+@override-package: shell-quote@^1.8.4
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -246,6 +246,7 @@
+     "yaserver": "^0.4.0"
+   },
+   "overrides": {
++    "shell-quote": "^1.8.4",
+     "postcss": "^8.4.31",
+     "node-gyp-build": "4.8.1",
+     "serialize-javascript": "^7.0.3",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -48,6 +48,7 @@
+     "yazl": "^2.4.3"
+   },
+   "overrides": {
++    "shell-quote": "^1.8.4",
+     "node-gyp-build": "4.8.1",
+     "ssh2": {
+       "cpu-features": "0.0.0"

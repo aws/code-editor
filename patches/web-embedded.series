@@ -64,3 +64,7 @@ web-embedded/only-allow-trusted-origins-in-webviews.diff
 web-embedded/enable-ts-features.diff
 web-embedded/disable-accounts-and-profiles.diff
 web-embedded/disable-file-actions.diff
+common/finding-override-shell-quote.diff
+common/fix-credential-provider-host-match.diff
+common/fix-snippets-path-traversal.diff
+common/fix-remote-hosts-loopback.diff
