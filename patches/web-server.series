@@ -43,3 +43,7 @@ web-server/embedding-events.diff
 web-server/proxy-uri.diff
 web-server/display-language.diff
 web-server/signature-verification.diff
+common/finding-override-shell-quote.diff
+common/fix-credential-provider-host-match.diff
+common/fix-snippets-path-traversal.diff
+common/fix-remote-hosts-loopback.diff
