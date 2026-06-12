@@ -1,0 +1,97 @@
+Backport remote hosts loopback check from upstream Code-OSS.
+Prompts user before connecting to non-loopback remote host:port authorities
+to prevent crafted workspaces from silently connecting to attacker-controlled
+servers.
+Remove when Code-OSS is updated to >= 1.123.1.
+
+@backported: https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e
+@finding-id: GHSA-remote-hosts-loopback
+Index: b/src/vs/platform/remote/common/remoteHosts.ts
+===================================================================
+--- a/src/vs/platform/remote/common/remoteHosts.ts
++++ b/src/vs/platform/remote/common/remoteHosts.ts
+@@ -63,3 +63,20 @@ function parseAuthority(authority: strin
+ 	// doesn't contain a port
+ 	return { host: authority, port: undefined };
+ }
++
++const loopbackHosts = new Set([
++	'localhost',
++	'127.0.0.1',
++	'::1',
++	'[::1]',
++	'0000:0000:0000:0000:0000:0000:0000:0001',
++	'[0000:0000:0000:0000:0000:0000:0000:0001]'
++]);
++
++/**
++ * Returns whether the given host (as found in a direct `<host>:<port>` remote
++ * authority) refers to the local loopback interface.
++ */
++export function isLoopbackHost(host: string): boolean {
++	return loopbackHosts.has(host.toLowerCase());
++}
+Index: b/src/vs/workbench/services/extensions/common/abstractExtensionService.ts
+===================================================================
+--- a/src/vs/workbench/services/extensions/common/abstractExtensionService.ts
++++ b/src/vs/workbench/services/extensions/common/abstractExtensionService.ts
+@@ -118,7 +118,7 @@ export abstract class AbstractExtensionS
+ 		@IRemoteExtensionsScannerService protected readonly _remoteExtensionsScannerService: IRemoteExtensionsScannerService,
+ 		@ILifecycleService private readonly _lifecycleService: ILifecycleService,
+ 		@IRemoteAuthorityResolverService protected readonly _remoteAuthorityResolverService: IRemoteAuthorityResolverService,
+-		@IDialogService private readonly _dialogService: IDialogService,
++		@IDialogService protected readonly _dialogService: IDialogService,
+ 	) {
+ 		super();
+ 
+Index: b/src/vs/workbench/services/extensions/electron-browser/nativeExtensionService.ts
+===================================================================
+--- a/src/vs/workbench/services/extensions/electron-browser/nativeExtensionService.ts
++++ b/src/vs/workbench/services/extensions/electron-browser/nativeExtensionService.ts
+@@ -29,9 +29,9 @@ import { IOpenerService } from '../../..
+ import { IProductService } from '../../../../platform/product/common/productService.js';
+ import { PersistentConnectionEventType } from '../../../../platform/remote/common/remoteAgentConnection.js';
+ import { IRemoteAgentEnvironment } from '../../../../platform/remote/common/remoteAgentEnvironment.js';
+-import { IRemoteAuthorityResolverService, RemoteAuthorityResolverError, RemoteConnectionType, ResolverResult, getRemoteAuthorityPrefix } from '../../../../platform/remote/common/remoteAuthorityResolver.js';
++import { IRemoteAuthorityResolverService, RemoteAuthorityResolverError, RemoteAuthorityResolverErrorCode, RemoteConnectionType, ResolverResult, getRemoteAuthorityPrefix } from '../../../../platform/remote/common/remoteAuthorityResolver.js';
+ import { IRemoteExtensionsScannerService } from '../../../../platform/remote/common/remoteExtensionsScanner.js';
+-import { getRemoteName, parseAuthorityWithPort } from '../../../../platform/remote/common/remoteHosts.js';
++import { getRemoteName, isLoopbackHost, parseAuthorityWithPort } from '../../../../platform/remote/common/remoteHosts.js';
+ import { updateProxyConfigurationsScope } from '../../../../platform/request/common/request.js';
+ import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
+ import { IWorkspaceContextService } from '../../../../platform/workspace/common/workspace.js';
+@@ -275,6 +275,11 @@ export class NativeExtensionService exte
+ 		if (authorityPlusIndex === -1) {
+ 			// This authority does not need to be resolved, simply parse the port number
+ 			const { host, port } = parseAuthorityWithPort(remoteAuthority);
++
++			if (!isLoopbackHost(host)) {
++				await this._confirmDirectRemoteConnection(host, port);
++			}
++
+ 			return {
+ 				authority: {
+ 					authority: remoteAuthority,
+@@ -291,6 +296,22 @@ export class NativeExtensionService exte
+ 		return this._resolveAuthorityOnExtensionHosts(ExtensionHostKind.LocalProcess, remoteAuthority);
+ 	}
+ 
++	private async _confirmDirectRemoteConnection(host: string, port: number): Promise<void> {
++		const { confirmed } = await this._dialogService.confirm({
++			type: Severity.Warning,
++			message: nls.localize('remoteConnectionConfirm', "Allow connecting to the remote server '{0}:{1}'?", host, port),
++			detail: nls.localize('remoteConnectionConfirmDetail', "Code is about to connect to '{0}:{1}' to host a remote extension host. Only continue if you trust this server, as it will be able to run code and access files on your behalf.", host, port),
++			primaryButton: nls.localize('remoteConnectionConfirmButton', "Connect")
++		});
++
++		if (!confirmed) {
++			throw new RemoteAuthorityResolverError(
++				nls.localize('remoteConnectionRejected', "Connection to '{0}:{1}' was not allowed.", host, port),
++				RemoteAuthorityResolverErrorCode.NotAvailable
++			);
++		}
++	}
++
+ 	private async _getCanonicalURI(remoteAuthority: string, uri: URI): Promise<URI> {
+ 
+ 		const authorityPlusIndex = remoteAuthority.indexOf('+');

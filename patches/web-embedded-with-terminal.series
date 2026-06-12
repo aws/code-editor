@@ -23,7 +23,13 @@ common/override-picomatch.diff
 common/override-follow-redirects.diff
 common/override-uuid-ghsa-w5hq.diff
 common/finding-override-ip-address.diff
+common/finding-override-shell-quote.diff
 common/fix-mcp-server-editor-disclosure.diff
+common/fix-github-credential-provider-host-match.diff
+common/fix-extpath-is-equal-or-parent.diff
+common/fix-snippets-path-traversal.diff
+common/fix-remote-hosts-loopback-check.diff
+common/fix-mcp-workspace-trust.diff
 web-embedded/readd-workbench.diff
 web-embedded/suppress-known-errors-build-integration.diff
 web-embedded/disable-built-in-walkthroughs-from-c.diff

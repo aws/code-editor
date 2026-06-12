@@ -27,6 +27,7 @@ web-server/local-storage.diff
 web-server/base-path.diff
 web-server/webview.diff
 common/finding-override-ip-address.diff
+common/finding-override-shell-quote.diff
 common/fix-mcp-server-editor-disclosure.diff
 web-server/marketplace.diff
 web-server/integration.diff
@@ -54,3 +55,8 @@ sagemaker/sanitize-terminal-sendtext-paths.diff
 sagemaker/override-picomatch-post-startup-notifications.diff
 sagemaker/remove-delay-shutdown-endpoint.diff
 sagemaker/fix-web-extension-resource-host-validation.diff
+common/fix-github-credential-provider-host-match.diff
+common/fix-extpath-is-equal-or-parent.diff
+common/fix-snippets-path-traversal.diff
+common/fix-remote-hosts-loopback-check.diff
+common/fix-mcp-workspace-trust.diff
