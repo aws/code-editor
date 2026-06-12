@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "finding_id": "CVE-2026-47284",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-credential-provider-host-match.diff",
+    "link": "https://github.com/microsoft/vscode/commit/4b6e2467dbd828018d602f73cc25d1b11f699d2c"
+  },
+  {
+    "finding_id": "GHSA-qcxw-jfff-cxpc",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-credential-provider-host-match.diff",
+    "link": "https://github.com/microsoft/vscode/commit/4b6e2467dbd828018d602f73cc25d1b11f699d2c"
+  },
+  {
+    "finding_id": "CVE-2026-47287",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-snippets-path-traversal.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9b31ff896671125cbfc65f33731c4a99660d6201"
+  },
+  {
+    "finding_id": "GHSA-hgwg-xqr5-q87f",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-snippets-path-traversal.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9b31ff896671125cbfc65f33731c4a99660d6201"
+  },
+  {
+    "finding_id": "CVE-2026-47281",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-remote-hosts-loopback.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e"
+  },
+  {
+    "finding_id": "GHSA-5j3g-c7qg-xfvx",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "patches/common/ghsa-remote-hosts-loopback.diff",
+    "link": "https://github.com/microsoft/vscode/commit/9505d0fca49eadb707c450d18dcb41a46b720a9e"
+  },
+  {
+    "finding_id": "CVE-2026-45482",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-c82g-9gj4-hxp2",
+    "note": "GitHub Copilot path traversal - Copilot not present in Code Editor"
+  },
+  {
+    "finding_id": "GHSA-c82g-9gj4-hxp2",
+    "affected_versions": "< 1.123.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-c82g-9gj4-hxp2",
+    "note": "GitHub Copilot path traversal - Copilot not present in Code Editor"
+  }
+]
