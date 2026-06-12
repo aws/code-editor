@@ -61,3 +61,7 @@ web-embedded/remove-new-window-actions-and-profile-workspace-section.diff
 web-embedded/only-allow-trusted-origins-in-webviews.diff
 web-embedded/disable-accounts-and-profiles.diff
 web-embedded/disable-file-actions.diff
+common/finding-override-shell-quote.diff
+common/ghsa-credential-provider-host-match.diff
+common/ghsa-snippets-path-traversal.diff
+common/ghsa-remote-hosts-loopback.diff
