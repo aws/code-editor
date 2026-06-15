@@ -31,12 +31,21 @@ jobs:
   get-branches-to-scan:
     runs-on: ubuntu-latest
     outputs:
-      security-scan-branches: ${{ steps.determine-pr-branches.outputs.branches || steps.determine-scheduled-security-scan-branches.outputs.branches }}
-      global-dependencies-branches: ${{ steps.determine-pr-branches.outputs.branches || steps.determine-scheduled-global-dependencies-branches.outputs.branches }}
-      output-branch-name: ${{ steps.determine-pr-branches.outputs.output-branch-name || steps.get-upstream-branches.outputs.output-branch-name }}
+      security-scan-branches: ${{ steps.manual-branch.outputs.branches || steps.determine-pr-branches.outputs.branches || steps.determine-scheduled-security-scan-branches.outputs.branches }}
+      global-dependencies-branches: ${{ steps.manual-branch.outputs.branches || steps.determine-pr-branches.outputs.branches || steps.determine-scheduled-global-dependencies-branches.outputs.branches }}
+      output-branch-name: ${{ steps.manual-branch.outputs.output-branch-name || steps.determine-pr-branches.outputs.output-branch-name || steps.get-upstream-branches.outputs.output-branch-name }}
     steps:
+      - name: Use current branch for manual dispatch
+        id: manual-branch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "Scanning current branch: ${{ github.ref_name }}"
+          echo 'branches=["${{ github.ref_name }}"]' >> "$GITHUB_OUTPUT"
+          echo "output-branch-name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@v6
+        if: github.event_name == 'schedule'
         with:
           fetch-depth: 0
 
@@ -63,7 +72,7 @@ jobs:
 
       - name: Get all upstream branches
         id: get-upstream-branches
-        if: github.event_name != 'push'
+        if: github.event_name == 'schedule'
         run: |
           # Get main branch and all version branches (*.*)
           branches=$(git branch -r | grep -E 'origin/(main|[0-9]+\.[0-9]+)$' | sed 's/origin\///' | tr '\n' ' ')
@@ -73,7 +82,7 @@ jobs:
 
       - name: Get completed workflows from previous day
         id: get-completed-workflows
-        if: github.event_name != 'push'
+        if: github.event_name == 'schedule'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -97,7 +106,7 @@ jobs:
 
       - name: Check for successful scan artifacts from previous day
         id: check-scan-artifacts
-        if: github.event_name != 'push'
+        if: github.event_name == 'schedule'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
@@ -148,7 +157,7 @@ jobs:
 
       - name: Determine security scan branches for scheduled runs
         id: determine-scheduled-security-scan-branches
-        if: github.event_name != 'push'
+        if: github.event_name == 'schedule'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-security-scan-branches }}"
@@ -185,7 +194,7 @@ jobs:
 
       - name: Determine global dependencies branches for scheduled runs
         id: determine-scheduled-global-dependencies-branches
-        if: github.event_name != 'push'
+        if: github.event_name == 'schedule'
         run: |
           upstream_branches="${{ steps.get-upstream-branches.outputs.upstream-branches }}"
           successful_branches="${{ steps.check-scan-artifacts.outputs.successful-global-dependencies-branches }}"
@@ -233,6 +242,14 @@ jobs:
         target: [code-editor-sagemaker-server]
         branch: ${{ fromJson(needs.get-branches-to-scan.outputs.security-scan-branches) }}
     steps:
+      - name: Sanitize branch name
+        id: branch-slug
+        run: |
+          slug=$(echo "${{ matrix.branch }}" | tr '/' '-' | cut -c1-28)
+          safe=$(echo "${{ matrix.branch }}" | tr '/' '-')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "safe=$safe" >> "$GITHUB_OUTPUT"
+
       - name: Assume IAM Role
         id: assume-aws-iam-role
         uses: aws-actions/configure-aws-credentials@v6
@@ -240,7 +257,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           role-duration-seconds: 900
           aws-region: us-east-1
-          role-session-name: scan-${{ matrix.target }}-${{matrix.branch}}
+          role-session-name: scan-${{ matrix.target }}-${{ steps.branch-slug.outputs.slug }}
       
       - name: Publish Scan Invoked metric
         env:
@@ -328,7 +345,7 @@ jobs:
       - name: Upload SBOM Files
         uses: actions/upload-artifact@v7
         with:
-          name: sbom-files-${{ matrix.target }}-${{ matrix.branch }}
+          name: sbom-files-${{ matrix.target }}-${{ steps.branch-slug.outputs.safe }}
           path: |
             code-editor-src/*-sbom.json
             code-editor-src/remote/*-sbom.json
@@ -340,7 +357,7 @@ jobs:
       - name: Upload Scan Result Files
         uses: actions/upload-artifact@v7
         with:
-          name: scan-results-${{ matrix.target }}-${{ matrix.branch }}
+          name: scan-results-${{ matrix.target }}-${{ steps.branch-slug.outputs.safe }}
           path: |
             code-editor-src/*-scan-result.json
             code-editor-src/remote/*-scan-result.json
@@ -357,7 +374,7 @@ jobs:
       
       - name: Create Success Indicator File
         env:
-          MATRIX_BRANCH: ${{ matrix.branch }}
+          MATRIX_BRANCH: ${{ steps.branch-slug.outputs.safe }}
           TARGET: ${{ matrix.target }}
         run: |
           output_branch="$MATRIX_BRANCH"
@@ -366,8 +383,8 @@ jobs:
       - name: Upload Success Indicator File
         uses: actions/upload-artifact@v7
         with:
-          name: scan-success-${{ matrix.target }}-${{ matrix.branch }}
-          path: scan-success-${{ matrix.target }}-${{ matrix.branch }}.txt
+          name: scan-success-${{ matrix.target }}-${{ steps.branch-slug.outputs.safe }}
+          path: scan-success-${{ matrix.target }}-${{ steps.branch-slug.outputs.safe }}.txt
           retention-days: 90
 
       - name: Publish Scan Successful Metric
@@ -415,7 +432,7 @@ jobs:
       
       - name: Check if branch was successful for all targets
         env:
-          MATRIX_BRANCH: ${{ matrix.branch }}
+          MATRIX_BRANCH: ${{ steps.branch-slug.outputs.safe }}
         run: |
           # Parse targets from environment variable
           readarray -t targets < <(jq -r '.[]' <<< "$CODE_EDITOR_TARGETS")
@@ -453,8 +470,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: scan-success-branch-${{ matrix.branch }}
-          path: scan-success-branch-${{ matrix.branch }}.txt
+          name: scan-success-branch-${{ steps.branch-slug.outputs.safe }}
+          path: scan-success-branch-${{ steps.branch-slug.outputs.safe }}.txt
           retention-days: 90
   
   security-scan-global-dependencies:
@@ -469,13 +486,21 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.get-branches-to-scan.outputs.global-dependencies-branches) }}
     steps:
+      - name: Sanitize branch name
+        id: branch-slug
+        run: |
+          slug=$(echo "${{ matrix.branch }}" | tr '/' '-' | cut -c1-28)
+          safe=$(echo "${{ matrix.branch }}" | tr '/' '-')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "safe=$safe" >> "$GITHUB_OUTPUT"
+
       - name: Assume IAM Role
         id: assume-aws-iam-role
         uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
-          role-session-name: scan-global-dependencies-${{matrix.branch}}
+          role-session-name: scan-global-deps-${{ steps.branch-slug.outputs.slug }}
           role-duration-seconds: 900
       
       - name: Publish Scan Invoked metric
@@ -546,7 +571,7 @@ jobs:
       - name: Upload Additional Node.js SBOMs
         uses: actions/upload-artifact@v7
         with:
-          name: additional-nodejs-sboms-${{ matrix.branch }}
+          name: additional-nodejs-sboms-${{ steps.branch-slug.outputs.safe }}
           path: additional-node-js-sboms/
           retention-days: 90
           if-no-files-found: error
@@ -554,7 +579,7 @@ jobs:
       - name: Upload Additional Inspector Scan Results
         uses: actions/upload-artifact@v7
         with:
-          name: additional-inspector-results-${{ matrix.branch }}
+          name: additional-inspector-results-${{ steps.branch-slug.outputs.safe }}
           path: additional-scan-results/
           retention-days: 90
           if-no-files-found: error
@@ -571,7 +596,7 @@ jobs:
       
       - name: Create Global Success Indicator File
         env:
-          MATRIX_BRANCH: ${{ matrix.branch }}
+          MATRIX_BRANCH: ${{ steps.branch-slug.outputs.safe }}
         run: |
           output_branch="$MATRIX_BRANCH"
           echo "PASS" > "global-scan-success-${output_branch}.txt"
@@ -579,8 +604,8 @@ jobs:
       - name: Upload Global Success Indicator File
         uses: actions/upload-artifact@v7
         with:
-          name: global-scan-success-${{ matrix.branch }}
-          path: global-scan-success-${{ matrix.branch }}.txt
+          name: global-scan-success-${{ steps.branch-slug.outputs.safe }}
+          path: global-scan-success-${{ steps.branch-slug.outputs.safe }}.txt
           retention-days: 90
       
       - name: Publish Failure Metrics
