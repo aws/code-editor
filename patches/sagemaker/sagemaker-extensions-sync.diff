@@ -173,7 +173,7 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,107 @@
 +import * as process from "process";
 +import * as vscode from 'vscode';
 +
@@ -188,7 +188,8 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
 +	getExtensionsFromDirectory, 
 +	getInstalledExtensions, 
 +	installExtension, 
-+	refreshExtensionsMetadata } from "./utils"
++	refreshExtensionsMetadata,
++	repairDanglingSymlinks } from "./utils"
 +
 +export async function activate() {
 +
@@ -200,6 +201,9 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/extension.ts
 +	}
 +
 +	console.log('Activating Sagemaker Extension Sync...');
++
++	// Auto-repair dangling symlinks from image upgrades before reading state
++	await repairDanglingSymlinks();
 +
 +	// get installed extensions. this could be different from pvExtensions b/c vscode sometimes doesn't delete the assets
 +	// for an old extension when uninstalling or changing versions
@@ -297,7 +301,7 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/utils.ts
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-extensions-sync/src/utils.ts
-@@ -0,0 +1,168 @@
+@@ -0,0 +1,251 @@
 +import * as fs from "fs/promises";
 +import * as path from "path";
 +import * as vscode from 'vscode';
@@ -306,6 +310,7 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/utils.ts
 +
 +import {
 +	ExtensionInfo,
++	IMAGE_EXTENSIONS_DIR,
 +	LOG_PREFIX,
 +	PERSISTENT_VOLUME_EXTENSIONS_DIR,
 +} from "./constants"
@@ -464,6 +469,88 @@ Index: code-editor-src/extensions/sagemaker-extensions-sync/src/utils.ts
 +	} catch (error) {
 +		vscode.window.showErrorMessage(`Could not install extension ${prePackagedExtensionInfo.identifier}`);
 +		console.error(`${LOG_PREFIX} ${error}`);
++	}
++}
++
++function stripVersion(dirname: string): string | null {
++	const match = dirname.match(/^(.+)-\d+\.\d+\.\d+.*$/);
++	return match ? match[1] : null;
++}
++
++export async function repairDanglingSymlinks(): Promise<void> {
++	let pvItems: string[];
++	try {
++		pvItems = await fs.readdir(PERSISTENT_VOLUME_EXTENSIONS_DIR);
++	} catch {
++		return;
++	}
++
++	let imageItems: string[];
++	try {
++		imageItems = await fs.readdir(IMAGE_EXTENSIONS_DIR);
++	} catch {
++		return;
++	}
++
++	const OBSOLETE_FILE = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, '.obsolete');
++	let obsoleteData: Record<string, boolean> = {};
++	try {
++		obsoleteData = JSON.parse(await fs.readFile(OBSOLETE_FILE, 'utf-8'));
++	} catch { /* may not exist */ }
++
++	let repaired = false;
++
++	for (const item of pvItems) {
++		const itemPath = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, item);
++
++		let lstats;
++		try {
++			lstats = await fs.lstat(itemPath);
++		} catch {
++			continue;
++		}
++		if (!lstats.isSymbolicLink()) {
++			continue;
++		}
++
++		try {
++			await fs.stat(itemPath);
++			continue; // valid symlink
++		} catch { /* dangling */ }
++
++		if (obsoleteData[item] === true) {
++			await fs.unlink(itemPath);
++			continue;
++		}
++
++		const oldIdentity = stripVersion(item);
++		let matched: string | undefined;
++		for (const imageItem of imageItems) {
++			if (oldIdentity && stripVersion(imageItem) === oldIdentity) {
++				matched = imageItem;
++				break;
++			}
++		}
++
++		if (matched) {
++			await fs.unlink(itemPath);
++			const newLinkPath = path.join(PERSISTENT_VOLUME_EXTENSIONS_DIR, matched);
++			try { await fs.unlink(newLinkPath); } catch { /* ok */ }
++			await fs.symlink(path.join(IMAGE_EXTENSIONS_DIR, matched), newLinkPath, 'dir');
++			obsoleteData[item] = true;
++			obsoleteData[matched] = false;
++			console.log(`${LOG_PREFIX} Auto-repaired: ${item} → ${matched}`);
++			repaired = true;
++		} else {
++			await fs.unlink(itemPath);
++			console.log(`${LOG_PREFIX} Cleaned dangling symlink: ${item}`);
++			repaired = true;
++		}
++	}
++
++	if (repaired) {
++		await fs.writeFile(OBSOLETE_FILE, JSON.stringify(obsoleteData, null, 2));
++		await refreshExtensionsMetadata();
 +	}
 +}
 \ No newline at end of file
