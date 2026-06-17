@@ -64,3 +64,4 @@ common/finding-override-axios.diff
 common/finding-override-ws.diff
 common/finding-override-anthropic-sdk.diff
 common/finding-override-github-copilot.diff
+common/add-openvsx-verification-check.diff
