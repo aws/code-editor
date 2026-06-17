@@ -1,0 +1,94 @@
+Query OpenVSX namespace verification and warn for unverified publishers
+
+OpenVSX's gallery-compatible API does not expose namespace verification
+status, causing the trust dialog to show "not verified" for ALL publishers
+and creating click fatigue that trains users to always click "Trust".
+
+This patch queries the OpenVSX native API (GET /api/{namespace}) in
+ExtensionGalleryService to retrieve the real verification status for each
+publisher before returning extension data to callers. Verified publishers
+see the standard trust dialog. Unverified publishers see the existing "not
+verified" indicator plus an additional explicit warning:
+
+  "Warning: Unverified namespaces on Open VSX can be claimed by anyone.
+   Extensions from unverified publishers may not be from who you expect."
+
+Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
+===================================================================
+--- code-editor-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
++++ code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
+@@ -680,6 +680,7 @@ export abstract class AbstractExtensionG
+ 			result.push(...extensions);
+ 		}
+ 
++		await this.enrichOpenVsxVerificationStatus(result);
+ 		return result;
+ 	}
+ 
+@@ -694,6 +695,27 @@ export abstract class AbstractExtensionG
+ 		return undefined;
+ 	}
+ 
++	private async enrichOpenVsxVerificationStatus(extensions: IGalleryExtension[]): Promise<void> {
++		if (!this.productService.extensionsGallery?.serviceUrl?.includes('open-vsx.org')) {
++			return;
++		}
++		const namespaces = [...new Set(extensions.map(e => e.publisher))];
++		const verificationMap = new Map<string, boolean>();
++		await Promise.all(namespaces.map(async (namespace) => {
++			try {
++				const response = await this.requestService.request({ type: 'GET', url: `https://open-vsx.org/api/${namespace}`, callSite: 'extensionGalleryService.enrichOpenVsxVerificationStatus' }, CancellationToken.None);
++				const data = await asJson<{ verified?: boolean }>(response);
++				verificationMap.set(namespace, !!data?.verified);
++			} catch {
++				verificationMap.set(namespace, false);
++			}
++		}));
++		for (const extension of extensions) {
++			const verified = verificationMap.get(extension.publisher) ?? false;
++			(extension as { publisherDomain?: { link: string; verified: boolean } }).publisherDomain = { link: `https://open-vsx.org/namespace/${extension.publisher}`, verified };
++		}
++	}
++
+ 	private async getExtensionsUsingQueryApi(extensionInfos: ReadonlyArray<IExtensionInfo>, options: IExtensionQueryOptions, extensionGalleryManifest: IExtensionGalleryManifest, token: CancellationToken): Promise<IGalleryExtension[]> {
+ 		const names: string[] = [],
+ 			ids: string[] = [],
+@@ -1186,11 +1208,13 @@ export abstract class AbstractExtensionG
+ 			return { extensions: result, total };
+ 		};
+ 		const { extensions, total } = await runQuery(query, token);
++		await this.enrichOpenVsxVerificationStatus(extensions);
+ 		const getPage = async (pageIndex: number, ct: CancellationToken) => {
+ 			if (ct.isCancellationRequested) {
+ 				throw new CancellationError();
+ 			}
+ 			const { extensions } = await runQuery(query.withPage(pageIndex + 1), ct);
++			await this.enrichOpenVsxVerificationStatus(extensions);
+ 			return extensions;
+ 		};
+ 
+Index: code-editor-src/src/vs/workbench/services/extensionManagement/common/extensionManagementService.ts
+===================================================================
+--- code-editor-src.orig/src/vs/workbench/services/extensionManagement/common/extensionManagementService.ts
++++ code-editor-src/src/vs/workbench/services/extensionManagement/common/extensionManagementService.ts
+@@ -863,7 +863,7 @@ export class ExtensionManagementService
+ 			label: localize({ key: 'learnMore', comment: ['&& denotes a mnemonic'] }, "&&Learn More"),
+ 			run: () => {
+ 				this.telemetryService.publicLog2<TrustPublisherEvent, TrustPublisherClassification>('extensions:trustPublisher', { action: 'learn', extensionId: untrustedExtensions.map(e => e.identifier.id).join(',') });
+-				this.instantiationService.invokeFunction(accessor => accessor.get(ICommandService).executeCommand('vscode.open', URI.parse('https://aka.ms/vscode-extension-security')));
++				this.instantiationService.invokeFunction(accessor => accessor.get(ICommandService).executeCommand('vscode.open', URI.parse('https://github.com/eclipse-openvsx/openvsx/wiki/Namespace-Access')));
+ 				throw new CancellationError();
+ 			}
+ 		};
+@@ -922,6 +922,11 @@ export class ExtensionManagementService
+ 			customMessage.appendMarkdown(`$(${Codicon.unverified.id})&nbsp;${localize('allUnverifed', "All publishers are [**not** verified]({0}).", unverifiedLink)}`);
+ 		}
+ 
++		if (unverfiiedPublishers.length && this.productService.extensionsGallery?.serviceUrl?.includes('open-vsx.org')) {
++			customMessage.appendText('\n');
++			customMessage.appendMarkdown(`$(warning)&nbsp;${localize('openVsxUnverifiedWarning', "**Warning:** Unverified namespaces on Open VSX can be claimed by anyone. Extensions from unverified publishers may not be from who you expect.")}`);
++		}
++
+ 		customMessage.appendText('\n');
+ 		if (allPublishers.length > 1) {
+ 			customMessage.appendMarkdown(localize('message4', "{0} has no control over the behavior of third-party extensions, including how they manage your personal data. Proceed only if you trust the publishers.", this.productService.nameLong));
