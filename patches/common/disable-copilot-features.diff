@@ -10,20 +10,6 @@ disables Copilot extension version tracking, forces chat entitlement to hidden,
 defaults AI edit telemetry stats to false, and marks mermaid-chat-features as
 not included.
 
-Index: code-editor-src/extensions/mermaid-chat-features/package.json
-===================================================================
---- code-editor-src.orig/extensions/mermaid-chat-features/package.json
-+++ code-editor-src/extensions/mermaid-chat-features/package.json
-@@ -75,7 +75,8 @@
-           "type": "boolean",
-           "default": true,
-           "description": "%config.enabled.description%",
--          "scope": "application"
-+          "scope": "application",
-+          "included": false
-         }
-       }
-     },
 Index: code-editor-src/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/chat/browser/chatParticipant.contribution.ts
@@ -143,7 +129,7 @@ Index: code-editor-src/src/vs/workbench/services/chat/common/chatEntitlementServ
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/services/chat/common/chatEntitlementService.ts
 +++ code-editor-src/src/vs/workbench/services/chat/common/chatEntitlementService.ts
-@@ -1206,14 +1206,11 @@ export class ChatEntitlementContext exte
+@@ -1318,14 +1318,11 @@ export class ChatEntitlementContext exte
  	private _forceHidden = false;
  
  	private withConfiguration(state: IChatEntitlementContextState): IChatEntitlementContextState {
@@ -167,7 +153,7 @@ Index: code-editor-src/build/gulpfile.reh.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.reh.ts
 +++ code-editor-src/build/gulpfile.reh.ts
-@@ -28,13 +28,13 @@ import glob from 'glob';
+@@ -23,13 +23,13 @@ import glob from 'glob';
  import { promisify } from 'util';
  import rceditCallback from 'rcedit';
  import { compileBuildWithManglingTask } from './gulpfile.compile.ts';
@@ -178,21 +164,30 @@ Index: code-editor-src/build/gulpfile.reh.ts
  import log from 'fancy-log';
  import buildfile from './buildfile.ts';
  import { fetchUrls, fetchGithub } from './lib/fetch.ts';
--import { getCopilotExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib/copilot.ts';
+-import { getCopilotExcludeFilter, getCopilotRuntimePrebuildFiles, getRipgrepExcludeFilter, prepareBuiltInCopilotRipgrepShim } from './lib/copilot.ts';
 +// Copilot build support removed
- import jsonEditor from 'gulp-json-editor';
  import through from 'through2';
  
-@@ -355,7 +355,7 @@ function packageTask(type: string, platf
+ 
+@@ -344,15 +344,11 @@ function packageTask(type: string, platf
+ 
+ 		const productionDependencies = getProductionDependencies(REMOTE_FOLDER);
+ 		const dependenciesSrc = productionDependencies.map(d => path.relative(REPO_ROOT, d)).map(d => [`${d}/**`, `!${d}/**/{test,tests}/**`, `!${d}/.bin/**`]).flat();
+-		const cleanedDeps = gulp.src(dependenciesSrc, { base: 'remote', dot: true })
++		const deps = gulp.src(dependenciesSrc, { base: 'remote', dot: true })
+ 			// filter out unnecessary files, no source maps in server build
  			.pipe(filter(['**', '!**/package-lock.json', '!**/*.{js,css}.map']))
  			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, '.moduleignore')))
- 			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, `.moduleignore.${process.platform}`)))
+-			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, `.moduleignore.${process.platform}`)));
+-		const copilotRuntimePrebuilds = gulp.src(getCopilotRuntimePrebuildFiles(platform, arch, 'remote/node_modules'), { base: 'remote', dot: true, allowEmpty: true });
+-		const deps = es.merge(cleanedDeps, copilotRuntimePrebuilds)
 -			.pipe(filter(getCopilotExcludeFilter(platform, arch)))
-+			
+-			.pipe(filter(getRipgrepExcludeFilter(platform, arch)))
++			.pipe(util.cleanNodeModules(path.join(import.meta.dirname, `.moduleignore.${process.platform}`)))
  			.pipe(jsFilter)
  			.pipe(util.stripSourceMappingURL())
  			.pipe(jsFilter.restore);
-@@ -482,16 +482,6 @@ function patchWin32DependenciesTask(dest
+@@ -513,16 +509,6 @@ function patchWin32DependenciesTask(dest
  	};
  }
  
@@ -209,15 +204,15 @@ Index: code-editor-src/build/gulpfile.reh.ts
  /**
   * @param product The parsed product.json file contents
   */
-@@ -548,7 +538,6 @@ function tweakProductForServerWeb(produc
- 				gulp.task(`node-${platform}-${arch}`) as task.Task,
+@@ -579,7 +565,6 @@ function tweakProductForServerWeb(produc
+ 				task.task(`node-${platform}-${arch}`) as task.Task,
  				util.rimraf(path.join(BUILD_ROOT, destinationFolderName)),
  				packageTask(type, platform, arch, sourceFolderName, destinationFolderName),
 -				prepareCopilotRipgrepShimTaskREH(platform, arch, destinationFolderName)
  			];
  
  			if (platform === 'win32') {
-@@ -562,7 +551,6 @@ function tweakProductForServerWeb(produc
+@@ -593,7 +578,6 @@ function tweakProductForServerWeb(produc
  				compileBuildWithManglingTask,
  				cleanExtensionsBuildTask,
  				compileNonNativeExtensionsBuildTask,
@@ -267,16 +262,16 @@ Index: code-editor-src/package.json
 ===================================================================
 --- code-editor-src.orig/package.json
 +++ code-editor-src/package.json
-@@ -21,7 +21,7 @@
-     "postinstall": "node build/npm/postinstall.ts",
-     "compile": "npm run gulp compile",
+@@ -23,7 +23,7 @@
+     "compile-client": "npm run gulp compile",
+     "compile-copilot": "npm --prefix extensions/copilot run compile",
      "compile-check-ts-native": "tsgo --project ./src/tsconfig.json --noEmit --skipLibCheck",
 -    "watch": "npm-run-all2 -lp watch-client-transpile watch-client watch-extensions watch-copilot",
 +    "watch": "npm-run-all2 -lp watch-client-transpile watch-client watch-extensions",
      "watchd": "deemon npm run watch",
      "watch-webd": "deemon npm run watch-web",
      "kill-watchd": "deemon --kill npm run watch",
-@@ -38,9 +38,6 @@
+@@ -40,9 +40,6 @@
      "watch-extensions": "npm run gulp watch-extensions watch-extension-media",
      "watch-extensionsd": "deemon npm run watch-extensions",
      "kill-watch-extensionsd": "deemon --kill npm run watch-extensions",
@@ -286,7 +281,7 @@ Index: code-editor-src/package.json
      "precommit": "node --experimental-strip-types build/hygiene.ts",
      "gulp": "node --experimental-strip-types --max-old-space-size=8192 ./node_modules/gulp/bin/gulp.js",
      "electron": "node build/lib/electron.ts",
-@@ -79,8 +76,6 @@
+@@ -81,8 +78,6 @@
      "perf": "node scripts/code-perf.js",
      "perf:chat": "node scripts/chat-simulation/test-chat-perf-regression.js",
      "perf:chat-leak": "node scripts/chat-simulation/test-chat-mem-leaks.js",

@@ -99,9 +99,9 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/ge
 -			'default': 'welcomePage',
 +			'default': 'none',
  			'description': localize('workbench.startupEditor', "Controls which editor is shown at startup, if none are restored from the previous session."),
- 			'experiment': { mode: 'auto' }
- 		},
-@@ -356,4 +348,3 @@ registerWorkbenchContribution2(StartupPa
+ 			'experiment': { mode: 'auto' },
+ 			agentsWindow: { default: 'none', readOnly: true },
+@@ -357,4 +349,3 @@ registerWorkbenchContribution2(StartupPa
  registerWorkbenchContribution2(StartupPageRunnerContribution.ID, StartupPageRunnerContribution, WorkbenchPhase.AfterRestored);
  
  AccessibleViewRegistry.register(new GettingStartedAccessibleView());
@@ -126,7 +126,7 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/get
  interface IGettingStartedContentProvider {
  	(): string;
  }
-@@ -68,9 +65,6 @@ gettingStartedContentRegistry.registerPr
+@@ -69,9 +66,6 @@ gettingStartedContentRegistry.registerPr
  // Register empty media for accessibility walkthrough
  gettingStartedContentRegistry.registerProvider('vs/workbench/contrib/welcomeGettingStarted/common/media/empty', () => '');
  
@@ -136,7 +136,7 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/get
  export type BuiltinGettingStartedStep = {
  	id: string;
  	title: string;
-@@ -110,511 +104,6 @@ export type BuiltinGettingStartedStartEn
+@@ -111,511 +105,6 @@ export type BuiltinGettingStartedStartEn
  type GettingStartedWalkthroughContent = BuiltinGettingStartedCategory[];
  type GettingStartedStartEntryContent = BuiltinGettingStartedStartEntry[];
  
@@ -293,7 +293,7 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/get
 -			type: 'steps',
 -			steps: [
 -				createCopilotSetupStep('CopilotSetupAnonymous', CopilotAnonymousButton, 'chatAnonymous && !chatSetupCompleted', true),
--				createCopilotSetupStep('CopilotSetupSignedOut', CopilotSignedOutButton, 'chatEntitlementSignedOut && !chatAnonymous', false),
+-				createCopilotSetupStep('CopilotSetupSignedOut', CopilotSignedOutButton, 'chatEntitlementSignedOut && !chatAnonymous && !github.copilot.hasByokModels', false),
 -				createCopilotSetupStep('CopilotSetupComplete', CopilotCompleteButton, 'chatSetupCompleted && !chatSetupDisabled && (chatAnonymous || chatPlanPro || chatPlanProPlus || chatPlanMax || chatPlanBusiness || chatPlanEnterprise || chatPlanFree)', false),
 -				createCopilotSetupStep('CopilotSetupSignedIn', CopilotSignedInButton, '!chatEntitlementSignedOut && (!chatSetupCompleted || chatSetupDisabled || chatPlanCanSignUp)', false),
 -				{

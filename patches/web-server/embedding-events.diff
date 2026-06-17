@@ -38,7 +38,7 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/browser/actions/windowActions.ts
 +++ code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
-@@ -461,6 +461,20 @@ class BlurAction extends Action2 {
+@@ -458,6 +458,20 @@ class BlurAction extends Action2 {
  	}
  }
  
@@ -59,7 +59,7 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
  // --- Actions Registration
  
  registerAction2(NewWindowAction);
-@@ -470,6 +484,7 @@ registerAction2(OpenRecentAction);
+@@ -467,6 +481,7 @@ registerAction2(OpenRecentAction);
  registerAction2(ReloadWindowAction);
  registerAction2(ShowAboutDialogAction);
  registerAction2(BlurAction);
@@ -67,9 +67,9 @@ Index: code-editor-src/src/vs/workbench/browser/actions/windowActions.ts
  
  // --- Commands/Keybindings Registration
  
-@@ -522,3 +537,8 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+@@ -518,3 +533,8 @@ MenuRegistry.appendMenuItem(MenuId.Menub
+ 	group: '2_open',
  	order: 4,
- 	when: IsSessionsWindowContext.negate()
  });
 +
 +// notify top window when reloading the iframe, so that the whole ide can be reloaded

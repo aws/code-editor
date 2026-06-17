@@ -41,7 +41,7 @@ Index: code-editor-src/product.json
  	"win32DirName": "Microsoft Code OSS",
  	"win32NameVersion": "Microsoft Code OSS",
  	"win32RegValueName": "CodeOSS",
-@@ -28,132 +28,38 @@
+@@ -28,131 +28,39 @@
  	"darwinBundleIdentifier": "com.visualstudio.code.oss",
  	"darwinProfileUUID": "47827DD9-4734-49A0-AF80-7E19B11495CC",
  	"darwinProfilePayloadUUID": "CF808BE7-53F3-46C6-A7E2-7EDB98A5E959",
@@ -52,6 +52,7 @@ Index: code-editor-src/product.json
 +	"reportIssueUrl": "https://github.com/aws/code-editor/issues/new",
  	"nodejsRepository": "https://nodejs.org",
  	"urlProtocol": "code-oss",
+ 	"agentsTelemetryAppName": "agents",
  	"webviewContentExternalBaseUrlTemplate": "https://{{uuid}}.vscode-cdn.net/insider/ef65ac1ba57f57f2a3961bfe94aa20481caca4c6/out/vs/workbench/contrib/webview/browser/pre/",
 -	"builtInExtensions": [
 -		{
@@ -114,9 +115,7 @@ Index: code-editor-src/product.json
 -		"privacyStatementUrl": "https://aka.ms/github-copilot-privacy-statement",
 -		"skusDocumentationUrl": "https://aka.ms/github-copilot-plans",
 -		"publicCodeMatchesUrl": "https://aka.ms/github-copilot-match-public-code",
--		"manageSettingsUrl": "https://aka.ms/github-copilot-settings",
 -		"managePlanUrl": "https://aka.ms/github-copilot-manage-plan",
--		"manageOverageUrl": "https://aka.ms/github-copilot-manage-overage",
 -		"upgradePlanUrl": "https://aka.ms/github-copilot-upgrade-plan",
 -		"signUpUrl": "https://aka.ms/github-sign-up",
 +		"extensionId": "Amazon.amazon-q-vscode",
@@ -190,11 +189,12 @@ Index: code-editor-src/product.json
  		]
  	},
  	"onboardingKeymaps": [
-@@ -233,5 +139,50 @@
- 	],
+@@ -233,5 +141,51 @@
  	"builtInExtensionsEnabledWithAutoUpdates": [
  		"GitHub.copilot-chat"
-+	],
+ 	],
+-	"sessionsWindowAllowedExtensions": []
++	"sessionsWindowAllowedExtensions": [],
 +	"codeEditorVersion": "1.0.0",
 +	"linkProtectionTrustedDomains": [
 +		"https://docs.aws.amazon.com",
@@ -228,7 +228,8 @@ Index: code-editor-src/product.json
 +		"git.addAICoAuthor",
 +		"workbench.commandPalette.experimental.chat",
 +		"workbench.commandPalette.experimental.askChat",
-+		"imageCarousel.chat"
++		"imageCarousel.chat",
++		"sessions."
 +	],
 +	"excludedActionPatterns": [
 +		"workbench.action.chat.",
@@ -239,5 +240,5 @@ Index: code-editor-src/product.json
 +		"workbench.action.terminal.chat.",
 +		"github.copilot.",
 +		"workbench.action.edits."
- 	]
++	]
  }

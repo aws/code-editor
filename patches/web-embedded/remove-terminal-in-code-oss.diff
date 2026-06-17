@@ -37,7 +37,7 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
  import './media/terminal.css';
  import './media/terminalVoice.css';
  import './media/widgets.css';
-@@ -32,22 +20,14 @@ import './media/xterm.css';
+@@ -32,21 +20,14 @@ import './media/xterm.css';
  import { RemoteTerminalBackendContribution } from './remoteTerminalBackend.js';
  import { ITerminalConfigurationService, ITerminalEditingService, ITerminalEditorService, ITerminalGroupService, ITerminalInstanceService, ITerminalService, TerminalDataTransfers, terminalEditorId } from './terminal.js';
  import { registerTerminalActions } from './terminalActions.js';
@@ -54,13 +54,13 @@ Index: code-editor-src/src/vs/workbench/contrib/terminal/browser/terminal.contri
 -import { setupTerminalMenus } from './terminalMenus.js';
  import { TerminalProfileService } from './terminalProfileService.js';
  import { TerminalService } from './terminalService.js';
- import { TerminalTelemetryContribution } from './terminalTelemetry.js';
 -import { TerminalViewPane } from './terminalView.js';
 -import { AgentHostTerminalService, IAgentHostTerminalService } from './agentHostTerminalService.js';
++import { TerminalTelemetryContribution } from './terminalTelemetry.js';
  
  // Register services
  registerSingleton(ITerminalLogService, TerminalLogService, InstantiationType.Delayed);
-@@ -70,74 +50,7 @@ registerWorkbenchContribution2(TerminalT
+@@ -68,74 +49,7 @@ registerWorkbenchContribution2(RemoteTer
  registerTerminalPlatformConfiguration();
  registerTerminalConfiguration(getFontSnippets);
  

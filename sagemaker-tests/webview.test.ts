@@ -47,7 +47,7 @@ describe('webview.diff validation', () => {
     }
     
     const content = readFileSync(filePath, 'utf8');
-    const expectedHash = "script-src 'sha256-Oi71Tq4Buohx0KDH3yEbVJUzABnqYv9iVLo420HZXqI=' 'self'";
+    const expectedHash = "script-src 'sha256-m1DlJtsIJd46QuWYNcsaYIG1xI+9FyjKQu+cfp+zq5Q=' 'self'";
     
     if (!content.includes(expectedHash)) {
       throw new Error(`Expected CSP hash not found in ${filePath}`);

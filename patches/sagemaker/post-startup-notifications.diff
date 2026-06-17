@@ -695,7 +695,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -91,6 +91,7 @@ const compilations = [
+@@ -88,6 +88,7 @@ const compilations = [
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',
  	'extensions/sagemaker-open-notebook-extension/tsconfig.json',
  	'extensions/sagemaker-ui-dark-theme/tsconfig.json',

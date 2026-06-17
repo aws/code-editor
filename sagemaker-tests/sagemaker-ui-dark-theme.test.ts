@@ -42,8 +42,8 @@ describe('sagemaker-ui-dark-theme.patch validation', () => {
     console.log('PASS: UI dark theme .vscodeignore found');
   });
 
-  test('sagemaker-ui-dark-theme should have webpack config', () => {
-    const filePath = join(PATCHED_VSCODE_DIR, 'extensions/sagemaker-ui-dark-theme/extension-browser.webpack.config.js');
+  test('sagemaker-ui-dark-theme should have esbuild config', () => {
+    const filePath = join(PATCHED_VSCODE_DIR, 'extensions/sagemaker-ui-dark-theme/esbuild.mts');
     
     if (!existsSync(filePath)) {
       throw new Error(`File not found: ${filePath}`);
@@ -51,13 +51,11 @@ describe('sagemaker-ui-dark-theme.patch validation', () => {
     
     const content = readFileSync(filePath, 'utf8');
     
-    // Check for Amazon copyright
-    const copyright = 'Copyright Amazon.com Inc. or its affiliates. All rights reserved.';
-    if (!content.includes(copyright)) {
-      throw new Error(`Expected Amazon copyright not found in ${filePath}`);
+    if (!content.includes('esbuild-extension-common')) {
+      throw new Error(`Expected esbuild config content not found in ${filePath}`);
     }
     
-    console.log('PASS: UI dark theme webpack config found');
+    console.log('PASS: UI dark theme esbuild config found');
   });
 
   test('sagemaker-ui-dark-theme should have package.json', () => {

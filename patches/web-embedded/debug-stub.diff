@@ -47,7 +47,7 @@ Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
 +++ code-editor-src/src/vs/workbench/workbench.common.main.ts
-@@ -270,7 +270,7 @@ import './contrib/scm/browser/quickDiff.
+@@ -277,7 +277,7 @@ import './contrib/scm/browser/quickDiff.
  import './contrib/scm/browser/scm.service.contribution.js';
  
  // Debug

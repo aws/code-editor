@@ -23,7 +23,7 @@ Index: code-editor-src/product.json
  	"nameShort": "Code Editor",
  	"nameLong": "Code Editor",
  	"applicationName": "code",
-@@ -150,7 +160,10 @@
+@@ -152,7 +162,10 @@
  		"https://console.amazonaws-us-gov.com",
  		"https://console.amazonaws.cn",
  		"https://aws.amazon.com",
@@ -39,7 +39,7 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/ge
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
 +++ code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/browser/gettingStarted.ts
-@@ -921,8 +921,8 @@ export class GettingStartedPage extends
+@@ -924,8 +924,8 @@ export class GettingStartedPage extends
  		}));
  
  		const header = $('.header', {},
@@ -253,7 +253,7 @@ Index: code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/get
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
 +++ code-editor-src/src/vs/workbench/contrib/welcomeGettingStarted/common/gettingStartedContent.ts
-@@ -287,8 +287,8 @@ export const walkthroughs: GettingStarte
+@@ -288,8 +288,8 @@ export const walkthroughs: GettingStarte
  
  	{
  		id: 'SetupWeb',
@@ -268,7 +268,7 @@ Index: code-editor-src/src/vs/workbench/workbench.common.main.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/workbench.common.main.ts
 +++ code-editor-src/src/vs/workbench/workbench.common.main.ts
-@@ -370,8 +370,6 @@ import './contrib/surveys/browser/langua
+@@ -377,8 +377,6 @@ import './contrib/surveys/browser/langua
  
  // Welcome
  import './contrib/welcomeGettingStarted/browser/gettingStarted.contribution.js';

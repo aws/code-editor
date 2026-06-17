@@ -438,7 +438,7 @@ Index: code-editor-src/src/vs/workbench/contrib/mergeEditor/browser/mergeEditor.
  	AcceptAllCombination, ToggleBetweenInputs
  } from './commands/commands.js';
  import { MergeEditorCopyContentsToJSON, MergeEditorLoadContentsFromFolder, MergeEditorSaveContentsToFolder } from './commands/devCommands.js';
-@@ -86,7 +86,6 @@ registerAction2(AcceptAllInput2);
+@@ -88,7 +88,6 @@ registerAction2(AcceptAllInput2);
  registerAction2(ResetToBaseAndAutoMergeCommand);
  
  registerAction2(AcceptMerge);

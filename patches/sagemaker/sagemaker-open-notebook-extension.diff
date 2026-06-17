@@ -8,7 +8,7 @@ Index: code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.co
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
 +++ code-editor-src/src/vs/workbench/contrib/extensions/browser/extensions.contribution.ts
-@@ -266,6 +266,11 @@ Registry.as<IConfigurationRegistry>(Conf
+@@ -285,6 +285,11 @@ Registry.as<IConfigurationRegistry>(Conf
  				description: localize('extensionsInQuickAccess', "When enabled, extensions can be searched for via Quick Access and report issues from there."),
  				default: true
  			},
@@ -255,7 +255,7 @@ Index: code-editor-src/build/gulpfile.extensions.ts
 ===================================================================
 --- code-editor-src.orig/build/gulpfile.extensions.ts
 +++ code-editor-src/build/gulpfile.extensions.ts
-@@ -89,6 +89,7 @@ const compilations = [
+@@ -86,6 +86,7 @@ const compilations = [
  	'extensions/sagemaker-extension/tsconfig.json',
  	'extensions/sagemaker-idle-extension/tsconfig.json',
  	'extensions/sagemaker-terminal-crash-mitigation/tsconfig.json',

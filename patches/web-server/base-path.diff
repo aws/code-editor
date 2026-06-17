@@ -203,7 +203,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
 ===================================================================
 --- code-editor-src.orig/src/vs/server/node/serverEnvironmentService.ts
 +++ code-editor-src/src/vs/server/node/serverEnvironmentService.ts
-@@ -100,6 +100,9 @@ export const serverOptions: OptionDescri
+@@ -104,6 +104,9 @@ export const serverOptions: OptionDescri
  
  	'compatibility': { type: 'string' },
  
@@ -213,7 +213,7 @@ Index: code-editor-src/src/vs/server/node/serverEnvironmentService.ts
  	_: OPTIONS['_']
  };
  
-@@ -232,6 +235,9 @@ export interface ServerParsedArgs {
+@@ -240,6 +243,9 @@ export interface ServerParsedArgs {
  
  	compatibility: string;
  
