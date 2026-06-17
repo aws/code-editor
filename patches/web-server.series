@@ -28,6 +28,7 @@ common/fix-github-credential-provider-host-check.diff
 common/fix-extpath-is-equal-or-parent.diff
 common/fix-snippets-path-traversal.diff
 common/fix-remote-hosts-loopback-check.diff
+common/add-openvsx-verification-check.diff
 web-server/suppress-known-errors-build-integration.diff
 web-server/local-storage.diff
 web-server/base-path.diff
