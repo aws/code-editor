@@ -65,3 +65,4 @@ common/finding-override-shell-quote.diff
 common/ghsa-credential-provider-host-match.diff
 common/ghsa-snippets-path-traversal.diff
 common/ghsa-remote-hosts-loopback.diff
+common/add-openvsx-verification-check.diff
