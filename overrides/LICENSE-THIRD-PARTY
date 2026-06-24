@@ -6547,7 +6547,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************
 
 tar
-7.5.11 <https://github.com/isaacs/node-tar>
+7.5.16 <https://github.com/isaacs/node-tar>
 # Blue Oak Model License
 
 Version 1.0.0
@@ -6706,7 +6706,7 @@ PERFORMANCE OF THIS SOFTWARE.
 ******************************
 
 undici
-7.24.5 <https://github.com/nodejs/undici>
+7.28.0 <https://github.com/nodejs/undici>
 MIT License
 
 Copyright (c) Matteo Collina and Undici contributors
@@ -6913,7 +6913,7 @@ SOFTWARE.
 ******************************
 
 ws
-7.5.10 <https://github.com/websockets/ws>
+7.5.11 <https://github.com/websockets/ws>
 The MIT License (MIT)
 
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>

@@ -58,3 +58,6 @@ sagemaker/fix-path-traversal-vscode-remote-resource.diff
 sagemaker/override-picomatch-post-startup-notifications.diff
 sagemaker/sanitize-terminal-sendtext-paths.diff
 sagemaker/remove-delay-shutdown-endpoint.diff
+common/finding-override-undici.diff
+common/finding-override-ws.diff
+common/finding-override-tar.diff

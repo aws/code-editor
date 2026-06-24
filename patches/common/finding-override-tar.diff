@@ -1,0 +1,29 @@
+Override tar to ^7.5.16 to fix CVE-2026-53655.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-tar.diff --override 'direct-dev:tar=^7.5.16' --override 'global:tar=^7.5.16'
+@override-package: tar@^7.5.16
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -207,7 +207,7 @@
+     "source-map": "0.6.1",
+     "source-map-support": "^0.3.2",
+     "style-loader": "^3.3.2",
+-    "tar": "^7.5.10",
++    "tar": "^7.5.16",
+     "ts-loader": "^9.5.1",
+     "ts-node": "^10.9.1",
+     "tsec": "0.2.7",
+@@ -243,7 +243,8 @@
+     "ip-address": "^10.1.1",
+     "shell-quote": "^1.8.4",
+     "undici": "^7.28.0",
+-    "ws": "^7.5.11"
++    "ws": "^7.5.11",
++    "tar": "^7.5.16"
+   },
+   "repository": {
+     "type": "git",
