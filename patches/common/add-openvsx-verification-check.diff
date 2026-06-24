@@ -17,7 +17,7 @@ Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalle
 ===================================================================
 --- code-editor-src.orig/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
 +++ code-editor-src/src/vs/platform/extensionManagement/common/extensionGalleryService.ts
-@@ -680,6 +680,7 @@ export abstract class AbstractExtensionG
+@@ -657,6 +657,7 @@ export abstract class AbstractExtensionG
  			result.push(...extensions);
  		}
  
@@ -25,7 +25,7 @@ Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalle
  		return result;
  	}
  
-@@ -694,6 +695,27 @@ export abstract class AbstractExtensionG
+@@ -671,6 +672,27 @@ export abstract class AbstractExtensionG
  		return undefined;
  	}
  
@@ -37,7 +37,7 @@ Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalle
 +		const verificationMap = new Map<string, boolean>();
 +		await Promise.all(namespaces.map(async (namespace) => {
 +			try {
-+				const response = await this.requestService.request({ type: 'GET', url: `https://open-vsx.org/api/${namespace}`, callSite: 'extensionGalleryService.enrichOpenVsxVerificationStatus' }, CancellationToken.None);
++				const response = await this.requestService.request({ type: 'GET', url: `https://open-vsx.org/api/${namespace}` }, CancellationToken.None);
 +				const data = await asJson<{ verified?: boolean }>(response);
 +				verificationMap.set(namespace, !!data?.verified);
 +			} catch {
@@ -53,8 +53,8 @@ Index: code-editor-src/src/vs/platform/extensionManagement/common/extensionGalle
  	private async getExtensionsUsingQueryApi(extensionInfos: ReadonlyArray<IExtensionInfo>, options: IExtensionQueryOptions, extensionGalleryManifest: IExtensionGalleryManifest, token: CancellationToken): Promise<IGalleryExtension[]> {
  		const names: string[] = [],
  			ids: string[] = [],
-@@ -1186,11 +1208,13 @@ export abstract class AbstractExtensionG
- 			return { extensions: result, total };
+@@ -1062,11 +1084,13 @@ export abstract class AbstractExtensionG
+ 			return { extensions, total };
  		};
  		const { extensions, total } = await runQuery(query, token);
 +		await this.enrichOpenVsxVerificationStatus(extensions);
