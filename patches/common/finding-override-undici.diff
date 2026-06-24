@@ -1,0 +1,42 @@
+Override undici to ^7.28.0 to fix CVE-2026-6734, CVE-2026-9697, CVE-2026-12151.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override 'direct:undici=^7.28.0' --override 'global:undici=^7.28.0' --override 'remote/package.json@global:undici=^7.28.0'
+@override-package: undici@^7.28.0
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -134,7 +134,7 @@
+     "playwright-core": "1.59.1",
+     "ssh2": "^1.16.0",
+     "tas-client": "0.3.1",
+-    "undici": "^7.24.0",
++    "undici": "^7.28.0",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "^9.3.2",
+@@ -260,7 +260,8 @@
+     "chrome-remote-interface": {
+       "ws": "^7.5.11"
+     },
+-    "@github/copilot": "^1.0.43"
++    "@github/copilot": "^1.0.43",
++    "undici": "^7.28.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -55,6 +55,7 @@
+     },
+     "uuid": "^14.0.0",
+     "ip-address": "^10.1.1",
+-    "@github/copilot": "^1.0.43"
++    "@github/copilot": "^1.0.43",
++    "undici": "^7.28.0"
+   }
+ }

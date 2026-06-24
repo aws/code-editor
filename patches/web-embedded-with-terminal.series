@@ -66,3 +66,6 @@ common/ghsa-credential-provider-host-match.diff
 common/ghsa-snippets-path-traversal.diff
 common/ghsa-remote-hosts-loopback.diff
 common/add-openvsx-verification-check.diff
+common/finding-override-undici.diff
+common/finding-override-form-data.diff
+common/finding-override-tar.diff

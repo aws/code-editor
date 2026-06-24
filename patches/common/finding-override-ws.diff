@@ -1,9 +1,9 @@
-Override ws to ^8.20.1.
-Remove when upstream Code-OSS updates ws to >= 8.20.1.
+Override ws to ^8.21.0 and nested chrome-remote-interface ws to ^7.5.11 to fix CVE-2026-48779.
 
 @generated
-@generator: scripts/patches/apply-override.sh --patch common/finding-override-ws.diff --override 'direct:ws=^8.20.1' --override 'remote/package.json@direct:ws=^8.20.1'
-@override-package: ws@^8.20.1
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-ws.diff --override 'direct:ws=^8.21.0' --override 'remote/package.json@direct:ws=^8.21.0' --override 'nested:chrome-remote-interface:ws=^7.5.11'
+@override-package: ws@^8.21.0
+@override-package: ws@^7.5.11
 
 Index: b/package.json
 ===================================================================
@@ -14,10 +14,22 @@ Index: b/package.json
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "^9.3.2",
 -    "ws": "^8.19.0",
-+    "ws": "^8.20.1",
++    "ws": "^8.21.0",
      "yauzl": "^3.0.0",
      "yazl": "^2.4.3"
    },
+@@ -255,7 +255,10 @@
+     "follow-redirects": "^1.16.0",
+     "uuid": "^14.0.0",
+     "ip-address": "^10.1.1",
+-    "axios": "^1.15.2"
++    "axios": "^1.15.2",
++    "chrome-remote-interface": {
++      "ws": "^7.5.11"
++    }
+   },
+   "repository": {
+     "type": "git",
 Index: b/remote/package.json
 ===================================================================
 --- a/remote/package.json
@@ -27,7 +39,7 @@ Index: b/remote/package.json
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "^9.3.2",
 -    "ws": "^8.19.0",
-+    "ws": "^8.20.1",
++    "ws": "^8.21.0",
      "yauzl": "^3.0.0",
      "yazl": "^2.4.3"
    },

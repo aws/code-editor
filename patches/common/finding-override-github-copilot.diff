@@ -9,12 +9,12 @@ Index: b/package.json
 ===================================================================
 --- a/package.json
 +++ b/package.json
-@@ -255,7 +255,8 @@
-     "follow-redirects": "^1.16.0",
-     "uuid": "^14.0.0",
-     "ip-address": "^10.1.1",
--    "axios": "^1.15.2"
-+    "axios": "^1.15.2",
+@@ -258,7 +258,8 @@
+     "axios": "^1.15.2",
+     "chrome-remote-interface": {
+       "ws": "^7.5.11"
+-    }
++    },
 +    "@github/copilot": "^1.0.43"
    },
    "repository": {
