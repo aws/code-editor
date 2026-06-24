@@ -6959,7 +6959,7 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ******************************
 
 form-data
-4.0.5 <https://github.com/form-data/form-data>
+4.0.6 <https://github.com/form-data/form-data>
 Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -7187,7 +7187,7 @@ SOFTWARE.
 ******************************
 
 hasown
-2.0.2 <https://github.com/inspect-js/hasOwn>
+2.0.4 <https://github.com/inspect-js/hasOwn>
 MIT License
 
 Copyright (c) Jordan Harband and contributors
@@ -9274,6 +9274,67 @@ software or this license, under any kind of legal claim.***
 
 ******************************
 
+tar
+7.5.16 <https://github.com/isaacs/node-tar>
+# Blue Oak Model License
+
+Version 1.0.0
+
+## Purpose
+
+This license gives everyone as much permission to work with
+this software as possible, while protecting contributors
+from liability.
+
+## Acceptance
+
+In order to receive this license, you must agree to its
+rules.  The rules of this license are both obligations
+under that agreement and conditions to your license.
+You must not do anything with this software that triggers
+a rule that you cannot or will not follow.
+
+## Copyright
+
+Each contributor licenses you to do everything with this
+software that would otherwise infringe that contributor's
+copyright in it.
+
+## Notices
+
+You must ensure that everyone who gets a copy of
+any part of this software from you, with or without
+changes, also gets the text of this license or a link to
+<https://blueoakcouncil.org/license/1.0.0>.
+
+## Excuse
+
+If anyone notifies you in writing that you have not
+complied with [Notices](#notices), you can keep your
+license by taking all practical steps to comply within 30
+days after the notice.  If you do not do so, your license
+ends immediately.
+
+## Patent
+
+Each contributor licenses you to do everything with this
+software that would otherwise infringe any patent claims
+they can license or become able to license.
+
+## Reliability
+
+No contributor can revoke this license.
+
+## No Liability
+
+***As far as the law allows, this software comes as is,
+without any warranty or condition, and no contributor
+will be liable to anyone for any damages related to this
+software or this license, under any kind of legal claim.***
+
+
+******************************
+
 tas-client
 0.3.1 <>
 MIT License
@@ -9492,7 +9553,7 @@ THE SOFTWARE.
 ******************************
 
 undici
-7.24.4 <https://github.com/nodejs/undici>
+7.28.0 <https://github.com/nodejs/undici>
 MIT License
 
 Copyright (c) Matteo Collina and Undici contributors
@@ -9923,7 +9984,7 @@ SOFTWARE.
 ******************************
 
 ws
-7.5.10 <https://github.com/websockets/ws>
+7.5.11 <https://github.com/websockets/ws>
 The MIT License (MIT)
 
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
@@ -9950,7 +10011,7 @@ SOFTWARE.
 ******************************
 
 ws
-8.20.1 <https://github.com/websockets/ws>
+8.21.0 <https://github.com/websockets/ws>
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
 Copyright (c) 2013 Arnout Kazemier and contributors
 Copyright (c) 2016 Luigi Pinca and contributors
