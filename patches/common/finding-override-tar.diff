@@ -1,0 +1,42 @@
+Override tar to ^7.5.16 to fix CVE-2026-53655.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-tar.diff --override 'direct:tar=^7.5.16' --override 'direct-dev:tar=^7.5.16' --override 'remote/package.json@global:tar=^7.5.16'
+@override-package: tar@^7.5.16
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -140,7 +140,8 @@
+     "vscode-textmate": "^9.3.2",
+     "ws": "^8.21.0",
+     "yauzl": "^3.0.0",
+-    "yazl": "^2.4.3"
++    "yazl": "^2.4.3",
++    "tar": "^7.5.16"
+   },
+   "devDependencies": {
+     "@playwright/cli": "^0.1.9",
+@@ -236,7 +237,7 @@
+     "sinon-test": "^3.1.3",
+     "source-map": "0.6.1",
+     "source-map-support": "^0.5.21",
+-    "tar": "^7.5.9",
++    "tar": "^7.5.16",
+     "tsec": "0.2.7",
+     "tslib": "^2.6.3",
+     "typescript": "^6.0.0-dev.20260416",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -56,6 +56,7 @@
+     "uuid": "^14.0.0",
+     "ip-address": "^10.1.1",
+     "@github/copilot": "^1.0.43",
+-    "undici": "^7.28.0"
++    "undici": "^7.28.0",
++    "tar": "^7.5.16"
+   }
+ }

@@ -47,3 +47,5 @@ common/finding-override-shell-quote.diff
 common/fix-credential-provider-host-match.diff
 common/fix-snippets-path-traversal.diff
 common/fix-remote-hosts-loopback.diff
+common/finding-override-undici.diff
+common/finding-override-form-data.diff

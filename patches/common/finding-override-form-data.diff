@@ -1,0 +1,20 @@
+Override form-data to ^4.0.6 to fix CVE-2026-12143.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-form-data.diff --override 'global:form-data=^4.0.6'
+@override-package: form-data@^4.0.6
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -261,7 +261,8 @@
+       "ws": "^7.5.11"
+     },
+     "@github/copilot": "^1.0.43",
+-    "undici": "^7.28.0"
++    "undici": "^7.28.0",
++    "form-data": "^4.0.6"
+   },
+   "repository": {
+     "type": "git",
