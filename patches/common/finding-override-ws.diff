@@ -1,0 +1,20 @@
+Override ws to ^7.5.11 to fix CVE-2026-48779.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-ws.diff --override 'global:ws=^7.5.11'
+@override-package: ws@^7.5.11
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -242,7 +242,8 @@
+     "uuid": "14.0.0",
+     "ip-address": "^10.1.1",
+     "shell-quote": "^1.8.4",
+-    "undici": "^7.28.0"
++    "undici": "^7.28.0",
++    "ws": "^7.5.11"
+   },
+   "repository": {
+     "type": "git",

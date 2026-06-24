@@ -1,0 +1,51 @@
+Override undici to ^7.28.0 to fix CVE-2026-6734, CVE-2026-9697, CVE-2026-12151.
+
+@generated
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override 'direct:undici=^7.28.0' --override 'global:undici=^7.28.0' --override 'remote/package.json@direct:undici=^7.28.0' --override 'remote/package.json@global:undici=^7.28.0'
+@override-package: undici@^7.28.0
+
+Index: b/package.json
+===================================================================
+--- a/package.json
++++ b/package.json
+@@ -107,7 +107,7 @@
+     "node-pty": "^1.1.0-beta33",
+     "open": "^8.4.2",
+     "tas-client-umd": "0.2.0",
+-    "undici": "^7.24.0",
++    "undici": "^7.28.0",
+     "v8-inspect-profiler": "^0.1.1",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+@@ -241,7 +241,8 @@
+     "follow-redirects": "1.16.0",
+     "uuid": "14.0.0",
+     "ip-address": "^10.1.1",
+-    "shell-quote": "^1.8.4"
++    "shell-quote": "^1.8.4",
++    "undici": "^7.28.0"
+   },
+   "repository": {
+     "type": "git",
+Index: b/remote/package.json
+===================================================================
+--- a/remote/package.json
++++ b/remote/package.json
+@@ -34,7 +34,7 @@
+     "native-watchdog": "^1.4.1",
+     "node-pty": "^1.1.0-beta33",
+     "tas-client-umd": "0.2.0",
+-    "undici": "^7.24.0",
++    "undici": "^7.28.0",
+     "vscode-oniguruma": "1.7.0",
+     "vscode-regexpp": "^3.1.0",
+     "vscode-textmate": "9.2.0",
+@@ -50,6 +50,7 @@
+     "picomatch": "2.3.2",
+     "follow-redirects": "1.16.0",
+     "uuid": "14.0.0",
+-    "ip-address": "^10.1.1"
++    "ip-address": "^10.1.1",
++    "undici": "^7.28.0"
+   }
+ }
