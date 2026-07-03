@@ -270,7 +270,7 @@ Index: code-editor-src/extensions/post-startup-notifications/src/extension.ts
 +let watcher: chokidar.FSWatcher;
 +let outputChannel: vscode.OutputChannel;
 +
-+export function activate(context: vscode.ExtensionContext) {
++export function activate(_context: vscode.ExtensionContext) {
 +    // Check if in SageMaker Unified Studio
 +    const envValue = process.env[SERVICE_NAME_ENV_KEY];
 +
