@@ -27,5 +27,5 @@ Index: code-editor-src/product.json
  		"workbench.action.edits."
 -	]
 +	],
-+	"sagemakerCodeEditorVersion": "__SAGEMAKER_VERSION__"
++	"sagemakerCodeEditorVersion": "1.10.0"
  }
