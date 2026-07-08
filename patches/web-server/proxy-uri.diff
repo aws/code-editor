@@ -67,7 +67,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/src/vs/server/node/proxyServer.ts
-@@ -0,0 +1,186 @@
+@@ -0,0 +1,200 @@
 +import proxyServer from "http-proxy";
 +import * as http from "http";
 +import * as net from "net";
@@ -132,20 +132,34 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +		if (!targetPathname) {
 +			return;
 +		}
-+		const [_, proxyPrefix, port] = targetPathname.split("/", 3);
++		const [_, proxyPrefix, portRaw] = targetPathname.split("/", 3);
 +		if (!ACCEPTED_PROXY_PREFIXES.includes(proxyPrefix)) {
 +			return;
 +		}
 +
++		if (!portRaw || !/^[1-9]\d*$/.test(portRaw)) {
++			return;
++		}
++		const port = Number(portRaw);
++
 +		let base: string | undefined;
 +		if (proxyPrefix === "ports") {
-+			base = `/ports/${port}`;
++			base = `/ports/${portRaw}`;
 +			targetPathname = targetPathname.slice(base.length);
 +		}
++
++		// Collapse leading slashes/backslashes to prevent protocol-relative URL interpretation
++		targetPathname = targetPathname.replace(/^[/\\][/\\]+/, "/");
++
++		const target = new URL((targetPathname || "/") + (sourceUrl.search ?? ""), `http://0.0.0.0:${port}`);
++		if (target.hostname !== "0.0.0.0" || target.port !== String(port)) {
++			return;
++		}
++
 +		return {
 +			base,
-+			port,
-+			target: url.resolve(`http://0.0.0.0:${port}/`, targetPathname + (sourceUrl.search ?? "")),
++			port: String(port),
++			target: target.toString(),
 +		};
 +	}
 +
