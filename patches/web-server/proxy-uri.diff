@@ -67,7 +67,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/src/vs/server/node/proxyServer.ts
-@@ -0,0 +1,200 @@
+@@ -0,0 +1,204 @@
 +import proxyServer from "http-proxy";
 +import * as http from "http";
 +import * as net from "net";
@@ -141,6 +141,9 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +			return;
 +		}
 +		const port = Number(portRaw);
++		if (port > 65535) {
++			return;
++		}
 +
 +		let base: string | undefined;
 +		if (proxyPrefix === "ports") {
@@ -152,7 +155,8 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +		targetPathname = targetPathname.replace(/^[/\\][/\\]+/, "/");
 +
 +		const target = new URL((targetPathname || "/") + (sourceUrl.search ?? ""), `http://0.0.0.0:${port}`);
-+		if (target.hostname !== "0.0.0.0" || target.port !== String(port)) {
++		const effectivePort = target.port || (target.protocol === "http:" ? "80" : "443");
++		if (target.hostname !== "0.0.0.0" || effectivePort !== String(port)) {
 +			return;
 +		}
 +
