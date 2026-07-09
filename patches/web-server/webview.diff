@@ -86,17 +86,20 @@ Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExte
 ===================================================================
 --- code-editor-src.orig/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
 +++ code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExtensionHostIframe.html
-@@ -25,6 +25,13 @@
- 			// validation not requested
+@@ -15,7 +15,7 @@
+ 	// DO NOT CHANGE the name of the worker without also updating js-debug, as that
+ 	// is used to filter targets to attach to (e.g. #232544)
+ 	const name = searchParams.get('debugged') ? 'DebugExtensionHostWorker' : 'ExtensionHostWorker';
+-	const parentOrigin = searchParams.get('parentOrigin') || window.origin;
++	let parentOrigin = window.origin;
+ 	const salt = searchParams.get('salt');
+
+ 	(async function () {
+@@ -25,6 +25,8 @@
  			return start();
  		}
 +
-+		// It is safe to run if we are on the same host.
-+		const parent = new URL(parentOrigin)
-+		if (parent.hostname === hostname) {
-+			return start()
-+		}
-+
++		parentOrigin = searchParams.get('parentOrigin') || window.origin;
  		if (!crypto.subtle) {
  			// cannot validate, not running in a secure context
  			return sendError(new Error(`Cannot validate in current context!`));
