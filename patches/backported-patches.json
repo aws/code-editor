@@ -94,5 +94,47 @@
         "patch_path": "N/A",
         "link": "https://github.com/microsoft/vscode/security/advisories/GHSA-rg3f-8xq5-hwh6",
         "note": "Copilot extension not present in Code-OSS 1.101.2"
+    },
+    {
+        "finding_id": "CVE-2026-47282",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b",
+        "note": "Copilot completions config not present in Code Editor 1.101.2 - no extensions/copilot, no completions-core, and no advanced.debug.overrideCapiUrl/overrideProxyUrl settings in shipped source"
+    },
+    {
+        "finding_id": "GHSA-wr9x-42j2-jvh3",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b",
+        "note": "Copilot completions config not present in Code Editor 1.101.2 - no extensions/copilot, no completions-core, and no advanced.debug.overrideCapiUrl/overrideProxyUrl settings in shipped source"
+    },
+    {
+        "finding_id": "CVE-2026-57101",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
+        "note": "Vulnerable mermaid notebook renderer not present in Code Editor 1.101.2 - no mermaid extension, no renderMermaidBlocksInElement, and no sanitized-HTML re-parse via innerHTML; markdown notebook renderer uses DOMPurify.sanitize directly"
+    },
+    {
+        "finding_id": "GHSA-9mw4-h26x-gfxw",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
+        "note": "Vulnerable mermaid notebook renderer not present in Code Editor 1.101.2 - no mermaid extension, no renderMermaidBlocksInElement, and no sanitized-HTML re-parse via innerHTML; markdown notebook renderer uses DOMPurify.sanitize directly"
+    },
+    {
+        "finding_id": "CVE-2026-57102",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "patches/web-server/webview.diff",
+        "link": "https://github.com/microsoft/vscode/commit/236fa7d8ea86f0f4261df38e1a17b3c7e7002bd0",
+        "note": "webWorkerExtensionHostIframe.html hardening already shipped: in the non-validated hostname path parentOrigin is forced to window.origin and the attacker-supplied parentOrigin search param is never used, equivalent to upstream's explicit parentOrigin rejection"
+    },
+    {
+        "finding_id": "GHSA-v282-cxqj-xgj4",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "patches/web-server/webview.diff",
+        "link": "https://github.com/microsoft/vscode/commit/236fa7d8ea86f0f4261df38e1a17b3c7e7002bd0",
+        "note": "webWorkerExtensionHostIframe.html hardening already shipped: in the non-validated hostname path parentOrigin is forced to window.origin and the attacker-supplied parentOrigin search param is never used, equivalent to upstream's explicit parentOrigin rejection"
     }
 ]
