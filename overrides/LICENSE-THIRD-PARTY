@@ -3940,7 +3940,7 @@ GitHub Copilot CLI License
 
 ******************************
 
-@github/copilot-linux-x64
+@github/copilot-linux-arm64
 1.0.50 <https://github.com/github/copilot-cli>
 GitHub Copilot CLI License
 
@@ -3981,7 +3981,7 @@ GitHub Copilot CLI License
 
 ******************************
 
-@github/copilot-linuxmusl-x64
+@github/copilot-linuxmusl-arm64
 1.0.50 <https://github.com/github/copilot-cli>
 GitHub Copilot CLI License
 
@@ -5716,7 +5716,7 @@ SOFTWARE.
 ******************************
 
 axios
-1.16.1 <https://github.com/axios/axios>
+1.18.1 <https://github.com/axios/axios>
 # Copyright (c) 2014-present Matt Zabriskie & Collaborators
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -9082,7 +9082,7 @@ SOFTWARE.
 ******************************
 
 shell-quote
-1.8.4 <https://github.com/ljharb/shell-quote>
+1.10.0 <https://github.com/ljharb/shell-quote>
 The MIT License
 
 Copyright (c) 2013 James Halliday (mail@substack.net)
@@ -9275,7 +9275,7 @@ software or this license, under any kind of legal claim.***
 ******************************
 
 tar
-7.5.16 <https://github.com/isaacs/node-tar>
+7.5.22 <https://github.com/isaacs/node-tar>
 # Blue Oak Model License
 
 Version 1.0.0
