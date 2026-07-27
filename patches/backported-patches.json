@@ -98,5 +98,47 @@
         "patch_path": "N/A",
         "link": "https://github.com/advisories/GHSA-c82g-9gj4-hxp2",
         "note": "GitHub Copilot path traversal - Copilot not present in Code Editor"
+    },
+    {
+        "finding_id": "CVE-2026-47282",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b",
+        "note": "Copilot completions config not present in Code Editor 1.108.2. Searched third-party-src for overrideCapiUrl/overrideProxyUrl, userScopeOnlyKeys, ICompletionsConfigProvider/VSCodeConfigProvider, and any copilot completions-core config code; none present (only unrelated terminal-suggest/typescript-language-features copilot helpers exist)."
+    },
+    {
+        "finding_id": "GHSA-wr9x-42j2-jvh3",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b",
+        "note": "Copilot completions config not present in Code Editor 1.108.2. Searched third-party-src for overrideCapiUrl/overrideProxyUrl, userScopeOnlyKeys, ICompletionsConfigProvider/VSCodeConfigProvider, and any copilot completions-core config code; none present (only unrelated terminal-suggest/typescript-language-features copilot helpers exist)."
+    },
+    {
+        "finding_id": "CVE-2026-57101",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
+        "note": "Vulnerable mermaid notebook renderer (extensions/mermaid-markdown-features/preview-src/notebook/index.ts, 'temp.innerHTML = result') not present in Code Editor 1.108.2. Shipped mermaid-chat-features webview uses textContent (safe); markdown-language-features notebook renderer already DOMPurify-sanitizes untrusted HTML. No equivalent unsafe innerHTML-of-untrusted-content render found."
+    },
+    {
+        "finding_id": "GHSA-9mw4-h26x-gfxw",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "N/A",
+        "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
+        "note": "Vulnerable mermaid notebook renderer (extensions/mermaid-markdown-features/preview-src/notebook/index.ts, 'temp.innerHTML = result') not present in Code Editor 1.108.2. Shipped mermaid-chat-features webview uses textContent (safe); markdown-language-features notebook renderer already DOMPurify-sanitizes untrusted HTML. No equivalent unsafe innerHTML-of-untrusted-content render found."
+    },
+    {
+        "finding_id": "CVE-2026-57102",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "patches/web-server/webview.diff",
+        "link": "https://github.com/microsoft/vscode/commit/236fa7d8ea86f0f4261df38e1a17b3c7e7002bd0",
+        "note": "Already mitigated by existing webview.diff: in the non-validated iframe path parentOrigin is forced to window.origin before start(), so an attacker-supplied parentOrigin search param is never honored (onmessage only accepts event.origin === parentOrigin). Equivalent to upstream's explicit parentOrigin rejection."
+    },
+    {
+        "finding_id": "GHSA-v282-cxqj-xgj4",
+        "affected_versions": "< 1.128.1",
+        "patch_path": "patches/web-server/webview.diff",
+        "link": "https://github.com/microsoft/vscode/commit/236fa7d8ea86f0f4261df38e1a17b3c7e7002bd0",
+        "note": "Already mitigated by existing webview.diff: in the non-validated iframe path parentOrigin is forced to window.origin before start(), so an attacker-supplied parentOrigin search param is never honored (onmessage only accepts event.origin === parentOrigin). Equivalent to upstream's explicit parentOrigin rejection."
     }
 ]
