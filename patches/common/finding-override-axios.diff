@@ -1,9 +1,9 @@
-Override axios to ^1.15.2.
-Remove when upstream Code-OSS updates axios to >= 1.15.2.
+Override axios to ^1.18.0.
+Remove when upstream Code-OSS updates axios to >= 1.18.0.
 
 @generated
-@generator: scripts/patches/apply-override.sh --patch common/finding-override-axios.diff --override 'global:axios=^1.15.2'
-@override-package: axios@^1.15.2
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-axios.diff --override 'global:axios=^1.18.0'
+@override-package: axios@^1.18.0
 
 Index: b/package.json
 ===================================================================
@@ -15,7 +15,7 @@ Index: b/package.json
      "uuid": "^14.0.0",
 -    "ip-address": "^10.1.1"
 +    "ip-address": "^10.1.1",
-+    "axios": "^1.15.2"
++    "axios": "^1.18.0"
    },
    "repository": {
      "type": "git",
