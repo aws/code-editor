@@ -1,0 +1,170 @@
+Restrict Copilot debug/proxy/CAPI URL override settings to user (global) scope only.
+
+These advanced debug settings can redirect Copilot network requests to an
+attacker-chosen endpoint. Reading them from workspace or folder scope lets a
+malicious repository's .vscode/settings.json silently point requests (and the
+credentials attached to them) at an attacker-controlled server. This change
+marks the override settings as userScopeOnly and reads them exclusively from
+the user's global configuration, ignoring workspace/folder values.
+
+Remove when Code-OSS is updated to >= 1.128.1.
+
+@backported: https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b
+@finding-id: CVE-2026-47282 GHSA-wr9x-42j2-jvh3
+
+Index: b/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
+===================================================================
+--- a/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
++++ b/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
+@@ -15,7 +15,8 @@ import {
+ 	getOptionalConfigDefaultForKey,
+ 	ICompletionsConfigProvider,
+ 	ICompletionsEditorAndPluginInfo,
+-	packageJson
++	packageJson,
++	userScopeOnlyKeys
+ } from '../../lib/src/config';
+ import { CopilotConfigPrefix } from '../../lib/src/constants';
+ import { Logger } from '../../lib/src/logger';
+@@ -44,13 +45,38 @@ export class VSCodeConfigProvider extend
+ 	}
+ 
+ 	override getConfig<T>(key: ConfigKeyType): T {
++		if (userScopeOnlyKeys.has(key)) {
++			return this._getUserScopeValue<T>(key) ?? getConfigDefaultForKey(key);
++		}
+ 		return getConfigKeyRecursively<T>(this.config, key) ?? getConfigDefaultForKey(key);
+ 	}
+ 
+ 	override getOptionalConfig<T>(key: ConfigKeyType): T | undefined {
++		if (userScopeOnlyKeys.has(key)) {
++			return this._getUserScopeValue<T>(key) ?? getOptionalConfigDefaultForKey(key);
++		}
+ 		return getConfigKeyRecursively<T>(this.config, key) ?? getOptionalConfigDefaultForKey(key);
+ 	}
+ 
++	private _getUserScopeValue<T>(key: ConfigKeyType): T | undefined {
++		// Try the flat key path directly
++		const inspected = this.config.inspect<T>(key);
++		if (inspected?.globalValue !== undefined) {
++			return inspected.globalValue;
++		}
++		// Handle object-style settings (e.g., "advanced": { "debug.overrideCapiUrl": "..." })
++		const firstDot = key.indexOf('.');
++		if (firstDot > 0) {
++			const parentKey = key.substring(0, firstDot);
++			const subKey = key.substring(firstDot + 1);
++			const parentInspect = this.config.inspect<Record<string, unknown>>(parentKey);
++			if (parentInspect?.globalValue && typeof parentInspect.globalValue === 'object') {
++				return getConfigKeyRecursively<T>(parentInspect.globalValue as Record<string, unknown>, subKey);
++			}
++		}
++		return undefined;
++	}
++
+ 	// Dumps config settings defined in the extension json
+ 	override dumpForTelemetry(): { [key: string]: string } {
+ 		return {};
+Index: b/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
+===================================================================
+--- a/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
++++ b/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
+@@ -75,6 +75,21 @@ export const ConfigKey = {
+ 	UseSplitContextPrompt: 'internal.useSplitContextPrompt',
+ };
+ 
++/**
++ * Settings that must only be read from user (global) scope, ignoring workspace/folder values.
++ * Prevents workspace-level override attacks via malicious .vscode/settings.json.
++ */
++export const userScopeOnlyKeys = new Set<ConfigKeyType>([
++	ConfigKey.DebugOverrideCapiUrl,
++	ConfigKey.DebugOverrideCapiUrlLegacy,
++	ConfigKey.DebugTestOverrideCapiUrl,
++	ConfigKey.DebugTestOverrideCapiUrlLegacy,
++	ConfigKey.DebugOverrideProxyUrl,
++	ConfigKey.DebugOverrideProxyUrlLegacy,
++	ConfigKey.DebugTestOverrideProxyUrl,
++	ConfigKey.DebugTestOverrideProxyUrlLegacy,
++]);
++
+ export type ConfigKeyType = string;
+ 
+ // How to determine where to terminate the completion to the current block.
+Index: b/extensions/copilot/src/platform/configuration/common/configurationService.ts
+===================================================================
+--- a/extensions/copilot/src/platform/configuration/common/configurationService.ts
++++ b/extensions/copilot/src/platform/configuration/common/configurationService.ts
+@@ -375,6 +375,12 @@ export const enum ConfigType {
+ export interface ConfigOptions {
+ 	readonly oldKey?: string;
+ 	readonly valueIgnoredForExternals?: boolean;
++	/**
++	 * When true, only reads from user (global) scope, ignoring workspace and folder values.
++	 * Use for security-sensitive settings (e.g., API endpoint overrides) that must not be
++	 * controllable via a workspace's .vscode/settings.json.
++	 */
++	readonly userScopeOnly?: boolean;
+ }
+ 
+ export interface Config<T> extends BaseConfig<T> {
+@@ -573,8 +579,8 @@ export namespace ConfigKey {
+ 	*/
+ 	export namespace Shared {
+ 		/** Allows for overriding the base domain we use for making requests to the CAPI. This helps CAPI devs develop against a local instance. */
+-		export const DebugOverrideProxyUrl = defineSetting<string | undefined>('advanced.debug.overrideProxyUrl', ConfigType.Simple, undefined);
+-		export const DebugOverrideCAPIUrl = defineSetting<string | undefined>('advanced.debug.overrideCapiUrl', ConfigType.Simple, undefined);
++		export const DebugOverrideProxyUrl = defineSetting<string | undefined>('advanced.debug.overrideProxyUrl', ConfigType.Simple, undefined, undefined, { userScopeOnly: true });
++		export const DebugOverrideCAPIUrl = defineSetting<string | undefined>('advanced.debug.overrideCapiUrl', ConfigType.Simple, undefined, undefined, { userScopeOnly: true });
+ 		export const DebugUseNodeFetchFetcher = defineSetting('advanced.debug.useNodeFetchFetcher', ConfigType.Simple, true);
+ 		export const DebugUseNodeFetcher = defineSetting('advanced.debug.useNodeFetcher', ConfigType.Simple, false);
+ 		export const DebugUseElectronFetcher = defineSetting('advanced.debug.useElectronFetcher', ConfigType.Simple, true);
+Index: b/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
+===================================================================
+--- a/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
++++ b/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
+@@ -57,7 +57,9 @@ export class ConfigurationServiceImpl ex
+ 		const config = scope === undefined ? this.config : vscode.workspace.getConfiguration(CopilotConfigPrefix, scope);
+ 
+ 		let configuredValue: T | undefined;
+-		if (key.advancedSubKey) {
++		if (key.options?.userScopeOnly) {
++			configuredValue = this._getUserScopeValue(config, key);
++		} else if (key.advancedSubKey) {
+ 			// This is a `github.copilot.advanced.*` setting
+ 
+ 			// First, let's try to read it using the flat style
+@@ -104,6 +106,33 @@ export class ConfigurationServiceImpl ex
+ 		return value.content;
+ 	}
+ 
++	private _getUserScopeValue<T>(config: WorkspaceConfiguration, key: Config<T>): T | undefined {
++		if (key.advancedSubKey) {
++			// Flat style: e.g., "github.copilot.advanced.debug.overrideCapiUrl": "..."
++			const flatInspect = config.inspect<T>(key.id);
++			if (flatInspect?.globalValue !== undefined) {
++				return flatInspect.globalValue;
++			}
++			// Object style: e.g., "github.copilot.advanced": { "debug.overrideCapiUrl": "..." }
++			const advancedInspect = config.inspect<Record<string, any>>('advanced');
++			return advancedInspect?.globalValue?.[key.advancedSubKey];
++		}
++
++		const inspected = config.inspect<T>(key.id);
++		if (inspected?.globalValue !== undefined) {
++			return inspected.globalValue;
++		}
++
++		if (key.oldId) {
++			const oldInspected = config.inspect<T>(key.oldId);
++			if (oldInspected?.globalValue !== undefined) {
++				return oldInspected.globalValue;
++			}
++		}
++
++		return undefined;
++	}
++
+ 	inspectConfig<T>(key: BaseConfig<T>, scope?: vscode.ConfigurationScope): InspectConfigResult<T> | undefined {
+ 		if (key.options?.valueIgnoredForExternals && !this._isInternal) {
+ 			return { defaultValue: this.getDefaultValue(key) };

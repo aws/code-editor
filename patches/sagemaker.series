@@ -72,3 +72,4 @@ common/add-openvsx-verification-check.diff
 common/finding-override-undici.diff
 common/finding-override-form-data.diff
 common/finding-override-tar.diff
+common/copilot-restrict-debug-override-urls-to-user-scope.diff
