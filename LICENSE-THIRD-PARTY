@@ -3940,7 +3940,7 @@ GitHub Copilot CLI License
 
 ******************************
 
-@github/copilot-linux-arm64
+@github/copilot-linux-x64
 1.0.50 <https://github.com/github/copilot-cli>
 GitHub Copilot CLI License
 
@@ -3981,7 +3981,7 @@ GitHub Copilot CLI License
 
 ******************************
 
-@github/copilot-linuxmusl-arm64
+@github/copilot-linuxmusl-x64
 1.0.50 <https://github.com/github/copilot-cli>
 GitHub Copilot CLI License
 
