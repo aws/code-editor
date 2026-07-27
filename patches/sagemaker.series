@@ -71,3 +71,4 @@ common/fix-remote-hosts-loopback.diff
 common/finding-override-undici.diff
 common/finding-override-form-data.diff
 common/finding-override-tar.diff
+common/fix-copilot-debug-override-user-scope.diff
