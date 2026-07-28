@@ -424,6 +424,14 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.get-branches-to-scan.outputs.security-scan-branches) }}
     steps:
+      - name: Sanitize branch name
+        id: branch-slug
+        run: |
+          slug=$(echo "${{ matrix.branch }}" | tr '/' '-' | cut -c1-28)
+          safe=$(echo "${{ matrix.branch }}" | tr '/' '-')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "safe=$safe" >> "$GITHUB_OUTPUT"
+
       - name: Download all scan success files
         uses: actions/download-artifact@v7
         with:
