@@ -6,10 +6,10 @@ Remove when upstream Code-OSS updates ws to >= 8.21.0.
 @override-package: ws@^8.21.0
 @override-package: ws@^7.5.11
 
-Index: b/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -138,7 +138,7 @@
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
@@ -22,7 +22,7 @@ Index: b/package.json
 @@ -255,7 +255,10 @@
      "follow-redirects": "^1.16.0",
      "uuid": "^14.0.0",
-     "ip-address": "^10.1.1",
+     "ip-address": "^10.3.1",
 -    "axios": "^1.18.0"
 +    "axios": "^1.18.0",
 +    "chrome-remote-interface": {
@@ -31,10 +31,10 @@ Index: b/package.json
    },
    "repository": {
      "type": "git",
-Index: b/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- a/remote/package.json
-+++ b/remote/package.json
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
 @@ -43,7 +43,7 @@
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
