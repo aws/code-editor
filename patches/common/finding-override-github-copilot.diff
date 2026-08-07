@@ -5,12 +5,12 @@ Remove when upstream Code-OSS updates @github/copilot to >= 1.0.43.
 @generator: scripts/patches/apply-override.sh --patch common/finding-override-github-copilot.diff --override 'global:@github/copilot=^1.0.43' --override 'remote/package.json@global:@github/copilot=^1.0.43'
 @override-package: @github/copilot@^1.0.43
 
-Index: b/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -258,7 +258,8 @@
-     "axios": "^1.15.2",
+     "axios": "^1.18.0",
      "chrome-remote-interface": {
        "ws": "^7.5.11"
 -    }
@@ -19,16 +19,16 @@ Index: b/package.json
    },
    "repository": {
      "type": "git",
-Index: b/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- a/remote/package.json
-+++ b/remote/package.json
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
 @@ -53,6 +53,7 @@
        "cpu-features": "0.0.0"
      },
      "uuid": "^14.0.0",
--    "ip-address": "^10.1.1"
-+    "ip-address": "^10.1.1",
+-    "ip-address": "^10.3.1"
++    "ip-address": "^10.3.1",
 +    "@github/copilot": "^1.0.43"
    }
  }
