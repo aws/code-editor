@@ -1,10 +1,10 @@
-Override ip-address to ^10.1.1.
-Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override global:ip-address=^10.1.1 --override remote/package.json@global:ip-address=^10.1.1
-Remove when upstream Code-OSS updates ip-address to >= 10.1.1.
+Override ip-address to ^10.3.1.
+Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override global:ip-address=^10.3.1 --override remote/package.json@global:ip-address=^10.3.1
+Remove when upstream Code-OSS updates ip-address to >= 10.3.1.
 
 @generated
-@generator: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override 'global:ip-address=^10.1.1' --override 'remote/package.json@global:ip-address=^10.1.1'
-@override-package: ip-address@^10.1.1
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-ip-address.diff --override 'global:ip-address=^10.3.1' --override 'remote/package.json@global:ip-address=^10.3.1'
+@override-package: ip-address@^10.3.1
 
 Index: b/package.json
 ===================================================================
@@ -17,7 +17,7 @@ Index: b/package.json
 -    "uuid": "14.0.0"
 -
 +    "uuid": "14.0.0",
-+    "ip-address": "^10.1.1"
++    "ip-address": "^10.3.1"
    },
    "repository": {
      "type": "git",
@@ -31,6 +31,6 @@ Index: b/remote/package.json
      "follow-redirects": "1.16.0",
 -    "uuid": "14.0.0"
 +    "uuid": "14.0.0",
-+    "ip-address": "^10.1.1"
++    "ip-address": "^10.3.1"
    }
  }
