@@ -6,10 +6,10 @@ Bug: GHSA profile snippets path traversal
 Add path traversal protection to snippet import. Validates that resolved
 snippet resource URIs remain within the snippetsHome directory, preventing
 an attacker-crafted profile from writing files outside the profile folder.
-Index: b/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
+Index: code-editor-src/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
 ===================================================================
---- a/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
-+++ b/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
+--- code-editor-src.orig/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
++++ code-editor-src/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
 @@ -6,10 +6,12 @@
  import { VSBuffer } from '../../../../base/common/buffer.js';
  import { IStringDictionary } from '../../../../base/common/collections.js';
@@ -78,10 +78,10 @@ Index: b/src/vs/workbench/services/userDataProfile/browser/snippetsResource.ts
  			await this.fileService.writeFile(resource, VSBuffer.fromString(snippetsContent.snippets[key]));
  		}
  	}
-Index: b/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
+Index: code-editor-src/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
 ===================================================================
---- a/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
-+++ b/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
+--- code-editor-src.orig/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
++++ code-editor-src/src/vs/workbench/services/userDataProfile/browser/userDataProfileInit.ts
 @@ -85,7 +85,7 @@ export class UserDataProfileInitializer
  				promises.push(this.initialize(new McpResourceInitializer(this.userDataProfileService, this.fileService, this.logService), profileTemplate.mcp, ProfileResourceType.Mcp));
  			}

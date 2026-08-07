@@ -5,10 +5,10 @@ Remove when upstream Code-OSS updates shell-quote to >= 1.9.0.
 @generator: scripts/patches/apply-override.sh --patch common/finding-override-shell-quote.diff --override 'global:shell-quote=^1.9.0' --override 'remote/package.json@global:shell-quote=^1.9.0'
 @override-package: shell-quote@^1.9.0
 
-Index: b/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -246,6 +246,7 @@
      "yaserver": "^0.4.0"
    },
@@ -17,10 +17,10 @@ Index: b/package.json
      "postcss": "^8.4.31",
      "node-gyp-build": "4.8.1",
      "serialize-javascript": "^7.0.3",
-Index: b/remote/package.json
+Index: code-editor-src/remote/package.json
 ===================================================================
---- a/remote/package.json
-+++ b/remote/package.json
+--- code-editor-src.orig/remote/package.json
++++ code-editor-src/remote/package.json
 @@ -48,6 +48,7 @@
      "yazl": "^2.4.3"
    },

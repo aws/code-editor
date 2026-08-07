@@ -12,10 +12,10 @@ Remove when Code-OSS is updated to >= 1.128.1.
 @backported: https://github.com/microsoft/vscode/commit/f05bcd1aa29cff28a62fe137b4a16fec9393f31b
 @finding-id: CVE-2026-47282 GHSA-wr9x-42j2-jvh3
 
-Index: b/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
+Index: code-editor-src/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
 ===================================================================
---- a/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
-+++ b/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
+--- code-editor-src.orig/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
++++ code-editor-src/extensions/copilot/src/extension/completions-core/vscode-node/extension/src/config.ts
 @@ -15,7 +15,8 @@ import {
  	getOptionalConfigDefaultForKey,
  	ICompletionsConfigProvider,
@@ -65,10 +65,10 @@ Index: b/extensions/copilot/src/extension/completions-core/vscode-node/extension
  	// Dumps config settings defined in the extension json
  	override dumpForTelemetry(): { [key: string]: string } {
  		return {};
-Index: b/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
+Index: code-editor-src/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
 ===================================================================
---- a/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
-+++ b/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
+--- code-editor-src.orig/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
++++ code-editor-src/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/config.ts
 @@ -75,6 +75,21 @@ export const ConfigKey = {
  	UseSplitContextPrompt: 'internal.useSplitContextPrompt',
  };
@@ -91,10 +91,10 @@ Index: b/extensions/copilot/src/extension/completions-core/vscode-node/lib/src/c
  export type ConfigKeyType = string;
  
  // How to determine where to terminate the completion to the current block.
-Index: b/extensions/copilot/src/platform/configuration/common/configurationService.ts
+Index: code-editor-src/extensions/copilot/src/platform/configuration/common/configurationService.ts
 ===================================================================
---- a/extensions/copilot/src/platform/configuration/common/configurationService.ts
-+++ b/extensions/copilot/src/platform/configuration/common/configurationService.ts
+--- code-editor-src.orig/extensions/copilot/src/platform/configuration/common/configurationService.ts
++++ code-editor-src/extensions/copilot/src/platform/configuration/common/configurationService.ts
 @@ -375,6 +375,12 @@ export const enum ConfigType {
  export interface ConfigOptions {
  	readonly oldKey?: string;
@@ -119,10 +119,10 @@ Index: b/extensions/copilot/src/platform/configuration/common/configurationServi
  		export const DebugUseNodeFetchFetcher = defineSetting('advanced.debug.useNodeFetchFetcher', ConfigType.Simple, true);
  		export const DebugUseNodeFetcher = defineSetting('advanced.debug.useNodeFetcher', ConfigType.Simple, false);
  		export const DebugUseElectronFetcher = defineSetting('advanced.debug.useElectronFetcher', ConfigType.Simple, true);
-Index: b/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
+Index: code-editor-src/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
 ===================================================================
---- a/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
-+++ b/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
+--- code-editor-src.orig/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
++++ code-editor-src/extensions/copilot/src/platform/configuration/vscode/configurationServiceImpl.ts
 @@ -57,7 +57,9 @@ export class ConfigurationServiceImpl ex
  		const config = scope === undefined ? this.config : vscode.workspace.getConfiguration(CopilotConfigPrefix, scope);
  

@@ -93,9 +93,10 @@ Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExte
 -	const parentOrigin = searchParams.get('parentOrigin') || window.origin;
 +	let parentOrigin = window.origin;
  	const salt = searchParams.get('salt');
-
+ 
  	(async function () {
 @@ -25,6 +25,8 @@
+ 			// validation not requested
  			return start();
  		}
 +
