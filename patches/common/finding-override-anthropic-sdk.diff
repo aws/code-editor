@@ -5,10 +5,10 @@ Remove when upstream Code-OSS updates @anthropic-ai/sdk to >= 0.91.1.
 @generator: scripts/patches/apply-override.sh --patch common/finding-override-anthropic-sdk.diff --override 'direct:@anthropic-ai/sdk=^0.91.1'
 @override-package: @anthropic-ai/sdk@^0.91.1
 
-Index: b/package.json
+Index: code-editor-src/package.json
 ===================================================================
---- a/package.json
-+++ b/package.json
+--- code-editor-src.orig/package.json
++++ code-editor-src/package.json
 @@ -82,7 +82,7 @@
      "install-latest-component-explorer": "npm install @vscode/component-explorer@next @vscode/component-explorer-cli@next && cd build/rspack && npm install @vscode/component-explorer-webpack-plugin@next @vscode/component-explorer@next && cd ../vite && npm install @vscode/component-explorer-vite-plugin@next @vscode/component-explorer@next"
    },

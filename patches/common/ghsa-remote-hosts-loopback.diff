@@ -7,10 +7,10 @@ Add isLoopbackHost function to validate whether a direct host:port remote
 authority targets the local loopback interface. This enables prompting users
 before connecting to non-loopback remote hosts that could originate from
 untrusted workspace files.
-Index: b/src/vs/platform/remote/common/remoteHosts.ts
+Index: code-editor-src/src/vs/platform/remote/common/remoteHosts.ts
 ===================================================================
---- a/src/vs/platform/remote/common/remoteHosts.ts
-+++ b/src/vs/platform/remote/common/remoteHosts.ts
+--- code-editor-src.orig/src/vs/platform/remote/common/remoteHosts.ts
++++ code-editor-src/src/vs/platform/remote/common/remoteHosts.ts
 @@ -87,3 +87,20 @@ function parseAuthority(authority: strin
  	// doesn't contain a port
  	return { host: authority, port: undefined };
