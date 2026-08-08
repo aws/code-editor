@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/build-tools/oss-attribution/oss-attribution-generator"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/build-tools/oss-attribution/oss-attribution-generator"
+    schedule:
+      interval: "weekly"
+    target-branch: "1.0"
+  - package-ecosystem: "npm"
+    directory: "/build-tools/oss-attribution/oss-attribution-generator"
+    schedule:
+      interval: "weekly"
+    target-branch: "1.1"
+  - package-ecosystem: "npm"
+    directory: "/build-tools/oss-attribution/oss-attribution-generator"
+    schedule:
+      interval: "weekly"
+    target-branch: "1.2"
