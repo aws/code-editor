@@ -88,5 +88,119 @@
     "patch_path": "N/A",
     "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
     "note": "Notebook Restricted-Mode bypass via mermaid render. Upstream vulnerable file extensions/mermaid-markdown-features/preview-src/notebook/index.ts (the 'temp.innerHTML = result' sink and renderMermaidBlocksInElement) does not exist in this branch's shipped source. The only mermaid extension here, mermaid-chat-features, renders diagrams via escapeHtmlText() into a <pre> and uses textContent (chat-webview-src/mermaidWebview.ts) inside a sandboxed webview with strict nonce CSP - no innerHTML of untrusted content. The markdown-language-features notebook renderer already sanitizes untrusted HTML with DOMPurify. No equivalent vulnerable innerHTML/insertAdjacentHTML sink for untrusted render output exists."
+  },
+  {
+    "finding_id": "CVE-2026-70336",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-block-privileged-url-payload.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ef3ccf912287348aafd04dc6cc2c5619d6ccb70f"
+  },
+  {
+    "finding_id": "GHSA-fp6w-v29h-43rj",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-block-privileged-url-payload.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ef3ccf912287348aafd04dc6cc2c5619d6ccb70f"
+  },
+  {
+    "finding_id": "CVE-2026-69320",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-block-privileged-url-payload.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ef3ccf912287348aafd04dc6cc2c5619d6ccb70f"
+  },
+  {
+    "finding_id": "GHSA-h29r-p8vr-4vfm",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-block-privileged-url-payload.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ef3ccf912287348aafd04dc6cc2c5619d6ccb70f"
+  },
+  {
+    "finding_id": "CVE-2026-69278",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-terminal-workspace-trust-bypass.diff",
+    "link": "https://github.com/microsoft/vscode/commit/3154a68fc151bcafe371f89d197412645e6a7616"
+  },
+  {
+    "finding_id": "GHSA-h9j4-x76r-fvj4",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-terminal-workspace-trust-bypass.diff",
+    "link": "https://github.com/microsoft/vscode/commit/3154a68fc151bcafe371f89d197412645e6a7616"
+  },
+  {
+    "finding_id": "CVE-2026-58650",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-network-filter-domain-validation.diff",
+    "link": "https://github.com/microsoft/vscode/commit/06a2bc84d0555f4c7ebd176809673e61fa49c6ff"
+  },
+  {
+    "finding_id": "GHSA-h6v9-3cqc-v234",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-network-filter-domain-validation.diff",
+    "link": "https://github.com/microsoft/vscode/commit/06a2bc84d0555f4c7ebd176809673e61fa49c6ff"
+  },
+  {
+    "finding_id": "CVE-2026-47285",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-buffer-copy-extensions.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ae7a28076f3076a10bd07b49cf7ff730c1773e61"
+  },
+  {
+    "finding_id": "GHSA-vcpf-2mpp-vx3v",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-buffer-copy-extensions.diff",
+    "link": "https://github.com/microsoft/vscode/commit/ae7a28076f3076a10bd07b49cf7ff730c1773e61"
+  },
+  {
+    "finding_id": "CVE-2026-65675",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-3hjg-cwxj-qfc6",
+    "note": "Copilot Chat security feature bypass - Copilot not present in Code Editor"
+  },
+  {
+    "finding_id": "GHSA-3hjg-cwxj-qfc6",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-3hjg-cwxj-qfc6",
+    "note": "Copilot Chat security feature bypass - Copilot not present in Code Editor"
+  },
+  {
+    "finding_id": "CVE-2026-70335",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-w79w-rj9h-vg4f",
+    "note": "Copilot Custom Agent Hook RCE - Copilot not present in Code Editor"
+  },
+  {
+    "finding_id": "GHSA-w79w-rj9h-vg4f",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-w79w-rj9h-vg4f",
+    "note": "Copilot Custom Agent Hook RCE - Copilot not present in Code Editor"
+  },
+  {
+    "finding_id": "CVE-2026-59113",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-36qf-jgq9-4m6j",
+    "note": "Fetch Web Page OS protocol handler RCE - webContentExtractor is electron-main only, not present in Code Editor web/reh-web builds"
+  },
+  {
+    "finding_id": "GHSA-36qf-jgq9-4m6j",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "N/A",
+    "link": "https://github.com/advisories/GHSA-36qf-jgq9-4m6j",
+    "note": "Fetch Web Page OS protocol handler RCE - webContentExtractor is electron-main only, not present in Code Editor web/reh-web builds"
+  },
+  {
+    "finding_id": "CVE-2026-69306",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-network-filter-domain-validation.diff",
+    "link": "https://github.com/microsoft/vscode/commit/af3a976e194030a94f6bfb5aebc5e0f4d66f5e41"
+  },
+  {
+    "finding_id": "GHSA-6xp2-9cj3-f488",
+    "affected_versions": "< 1.132.1",
+    "patch_path": "patches/common/fix-network-filter-domain-validation.diff",
+    "link": "https://github.com/microsoft/vscode/commit/af3a976e194030a94f6bfb5aebc5e0f4d66f5e41"
   }
 ]

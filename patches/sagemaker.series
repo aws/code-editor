@@ -72,3 +72,7 @@ common/finding-override-undici.diff
 common/finding-override-form-data.diff
 common/finding-override-tar.diff
 common/fix-copilot-debug-override-user-scope.diff
+common/fix-block-privileged-url-payload.diff
+common/fix-terminal-workspace-trust-bypass.diff
+common/fix-network-filter-domain-validation.diff
+common/fix-buffer-copy-extensions.diff
