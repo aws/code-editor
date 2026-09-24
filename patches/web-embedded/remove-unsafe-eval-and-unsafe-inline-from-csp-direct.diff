@@ -66,7 +66,7 @@ Index: code-editor-src/src/vs/workbench/services/extensions/worker/webWorkerExte
  		<meta http-equiv="Content-Security-Policy" content="
  			default-src 'none';
  			child-src 'self' data: blob:;
--			script-src 'self' 'wasm-unsafe-eval' 'sha256-__INLINE_SCRIPT_SHA__' https: http://localhost:* blob:;
+-			script-src 'self' 'unsafe-eval' 'sha256-__INLINE_SCRIPT_SHA__' https: http://localhost:* blob:;
 +			script-src 'self' 'sha256-__INLINE_SCRIPT_SHA__' https: http://localhost:* blob:;
  			connect-src 'self' https: wss: http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"/>
  	</head>
