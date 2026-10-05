@@ -1,10 +1,10 @@
-Override undici to ^7.29.0.
-Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override direct:undici=^7.29.0 --override global:undici=^7.29.0 --override remote/package.json@global:undici=^7.29.0
-Remove when upstream Code-OSS updates undici to >= 7.29.0.
+Override undici to ^7.29.1.
+Regenerate: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override direct:undici=^7.29.1 --override global:undici=^7.29.1 --override remote/package.json@global:undici=^7.29.1
+Remove when upstream Code-OSS updates undici to >= 7.29.1.
 
 @generated
-@generator: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override 'direct:undici=^7.29.0' --override 'global:undici=^7.29.0' --override 'remote/package.json@global:undici=^7.29.0'
-@override-package: undici@^7.29.0
+@generator: scripts/patches/apply-override.sh --patch common/finding-override-undici.diff --override 'direct:undici=^7.29.1' --override 'global:undici=^7.29.1' --override 'remote/package.json@global:undici=^7.29.1'
+@override-package: undici@^7.29.1
 
 Index: code-editor-src/package.json
 ===================================================================
@@ -15,7 +15,7 @@ Index: code-editor-src/package.json
      "ssh2": "^1.16.0",
      "tas-client": "0.3.1",
 -    "undici": "^7.24.0",
-+    "undici": "^7.29.0",
++    "undici": "^7.29.1",
      "vscode-oniguruma": "1.7.0",
      "vscode-regexpp": "^3.1.0",
      "vscode-textmate": "^9.3.2",
@@ -25,7 +25,7 @@ Index: code-editor-src/package.json
      },
 -    "@github/copilot": "^1.0.43"
 +    "@github/copilot": "^1.0.43",
-+    "undici": "^7.29.0"
++    "undici": "^7.29.1"
    },
    "repository": {
      "type": "git",
@@ -39,6 +39,6 @@ Index: code-editor-src/remote/package.json
      "ip-address": "^10.3.1",
 -    "@github/copilot": "^1.0.43"
 +    "@github/copilot": "^1.0.43",
-+    "undici": "^7.29.0"
++    "undici": "^7.29.1"
    }
  }
