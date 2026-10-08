@@ -1,0 +1,151 @@
+Fix network filter domain validation and extension URL handler
+
+Hardens the network filter domain matcher to properly canonicalize URI
+authorities (handling user info, ports, and IPv6 literals), blocks HTTP/HTTPS
+requests with unparseable domains instead of allowing them, and reorders the
+extension URL handler to invoke override handlers only after trust checks,
+preventing trust bypass via URL authority manipulation.
+
+Remove when Code-OSS is updated to >= 1.132.1.
+
+@backported: https://github.com/microsoft/vscode/commit/06a2bc84d0555f4c7ebd176809673e61fa49c6ff
+@finding-id: CVE-2026-58650 GHSA-h6v9-3cqc-v234 CVE-2026-69306 GHSA-6xp2-9cj3-f488
+Index: b/src/vs/platform/networkFilter/common/domainMatcher.ts
+===================================================================
+--- a/src/vs/platform/networkFilter/common/domainMatcher.ts
++++ b/src/vs/platform/networkFilter/common/domainMatcher.ts
+@@ -91,6 +91,25 @@ export function normalizeDomain(value: s
+ 	return hasWildcardPrefix ? `*.${host}` : host;
+ }
+ 
++function normalizeUriAuthority(authority: string | undefined): string | undefined {
++	if (!authority || /[/?#\\]/.test(authority)) {
++		return undefined;
++	}
++
++	let hostname: string;
++	try {
++		hostname = new URL(`http://${authority}`).hostname.toLowerCase();
++	} catch {
++		return undefined;
++	}
++
++	if (hostname.startsWith('[')) {
++		return hostname.endsWith(']') ? hostname : undefined;
++	}
++
++	return normalizeDomain(hostname, true);
++}
++
+ /**
+  * Extracts the domain portion from a pattern string.
+  * If the pattern contains `://`, it is parsed as a URI and the authority is returned.
+@@ -120,7 +139,8 @@ export function extractDomainPattern(pat
+  * @returns `true` if the domain matches the pattern.
+  */
+ export function matchesDomainPattern(domain: string, pattern: string): boolean {
+-	const normalizedPattern = normalizeDomain(extractDomainPattern(pattern), pattern.includes('://'));
++	const extractedPattern = extractDomainPattern(pattern);
++	const normalizedPattern = normalizeDomain(extractedPattern, pattern.includes('://')) ?? normalizeUriAuthority(extractedPattern);
+ 	if (!normalizedPattern) {
+ 		return false;
+ 	}
+@@ -136,13 +156,13 @@ export function matchesDomainPattern(dom
+ 
+ /**
+  * Extracts and normalizes a domain from a URI.
+- * Strips port numbers and trailing dots.
++ * Separates user information and ports, and canonicalizes IPv6 literals.
+  *
+  * @param uri The URI to extract the domain from.
+  * @returns The normalized domain, or `undefined` if no valid domain could be extracted.
+  */
+ export function extractDomainFromUri(uri: URI): string | undefined {
+-	return normalizeDomain(uri.authority, true);
++	return normalizeUriAuthority(uri.authority);
+ }
+ 
+ /**
+Index: b/src/vs/platform/networkFilter/common/networkFilterService.ts
+===================================================================
+--- a/src/vs/platform/networkFilter/common/networkFilterService.ts
++++ b/src/vs/platform/networkFilter/common/networkFilterService.ts
+@@ -6,6 +6,7 @@
+ import { Emitter, Event } from '../../../base/common/event.js';
+ import { Disposable } from '../../../base/common/lifecycle.js';
+ import { LRUCache } from '../../../base/common/map.js';
++import { matchesScheme, Schemas } from '../../../base/common/network.js';
+ import { URI } from '../../../base/common/uri.js';
+ import { localize } from '../../../nls.js';
+ import { IConfigurationService } from '../../configuration/common/configuration.js';
+@@ -122,13 +123,13 @@ export class AgentNetworkFilterService e
+ 		}
+ 
+ 		// File URIs and URIs without authority always pass
+-		if (uri.scheme === 'file' || !uri.authority) {
++		if (matchesScheme(uri, Schemas.file) || !uri.authority) {
+ 			return true;
+ 		}
+ 
+ 		const domain = extractDomainFromUri(uri);
+ 		if (!domain) {
+-			return true;
++			return !matchesScheme(uri, Schemas.http) && !matchesScheme(uri, Schemas.https);
+ 		}
+ 
+ 		let result = this.domainCache.get(domain);
+Index: b/src/vs/workbench/services/extensions/browser/extensionUrlHandler.ts
+===================================================================
+--- a/src/vs/workbench/services/extensions/browser/extensionUrlHandler.ts
++++ b/src/vs/workbench/services/extensions/browser/extensionUrlHandler.ts
+@@ -156,27 +156,21 @@ class ExtensionUrlHandler implements IEx
+ 		}
+ 
+ 		const overrideHandler = ExtensionUrlHandlerOverrideRegistry.getHandler(uri);
+-		if (overrideHandler) {
+-			const handled = await overrideHandler.handleURL(uri);
+-			if (handled) {
+-				return handled;
+-			}
+-		}
+-
+ 		const extensionId = uri.authority;
+ 
+ 		const initialHandler = this.extensionHandlers.get(ExtensionIdentifier.toKey(extensionId));
+ 		let extensionDisplayName: string;
++		let extensionInstalled = !!initialHandler;
+ 
+ 		if (!initialHandler) {
+ 			// The extension is not yet activated, so let's check if it is installed and enabled
+ 			const extension = await this.extensionService.getExtension(extensionId);
+-			if (!extension) {
++			extensionInstalled = !!extension;
++			if (!extension && !overrideHandler) {
+ 				await this.handleUnhandledURL(uri, extensionId, options);
+ 				return true;
+-			} else {
+-				extensionDisplayName = extension.displayName ?? '';
+ 			}
++			extensionDisplayName = extension?.displayName ?? extensionId;
+ 		} else {
+ 			extensionDisplayName = initialHandler.extensionDisplayName;
+ 		}
+@@ -215,6 +209,18 @@ class ExtensionUrlHandler implements IEx
+ 			}
+ 		}
+ 
++		if (overrideHandler) {
++			const handled = await overrideHandler.handleURL(uri);
++			if (handled) {
++				return handled;
++			}
++		}
++
++		if (!extensionInstalled) {
++			await this.handleUnhandledURL(uri, extensionId, { ...options, trusted: true });
++			return true;
++		}
++
+ 		const handler = this.extensionHandlers.get(ExtensionIdentifier.toKey(extensionId));
+ 
+ 		if (handler) {
