@@ -1,5 +1,8 @@
 ## Code Editor
 
+> [!IMPORTANT]
+> This open source project is no longer being actively maintained and will only receive critical security fixes.
+
 This is the repo for `code-editor`.
 
 ### Repository structure
