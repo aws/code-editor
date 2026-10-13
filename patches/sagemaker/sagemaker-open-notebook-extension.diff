@@ -128,7 +128,7 @@ Index: code-editor-src/extensions/sagemaker-open-notebook-extension/src/extensio
 ===================================================================
 --- /dev/null
 +++ code-editor-src/extensions/sagemaker-open-notebook-extension/src/extension.ts
-@@ -0,0 +1,100 @@
+@@ -0,0 +1,111 @@
 +
 +import * as vscode from 'vscode';
 +import * as https from 'https';
@@ -154,9 +154,20 @@ Index: code-editor-src/extensions/sagemaker-open-notebook-extension/src/extensio
 +    return regionRegex.test(region);
 +}
 +
++function isValidClusterId(clusterId: string): boolean {
++    // Cluster IDs/names are alphanumeric with hyphens and underscores only
++    const clusterIdRegex = /^[a-zA-Z0-9_-]+$/;
++    return clusterIdRegex.test(clusterId);
++}
++
 +async function loadAndDisplayNotebook(fileKey: string, clusterId: string, region: string) {
 +    if (!isValidRegion(region)) {
 +        vscode.window.showErrorMessage('Invalid region format. Region should only contain characters, numbers, and hyphens.');
++        return;
++    }
++
++    if (clusterId && !isValidClusterId(clusterId)) {
++        vscode.window.showErrorMessage('Invalid cluster ID format. Cluster ID should only contain letters, numbers, hyphens, and underscores.');
 +        return;
 +    }
 +    
