@@ -67,7 +67,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 ===================================================================
 --- /dev/null
 +++ third-party-src/src/vs/server/node/proxyServer.ts
-@@ -0,0 +1,204 @@
+@@ -0,0 +1,215 @@
 +import proxyServer from "http-proxy";
 +import * as http from "http";
 +import * as net from "net";
@@ -76,6 +76,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +import {RemoteAgentConnectionContext} from "../../platform/remote/common/remoteAgentEnvironment.js";
 +import {IServerChannel} from "../../base/parts/ipc/common/ipc.js";
 +import {Emitter, Event} from "../../base/common/event.js";
++import {requestHasValidConnectionToken, ServerConnectionToken, ServerConnectionTokenType} from "./serverConnectionToken.js";
 +
 +type ProxyRequest = {
 +	base?: string;
@@ -98,7 +99,10 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +	public readonly onPortRemoved: Event<number> = this._onPortRemoved.event;
 +	public readonly onPortSynced: Event<number[]> = this._onPortSynced.event;
 +
-+	constructor(_socketServer: SocketServer<RemoteAgentConnectionContext>) {
++	constructor(
++		_socketServer: SocketServer<RemoteAgentConnectionContext>,
++		private readonly _connectionToken: ServerConnectionToken
++	) {
 +		this.proxy = proxyServer.createProxyServer({});
 +		this.setupProxy();
 +		this._socketServer = _socketServer;
@@ -177,7 +181,7 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +
 +	private writeResponse(res: http.ServerResponse | net.Socket, code: number, message: string) {
 +		if (res instanceof net.Socket) {
-+			res.end(`HTTP/1.1 ${code} ${message}`);
++			res.end(`HTTP/1.1 ${code} ${message}\r\n\r\n`);
 +		} else {
 +			res.writeHead(code, message);
 +			res.end();
@@ -192,6 +196,13 @@ Index: third-party-src/src/vs/server/node/proxyServer.ts
 +		const proxyRequest = this.createProxyRequest(req);
 +		if (!proxyRequest) {
 +			return false;
++		}
++
++		// When connection token auth is enabled, proxied ports require the same token as the workbench
++		if (this._connectionToken.type !== ServerConnectionTokenType.None
++			&& !requestHasValidConnectionToken(this._connectionToken, req, url.parse(req.url ?? "", true))) {
++			this.writeResponse(res, 403, "Forbidden");
++			return true;
 +		}
 +
 +		if (!this.validatePort(proxyRequest)) {
@@ -299,7 +310,7 @@ Index: third-party-src/src/vs/server/node/remoteExtensionHostAgentServer.ts
  		);
 +		this._proxyServer = (
 +			hasWebClient
-+				? this._instantiationService.createInstance(ProxyServer, this._socketServer)
++				? this._instantiationService.createInstance(ProxyServer, this._socketServer, this._connectionToken)
 +				: null
 +		);
  		this._logService.info(`Extension host agent started.`);
@@ -654,3 +665,34 @@ Index: third-party-src/src/vs/workbench/services/remote/common/tunnelModel.ts
  	}
  
  	private async getTunnelRestoreStorageKey(): Promise<string | undefined> {
+Index: third-party-src/src/vs/server/node/webClientServer.ts
+===================================================================
+--- third-party-src.orig/src/vs/server/node/webClientServer.ts
++++ third-party-src/src/vs/server/node/webClientServer.ts
+@@ -260,6 +260,8 @@ export class WebClientServer {
+ 				queryConnectionToken,
+ 				{
+ 					sameSite: 'lax',
++					httpOnly: true,
++					secure: true,
+ 					maxAge: 60 * 60 * 24 * 7 /* 1 week */
+ 				}
+ 			);
+@@ -356,6 +358,8 @@ export class WebClientServer {
+ 
+ 		const workbenchWebConfiguration = {
+ 			remoteAuthority,
++			// The vscode-tkn cookie is HttpOnly, so the workbench gets the token from its configuration
++			connectionToken: this._connectionToken.type !== ServerConnectionTokenType.None ? this._connectionToken.value : undefined,
+ 			userDataPath: this._environmentService.userDataPath,
+ 			webviewEndpoint: staticRoute + '/out/vs/workbench/contrib/webview/browser/pre',
+ 			serverBasePath: this._basePath,
+@@ -447,6 +451,8 @@ export class WebClientServer {
+ 				this._connectionToken.value,
+ 				{
+ 					sameSite: 'lax',
++					httpOnly: true,
++					secure: true,
+ 					maxAge: 60 * 60 * 24 * 7 /* 1 week */
+ 				}
+ 			);
