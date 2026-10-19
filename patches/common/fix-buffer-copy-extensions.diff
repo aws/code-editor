@@ -1,0 +1,47 @@
+Always return copies of buffers to extensions
+
+Returns a copied slice of the buffer in extHostCommands instead of
+the original backing ArrayBuffer, preventing extensions from mutating
+shared memory. Also simplifies webview stream chunk handling to use
+VSBuffer.buffer which already returns a safe Uint8Array copy.
+
+Remove when Code-OSS is updated to >= 1.132.1.
+
+@backported: https://github.com/microsoft/vscode/commit/ae7a28076f3076a10bd07b49cf7ff730c1773e61
+@finding-id: CVE-2026-47285 GHSA-vcpf-2mpp-vx3v
+Index: b/src/vs/workbench/api/common/extHostCommands.ts
+===================================================================
+--- a/src/vs/workbench/api/common/extHostCommands.ts
++++ b/src/vs/workbench/api/common/extHostCommands.ts
+@@ -101,7 +101,8 @@ export class ExtHostCommands implements
+ 							return extHostTypeConverter.location.to(obj);
+ 						}
+ 						if (obj instanceof VSBuffer) {
+-							return obj.buffer.buffer;
++							// Create a copy of the buffer since the original buffer is owned by the extension host and might be reused for other commands
++							return obj.buffer.buffer.slice(obj.buffer.byteOffset, obj.buffer.byteOffset + obj.buffer.byteLength);
+ 						}
+ 						if (!Array.isArray(obj)) {
+ 							return obj;
+Index: b/src/vs/workbench/contrib/webview/browser/webviewElement.ts
+===================================================================
+--- a/src/vs/workbench/contrib/webview/browser/webviewElement.ts
++++ b/src/vs/workbench/contrib/webview/browser/webviewElement.ts
+@@ -820,7 +820,7 @@ export class WebviewElement extends Disp
+ 									onData: (chunk) => {
+ 										if (!closed) {
+ 											try {
+-												controller.enqueue(new Uint8Array<ArrayBuffer>(chunk.buffer.buffer as ArrayBuffer, chunk.buffer.byteOffset, chunk.buffer.byteLength));
++												controller?.enqueue(new Uint8Array(chunk.buffer));
+ 											} catch {
+ 												closed = true;
+ 												this._activeStreamControllers.delete(controller);
+@@ -861,7 +861,7 @@ export class WebviewElement extends Disp
+ 						});
+ 						listenStream(result.stream, {
+ 							onData: (chunk) => {
+-								const data = new Uint8Array(chunk.buffer.buffer, chunk.buffer.byteOffset, chunk.buffer.byteLength);
++								const data = new Uint8Array(chunk.buffer);
+ 								this._send('did-load-resource-chunk', { id, data }, [data.buffer]);
+ 							},
+ 							onError: () => {

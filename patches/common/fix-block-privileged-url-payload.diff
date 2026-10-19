@@ -1,0 +1,109 @@
+Block privileged URL payload options in server
+
+Prevents environment variable injection via startParamsEnv by ensuring
+VSCODE_* critical vars cannot be overridden, sanitizes resolverEnv before
+use in terminal channel, removes dangerous env vars case-insensitively
+across all platforms, and restricts extension dev payload options to
+non-production builds only.
+
+Remove when Code-OSS is updated to >= 1.132.1.
+
+@backported: https://github.com/microsoft/vscode/commit/ef3ccf912287348aafd04dc6cc2c5619d6ccb70f
+@finding-id: CVE-2026-70336 GHSA-fp6w-v29h-43rj CVE-2026-69320 GHSA-h29r-p8vr-4vfm
+Index: b/src/vs/base/common/processes.ts
+===================================================================
+--- a/src/vs/base/common/processes.ts
++++ b/src/vs/base/common/processes.ts
+@@ -3,7 +3,7 @@
+  *  Licensed under the MIT License. See License.txt in the project root for license information.
+  *--------------------------------------------------------------------------------------------*/
+ 
+-import { IProcessEnvironment, isLinux } from './platform.js';
++import { IProcessEnvironment } from './platform.js';
+ 
+ /**
+  * Options to be passed to the external program or shell.
+@@ -136,13 +136,16 @@ export function removeDangerousEnvVariab
+ 		return;
+ 	}
+ 
+-	// Unset `DEBUG`, as an invalid value might lead to process crashes
+-	// See https://github.com/microsoft/vscode/issues/130072
+-	delete env['DEBUG'];
+-
+-	if (isLinux) {
+-		// Unset `LD_PRELOAD`, as it might lead to process crashes
+-		// See https://github.com/microsoft/vscode/issues/134177
+-		delete env['LD_PRELOAD'];
++	const dangerousEnvVariables = new Set([
++		'DEBUG',
++		'NODE_OPTIONS',
++		'VSCODE_NODE_OPTIONS',
++		'LD_PRELOAD',
++		'DYLD_INSERT_LIBRARIES'
++	]);
++	for (const key of Object.keys(env)) {
++		if (dangerousEnvVariables.has(key.toUpperCase())) {
++			delete env[key];
++		}
+ 	}
+ }
+Index: b/src/vs/server/node/extensionHostConnection.ts
+===================================================================
+--- a/src/vs/server/node/extensionHostConnection.ts
++++ b/src/vs/server/node/extensionHostConnection.ts
+@@ -40,12 +40,10 @@ export async function buildUserEnvironme
+ 	const env: IProcessEnvironment = {
+ 		...processEnv,
+ 		...userShellEnv,
+-		...{
+-			VSCODE_ESM_ENTRYPOINT: 'vs/workbench/api/node/extensionHostProcess',
+-			VSCODE_HANDLES_UNCAUGHT_ERRORS: 'true',
+-			VSCODE_NLS_CONFIG: JSON.stringify(nlsConfig)
+-		},
+-		...startParamsEnv
++		...startParamsEnv,
++		VSCODE_ESM_ENTRYPOINT: 'vs/workbench/api/node/extensionHostProcess',
++		VSCODE_HANDLES_UNCAUGHT_ERRORS: 'true',
++		VSCODE_NLS_CONFIG: JSON.stringify(nlsConfig)
+ 	};
+ 
+ 	const binFolder = environmentService.isBuilt ? join(environmentService.appRoot, 'bin') : join(environmentService.appRoot, 'resources', 'server', 'bin-dev');
+Index: b/src/vs/server/node/remoteTerminalChannel.ts
+===================================================================
+--- a/src/vs/server/node/remoteTerminalChannel.ts
++++ b/src/vs/server/node/remoteTerminalChannel.ts
+@@ -9,6 +9,7 @@ import { cloneAndChange } from '../../ba
+ import { Disposable } from '../../base/common/lifecycle.js';
+ import * as path from '../../base/common/path.js';
+ import * as platform from '../../base/common/platform.js';
++import { removeDangerousEnvVariables } from '../../base/common/processes.js';
+ import { URI } from '../../base/common/uri.js';
+ import { IURITransformer } from '../../base/common/uriIpc.js';
+ import { IServerChannel } from '../../base/parts/ipc/common/ipc.js';
+@@ -210,7 +211,9 @@ export class RemoteTerminalChannel exten
+ 		};
+ 
+ 
+-		const baseEnv = await buildUserEnvironment(args.resolverEnv, !!args.shellLaunchConfig.useShellEnvironment, platform.language, this._environmentService, this._logService, this._configurationService);
++		const resolverEnv = { ...args.resolverEnv };
++		removeDangerousEnvVariables(resolverEnv);
++		const baseEnv = await buildUserEnvironment(resolverEnv, !!args.shellLaunchConfig.useShellEnvironment, platform.language, this._environmentService, this._logService, this._configurationService);
+ 		this._logService.trace('baseEnv', baseEnv);
+ 
+ 		const reviveWorkspaceFolder = (workspaceData: IWorkspaceFolderData): IWorkspaceFolder => {
+Index: b/src/vs/workbench/services/environment/browser/environmentService.ts
+===================================================================
+--- a/src/vs/workbench/services/environment/browser/environmentService.ts
++++ b/src/vs/workbench/services/environment/browser/environmentService.ts
+@@ -302,8 +302,8 @@ export class BrowserWorkbenchEnvironment
+ 			extensionDevelopmentKind: undefined
+ 		};
+ 
+-		// Fill in selected extra environmental properties
+-		if (this.payload) {
++		// Extension host development options from the payload are only valid in development builds.
++		if (this.payload && !this.isBuilt) {
+ 			for (const [key, value] of this.payload) {
+ 				switch (key) {
+ 					case 'extensionDevelopmentPath':
