@@ -68,3 +68,4 @@ common/fix-remote-hosts-loopback.diff
 common/finding-override-undici.diff
 common/finding-override-form-data.diff
 common/fix-copilot-debug-override-user-scope.diff
+common/fix-config-nested-restricted-settings.diff

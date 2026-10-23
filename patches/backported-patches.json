@@ -88,5 +88,17 @@
     "patch_path": "N/A",
     "link": "https://github.com/microsoft/vscode/commit/bc2d56c6f8da22a4bd31f741fcb034208770f158",
     "note": "Notebook Restricted-Mode bypass via mermaid render. Upstream vulnerable file extensions/mermaid-markdown-features/preview-src/notebook/index.ts (the 'temp.innerHTML = result' sink and renderMermaidBlocksInElement) does not exist in this branch's shipped source. The only mermaid extension here, mermaid-chat-features, renders diagrams via escapeHtmlText() into a <pre> and uses textContent (chat-webview-src/mermaidWebview.ts) inside a sandboxed webview with strict nonce CSP - no innerHTML of untrusted content. The markdown-language-features notebook renderer already sanitizes untrusted HTML with DOMPurify. No equivalent vulnerable innerHTML/insertAdjacentHTML sink for untrusted render output exists."
+  },
+  {
+    "finding_id": "CVE-2026-70334",
+    "affected_versions": "< 1.136.2",
+    "patch_path": "patches/common/fix-config-nested-restricted-settings.diff",
+    "link": "https://github.com/microsoft/vscode/commit/0684cb5905a3f23156f45a28135326e09310ff4d"
+  },
+  {
+    "finding_id": "GHSA-q2f8-hh8x-wpc2",
+    "affected_versions": "< 1.136.2",
+    "patch_path": "patches/common/fix-config-nested-restricted-settings.diff",
+    "link": "https://github.com/microsoft/vscode/commit/0684cb5905a3f23156f45a28135326e09310ff4d"
   }
 ]
