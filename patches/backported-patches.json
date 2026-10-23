@@ -88,5 +88,17 @@
     "patch_path": "patches/web-server/webview.diff",
     "link": "https://github.com/microsoft/vscode/commit/236fa7d8ea86f0f4261df38e1a17b3c7e7002bd0",
     "note": "RCE via attacker-controlled parentOrigin in webWorkerExtensionHostIframe.html. Already mitigated by the existing web-server/webview.diff (repo commit 4d1c2d6): the non-validated path forces parentOrigin = window.origin and never reads the attacker-supplied searchParams value there, while the hostname-validation path binds parentOrigin into the parentOriginHash subdomain check that rejects any mismatched origin. Equivalent to upstream's explicit parentOrigin rejection; not double-applied."
+  },
+  {
+    "finding_id": "CVE-2026-70334",
+    "affected_versions": "< 1.136.2",
+    "patch_path": "patches/common/ghsa-config-nested-restricted-settings.diff",
+    "link": "https://github.com/microsoft/vscode/commit/0684cb5905a3f23156f45a28135326e09310ff4d"
+  },
+  {
+    "finding_id": "GHSA-q2f8-hh8x-wpc2",
+    "affected_versions": "< 1.136.2",
+    "patch_path": "patches/common/ghsa-config-nested-restricted-settings.diff",
+    "link": "https://github.com/microsoft/vscode/commit/0684cb5905a3f23156f45a28135326e09310ff4d"
   }
 ]
