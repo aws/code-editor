@@ -1,0 +1,74 @@
+From: Sandeep Somavarapu <sasomava@microsoft.com>
+Subject: Filter restricted settings in nested configuration objects
+Origin: backport, https://github.com/microsoft/vscode/commit/0684cb5905a3f23156f45a28135326e09310ff4d
+Bug: GHSA-q2f8-hh8x-wpc2
+
+ConfigurationModelParser only checked top-level keys against the
+configuration registry. Walk nested objects and check each setting by its
+effective dotted path. Adapted for 1.101.x, which has no excluded-property
+filtering in the parser. Remove when Code-OSS is updated to >= 1.136.2.
+Index: code-editor-src/src/vs/platform/configuration/common/configurationModels.ts
+===================================================================
+--- code-editor-src.orig/src/vs/platform/configuration/common/configurationModels.ts
++++ code-editor-src/src/vs/platform/configuration/common/configurationModels.ts
+@@ -428,12 +428,11 @@ export class ConfigurationModelParser {
+ 				hasExcludedProperties = hasExcludedProperties || result.hasExcludedProperties;
+ 				restricted.push(...result.restricted);
+ 			} else {
+-				const propertySchema = configurationProperties[key];
+-				if (propertySchema?.restricted) {
+-					restricted.push(key);
+-				}
+-				if (this.shouldInclude(key, propertySchema, options)) {
+-					raw[key] = properties[key];
++				const result = this.filterProperty(key, properties[key], configurationProperties, options);
++				restricted.push(...result.restricted);
++				hasExcludedProperties = hasExcludedProperties || result.hasExcludedProperties;
++				if (result.included) {
++					raw[key] = result.value;
+ 				} else {
+ 					hasExcludedProperties = true;
+ 				}
+@@ -442,6 +441,42 @@ export class ConfigurationModelParser {
+ 		return { raw, restricted, hasExcludedProperties };
+ 	}
+ 
++	private filterProperty(path: string, value: unknown, configurationProperties: { [qualifiedKey: string]: IConfigurationPropertySchema | undefined }, options: ConfigurationParseOptions): { included: boolean; value: unknown; restricted: string[]; hasExcludedProperties: boolean } {
++		const propertySchema = configurationProperties[path];
++		if (propertySchema) {
++			return { included: this.shouldInclude(path, propertySchema, options), value, restricted: propertySchema.restricted ? [path] : [], hasExcludedProperties: false };
++		}
++		if (!types.isObject(value) || Array.isArray(value)) {
++			return { included: this.shouldInclude(path, propertySchema, options), value, restricted: [], hasExcludedProperties: false };
++		}
++		// If the whole object is explicitly excluded, do not recurse into its children.
++		if (options.exclude?.includes(path)) {
++			return { included: false, value, restricted: [], hasExcludedProperties: false };
++		}
++		const keys = Object.keys(value);
++		if (keys.length === 0) {
++			return { included: this.shouldInclude(path, propertySchema, options), value, restricted: [], hasExcludedProperties: false };
++		}
++		const nested: IStringDictionary<unknown> = {};
++		const restricted: string[] = [];
++		let included = false;
++		let hasExcludedProperties = false;
++		for (const key of keys) {
++			const result = this.filterProperty(`${path}.${key}`, (value as IStringDictionary<unknown>)[key], configurationProperties, options);
++			if (result.restricted.length) {
++				restricted.push(...result.restricted);
++			}
++			hasExcludedProperties = hasExcludedProperties || result.hasExcludedProperties;
++			if (result.included) {
++				nested[key] = result.value;
++				included = true;
++			} else {
++				hasExcludedProperties = true;
++			}
++		}
++		return { included, value: nested, restricted, hasExcludedProperties };
++	}
++
+ 	private shouldInclude(key: string, propertySchema: IConfigurationPropertySchema | undefined, options: ConfigurationParseOptions): boolean {
+ 		if (options.exclude?.includes(key)) {
+ 			return false;

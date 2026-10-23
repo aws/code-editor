@@ -58,3 +58,4 @@ web-embedded/only-allow-trusted-origins-in-webviews.diff
 common/finding-override-undici.diff
 common/finding-override-ws.diff
 common/finding-override-tar.diff
+common/fix-config-nested-restricted-settings.diff
