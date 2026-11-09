@@ -163,11 +163,15 @@ if [[ ! -d "$PATCHED_SRC" ]]; then
     exit 1
 fi
 
-# Find the first series file for quilt env
-SERIES_FILE=$(find "$PATCHES_DIR" -maxdepth 1 -name "*.series" | head -1)
-if [[ -z "$SERIES_FILE" ]]; then
-    echo "Error: No series files found in patches/" >&2
-    exit 1
+# Find the series file for quilt env (honor a pre-set QUILT_SERIES)
+if [[ -n "${QUILT_SERIES:-}" && -f "${QUILT_SERIES}" ]]; then
+    SERIES_FILE="$QUILT_SERIES"
+else
+    SERIES_FILE=$(find "$PATCHES_DIR" -maxdepth 1 -name "*.series" | head -1)
+    if [[ -z "$SERIES_FILE" ]]; then
+        echo "Error: No series files found in patches/" >&2
+        exit 1
+    fi
 fi
 
 export QUILT_PATCHES="$PATCHES_DIR"
