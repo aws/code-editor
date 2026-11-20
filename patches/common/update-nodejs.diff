@@ -1,0 +1,39 @@
+Update bundled Node.js from 22.21.1 to 22.23.5.
+
+Index: code-editor-src/.nvmrc
+===================================================================
+--- code-editor-src.orig/.nvmrc
++++ code-editor-src/.nvmrc
+@@ -1 +1 @@
+-22.21.1
++22.23.5
+Index: code-editor-src/build/checksums/nodejs.txt
+===================================================================
+--- code-editor-src.orig/build/checksums/nodejs.txt
++++ code-editor-src/build/checksums/nodejs.txt
+@@ -1,7 +1,7 @@
+-c170d6554fba83d41d25a76cdbad85487c077e51fa73519e41ac885aa429d8af  node-v22.21.1-darwin-arm64.tar.gz
+-8e3dc89614debe66c2a6ad2313a1adb06eb37db6cd6c40d7de6f7d987f7d1afd  node-v22.21.1-darwin-x64.tar.gz
+-c86830dedf77f8941faa6c5a9c863bdfdd1927a336a46943decc06a38f80bfb2  node-v22.21.1-linux-arm64.tar.gz
+-40d3d09aee556abc297dd782864fcc6b9e60acd438ff0660ba9ddcd569c00920  node-v22.21.1-linux-armv7l.tar.gz
+-219a152ea859861d75adea578bdec3dce8143853c13c5187f40c40e77b0143b2  node-v22.21.1-linux-x64.tar.gz
+-707bbc8a9e615299ecdbff9040f88f59f20033ff1af923beee749b885cbd565d  win-arm64/node.exe
+-471961cb355311c9a9dd8ba417eca8269ead32a2231653084112554cda52e8b3  win-x64/node.exe
++e7131995759b61a0170b646010d2ad35a5d37b4cb0d471f3e8317eac6f742f3d  node-v22.23.5-darwin-arm64.tar.gz
++c53383238206b9ae4db23c5d8a63645e2e753bec8ab51a49cc81939aa64e9422  node-v22.23.5-darwin-x64.tar.gz
++8bd3dc69eee8f3f226315a80d7d1d4faccf217a4c8fae500168ac2e38f3bdba3  node-v22.23.5-linux-arm64.tar.gz
++02cd221808721481ba3edd8b51624a391b45357543b8144e6ff7aac35e1500ac  node-v22.23.5-linux-armv7l.tar.gz
++c54118104acc524633b5abe106bbf44a53126ec8b4e5fa105cb92b5d7de8a1a1  node-v22.23.5-linux-x64.tar.gz
++c2eaa48231229b966bfef21554df203221862a9fc94ec2a6908aad5eaa6c0ba0  win-arm64/node.exe
++247e9693d316da9857e44990e5e11709f596f18112251b8026ec6eed80bdf38a  win-x64/node.exe
+Index: code-editor-src/remote/.npmrc
+===================================================================
+--- code-editor-src.orig/remote/.npmrc
++++ code-editor-src/remote/.npmrc
+@@ -1,5 +1,5 @@
+ disturl="https://nodejs.org/dist"
+-target="22.21.1"
++target="22.23.5"
+ ms_build_id="374314"
+ runtime="node"
+ build_from_source="true"
