@@ -304,6 +304,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          check-latest: true
           cache: 'npm'
           cache-dependency-path: 'code-editor-src/package-lock.json'
       
