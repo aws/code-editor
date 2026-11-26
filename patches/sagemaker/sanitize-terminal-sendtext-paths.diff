@@ -1,11 +1,11 @@
-Confirm before sending terminal text that contains unsafe file names
+Block terminal text that contains unsafe file names
 
 File names with shell special characters can change the meaning of
 commands that extensions send via terminal.sendText() when the names
 are not escaped.
 
-Resolve the paths in the text against real directory listings and ask
-the user before sending text that references such a name.
+Resolve the paths in the text against real directory listings and do
+not send text that references such a name.
 
 Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
 ===================================================================
@@ -45,13 +45,13 @@ Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
  	) {
  		super();
  
-@@ -1366,6 +1370,43 @@ export class TerminalInstance extends Di
+@@ -1366,6 +1370,45 @@ export class TerminalInstance extends Di
  	}
  
  	async sendText(text: string, shouldExecute: boolean, bracketedPasteMode?: boolean): Promise<void> {
 +		// Sequenced so the async check below can't reorder consecutive sends
 +		return this._sendTextSequencer.queue(async () => {
-+			if (await this._confirmUnsafeFileNames(text)) {
++			if (await this._isFreeOfUnsafeFileNames(text)) {
 +				return this._sendText(text, shouldExecute, bracketedPasteMode);
 +			}
 +		});
@@ -59,28 +59,30 @@ Index: b/src/vs/workbench/contrib/terminal/browser/terminalInstance.ts
 +
 +	/**
 +	 * Callers such as extensions often paste file names into commands unescaped, so names with
-+	 * shell special characters can change what a command does. Asks before sending such text.
++	 * shell special characters can change what a command does. Such text is never sent.
 +	 */
-+	private async _confirmUnsafeFileNames(text: string): Promise<boolean> {
++	private async _isFreeOfUnsafeFileNames(text: string): Promise<boolean> {
 +		const cwd = await this.getSpeculativeCwd() || undefined;
 +		const unsafe = await findUnsafeFileNameInCommand(text, path => this._readDirectory(path), cwd, this.userHome);
 +		if (!unsafe) {
 +			return true;
 +		}
-+		this._logService.warn('Text contains a file name with shell special characters', unsafe.name);
-+		const { confirmed } = await this._dialogService.confirm({
-+			type: Severity.Warning,
-+			message: nls.localize('terminal.unsafeFileName', "Send command with an unsafe file name to the terminal?"),
-+			detail: unsafe.name === undefined
-+				? nls.localize('terminal.unsafeFileName.unchecked', "The command references too many paths to check them for file names that could run unintended commands.")
-+				: nls.localize('terminal.unsafeFileName.detail', "The command contains the file name \"{0}\". Its shell special characters could run unintended commands.", unsafe.name),
-+			primaryButton: nls.localize({ key: 'terminal.unsafeFileName.send', comment: ['&& denotes a mnemonic'] }, "&&Send Anyway"),
-+		});
-+		return confirmed;
++		this._logService.warn('Text not sent, it contains a file name with shell special characters', unsafe.name);
++		this._dialogService.warn(
++			nls.localize('terminal.unsafeFileName', "The command was not sent to the terminal"),
++			unsafe.name === undefined
++				? nls.localize('terminal.unsafeFileName.unchecked', "It references too many paths to check them for file names with shell special characters.")
++				: nls.localize('terminal.unsafeFileName.detail', "It contains the file name \"{0}\", whose shell special characters could run unintended commands. Rename the file or folder and try again.", unsafe.name)
++		);
++		return false;
 +	}
 +
 +	private async _readDirectory(path: string): Promise<string[] | undefined> {
-+		const resource = this.remoteAuthority ? await this._pathService.fileURI(path) : URI.file(path);
++		// Remote files are served under the vscode-remote scheme; a file:// URI would hit the
++		// empty in-browser file system and silently find nothing.
++		const resource = this.remoteAuthority
++			? URI.from({ scheme: Schemas.vscodeRemote, authority: this.remoteAuthority, path })
++			: URI.file(path);
 +		const stat = await this._fileService.resolve(resource);
 +		return stat.children?.map(child => child.name);
 +	}
